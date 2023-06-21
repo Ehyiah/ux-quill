@@ -1,0 +1,85 @@
+{
+    "name": "@ehyiah/symfony-ux-quill-js",
+    "description": "Symfony bundle to use Quill JS text editor",
+    "version": "0.0.1",
+    "license": "MIT",
+    "symfony": {
+        "controllers": {
+            "quilljs": {
+                "main": "dist/controller.js",
+                "fetch": "eager",
+                "enabled": true,
+                "autoimport": {
+                    "dist/bootstrap4-theme.css": false,
+                    "dist/bootstrap5-theme.css": true
+                }
+            }
+        }
+    },
+    "scripts": {
+        "dev-server": "encore dev-server",
+        "dev": "encore dev",
+        "watch": "encore dev --watch",
+        "build": "babel src --extensions .ts -d dist",
+        "lint": "yarn run eslint src"
+    },
+    "devDependencies": {
+        "@babel/cli": "^7.20.7",
+        "@babel/core": "^7.20.12",
+        "@babel/plugin-proposal-class-properties": "^7.18.6",
+        "@babel/preset-env": "^7.20.2",
+        "@babel/preset-typescript": "^7.18.6",
+        "@hotwired/stimulus": "^3.2.1",
+        "@symfony/webpack-encore": "^4.0.0",
+        "core-js": "^3.30.2",
+        "ts-loader": "^9.0.0",
+        "webpack": "^5.74.0",
+        "webpack-cli": "^4.10.0",
+        "webpack-notifier": "^1.15.0",
+        "eslint": "^8.1.0",
+        "eslint-config-prettier": "^8.0.0",
+        "typescript": "^4.9.5",
+        "@typescript-eslint/eslint-plugin": "^5.2.0",
+        "@typescript-eslint/parser": "^5.2.0",
+        "eslint-plugin-jest": "^25.2.2"
+    },
+    "peerDependencies": {
+        "@hotwired/stimulus": "^3.0.0",
+        "slugify": "^1.6.5"
+    },
+    "dependencies": {
+        "@testing-library/dom": "^9.3.0",
+        "@types/jest": "^29.5.2",
+        "file-loader": "^6.2.0",
+        "quill": "^1.3.7"
+    },
+    "eslintConfig": {
+        "root": true,
+        "parser": "@typescript-eslint/parser",
+        "plugins": [
+            "@typescript-eslint"
+        ],
+        "extends": [
+            "eslint:recommended",
+            "prettier",
+            "plugin:@typescript-eslint/eslint-recommended",
+            "plugin:@typescript-eslint/recommended"
+        ],
+        "rules": {
+            "@typescript-eslint/no-explicit-any": "off",
+            "@typescript-eslint/no-empty-function": "off",
+            "@typescript-eslint/ban-ts-comment": "off",
+            "quotes": [
+                "error",
+                "single"
+            ]
+        }
+    },
+    "prettier": {
+        "printWidth": 120,
+        "trailingComma": "es5",
+        "tabWidth": 4,
+        "jsxBracketSameLine": true,
+        "singleQuote": true
+    }
+}

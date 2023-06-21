@@ -1,0 +1,52 @@
+{
+    "type": "bundle",
+    "name": "ehyiah/symfony-quill-js-bundle",
+    "description": "Symfony Bundle to use Quill JS text editor",
+    "keywords": [
+        "symfony-ux",
+        "quilljs"
+    ],
+    "license": "MIT",
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "authors": [
+        {
+            "name": "Matthieu Gostiaux",
+            "role": "Author",
+            "email": "rei_eva@hotmail.com"
+        }
+    ],
+    "require": {
+        "php": "^8.1.0",
+        "symfony/stimulus-bundle": "^2.9.1",
+        "twig/extra-bundle": "^2.12|^3.0",
+        "symfony/twig-bundle": "6.3.*",
+        "symfony/form": "6.3.*"
+    },
+    "require-dev": {
+        "symfony/console": "6.2.*",
+        "phpstan/phpstan": "^1.10",
+        "phpunit/phpunit": "^9.5",
+        "friendsofphp/php-cs-fixer": "^3.1",
+        "symfony/browser-kit": "^6.2",
+        "symfony/framework-bundle": "^6.2",
+        "symfony/html-sanitizer": "6.3.*",
+        "symfony/asset-mapper": "^6.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "Ehyiah\\QuillJs\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Ehyiah\\QuillJs\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "thanks": {
+            "name": "symfony/ux",
+            "url": "https://github.com/symfony/ux"
+        }
+    }
+}

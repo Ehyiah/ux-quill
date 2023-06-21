@@ -1,0 +1,15 @@
+parameters:
+    inferPrivatePropertyTypeFromConstructor: true
+    checkGenericClassInNonGenericObjectType: false
+    doctrine:
+        objectManagerLoader: build/phpstan/doctrine-loader.php
+    symfony:
+        container_xml_path: var/cache/dev/App_KernelDevDebugContainer.xml
+        console_application_loader: build/phpstan/console-loader.php
+    level: 7
+    paths:
+        - src
+    excludePaths:
+        - src/Migrations/*
+        - src/Kernel.php
+        - src/Command/ImportFromLaravel
