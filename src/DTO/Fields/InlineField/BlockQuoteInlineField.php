@@ -1,8 +1,8 @@
 <?php
 
-namespace Ehyiah\QuillJs\DTO\Fields\InlineField;
+namespace Ehyiah\QuillJsBundleBundle\DTO\Fields\InlineField;
 
-use Ehyiah\QuillJs\DTO\Fields\Interfaces\QuillInlineFieldInterface;
+use Ehyiah\QuillJsBundleBundle\DTO\Fields\Interfaces\QuillInlineFieldInterface;
 
 final class BlockQuoteInlineField implements QuillInlineFieldInterface
 {

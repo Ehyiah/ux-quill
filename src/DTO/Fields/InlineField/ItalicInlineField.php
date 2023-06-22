@@ -1,8 +1,8 @@
 <?php
 
-namespace Ehyiah\QuillJs\DTO\Fields\InlineField;
+namespace Ehyiah\QuillJsBundle\DTO\Fields\InlineField;
 
-use Ehyiah\QuillJs\DTO\Fields\Interfaces\QuillInlineFieldInterface;
+use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillInlineFieldInterface;
 
 final class ItalicInlineField implements QuillInlineFieldInterface
 {

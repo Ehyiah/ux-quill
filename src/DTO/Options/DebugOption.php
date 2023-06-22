@@ -1,6 +1,6 @@
 <?php
 
-namespace Ehyiah\QuillJs\DTO\Options;
+namespace Ehyiah\QuillJsBundle\DTO\Options;
 
 class DebugOption
 {

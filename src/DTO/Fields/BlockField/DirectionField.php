@@ -1,8 +1,8 @@
 <?php
 
-namespace Ehyiah\QuillJs\DTO\Fields\BlockField;
+namespace Ehyiah\QuillJsBundle\DTO\Fields\BlockField;
 
-use Ehyiah\QuillJs\DTO\Fields\Interfaces\QuillBlockFieldInterface;
+use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillBlockFieldInterface;
 
 final class DirectionField implements QuillBlockFieldInterface
 {
