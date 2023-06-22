@@ -17,7 +17,7 @@ class QuillJsExtension extends Extension implements PrependExtensionInterface
         $bundles = $container->getParameter('kernel.bundles');
 
         if (isset($bundles['TwigBundle'])) {
-            $container->prependExtensionConfig('twig', ['form_themes' => ['@QuillJS/form.html.twig']]);
+            $container->prependExtensionConfig('twig', ['form_themes' => ['@QuillJs/form.html.twig']]);
         }
 
         if ($this->isAssetMapperAvailable($container)) {
