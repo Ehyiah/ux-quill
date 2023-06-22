@@ -1,10 +1,10 @@
 <?php
 
-namespace Ehyiah\QuillJs\DTO;
+namespace Ehyiah\QuillJsBundle\DTO;
 
-use Ehyiah\QuillJs\DTO\Fields\Interfaces\QuillBlockFieldInterface;
-use Ehyiah\QuillJs\DTO\Fields\Interfaces\QuillGroupInterface;
-use Ehyiah\QuillJs\DTO\Fields\Interfaces\QuillInlineFieldInterface;
+use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillBlockFieldInterface;
+use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillGroupInterface;
+use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillInlineFieldInterface;
 
 final class QuillGroup implements QuillGroupInterface
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Ehyiah\QuillJs\DTO\Fields\Interfaces;
+namespace Ehyiah\QuillJsBundle\DTO\Fields\Interfaces;
 
 interface QuillGroupInterface
 {

@@ -1,8 +1,8 @@
 <?php
 
-namespace Ehyiah\QuillJs\Form;
+namespace Ehyiah\QuillJsBundle\Form;
 
-use Ehyiah\QuillJs\DTO\Options\ThemeOption;
+use Ehyiah\QuillJsBundle\DTO\Options\ThemeOption;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormInterface;

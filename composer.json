@@ -1,6 +1,6 @@
 {
     "type": "bundle",
-    "name": "ehyiah/symfony-quill-js-bundle",
+    "name": "ehyiah/symfony-quill-js",
     "description": "Symfony Bundle to use Quill JS text editor",
     "keywords": [
         "symfony-ux",
@@ -35,12 +35,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Ehyiah\\QuillJs\\": "src/"
+            "Ehyiah\\QuillJsBundle\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Ehyiah\\QuillJs\\Tests\\": "tests/"
+            "Ehyiah\\QuillJsBundle\\Tests\\": "tests/"
         }
     },
     "extra": {

@@ -1,8 +1,8 @@
 <?php
 
-namespace Ehyiah\QuillJs\DependencyInjection;
+namespace Ehyiah\QuillJsBundle\DependencyInjection;
 
-use Ehyiah\QuillJs\Form\QuillType;
+use Ehyiah\QuillJsBundle\Form\QuillType;
 use Symfony\Component\AssetMapper\AssetMapperInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -17,7 +17,7 @@ class QuillJsExtension extends Extension implements PrependExtensionInterface
         $bundles = $container->getParameter('kernel.bundles');
 
         if (isset($bundles['TwigBundle'])) {
-            $container->prependExtensionConfig('twig', ['form_themes' => ['@QuillJS/quill_js_form_theme.html.twig']]);
+            $container->prependExtensionConfig('twig', ['form_themes' => ['@QuillJS/form.html.twig']]);
         }
 
         if ($this->isAssetMapperAvailable($container)) {
