@@ -3,16 +3,14 @@
     "description": "Symfony bundle to use Quill JS text editor",
     "version": "0.0.1",
     "license": "MIT",
+    "main": "dist/controller.js",
     "symfony": {
         "controllers": {
             "quilljs": {
                 "main": "dist/controller.js",
+                "webpackMode": "eager",
                 "fetch": "eager",
-                "enabled": true,
-                "autoimport": {
-                    "dist/bootstrap4-theme.css": false,
-                    "dist/bootstrap5-theme.css": true
-                }
+                "enabled": true
             }
         }
     },

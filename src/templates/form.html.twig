@@ -1,17 +1,18 @@
 {% block quill_widget %}
-    {%- set dataController = (attr['data-controller']|default('') ~ ' quill')|trim -%}
+    {%- set controllerName = "ehyiah--symfony-quill-js--quilljs"%}
+    {% set dataSet = "data-ehyiah--symfony-quill-js--quilljs" %}
 
 {#    <script src="//cdn.quilljs.com/1.3.7/quill.js"></script>#}
 {#    <link href="//cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">#}
 
     <div class="quill-container"
-         data-controller="{{ dataController }}"
-         data-quill-toolbar-options-value="{{ attr['quill_options'] }}"
-         data-quill-extra-options-value="{{ attr['quill_extra_options'] }}"
+         data-controller="{{ controllerName }}"
+         {{ dataSet }}-toolbar-options-value="{{ attr['quill_options'] }}"
+         {{ dataSet }}-extra-options-value="{{ attr['quill_extra_options'] }}"
     >
         <label>
             <textarea style="display: none" {{ block('widget_attributes') }}
-                      data-quill-target="input"
+                      {{ dataSet }}-target="input"
             >
                 {{ value|raw|sanitize_html('quill_default_sanitizer') }}
             </textarea>
@@ -19,7 +20,7 @@
 
         <div>
             <div class="quill-editor"
-                 data-quill-target="editorContainer"
+                 {{ dataSet }}-target="editorContainer"
             >
                 {# TODO check both differences for sanitizing #}
 {#                {{ value|raw|sanitize_html() }}#}
