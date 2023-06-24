@@ -69,7 +69,7 @@ For the most basic this is only what you have to do.
                 ],
                 'quill_options' => [
                 // this is where you customize the WYSIWYG by creating one or many Groups
-                // you can also build your groups using a classic array but many clases are covering almost every Quill Fields see below
+                // you can also build your groups using a classic array but many classes are covering almost every Quill Fields see below
                     QuillGroup::build(
                         new BoldInlineField(),
                         new ItalicInlineField(),
@@ -119,12 +119,12 @@ This example will display a h1 and h2 header options side by side
 ```
 This example will display a h1 and h2 header options side by side and another Group containing a Bold and an Italic fields
 
-You can add as many Groups as you like or just One if you don't need the WYSIWYG options to have spaces beetwen them.
+You can add as many Groups as you like or just One if you don't need the WYSIWYG options to have spaces between them.
 
 
 Many fields have options:
 
 ### Fields
 - ***HeaderField*** 
-
+// To finish
 
