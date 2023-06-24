@@ -3,17 +3,18 @@
 - add to package.json in your project : 
 -
       "dependencies": {
-        "@ehyiah/symfony-quill-js" : "file:vendor/ehyiah/symfony-quill-js/src/assets"
+        "@ehyiah/ux-quill" : "file:vendor/ehyiah/ux-quill/src/assets"
       }
 
 - next in controllers.json :
 -
-      "@ehyiah/symfony-quill-js": {
-          "quilljs": {
-              "enabled": true,
-              "fetch": "eager"
+      "controllers": {
+          "@ehyiah/ux-quill": {
+              "quill": {
+                  "enabled": true,
+                  "fetch": "eager"
+              }
           }
       }
-
 then you can use the QuillType to build a QuillJs WYSIWYG
 
