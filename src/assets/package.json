@@ -1,16 +1,20 @@
 {
-    "name": "@ehyiah/symfony-ux-quill-js",
+    "name": "@ehyiah/ux-quill",
     "description": "Symfony bundle to use Quill JS text editor",
     "version": "0.0.1",
     "license": "MIT",
     "main": "dist/controller.js",
     "symfony": {
         "controllers": {
-            "quilljs": {
+            "quill": {
                 "main": "dist/controller.js",
                 "webpackMode": "eager",
                 "fetch": "eager",
-                "enabled": true
+                "enabled": true,
+                "autoimport": {
+                    "quill/dist/quill.snow.css": true,
+                    "quill/dist/quill.bubble.css": false
+                }
             }
         }
     },
