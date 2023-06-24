@@ -4,7 +4,9 @@
     "description": "Symfony Bundle to use Quill JS text editor",
     "keywords": [
         "symfony-ux",
-        "quilljs"
+        "quilljs",
+        "quill",
+        "wysiwyg"
     ],
     "license": "MIT",
     "minimum-stability": "stable",
