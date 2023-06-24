@@ -2,9 +2,6 @@
     {%- set controllerName = "ehyiah--ux-quill--quill"%}
     {% set dataSet = "data-ehyiah--ux-quill--quill" %}
 
-{#    <script src="//cdn.quilljs.com/1.3.7/quill.js"></script>#}
-{#    <link href="//cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">#}
-
     <div class="quill-container"
          data-controller="{{ controllerName }}"
          {{ dataSet }}-toolbar-options-value="{{ attr['quill_options'] }}"
@@ -23,7 +20,7 @@
                  {{ dataSet }}-target="editorContainer"
             >
                 {# TODO check both differences for sanitizing #}
-{#                {{ value|raw|sanitize_html() }}#}
+                {{ value|raw|sanitize_html() }}
                 {{ value|raw|sanitize_html('quill_default_sanitizer') }}
             </div>
         </div>
