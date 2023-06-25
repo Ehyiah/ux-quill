@@ -24,7 +24,8 @@
         "symfony/stimulus-bundle": "^2.9.1",
         "twig/extra-bundle": "^2.12|^3.0",
         "symfony/twig-bundle": "6.3.*",
-        "symfony/form": "6.3.*"
+        "symfony/form": "6.3.*",
+        "symfony/html-sanitizer": "6.3.*"
     },
     "require-dev": {
         "symfony/console": "6.2.*",
@@ -33,7 +34,6 @@
         "friendsofphp/php-cs-fixer": "^3.1",
         "symfony/browser-kit": "^6.2",
         "symfony/framework-bundle": "^6.2",
-        "symfony/html-sanitizer": "6.3.*",
         "symfony/asset-mapper": "^6.3"
     },
     "autoload": {

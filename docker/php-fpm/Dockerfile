@@ -1,4 +1,4 @@
-FROM php:8.1-fpm
+FROM php:8.1.3-fpm
 ARG TIMEZONE="Europe/Paris"
 
 # https://hub.docker.com/repository/docker/ehyiah/ci_php8.1/general

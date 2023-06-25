@@ -2,6 +2,7 @@
 
 namespace Ehyiah\QuillJsBundle\Form;
 
+use Ehyiah\QuillJsBundle\DTO\Options\DebugOption;
 use Ehyiah\QuillJsBundle\DTO\Options\ThemeOption;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -15,13 +16,13 @@ class QuillType extends AbstractType
     {
         $view->vars['attr']['quill_options'] = json_encode($options['quill_options']);
         $view->vars['attr']['quill_extra_options'] = json_encode($options['quill_extra_options']);
+        $view->vars['attr']['sanitizer'] = $options['quill_extra_options']['sanitizer'];
     }
 
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
             'sanitize_html' => true,
-            'sanitizer' => 'quill_default_sanitizer',
             'label' => false,
             'error_bubbling' => true,
             'quill_options' => ['bold', 'italic'],
@@ -29,7 +30,7 @@ class QuillType extends AbstractType
                 $resolver
                     ->setDefault('debug', 'error')
                     ->setAllowedTypes('debug', 'string')
-                    ->setAllowedValues('debug', ['error', 'warn', 'log', 'info']);
+                    ->setAllowedValues('debug', [DebugOption::DEBUG_OPTION_ERROR, DebugOption::DEBUG_OPTION_WARNING, DebugOption::DEBUG_OPTION_LOG, DebugOption::DEBUG_OPTION_INFO]);
                 $resolver
                     ->setDefault('height', '200px')
                     ->setAllowedTypes('height', ['string', 'null'])
@@ -47,6 +48,10 @@ class QuillType extends AbstractType
                 $resolver
                     ->setDefault('placeholder', 'Quill editor')
                     ->setAllowedTypes('placeholder', 'string')
+                ;
+                $resolver
+                    ->setDefault('sanitizer', 'default')
+                    ->setAllowedTypes('sanitizer', 'string')
                 ;
             },
         ]);
