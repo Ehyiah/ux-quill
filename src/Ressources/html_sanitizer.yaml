@@ -1,0 +1,6 @@
+framework:
+    default_sanitizer: 'default'
+    sanitizers:
+        default:
+            extensions:
+                - 'basic'
