@@ -1,25 +1,19 @@
 # QuillJs Bundle for Symfony using Symfony UX
 
 ## Installation
-
+### Require bundle
 ```sh
 composer require ehyiah/ux-quill
-
-# Don't forget to install the JavaScript dependencies as well and compile
-npm install --force
-npm run watch
-
-# or use yarn
-yarn install --force
-yarn watch
 ```
-## Post installation
-- add to package.json in your project : 
+
+### Don't forget to install the JavaScript dependencies as well and compile
+- add to package.json in your project :
 ```
     "dependencies": {
         "@ehyiah/ux-quill" : "file:vendor/ehyiah/ux-quill/src/assets"
     }
 ```
+
 - next in controllers.json :
 ```
     "controllers": {
@@ -35,8 +29,16 @@ yarn watch
         }
     }
 ```
+- next run
+```
+npm install --force
+npm run watch
 
-then you can use the QuillType to build a QuillJs WYSIWYG
+# or use yarn
+yarn install --force
+yarn watch
+```
+It's done, you can use the QuillType to build a QuillJs WYSIWYG
 
 ## Usage
 In a form, use QuillType. It works like a classic Type except it has more options : e.g:
@@ -53,7 +55,7 @@ In a form, use QuillType. It works like a classic Type except it has more option
 ```
 
 For the most basic this is only what you have to do.
-## Options
+### Customize Options
 ```php
     use Ehyiah\QuillJsBundle\Form\QuillType;
     
@@ -86,14 +88,14 @@ For the most basic this is only what you have to do.
     }
 ```
 
-### quill_extra_options:
+#### quill_extra_options:
 
-- **debug**: type:string, values: 'error', 'warn', 'log', 'info'
+- **debug**: type:string, values: 'error', 'warn', 'log', 'info'  (you can use DebugOption class to build it)
 - **height**: type string, examples: 200px, 200em, default: '200px'
-- **theme**: type: string, values: 'snow', 'bubble', default: 'snow'
+- **theme**: type: string, values: 'snow', 'bubble', default: 'snow' (you can use ThemeOption class to build it)
 - **placeholder**: type: string
 
-### quill_options
+#### quill_options
 
 This is where you will choose what elements you want to display in your WYSIWYG.
 You can build an array like you would do following the QuillJs official documentation
@@ -125,6 +127,4 @@ You can add as many Groups as you like or just One if you don't need the WYSIWYG
 Many fields have options:
 
 ### Fields
-- ***HeaderField*** 
-// To finish
-
+- you can look in DTO/Fields folder to see the full list of available fields.
