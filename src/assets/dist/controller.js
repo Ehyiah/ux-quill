@@ -45,7 +45,7 @@ var _default = /*#__PURE__*/function (_Controller) {
       if (null !== heightDefined) {
         this.editorContainerTarget.style.height = this.extraOptionsValue.height;
       }
-      var quill = new _quill.default('.quill-editor', options);
+      var quill = new _quill.default(this.editorContainerTarget, options);
       quill.on('text-change', function (delta, deltaResult, source) {
         _this.inputTarget.innerHTML = quill.root.innerHTML;
       });

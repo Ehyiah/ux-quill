@@ -40,6 +40,8 @@ yarn watch
 ```
 It's done, you can use the QuillType to build a QuillJs WYSIWYG
 
+You can add as many WYSIWYG fields inside same page like any normal fields.
+
 ## Usage
 In a form, use QuillType. It works like a classic Type except it has more options : e.g:
 ```php

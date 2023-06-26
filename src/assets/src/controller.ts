@@ -43,7 +43,7 @@ export default class extends Controller {
             this.editorContainerTarget.style.height = this.extraOptionsValue.height
         }
 
-        const quill = new Quill('.quill-editor', options);
+        const quill = new Quill(this.editorContainerTarget, options);
         quill.on('text-change', (delta, deltaResult, source) => {
             this.inputTarget.innerHTML = quill.root.innerHTML;
         })
