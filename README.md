@@ -130,3 +130,37 @@ Many fields have options:
 
 ### Fields
 - you can look in DTO/Fields folder to see the full list of available fields.
+
+
+
+## Easyadmin Integration
+### prerequisite
+- First create a quill.js inside assets diretory
+```
+    // start the Stimulus application
+    import './bootstrap';
+```
+
+- Next create in webpack.config a new entry
+```
+    .addEntry('quill', './assets/quill.js')
+```
+### Usage
+Then you can use the QuillAdminField like this :
+```
+    QuillAdminField::new('quill')
+```
+
+Or add custom options like you would do with the normal type
+```
+    QuillAdminField::new('quill')
+        ->setFormTypeOptions([
+            'quill_options' =>
+                QuillGroup::build(
+                    new BoldInlineField(),
+                    new ItalicInlineField(),
+                    new HeaderField(HeaderField::HEADER_OPTION_1),
+                    new HeaderField(HeaderField::HEADER_OPTION_2),
+                )
+        ])
+```
