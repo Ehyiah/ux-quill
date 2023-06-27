@@ -26,11 +26,12 @@ class QuillType extends AbstractType
             'label' => false,
             'error_bubbling' => true,
             'quill_options' => ['bold', 'italic'],
-            'quill_extra_options' => function(OptionsResolver $resolver) {
+            'quill_extra_options' => function (OptionsResolver $resolver) {
                 $resolver
-                    ->setDefault('debug', 'error')
+                    ->setDefault('debug', DebugOption::DEBUG_OPTION_ERROR)
                     ->setAllowedTypes('debug', 'string')
-                    ->setAllowedValues('debug', [DebugOption::DEBUG_OPTION_ERROR, DebugOption::DEBUG_OPTION_WARNING, DebugOption::DEBUG_OPTION_LOG, DebugOption::DEBUG_OPTION_INFO]);
+                    ->setAllowedValues('debug', [DebugOption::DEBUG_OPTION_ERROR, DebugOption::DEBUG_OPTION_WARNING, DebugOption::DEBUG_OPTION_LOG, DebugOption::DEBUG_OPTION_INFO])
+                ;
                 $resolver
                     ->setDefault('height', '200px')
                     ->setAllowedTypes('height', ['string', 'null'])
@@ -38,8 +39,10 @@ class QuillType extends AbstractType
                         if (null === $value) {
                             return true;
                         }
+
                         return preg_match('/(\d+)(px$|em$|ex$|%$)/', $value);
-                    });
+                    })
+                ;
                 $resolver
                     ->setDefault('theme', 'snow')
                     ->setAllowedTypes('theme', 'string')
