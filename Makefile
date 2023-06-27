@@ -88,7 +88,7 @@ assets: node_modules ## Install assets
 watch: node_modules ## Watch front update
 	$(YARN) encore dev --watch
 
-node_modules: yarn.lock src/assets/package.json ## Install yarn dependency
+node_modules: yarn.lock assets ## Install yarn dependency
 	$(YARN) install
 
 .PHONY: assets watch node_modules
