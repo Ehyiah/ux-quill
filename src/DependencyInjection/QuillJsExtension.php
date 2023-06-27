@@ -2,6 +2,7 @@
 
 namespace Ehyiah\QuillJsBundle\DependencyInjection;
 
+use Ehyiah\QuillJsBundle\Form\QuillAdminField;
 use Ehyiah\QuillJsBundle\Form\QuillType;
 use Symfony\Component\AssetMapper\AssetMapperInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -38,6 +39,16 @@ class QuillJsExtension extends Extension implements PrependExtensionInterface
             ->addTag('form.type')
             ->setPublic(false)
         ;
+
+        $bundles = $container->getParameter('kernel.bundles');
+
+        if (isset($bundles['EasyAdminBundle'])) {
+            $container
+                ->setDefinition('form.ux-quill-js', new Definition(QuillAdminField::class))
+                ->addTag('form.type_admin')
+                ->setPublic(false)
+            ;
+        }
     }
 
     private function isAssetMapperAvailable(ContainerBuilder $container): bool
