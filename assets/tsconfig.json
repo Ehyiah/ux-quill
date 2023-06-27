@@ -10,7 +10,7 @@
         "target": "es2017",
         "removeComments": true,
         "outDir": "types",
-        "baseUrl": "../..",
+        "baseUrl": "..",
         "noEmit": false,
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,

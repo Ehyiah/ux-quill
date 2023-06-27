@@ -1,43 +1,20 @@
 # QuillJs Bundle for Symfony using Symfony UX
 
 ## Installation
-### Require bundle
+### Step 1 Require bundle
 ```sh
-composer require ehyiah/ux-quill
+  composer require ehyiah/ux-quill
 ```
-
-### Don't forget to install the JavaScript dependencies as well and compile
-- add to package.json in your project :
+### step 2 next run
+``` sh
+    yarn install --force
+    yarn watch
 ```
-    "dependencies": {
-        "@ehyiah/ux-quill" : "file:vendor/ehyiah/ux-quill/src/assets"
-    }
-```
-
-- next in controllers.json :
-```
-    "controllers": {
-        "@ehyiah/ux-quill": {
-            "quill": {
-                "enabled": true,
-                "fetch": "eager",
-                "autoimport": {
-                    "quill/dist/quill.snow.css": true,
-                    "quill/dist/quill.bubble.css": false
-                }
-            }
-        }
-    }
-```
-- next run
-```
-npm install --force
-npm run watch
-
-# or use yarn
-yarn install --force
-yarn watch
-```
+OR
+``` sh
+    npm install --force
+    npm run watch
+``` 
 It's done, you can use the QuillType to build a QuillJs WYSIWYG
 
 You can add as many WYSIWYG fields inside same page like any normal fields.

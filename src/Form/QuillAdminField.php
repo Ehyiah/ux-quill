@@ -18,7 +18,6 @@ class QuillAdminField implements FieldInterface
             ->addFormTheme('@QuillJs/form.html.twig', '@EasyAdmin/crud/form_theme.html.twig')
             ->setProperty($propertyName)
             ->setLabel($label)
-            ->setTemplatePath('form.html.twig')
             ->setFormType(QuillType::class)
             ->addWebpackEncoreEntries('quill')
         ;

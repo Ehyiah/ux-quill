@@ -25,7 +25,7 @@ class QuillJsExtension extends Extension implements PrependExtensionInterface
             $container->prependExtensionConfig('framework', [
                 'asset_mapper' => [
                     'paths' => [
-                        __DIR__.'/../../assets/dist' => '@ehyiah/ux-quill',
+                        __DIR__ . '/../../assets/dist' => '@ehyiah/ux-quill',
                     ],
                 ],
             ]);
@@ -63,6 +63,6 @@ class QuillJsExtension extends Extension implements PrependExtensionInterface
             return false;
         }
 
-        return is_file($bundlesMetadata['FrameworkBundle']['path'].'/Resources/config/asset_mapper.php');
+        return is_file($bundlesMetadata['FrameworkBundle']['path'] . '/Resources/config/asset_mapper.php');
     }
 }

@@ -10,11 +10,11 @@ type ExtraOptions = {
 
 export default class extends Controller {
     readonly inputTarget: HTMLDivElement;
-    readonly toolbarOptionsValue: HTMLDivElement;
-    readonly extraOptionsValue: ExtraOptions;
     readonly editorContainerTarget: HTMLDivElement;
-
     static targets = ['input', 'editorContainer'];
+
+    readonly extraOptionsValue: ExtraOptions;
+    readonly toolbarOptionsValue: HTMLDivElement;
     static values = {
         toolbarOptions: {
             type: Array,
