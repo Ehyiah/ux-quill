@@ -1,11 +1,8 @@
 parameters:
     inferPrivatePropertyTypeFromConstructor: true
     checkGenericClassInNonGenericObjectType: false
-    symfony:
-        console_application_loader: build/phpstan/console-loader.php
     level: 7
     paths:
         - src
     excludePaths:
-        - src/Migrations/*
         - src/Kernel.php

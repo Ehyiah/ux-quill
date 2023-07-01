@@ -73,6 +73,7 @@ For the most basic this is only what you have to do.
 - **height**: type string, examples: 200px, 200em, default: '200px'
 - **theme**: type: string, values: 'snow', 'bubble', default: 'snow' (you can use ThemeOption class to build it)
 - **placeholder**: type: string
+- **upload_handler**: type: array (explained below)
 
 #### quill_options
 
@@ -86,8 +87,6 @@ Or use a more convenient with Autocomplete using the many Fields Object in this 
       )
 ```
 This example will display a h1 and h2 header options side by side
-
-
 ```
       QuillGroup::build(
           new HeaderField(HeaderField::HEADER_OPTION_1),
@@ -108,9 +107,37 @@ Many fields have options:
 ### Fields
 - you can look in DTO/Fields folder to see the full list of available fields.
 
+### Image upload Handling
+in ***ImageInlineField*** : QuillJS transform images in base64 encoded file by default to save your files.
+However, you can specify a custom endpoint to handle image uploading and pass in response the entire public URL to display the image.
+- currently handling :
+- data sendig in base64 inside a json
+- OR
+- in a multipart/form-data
+```
+    'quill_extra_options' => [
+        ///
+        'upload_handler' => [
+            'type' => 'json',
+            // 'type' => 'form',
+            'path' => '/my-custom-endpoint/upload',
+        ]
+    ],
+```
+- your endpoint must return the complete URL of the file example :
+```
+  https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/JavaScript-logo.png/480px-JavaScript-logo.png
+```
+- in json mode data will look like this by calling $request->getContent() and ```application/json``` in content-type headers
+```
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAlgAAAJYCAQAAAAUb1BXAAAABGdBTUEAALGPC/xhBQAAACyygyyioiBqFCUIKC64x..."
+```
+- in form mode you will find a ```multipart/form-data``` in content-type headers and file will be present in $request->files named ```file```
+- then you can handle it like you would do with a FileType
 
 
-## Easyadmin Integration
+
+# Easyadmin Integration
 ### prerequisite
 - First create a quill.js inside assets diretory
 ```
@@ -140,4 +167,18 @@ Or add custom options like you would do with the normal type
                     new HeaderField(HeaderField::HEADER_OPTION_2),
                 )
         ])
+```
+
+
+# Display result
+in a twig template simply : 
+```
+    <div>{{ my_variable|raw }}</div>
+```
+you can of course sanitize HTML if you need to for security reason, but don't forget to configure it 
+to your needs as many html balise and style elements will be removed by default.
+Same goes in your Form configuration
+```
+    'sanitize_html' => false,
+    'sanitizer' => 'my_awesome_sanitizer_config
 ```
