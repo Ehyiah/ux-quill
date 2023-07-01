@@ -34,7 +34,7 @@ class QuillType extends AbstractType
                             'path' => null,
                         ]);
                         $spoolResolver->setAllowedTypes('type', ['string', 'null']);
-                        $spoolResolver->setAllowedTypes('path', ['string']);
+                        $spoolResolver->setAllowedTypes('path', ['string', 'null']);
                         $spoolResolver->setAllowedValues('type', ['json', 'form', null]);
                     })
                 ;
