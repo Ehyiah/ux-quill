@@ -56,10 +56,6 @@ RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
 RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
 RUN apt-get update && apt-get install -y yarn
 
-## NEEDED as this image has been commited to use on gitlab CI
-##RUN cd /usr/local/etc/php/conf.d/ && \
-##  echo 'memory_limit = 512M' >> /usr/local/etc/php/conf.d/docker-php-memlimit.ini
-
 # CREATE USER
 # default values are below, but they are overwritten in make build command with your current user ID and NAME
 ARG APP_USER=www-data
