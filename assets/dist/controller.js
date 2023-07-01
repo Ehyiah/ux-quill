@@ -6,6 +6,9 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = void 0;
 var _stimulus = require("@hotwired/stimulus");
 var _quill = _interopRequireDefault(require("quill/dist/quill"));
+var _quillImageUploader = _interopRequireDefault(require("quill-image-uploader"));
+require("quill-image-uploader/dist/quill.imageUploader.min.css");
+var _axios = _interopRequireDefault(require("axios"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -21,6 +24,7 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return _typeof(key) === "symbol" ? key : String(key); }
 function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (_typeof(res) !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
+_quill.default.register("modules/imageUploader", _quillImageUploader.default);
 var _default = /*#__PURE__*/function (_Controller) {
   _inherits(_default, _Controller);
   var _super = _createSuper(_default);
@@ -41,13 +45,62 @@ var _default = /*#__PURE__*/function (_Controller) {
         placeholder: this.extraOptionsValue.placeholder,
         theme: this.extraOptionsValue.theme
       };
+      if (this.extraOptionsValue.upload_handler.path !== null && this.extraOptionsValue.upload_handler.type === 'form') {
+        Object.assign(options.modules, {
+          imageUploader: {
+            upload: function upload(file) {
+              return new Promise(function (resolve, reject) {
+                var formData = new FormData();
+                formData.append("file", file);
+                _axios.default.post(_this.extraOptionsValue.upload_handler.path, formData).then(function (response) {
+                  resolve(response.data);
+                }).catch(function (err) {
+                  reject("Upload failed");
+                });
+              });
+            }
+          }
+        });
+      }
+      if (this.extraOptionsValue.upload_handler.path !== null && this.extraOptionsValue.upload_handler.type === 'json') {
+        Object.assign(options.modules, {
+          imageUploader: {
+            upload: function upload(file) {
+              return new Promise(function (resolve, reject) {
+                var reader = function reader(file) {
+                  return new Promise(function (resolve, reject) {
+                    var fileReader = new FileReader();
+                    fileReader.onload = function () {
+                      return resolve(fileReader.result);
+                    };
+                    fileReader.readAsDataURL(file);
+                  });
+                };
+                reader(file).then(function (result) {
+                  return _axios.default.post(_this.extraOptionsValue.upload_handler.path, result, {
+                    headers: {
+                      'Content-Type': 'application/json'
+                    }
+                  }).then(function (response) {
+                    resolve(response.data);
+                  }).catch(function (err) {
+                    reject("Upload failed");
+                  });
+                });
+              });
+            }
+          }
+        });
+      }
       var heightDefined = this.extraOptionsValue.height;
       if (null !== heightDefined) {
         this.editorContainerTarget.style.height = this.extraOptionsValue.height;
       }
       var quill = new _quill.default(this.editorContainerTarget, options);
       quill.on('text-change', function (delta, deltaResult, source) {
-        _this.inputTarget.innerHTML = quill.root.innerHTML;
+        var quillContent = quill.root.innerHTML;
+        var inputContent = _this.inputTarget;
+        inputContent.value = quillContent;
       });
     }
   }]);

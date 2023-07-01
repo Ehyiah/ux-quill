@@ -28,6 +28,17 @@ class QuillType extends AbstractType
             'quill_options' => ['bold', 'italic'],
             'quill_extra_options' => function (OptionsResolver $resolver) {
                 $resolver
+                    ->setDefault('upload_handler', function (OptionsResolver $spoolResolver): void {
+                        $spoolResolver->setDefaults([
+                            'type' => 'form',
+                            'path' => null,
+                        ]);
+                        $spoolResolver->setAllowedTypes('type', ['string', 'null']);
+                        $spoolResolver->setAllowedTypes('path', ['string']);
+                        $spoolResolver->setAllowedValues('type', ['json', 'form', null]);
+                    })
+                ;
+                $resolver
                     ->setDefault('debug', DebugOption::DEBUG_OPTION_ERROR)
                     ->setAllowedTypes('debug', 'string')
                     ->setAllowedValues('debug', [DebugOption::DEBUG_OPTION_ERROR, DebugOption::DEBUG_OPTION_WARNING, DebugOption::DEBUG_OPTION_LOG, DebugOption::DEBUG_OPTION_INFO])
