@@ -2,7 +2,7 @@ import { Controller } from '@hotwired/stimulus';
 import Quill from 'quill/dist/quill';
 import ImageUploader from 'quill-image-uploader';
 import 'quill-image-uploader/dist/quill.imageUploader.min.css';
-Quill.register("modules/imageUploader", ImageUploader);
+Quill.register('modules/imageUploader', ImageUploader);
 import axios from 'axios';
 
 type ExtraOptions = {
@@ -53,7 +53,7 @@ export default class extends Controller {
                     upload: file => {
                         return new Promise((resolve, reject) => {
                             const formData = new FormData();
-                            formData.append("file", file);
+                            formData.append('file', file);
 
                             axios
                                 .post(this.extraOptionsValue.upload_handler.path, formData)
@@ -61,7 +61,8 @@ export default class extends Controller {
                                     resolve(response.data);
                                 })
                                 .catch(err => {
-                                    reject("Upload failed");
+                                    reject('Upload failed');
+                                    console.log(err)
                                 })
                         })
                     }
@@ -75,7 +76,7 @@ export default class extends Controller {
                     upload: file => {
                         return new Promise((resolve, reject) => {
                             const reader = (file) => {
-                                return new Promise((resolve, reject) => {
+                                return new Promise((resolve) => {
                                     const fileReader = new FileReader();
                                     fileReader.onload = () => resolve(fileReader.result);
                                     fileReader.readAsDataURL(file);
@@ -93,7 +94,8 @@ export default class extends Controller {
                                         resolve(response.data);
                                     })
                                     .catch(err => {
-                                        reject("Upload failed");
+                                        reject('Upload failed');
+                                        console.log(err)
                                     })
                             );
                         })
@@ -108,9 +110,9 @@ export default class extends Controller {
         }
 
         const quill = new Quill(this.editorContainerTarget, options);
-        quill.on('text-change', (delta, deltaResult, source) => {
-            let quillContent = quill.root.innerHTML;
-            let inputContent = this.inputTarget;
+        quill.on('text-change', () => {
+            const quillContent = quill.root.innerHTML;
+            const inputContent = this.inputTarget;
             inputContent.value = quillContent;
         })
     }
