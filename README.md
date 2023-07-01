@@ -73,6 +73,7 @@ For the most basic this is only what you have to do.
 - **height**: type string, examples: 200px, 200em, default: '200px'
 - **theme**: type: string, values: 'snow', 'bubble', default: 'snow' (you can use ThemeOption class to build it)
 - **placeholder**: type: string
+- **upload_handler**: type: array (explained below)
 
 #### quill_options
 
@@ -166,4 +167,18 @@ Or add custom options like you would do with the normal type
                     new HeaderField(HeaderField::HEADER_OPTION_2),
                 )
         ])
+```
+
+
+# Display result
+in a twig template simply : 
+```
+    <div>{{ my_variable|raw }}</div>
+```
+you can of course sanitize HTML if you need to for security reason, but don't forget to configure it 
+to your needs as many html balise and style elements will be removed by default.
+Same goes in your Form configuration
+```
+    'sanitize_html' => false,
+    'sanitizer' => 'my_awesome_sanitizer_config
 ```

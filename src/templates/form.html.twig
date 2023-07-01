@@ -1,5 +1,5 @@
 {% block quill_widget %}
-    {%- set controllerName = "ehyiah--ux-quill--quill"%}
+    {%- set controllerName = "ehyiah--ux-quill--quill" -%}
     {% set dataSet = "data-ehyiah--ux-quill--quill" %}
     {% set html_sanitizer = attr['sanitizer'] %}
 
@@ -8,20 +8,25 @@
          {{ dataSet }}-toolbar-options-value="{{ attr['quill_options'] }}"
          {{ dataSet }}-extra-options-value="{{ attr['quill_extra_options'] }}"
     >
-        <label>
-            <textarea style="display: none" {{ block('widget_attributes') }}
-                      {{ dataSet }}-target="input"
+        <div>
+            <input type="hidden"
+                   value="{{ value }}"
+                    {{ block('widget_attributes') }}
+                   {{ dataSet }}-target="input"
             >
-                {{ value|raw|sanitize_html(html_sanitizer) }}
-            </textarea>
-        </label>
+        </div>
 
         <div>
             <div class="quill-editor"
                  {{ dataSet }}-target="editorContainer"
             >
-                {{ value|raw|sanitize_html(html_sanitizer) }}
+                {% if html_sanitizer is not null %}
+                    {{ value|raw|sanitize_html(html_sanitizer) }}
+                {% else %}
+                    {{ value|raw }}
+                {% endif %}
             </div>
         </div>
+
     </div>
 {% endblock %}

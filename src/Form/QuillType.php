@@ -22,7 +22,7 @@ class QuillType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'sanitize_html' => true,
+            'sanitize_html' => false,
             'label' => false,
             'error_bubbling' => true,
             'quill_options' => ['bold', 'italic'],
@@ -64,8 +64,8 @@ class QuillType extends AbstractType
                     ->setAllowedTypes('placeholder', 'string')
                 ;
                 $resolver
-                    ->setDefault('sanitizer', 'default')
-                    ->setAllowedTypes('sanitizer', 'string')
+                    ->setDefault('sanitizer', null)
+                    ->setAllowedTypes('sanitizer', ['string', 'null'])
                 ;
             },
         ]);
