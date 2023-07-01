@@ -1,9 +1,14 @@
 import { Controller } from '@hotwired/stimulus';
 import Quill from 'quill/dist/quill';
+
 import ImageUploader from 'quill-image-uploader';
+import axios from 'axios';
 import 'quill-image-uploader/dist/quill.imageUploader.min.css';
 Quill.register('modules/imageUploader', ImageUploader);
-import axios from 'axios';
+
+import "quill-emoji/dist/quill-emoji.css";
+import * as Emoji from "quill-emoji";
+Quill.register("modules/emoji", Emoji);
 
 type ExtraOptions = {
     theme: string;
@@ -42,6 +47,8 @@ export default class extends Controller {
             debug: this.extraOptionsValue.debug,
             modules: {
                 toolbar: toolbarOptionsValue,
+                "emoji-toolbar": true,
+                "emoji-shortname": true,
             },
             placeholder: this.extraOptionsValue.placeholder,
             theme: this.extraOptionsValue.theme,
