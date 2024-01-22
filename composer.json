@@ -23,12 +23,12 @@
         "php": "^8.1.0",
         "symfony/stimulus-bundle": "^2.9.1",
         "twig/extra-bundle": "^2.12|^3.0",
-        "symfony/twig-bundle": "6.3.*",
-        "symfony/form": "6.3.*",
-        "symfony/html-sanitizer": "6.3.*"
+        "symfony/twig-bundle": "^6.3",
+        "symfony/form": "^6.3",
+        "symfony/html-sanitizer": "^6.3"
     },
     "require-dev": {
-        "symfony/console": "6.2.*",
+        "symfony/console": "^6.2",
         "phpstan/phpstan": "^1.10",
         "phpunit/phpunit": "^9.5",
         "friendsofphp/php-cs-fixer": "^3.1",
