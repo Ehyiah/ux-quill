@@ -1,7 +1,6 @@
-FROM php:8.1.3-fpm
+FROM php:8.2.1-fpm
 ARG TIMEZONE="Europe/Paris"
 
-# https://hub.docker.com/repository/docker/ehyiah/ci_php8.1/general
 MAINTAINER Matthieu Gostiaux<rei_eva@hotmail.com>
 
 COPY --from=composer:2.4.4 /usr/bin/composer /usr/bin/composer
