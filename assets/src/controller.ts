@@ -1,14 +1,15 @@
 import { Controller } from '@hotwired/stimulus';
-import Quill from 'quill/dist/quill';
+import Quill from 'quill';
+
+import axios from 'axios';
 
 import ImageUploader from 'quill-image-uploader';
-import axios from 'axios';
 import 'quill-image-uploader/dist/quill.imageUploader.min.css';
 Quill.register('modules/imageUploader', ImageUploader);
 
-import "quill-emoji/dist/quill-emoji.css";
-import * as Emoji from "quill-emoji";
-Quill.register("modules/emoji", Emoji);
+import 'quill-emoji/dist/quill-emoji.css';
+import * as Emoji from 'quill-emoji';
+Quill.register('modules/emoji', Emoji);
 
 type ExtraOptions = {
     theme: string;
@@ -23,12 +24,12 @@ type uploadOptions = {
 }
 
 export default class extends Controller {
-    readonly inputTarget: HTMLInputElement;
-    readonly editorContainerTarget: HTMLDivElement;
+    declare readonly inputTarget: HTMLInputElement;
+    declare readonly editorContainerTarget: HTMLDivElement;
     static targets = ['input', 'editorContainer'];
 
-    readonly extraOptionsValue: ExtraOptions;
-    readonly toolbarOptionsValue: HTMLDivElement;
+    declare readonly extraOptionsValue: ExtraOptions;
+    declare readonly toolbarOptionsValue: HTMLDivElement;
     static values = {
         toolbarOptions: {
             type: Array,
@@ -47,8 +48,8 @@ export default class extends Controller {
             debug: this.extraOptionsValue.debug,
             modules: {
                 toolbar: toolbarOptionsValue,
-                "emoji-toolbar": true,
-                "emoji-shortname": true,
+                'emoji-toolbar': true,
+                'emoji-shortname': true,
             },
             placeholder: this.extraOptionsValue.placeholder,
             theme: this.extraOptionsValue.theme,
