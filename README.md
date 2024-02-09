@@ -5,6 +5,9 @@
 ```sh
   composer require ehyiah/ux-quill
 ```
+If you are using the AssetMapper Component you're done !
+
+If you are using webpack encore follow next step
 ### step 2 next run
 ``` sh
     yarn install --force
