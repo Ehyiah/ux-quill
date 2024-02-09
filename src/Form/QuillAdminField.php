@@ -14,12 +14,22 @@ class QuillAdminField implements FieldInterface
      */
     public static function new(string $propertyName, $label = null): self
     {
+        if (!class_exists('Symfony\\Component\\AssetMapper\\AssetMapper')) {
+            return (new self())
+                ->addFormTheme('@QuillJs/form.html.twig', '@EasyAdmin/crud/form_theme.html.twig')
+                ->setProperty($propertyName)
+                ->setLabel($label)
+                ->setFormType(QuillType::class)
+                ->addWebpackEncoreEntries('quill-admin')
+            ;
+        }
+
         return (new self())
             ->addFormTheme('@QuillJs/form.html.twig', '@EasyAdmin/crud/form_theme.html.twig')
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setFormType(QuillType::class)
-            ->addWebpackEncoreEntries('quill')
+            ->addAssetMapperEntries('quill-admin')
         ;
     }
 }
