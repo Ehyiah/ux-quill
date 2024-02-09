@@ -8,7 +8,10 @@ use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillInlineFieldInterface;
 
 final class QuillGroup implements QuillGroupInterface
 {
-    public static function build(QuillInlineFieldInterface|QuillBlockFieldInterface ...$fields): array
+    /**
+     * @return array<int<0, max>, array<string>|string>
+     */
+    public static function build(QuillBlockFieldInterface|QuillInlineFieldInterface ...$fields): array
     {
         $array = [];
         foreach ($fields as $field) {

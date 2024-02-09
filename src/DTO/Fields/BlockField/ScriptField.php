@@ -9,6 +9,9 @@ final class ScriptField implements QuillBlockFieldInterface
     public const SCRIPT_FIELD_OPTION_SUB = 'sub';
     public const SCRIPT_FIELD_OPTION_SUPER = 'super';
 
+    /**
+     * @var string[]
+     */
     private array $options = [];
 
     public function __construct(string ...$options)
@@ -16,6 +19,9 @@ final class ScriptField implements QuillBlockFieldInterface
         $this->options = $options;
     }
 
+    /**
+     * @return array|mixed[]
+     */
     public function getOption(): array
     {
         $array = [];
