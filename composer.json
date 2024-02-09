@@ -1,10 +1,13 @@
 {
-    "type": "bundle",
     "name": "ehyiah/ux-quill",
-    "description": "Symfony Bundle to use Quill JS text editor",
+    "type": "symfony-bundle",
+    "description": "Symfony UX Bundle to use Quill JS wysiwyg text editor with full and easy customisation",
     "keywords": [
-        "symfony-ux",
-        "symfony-form",
+        "symfony ux",
+        "symfony form",
+        "symfony wysiwyg",
+        "symfony quill",
+        "symfony ux bundle",
         "quilljs",
         "quill",
         "wysiwyg"
