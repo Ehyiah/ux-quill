@@ -6,6 +6,9 @@ use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillBlockFieldInterface;
 
 final class ColorField implements QuillBlockFieldInterface
 {
+    /**
+     * @var string[]
+     */
     private array $options = [];
 
     public function __construct(string ...$options)
@@ -13,6 +16,9 @@ final class ColorField implements QuillBlockFieldInterface
         $this->options = $options;
     }
 
+    /**
+     * @return array<string, array<string>>
+     */
     public function getOption(): array
     {
         $array = [];
