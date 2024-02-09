@@ -1,4 +1,4 @@
-FROM php:8.2.1-fpm
+FROM php:8.1.0-fpm
 ARG TIMEZONE="Europe/Paris"
 
 MAINTAINER Matthieu Gostiaux<rei_eva@hotmail.com>

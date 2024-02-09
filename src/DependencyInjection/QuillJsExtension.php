@@ -12,7 +12,7 @@ use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 
 class QuillJsExtension extends Extension implements PrependExtensionInterface
 {
-    public function prepend(ContainerBuilder $container)
+    public function prepend(ContainerBuilder $container): void
     {
         // Register the QuillJS form theme if TwigBundle is available
         $bundles = $container->getParameter('kernel.bundles');
@@ -32,7 +32,7 @@ class QuillJsExtension extends Extension implements PrependExtensionInterface
         }
     }
 
-    public function load(array $configs, ContainerBuilder $container)
+    public function load(array $configs, ContainerBuilder $container): void
     {
         $container
             ->setDefinition('form.ux-quill-js', new Definition(QuillType::class))

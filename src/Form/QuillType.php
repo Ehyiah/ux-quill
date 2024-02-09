@@ -12,14 +12,14 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class QuillType extends AbstractType
 {
-    public function buildView(FormView $view, FormInterface $form, array $options)
+    public function buildView(FormView $view, FormInterface $form, array $options): void
     {
         $view->vars['attr']['quill_options'] = json_encode($options['quill_options']);
         $view->vars['attr']['quill_extra_options'] = json_encode($options['quill_extra_options']);
         $view->vars['attr']['sanitizer'] = $options['quill_extra_options']['sanitizer'];
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'sanitize_html' => false,
