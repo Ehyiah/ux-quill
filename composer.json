@@ -10,7 +10,9 @@
         "symfony ux bundle",
         "quilljs",
         "quill",
-        "wysiwyg"
+        "wysiwyg",
+        "easyadmin",
+        "easyadmin wysiwyg"
     ],
     "license": "MIT",
     "minimum-stability": "stable",

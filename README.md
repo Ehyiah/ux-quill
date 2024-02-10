@@ -1,5 +1,16 @@
 # QuillJs Bundle for Symfony using Symfony UX
 
+* [Installation](#installation)
+
+* [Basic Usage](#basic-usage)
+* [Customize quillJS options](#customize-options)
+* [Handle images uploads](#image-upload-handling)
+
+* [Display Result](#display-result)
+
+* [EasyAdmin Integration](#easyadmin-integration)
+* [EasyAdmin Usage](#usage)
+
 ## Installation
 ### Step 1 Require bundle
 ```sh
@@ -22,7 +33,7 @@ It's done, you can use the QuillType to build a QuillJs WYSIWYG
 
 You can add as many WYSIWYG fields inside same page like any normal fields.
 
-## Usage
+## Basic Usage
 In a form, use QuillType. It works like a classic Type except it has more options : e.g:
 ```php
     use Ehyiah\QuillJsBundle\Form\QuillType;
