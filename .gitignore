@@ -9,3 +9,4 @@ vendor/
 
 assets/node_modules
 docker-compose.override.yaml
+/.phpunit.cache/

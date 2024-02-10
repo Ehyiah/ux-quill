@@ -84,5 +84,7 @@ ci: ## Launch csfixer and phpstan and javascript quality check
 fixer-php: ## Launch csfixer no dry
 	$(COMPOSER) phpcsfixer
 
+.PHONY: ci fixer-php phptests
 
-.PHONY: ci fixer-php
+phptests:
+	$(PHP) vendor/bin/phpunit
