@@ -1,15 +1,15 @@
 import { Controller } from '@hotwired/stimulus';
 import Quill from 'quill';
+import * as Options from 'quill/core/quill';
 
-import axios from 'axios';
-
-import ImageUploader from 'quill-image-uploader';
-import 'quill-image-uploader/dist/quill.imageUploader.min.css';
+import ImageUploader from './imageUploader.js'
 Quill.register('modules/imageUploader', ImageUploader);
 
-import 'quill-emoji/dist/quill-emoji.css';
-import * as Emoji from 'quill-emoji';
+import * as Emoji from 'quill2-emoji';
+import 'quill2-emoji/dist/style.css';
 Quill.register('modules/emoji', Emoji);
+
+import axios from 'axios';
 
 type ExtraOptions = {
     theme: string;
@@ -20,7 +20,7 @@ type ExtraOptions = {
 }
 type uploadOptions = {
     type: string;
-    path; string
+    path: string;
 }
 
 export default class extends Controller {
@@ -44,12 +44,11 @@ export default class extends Controller {
     connect() {
         const toolbarOptionsValue = this.toolbarOptionsValue;
 
-        const options = {
+        const options: Options = {
             debug: this.extraOptionsValue.debug,
             modules: {
                 toolbar: toolbarOptionsValue,
                 'emoji-toolbar': true,
-                'emoji-shortname': true,
             },
             placeholder: this.extraOptionsValue.placeholder,
             theme: this.extraOptionsValue.theme,
@@ -114,7 +113,7 @@ export default class extends Controller {
 
         const heightDefined = this.extraOptionsValue.height;
         if (null !== heightDefined) {
-            this.editorContainerTarget.style.height = this.extraOptionsValue.height
+            this.editorContainerTarget.style.height = heightDefined
         }
 
         const quill = new Quill(this.editorContainerTarget, options);

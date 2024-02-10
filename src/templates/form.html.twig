@@ -27,6 +27,13 @@
                 {% endif %}
             </div>
         </div>
-
     </div>
+
+    {# include katex only if a formula field is present #}
+    {% set json_string = attr['quill_options']|json_encode %}
+    {% set formula_exists = 'formula' in json_string %}
+    {% if formula_exists %}
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+        <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
+    {% endif %}
 {% endblock %}

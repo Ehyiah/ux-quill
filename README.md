@@ -1,12 +1,23 @@
 # QuillJs Bundle for Symfony using Symfony UX
 
+Symfony UX Bundle implementing the Quill JS Wysiwyg https://v2.quilljs.com/
+
+If you need a easy to use WYSIWYG (with no complex configuration) into a symfony project this is what you need.
+
+2.x.x tags cover the new Quill v2 (release candidate 2 at the moment)
+
+1.x.x tags cover the Quill v1.3.7
+
 * [Installation](#installation)
 
+
 * [Basic Usage](#basic-usage)
-* [Customize quillJS options](#customize-options)
+* [Display Result](#display-result)
+
+
+* [Customize quillJS with options and extra_options](#customize-options)
 * [Handle images uploads](#image-upload-handling)
 
-* [Display Result](#display-result)
 
 * [EasyAdmin Integration](#easyadmin-integration)
 * [EasyAdmin Usage](#usage)
@@ -18,8 +29,7 @@
 ```
 If you are using the AssetMapper Component you're done !
 
-If you are using webpack encore follow next step
-### step 2 next run
+### step 2 next run (If you are using webpack encore, not needed with AssetMapper)
 ``` sh
     yarn install --force
     yarn watch
@@ -33,7 +43,7 @@ It's done, you can use the QuillType to build a QuillJs WYSIWYG
 
 You can add as many WYSIWYG fields inside same page like any normal fields.
 
-## Basic Usage
+# Basic Usage
 In a form, use QuillType. It works like a classic Type except it has more options : e.g:
 ```php
     use Ehyiah\QuillJsBundle\Form\QuillType;
@@ -47,8 +57,22 @@ In a form, use QuillType. It works like a classic Type except it has more option
     }
 ```
 
+# Display result
+in a twig template simply :
+```
+    <div>{{ myField|raw }}</div>
+```
+you can of course sanitize HTML if you need to for security reason, but don't forget to configure it
+to your needs as many html balise and style elements will be removed by default.
+Same goes in your Form configuration
+```
+    'sanitize_html' => false,
+    'sanitizer' => 'my_awesome_sanitizer_config
+```
+
+
 For the most basic this is only what you have to do.
-### Customize Options
+# Customize Options
 ```php
     use Ehyiah\QuillJsBundle\Form\QuillType;
     
@@ -80,16 +104,10 @@ For the most basic this is only what you have to do.
         ;
     }
 ```
+If you want to use all fields available use QuillGroup::buildWithAllFields instead of QuillGroup::build to add every fields available in this bundle.
 
-#### quill_extra_options:
 
-- **debug**: type:string, values: 'error', 'warn', 'log', 'info'  (you can use DebugOption class to build it)
-- **height**: type string, examples: 200px, 200em, default: '200px'
-- **theme**: type: string, values: 'snow', 'bubble', default: 'snow' (you can use ThemeOption class to build it)
-- **placeholder**: type: string
-- **upload_handler**: type: array (explained below)
-
-#### quill_options
+## quill_options :
 
 This is where you will choose what elements you want to display in your WYSIWYG.
 You can build an array like you would do following the QuillJs official documentation
@@ -115,17 +133,23 @@ This example will display a h1 and h2 header options side by side and another Gr
 
 You can add as many Groups as you like or just One if you don't need the WYSIWYG options to have spaces between them.
 
-
-Many fields have options:
-
 ### Fields
 - you can look in DTO/Fields folder to see the full list of available fields.
+
+
+## quill_extra_options:
+
+- **debug**: type:string, values: 'error', 'warn', 'log', 'info'  (you can use DebugOption class to build it)
+- **height**: type string, examples: 200px, 200em, default: '200px'
+- **theme**: type: string, values: 'snow', 'bubble', default: 'snow' (you can use ThemeOption class to build it)
+- **placeholder**: type: string
+- **upload_handler**: type: array (explained below)
 
 ### Image upload Handling
 in ***ImageInlineField*** : QuillJS transform images in base64 encoded file by default to save your files.
 However, you can specify a custom endpoint to handle image uploading and pass in response the entire public URL to display the image.
 - currently handling :
-- data sendig in base64 inside a json
+- data sending in base64 inside a json
 - OR
 - in a multipart/form-data
 ```
@@ -133,7 +157,7 @@ However, you can specify a custom endpoint to handle image uploading and pass in
         ///
         'upload_handler' => [
             'type' => 'json',
-            // 'type' => 'form',
+            // or 'type' => 'form',
             'path' => '/my-custom-endpoint/upload',
         ]
     ],
@@ -157,7 +181,7 @@ However, you can specify a custom endpoint to handle image uploading and pass in
     // start the Stimulus application
     import './bootstrap';
 ```
-### When using AssetMapper
+## When using AssetMapper
 create a new entry in importmap.php
 (the key must be quill-admin as it is the name used in the built-in QuillAdminField)
 ```
@@ -192,7 +216,7 @@ in your dashboard
     }
 ```
 
-### When using webpack
+## When using webpack
 - Next create in webpack.config a new entry
 (the entry name must be quill-admin as it is the name used in the built-in QuillAdminField)
 ```
@@ -200,7 +224,7 @@ in your dashboard
 ```
 don't forget to recompile assets (yarn build/watch or npm equivalent).
 
-## Usage
+## EasyAdmin
 Then you can use the QuillAdminField like this :
 ```
     QuillAdminField::new('quill')
@@ -218,18 +242,4 @@ Or add custom options like you would do with the normal type
                     new HeaderField(HeaderField::HEADER_OPTION_2),
                 )
         ])
-```
-
-
-# Display result
-in a twig template simply : 
-```
-    <div>{{ my_variable|raw }}</div>
-```
-you can of course sanitize HTML if you need to for security reason, but don't forget to configure it 
-to your needs as many html balise and style elements will be removed by default.
-Same goes in your Form configuration
-```
-    'sanitize_html' => false,
-    'sanitizer' => 'my_awesome_sanitizer_config
 ```

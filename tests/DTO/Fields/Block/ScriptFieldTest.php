@@ -17,13 +17,13 @@ final class ScriptFieldTest extends TestCase
     {
         $field = new ScriptField(ScriptField::SCRIPT_FIELD_OPTION_SUB);
         $result = $field->getOption();
-        $expectedResult = ['script' => ['sub']];
+        $expectedResult = ['script' => 'sub'];
 
         $this->assertEquals($expectedResult, $result);
 
-        $field = new ScriptField(ScriptField::SCRIPT_FIELD_OPTION_SUB, ScriptField::SCRIPT_FIELD_OPTION_SUPER);
+        $field = new ScriptField(ScriptField::SCRIPT_FIELD_OPTION_SUPER);
         $result = $field->getOption();
-        $expectedResult = ['script' => ['sub', 'super']];
+        $expectedResult = ['script' => 'super'];
 
         $this->assertEquals($expectedResult, $result);
     }

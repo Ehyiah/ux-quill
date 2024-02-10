@@ -1,7 +1,7 @@
 {
     "name": "@ehyiah/ux-quill",
     "description": "Symfony bundle to use Quill JS text editor",
-    "version": "1.0.0",
+    "version": "2.0.0-beta",
     "license": "MIT",
     "main": "dist/controller.js",
     "symfony": {
@@ -19,16 +19,13 @@
         },
         "importmap": {
             "@hotwired/stimulus": "^3.0.0",
-            "slugify": "^1.6.5",
-            "quill": "^1.3.7",
-            "quill-emoji": "^0.2.0",
-            "quill-image-uploader": "^1.3.0",
             "file-loader": "^6.2.0",
-            "quill/dist/quill.snow.css": "1.3.7",
-            "quill/dist/quill.bubble.css": "1.3.7",
-            "quill-image-uploader/dist/quill.imageUploader.min.css": "1.3.0",
-            "quill-emoji/dist/quill-emoji.css": "0.2.0",
-            "axios": "^1.4.0"
+            "quill": "2.0.0-rc.2",
+            "quill/dist/quill.snow.css": "2.0.0-rc.2",
+            "quill/dist/quill.bubble.css": "2.0.0-rc.2",
+            "axios": "^1.4.0",
+            "quill2-emoji": "^0.1.2",
+            "quill2-emoji/dist/style.css": "^0.1.2"
         }
     },
     "scripts": {
@@ -36,7 +33,8 @@
         "dev": "encore dev",
         "watch": "babel src --out-dir dist --source-maps --watch --extensions '.ts,.js'",
         "build": "babel src --extensions .ts -d dist",
-        "lint": "yarn run eslint src"
+        "lint": "yarn run eslint src",
+        "build:types": "tsc --emitDeclarationOnly"
     },
     "devDependencies": {
         "@babel/cli": "^7.20.7",
@@ -65,18 +63,16 @@
         "@hotwired/stimulus": "^3.0.0",
         "axios": "^1.4.0",
         "file-loader": "^6.2.0",
-        "quill": "^1.3.7",
-        "quill-emoji": "^0.2.0",
-        "quill-image-uploader": "^1.3.0",
-        "slugify": "^1.6.5"
+        "quill": "2.0.0-rc.2"
     },
     "dependencies": {
         "axios": "^1.4.0",
+        "eventemitter3": "^5.0.1",
         "file-loader": "^6.2.0",
-        "quill": "^1.3.7",
-        "quill-emoji": "^0.2.0",
-        "quill-image-uploader": "^1.3.0",
-        "slugify": "^1.6.5"
+        "lodash-es": "^4.17.21",
+        "quill": "2.0.0-rc.2",
+        "quill-delta": "^5.1.0",
+        "quill2-emoji": "^0.1.2"
     },
     "eslintConfig": {
         "root": true,

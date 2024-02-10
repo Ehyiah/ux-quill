@@ -17,13 +17,19 @@ final class ListFieldTest extends TestCase
     {
         $field = new ListField(ListField::LIST_FIELD_OPTION_ORDERED);
         $result = $field->getOption();
-        $expectedResult = [['list' => 'ordered']];
+        $expectedResult = ['list' => 'ordered'];
 
         $this->assertEquals($expectedResult, $result);
 
-        $field = new ListField(ListField::LIST_FIELD_OPTION_ORDERED, ListField::LIST_FIELD_OPTION_BULLET);
+        $field = new ListField(ListField::LIST_FIELD_OPTION_BULLET);
         $result = $field->getOption();
-        $expectedResult = [['list' => 'ordered'], ['list' => 'bullet']];
+        $expectedResult = ['list' => 'bullet'];
+
+        $this->assertEquals($expectedResult, $result);
+
+        $field = new ListField(ListField::LIST_FIELD_OPTION_CHECK);
+        $result = $field->getOption();
+        $expectedResult = ['list' => 'check'];
 
         $this->assertEquals($expectedResult, $result);
     }
