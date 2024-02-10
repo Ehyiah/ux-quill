@@ -66,8 +66,8 @@ jobs:
               run: ./vendor/bin/twigcs ./src/templates/
 
             ## —— Tests ✅ ———————————————————————————————————————————————————————————
-#            - name: Run functionnal and unit tests
-#              run: ./vendor/bin/phpunit
+            - name: Run functionnal and unit tests
+              run: ./vendor/bin/phpunit
 
     security:
         name: composer security check (PHP ${{ matrix.php-versions }})
