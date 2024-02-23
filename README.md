@@ -88,7 +88,7 @@ For the most basic this is only what you have to do.
                 ],
                 'quill_options' => [
                 // this is where you customize the WYSIWYG by creating one or many Groups
-                // you can also build your groups using a classic array but many classes are covering almost every Quill Fields see below
+                // you can also build your groups using a classic array but many classes are covering every Quill available Fields (see below for detailed list)
                     QuillGroup::build(
                         new BoldInlineField(),
                         new ItalicInlineField(),
@@ -98,17 +98,17 @@ For the most basic this is only what you have to do.
                         new HeaderField(HeaderField::HEADER_OPTION_1),
                         new HeaderField(HeaderField::HEADER_OPTION_2),
                         // and many more
-                    )
+                    ),
+                    // Or add all available fields at once
+                    QuillGroup::buildWithAllFields()
                 ]
             ])
         ;
     }
 ```
-If you want to use all fields available use QuillGroup::buildWithAllFields instead of QuillGroup::build to add every fields available in this bundle.
 
 
 ## quill_options :
-
 This is where you will choose what elements you want to display in your WYSIWYG.
 You can build an array like you would do following the QuillJs official documentation
 Or use a more convenient with Autocomplete using the many Fields Object in this bundle.
@@ -134,7 +134,41 @@ This example will display a h1 and h2 header options side by side and another Gr
 You can add as many Groups as you like or just One if you don't need the WYSIWYG options to have spaces between them.
 
 ### Fields
-- you can look in DTO/Fields folder to see the full list of available fields.
+- Below is the list of available fields from QuillJS (https://v2.quilljs.com/docs/formats)
+
+|        Field         |                                     Description                                      |   Available options    (options are available as class constants in each Field Class)    | Default option | QuillJS field name |
+|:--------------------:|:------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------:|:--------------:|:------------------:|
+|      BoldField       |                                  mark text as bold                                   |                                            -                                             |                |        bold        |
+|      ColorField      |                               Change color of the font                               |           array of colors (default is empty array to get quillJS default value           |                |       color        |
+| BackGroundColorField |                     change background color of the selected text                     |           array of colors (default is empty array to get quillJS default value           |                |     background     |
+|      AlignField      |                                Choose text alignment                                 |                           false (left), center, right, justify                           |      all       |       align        |
+|    DirectionField    |                                Choose text direction                                 | rtl (right to left, this is the only option available this widget is more like a toggle) |      rtl       |     direction      |
+|      FontField       |                                    Choose a font                                     |                             ''(sans serif) ,serif, monospace                             |      all       |        font        |
+|   HeaderGroupField   |                           Display a list of header levels                            |                    1, 2, 3, 4, 5, 6, false (will only display normal)                    |      all       |       header       |
+|     HeaderField      |                              Add a H1 or H2 widget only                              |                                           1, 2                                           |       1        |       header       |
+|     IndentField      |                                 Add or Remove indent                                 |                                          +1, -1                                          |       +1       |       indent       |
+|      ListField       |                                      Add a list                                      |                                  ordered, bullet, check                                  |    ordered     |        list        |
+|     ScriptField      |                                                                                      |                                        sub, super                                        |      sub       |       script       |
+|      SizeField       |                                   Change text size                                   |                            small, false (normal), large, huge                            |      all       |        size        |
+|   BlockQuoteField    |                                     Quote a text                                     |                                            -                                             |                |     blockquote     |
+|      CleanField      |                                  Clean text styling                                  |                                            -                                             |                |       clean        |
+|    CodeBlockField    |                                   Add a code-block                                   |                                            -                                             |                |     code-block     |
+|      CodeField       |                                    Add some code                                     |                                            -                                             |                |        code        |
+|     FormulaField     |                   add a formula (with [Katex](https://katex.org/))                   |                                            -                                             |                |      formula       |
+|      ImageField      | Add an image (see [quill_extra_options](#image-upload-handling) for uploads options) |                                            -                                             |                |       image        |
+|     ItalicField      |                                 mark text as italic                                  |                                            -                                             |                |       italic       |
+|      LinkField       |                                 Add a link to a text                                 |                                            -                                             |                |        link        |
+|     StrikeField      |                                mark a text as striked                                |                                            -                                             |                |       strike       |
+|    UnderlineField    |                               mark text as underlined                                |                                            -                                             |                |     underline      |
+|      VideoField      |                                  add an embed video                                  |                                            -                                             |                |       video        |
+
+
+- Below is a list of fields not available in QuillJS but taken from community
+
+|   Field    | Description  | Available options  (options are available as class constants in each Field Class)  | Default option |
+|:----------:|:------------:|:----------------------------------------------------------------------------------:|:--------------:|
+| EmojiField | Add an emoji |                                         -                                          |                |
+
 
 
 ## quill_extra_options:

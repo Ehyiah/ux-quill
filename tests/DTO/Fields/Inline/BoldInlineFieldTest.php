@@ -2,11 +2,11 @@
 
 namespace Ehyiah\QuillJsBundle\Tests\DTO\Fields\Inline;
 
-use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\BoldInlineField;
+use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\BoldField;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @coversDefaultClass \Ehyiah\QuillJsBundle\DTO\Fields\InlineField\BoldInlineField
+ * @coversDefaultClass \Ehyiah\QuillJsBundle\DTO\Fields\InlineField\BoldField
  */
 final class BoldInlineFieldTest extends TestCase
 {
@@ -15,7 +15,7 @@ final class BoldInlineFieldTest extends TestCase
      */
     public function testGetOption(): void
     {
-        $field = new BoldInlineField();
+        $field = new BoldField();
 
         $result = $field->getOption();
 
