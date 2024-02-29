@@ -4677,6 +4677,11 @@ quill-delta@^5.1.0:
     lodash.clonedeep "^4.5.0"
     lodash.isequal "^4.5.0"
 
+quill-resize-image@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/quill-resize-image/-/quill-resize-image-1.0.4.tgz#d199629e1265dced74d21e0a5814ffcbf1b8c6d8"
+  integrity sha512-CwFFRe1Wvtn9gfmUQ2Cj6R+l2VSpBKv1xGVScKiAtkljHKZx94jatJTedpw9HGN4mdWOu8AZfgIDCtkeQrmiBA==
+
 quill2-emoji@^0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/quill2-emoji/-/quill2-emoji-0.1.2.tgz#70ad7dc72455f23b0d74ad0c0766885ca2ef92bb"
