@@ -20,9 +20,9 @@
         "importmap": {
             "@hotwired/stimulus": "^3.0.0",
             "file-loader": "^6.2.0",
-            "quill": "2.0.0-rc.2",
-            "quill/dist/quill.snow.css": "2.0.0-rc.2",
-            "quill/dist/quill.bubble.css": "2.0.0-rc.2",
+            "quill": "2.0.0-rc.3",
+            "quill/dist/quill.snow.css": "2.0.0-rc.3",
+            "quill/dist/quill.bubble.css": "2.0.0-rc.3",
             "axios": "^1.4.0",
             "quill2-emoji": "^0.1.2",
             "quill2-emoji/dist/style.css": "^0.1.2",
@@ -66,14 +66,14 @@
         "@hotwired/stimulus": "^3.0.0",
         "axios": "^1.4.0",
         "file-loader": "^6.2.0",
-        "quill": "2.0.0-rc.2"
+        "quill": "2.0.0-rc.3"
     },
     "dependencies": {
         "axios": "^1.4.0",
         "eventemitter3": "^5.0.1",
         "file-loader": "^6.2.0",
         "lodash-es": "^4.17.21",
-        "quill": "2.0.0-rc.2",
+        "quill": "2.0.0-rc.3",
         "quill-delta": "^5.1.0",
         "quill-resize-image": "^1.0.4",
         "quill2-emoji": "^0.1.2"
