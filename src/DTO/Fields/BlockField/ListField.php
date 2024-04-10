@@ -26,7 +26,7 @@ final class ListField implements QuillBlockFieldInterface
     {
         $array = [];
         foreach ($this->options as $option) {
-            $array[] = ['list' => $option];
+            $array['list'] =  $option;
         }
 
         return $array;
