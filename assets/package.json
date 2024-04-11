@@ -1,7 +1,7 @@
 {
     "name": "@ehyiah/ux-quill",
     "description": "Symfony bundle to use Quill JS text editor",
-    "version": "2.0.0-rc2",
+    "version": "2.0.0-rc5",
     "license": "MIT",
     "main": "dist/controller.js",
     "symfony": {
@@ -20,9 +20,9 @@
         "importmap": {
             "@hotwired/stimulus": "^3.0.0",
             "file-loader": "^6.2.0",
-            "quill": "2.0.0-rc.3",
-            "quill/dist/quill.snow.css": "2.0.0-rc.3",
-            "quill/dist/quill.bubble.css": "2.0.0-rc.3",
+            "quill": "2.0.0-rc.5",
+            "quill/dist/quill.snow.css": "2.0.0-rc.5",
+            "quill/dist/quill.bubble.css": "2.0.0-rc.5",
             "axios": "^1.4.0",
             "quill2-emoji": "^0.1.2",
             "quill2-emoji/dist/style.css": "^0.1.2",
@@ -66,14 +66,14 @@
         "@hotwired/stimulus": "^3.0.0",
         "axios": "^1.4.0",
         "file-loader": "^6.2.0",
-        "quill": "2.0.0-rc.3"
+        "quill": "2.0.0-rc.5"
     },
     "dependencies": {
         "axios": "^1.4.0",
         "eventemitter3": "^5.0.1",
         "file-loader": "^6.2.0",
         "lodash-es": "^4.17.21",
-        "quill": "2.0.0-rc.3",
+        "quill": "2.0.0-rc.5",
         "quill-delta": "^5.1.0",
         "quill-resize-image": "^1.0.4",
         "quill2-emoji": "^0.1.2"

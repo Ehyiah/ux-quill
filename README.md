@@ -1,10 +1,10 @@
 # QuillJs Bundle for Symfony using Symfony UX
 
-Symfony UX Bundle implementing the Quill JS Wysiwyg https://v2.quilljs.com/
+Symfony UX Bundle implementing the Quill JS Wysiwyg https://quilljs.com/
 
 If you need a easy to use WYSIWYG (with no complex configuration) into a symfony project this is what you need.
 
-2.x.x tags cover the new Quill v2 (release candidate 2 at the moment)
+2.x.x tags cover the new Quill v2 (release candidate 5 at the moment)
 
 1.x.x tags cover the Quill v1.3.7
 
