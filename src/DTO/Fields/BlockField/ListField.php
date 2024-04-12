@@ -8,26 +8,22 @@ final class ListField implements QuillBlockFieldInterface
 {
     public const LIST_FIELD_OPTION_ORDERED = 'ordered';
     public const LIST_FIELD_OPTION_BULLET = 'bullet';
+    public const LIST_FIELD_OPTION_CHECK = 'check';
 
-    /**
-     * @var string[]
-     */
-    private array $options;
+    private string $option;
 
-    public function __construct(string ...$options)
+    public function __construct(string $option = self::LIST_FIELD_OPTION_ORDERED)
     {
-        $this->options = $options;
+        $this->option = $option;
     }
 
     /**
-     * @return array<int<0, max>, array<string, string>>
+     * @return string[]
      */
     public function getOption(): array
     {
         $array = [];
-        foreach ($this->options as $option) {
-            $array[] = ['list' => $option];
-        }
+        $array['list'] = $this->option;
 
         return $array;
     }
