@@ -2,11 +2,11 @@
 
 namespace Ehyiah\QuillJsBundle\Tests\DTO\Fields\Inline;
 
-use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ItalicInlineField;
+use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ItalicField;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @coversDefaultClass \Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ItalicInlineField
+ * @coversDefaultClass \Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ItalicField
  */
 final class ItalicInlineFieldTest extends TestCase
 {
@@ -15,7 +15,7 @@ final class ItalicInlineFieldTest extends TestCase
      */
     public function testGetOption(): void
     {
-        $field = new ItalicInlineField();
+        $field = new ItalicField();
 
         $result = $field->getOption();
 

@@ -4,10 +4,10 @@ namespace Ehyiah\QuillJsBundle\DTO\Fields\InlineField;
 
 use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillInlineFieldInterface;
 
-class CleanInlineField implements QuillInlineFieldInterface
+class ImageField implements QuillInlineFieldInterface
 {
     public function getOption(): string
     {
-        return 'clean';
+        return 'image';
     }
 }

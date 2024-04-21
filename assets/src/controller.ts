@@ -1,15 +1,36 @@
 import { Controller } from '@hotwired/stimulus';
 import Quill from 'quill';
+import * as Options from 'quill/core/quill';
 
 import axios from 'axios';
 
-import ImageUploader from 'quill-image-uploader';
-import 'quill-image-uploader/dist/quill.imageUploader.min.css';
+import ImageUploader from './imageUploader.js'
 Quill.register('modules/imageUploader', ImageUploader);
 
-import 'quill-emoji/dist/quill-emoji.css';
-import * as Emoji from 'quill-emoji';
+import * as Emoji from 'quill2-emoji';
+import 'quill2-emoji/dist/style.css';
 Quill.register('modules/emoji', Emoji);
+
+import QuillResizeImage from 'quill-resize-image';
+Quill.register('modules/resize', QuillResizeImage);
+// allow image resize and position to be reloaded after persist
+const Image = Quill.import('formats/image');
+const oldFormats = Image.formats;
+Image.formats = function (domNode) {
+    const formats = oldFormats(domNode);
+    if (domNode.hasAttribute('style')) {
+        formats.style = domNode.getAttribute('style');
+    }
+    return formats;
+}
+
+Image.prototype.format = function (name, value) {
+    if (value) {
+        this.domNode.setAttribute(name, value);
+    } else {
+        this.domNode.removeAttribute(name);
+    }
+}
 
 type ExtraOptions = {
     theme: string;
@@ -20,7 +41,7 @@ type ExtraOptions = {
 }
 type uploadOptions = {
     type: string;
-    path; string
+    path: string;
 }
 
 export default class extends Controller {
@@ -44,12 +65,12 @@ export default class extends Controller {
     connect() {
         const toolbarOptionsValue = this.toolbarOptionsValue;
 
-        const options = {
+        const options: Options = {
             debug: this.extraOptionsValue.debug,
             modules: {
                 toolbar: toolbarOptionsValue,
                 'emoji-toolbar': true,
-                'emoji-shortname': true,
+                resize: {},
             },
             placeholder: this.extraOptionsValue.placeholder,
             theme: this.extraOptionsValue.theme,
@@ -114,7 +135,7 @@ export default class extends Controller {
 
         const heightDefined = this.extraOptionsValue.height;
         if (null !== heightDefined) {
-            this.editorContainerTarget.style.height = this.extraOptionsValue.height
+            this.editorContainerTarget.style.height = heightDefined
         }
 
         const quill = new Quill(this.editorContainerTarget, options);

@@ -2,11 +2,11 @@
 
 namespace Ehyiah\QuillJsBundle\Tests\DTO\Fields\Inline;
 
-use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\BlockQuoteInlineField;
+use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\BlockQuoteField;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @coversDefaultClass \Ehyiah\QuillJsBundle\DTO\Fields\InlineField\BlockQuoteInlineField
+ * @coversDefaultClass \Ehyiah\QuillJsBundle\DTO\Fields\InlineField\BlockQuoteField
  */
 final class BlockQuoteInlineFieldTest extends TestCase
 {
@@ -15,7 +15,7 @@ final class BlockQuoteInlineFieldTest extends TestCase
      */
     public function testGetOption(): void
     {
-        $field = new BlockQuoteInlineField();
+        $field = new BlockQuoteField();
         $result = $field->getOption();
 
         $this->assertEquals('blockquote', $result);

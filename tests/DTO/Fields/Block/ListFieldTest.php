@@ -26,5 +26,11 @@ final class ListFieldTest extends TestCase
         $expectedResult = ['list' => 'bullet'];
 
         $this->assertEquals($expectedResult, $result);
+
+        $field = new ListField(ListField::LIST_FIELD_OPTION_CHECK);
+        $result = $field->getOption();
+        $expectedResult = ['list' => 'check'];
+
+        $this->assertEquals($expectedResult, $result);
     }
 }
