@@ -58,10 +58,22 @@ In a form, use QuillType. It works like a classic Type except it has more option
 ```
 
 # Display result
-in a twig template simply :
+in a twig template :
+
+- if you use the default class styling option you may need to encapsulate the content so the quill stylesheet can be applied like this :
+```
+    <div class="ql-snow">
+        <div class="ql-editor">
+            {{ myField|raw }}
+        </div>
+    </div>
+```
+
+- if you use the inline styling option simply :
 ```
     <div>{{ myField|raw }}</div>
 ```
+
 you can of course sanitize HTML if you need to for security reason, but don't forget to configure it
 to your needs as many html balise and style elements will be removed by default.
 Same goes in your Form configuration
@@ -177,6 +189,7 @@ You can add as many Groups as you like or just One if you don't need the WYSIWYG
 - **height**: type string, examples: 200px, 200em, default: '200px'
 - **theme**: type: string, values: 'snow', 'bubble', default: 'snow' (you can use ThemeOption class to build it)
 - **placeholder**: type: string
+- **style**: type: string values: 'class', 'inline'
 - **upload_handler**: type: array (explained below)
 
 ### Image upload Handling

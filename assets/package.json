@@ -13,7 +13,7 @@
                 "enabled": true,
                 "autoimport": {
                     "quill/dist/quill.snow.css": true,
-                    "quill/dist/quill.bubble.css": false
+                    "quill/dist/quill.bubble.css": true
                 }
             }
         },

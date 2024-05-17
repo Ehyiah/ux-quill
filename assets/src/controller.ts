@@ -38,6 +38,7 @@ type ExtraOptions = {
     height: string|null;
     placeholder: string|null;
     upload_handler: uploadOptions;
+    style: string;
 }
 type uploadOptions = {
     type: string;
@@ -74,7 +75,17 @@ export default class extends Controller {
             },
             placeholder: this.extraOptionsValue.placeholder,
             theme: this.extraOptionsValue.theme,
+            style: this.extraOptionsValue.style,
         };
+
+        if (options.style === 'inline') {
+            Quill.register(Quill.import('attributors/style/align'), true);
+            Quill.register(Quill.import('attributors/style/background'),true);
+            Quill.register(Quill.import('attributors/style/color'), true);
+            Quill.register(Quill.import('attributors/style/direction'),true);
+            Quill.register(Quill.import('attributors/style/font'), true);
+            Quill.register(Quill.import('attributors/style/size'), true);
+        }
 
         if (this.extraOptionsValue.upload_handler.path !== null && this.extraOptionsValue.upload_handler.type === 'form') {
             Object.assign(options.modules, {
