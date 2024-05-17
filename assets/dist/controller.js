@@ -36,8 +36,17 @@ export default class _Class extends Controller {
         resize: {}
       },
       placeholder: this.extraOptionsValue.placeholder,
-      theme: this.extraOptionsValue.theme
+      theme: this.extraOptionsValue.theme,
+      style: this.extraOptionsValue.style
     };
+    if (options.style === 'inline') {
+      Quill.register(Quill.import('attributors/style/align'), true);
+      Quill.register(Quill.import('attributors/style/background'), true);
+      Quill.register(Quill.import('attributors/style/color'), true);
+      Quill.register(Quill.import('attributors/style/direction'), true);
+      Quill.register(Quill.import('attributors/style/font'), true);
+      Quill.register(Quill.import('attributors/style/size'), true);
+    }
     if (this.extraOptionsValue.upload_handler.path !== null && this.extraOptionsValue.upload_handler.type === 'form') {
       Object.assign(options.modules, {
         imageUploader: {

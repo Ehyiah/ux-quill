@@ -3,6 +3,7 @@
 namespace Ehyiah\QuillJsBundle\Form;
 
 use Ehyiah\QuillJsBundle\DTO\Options\DebugOption;
+use Ehyiah\QuillJsBundle\DTO\Options\StyleOption;
 use Ehyiah\QuillJsBundle\DTO\Options\ThemeOption;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -66,6 +67,11 @@ class QuillType extends AbstractType
                 $resolver
                     ->setDefault('sanitizer', null)
                     ->setAllowedTypes('sanitizer', ['string', 'null'])
+                ;
+                $resolver
+                    ->setDefault('style', StyleOption::QUILL_STYLE_CLASS)
+                    ->setAllowedTypes('style', 'string')
+                    ->setAllowedValues('style', [StyleOption::QUILL_STYLE_INLINE, StyleOption::QUILL_STYLE_CLASS])
                 ;
             },
         ]);
