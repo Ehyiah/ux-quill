@@ -100,10 +100,11 @@ For the most basic this is only what you have to do.
                 ],
                 'quill_options' => [
                 // this is where you customize the WYSIWYG by creating one or many Groups
+                // if you create many groups, they will be separated by a space in the toolbar
                 // you can also build your groups using a classic array but many classes are covering every Quill available Fields (see below for detailed list)
                     QuillGroup::build(
-                        new BoldInlineField(),
-                        new ItalicInlineField(),
+                        new BoldField(),
+                        new ItalicField(),
                         // and many more
                     ),
                     QuillGroup::build(
@@ -137,15 +138,15 @@ This example will display a h1 and h2 header options side by side
           new HeaderField(HeaderField::HEADER_OPTION_2),
       )
       QuillGroup::build(
-          new BoldInlineField(),
-          new ItalicInlineField(),
+          new BoldField(),
+          new ItalicField(),
       )
 ```
 This example will display a h1 and h2 header options side by side and another Group containing a Bold and an Italic fields
 
 You can add as many Groups as you like or just One if you don't need the WYSIWYG options to have spaces between them.
 
-### Fields
+### Available Fields 
 - Below is the list of available fields from QuillJS (https://v2.quilljs.com/docs/formats)
 
 |        Field         |                                     Description                                      |   Available options    (options are available as class constants in each Field Class)    | Default option | QuillJS field name |
@@ -185,20 +186,23 @@ You can add as many Groups as you like or just One if you don't need the WYSIWYG
 
 ## quill_extra_options:
 
-- **debug**: type:string, values: 'error', 'warn', 'log', 'info'  (you can use DebugOption class to build it)
-- **height**: type string, examples: 200px, 200em, default: '200px'
-- **theme**: type: string, values: 'snow', 'bubble', default: 'snow' (you can use ThemeOption class to build it)
-- **placeholder**: type: string
-- **style**: type: string values: 'class', 'inline'
-- **upload_handler**: type: array (explained below)
+|  extra_option_name  |  type  | values                                                                                                 |
+|:-------------------:|:------:|:-------------------------------------------------------------------------------------------------------|
+|      **debug**      | string | `` error``, ``warn``, ``log``, ``info``  (you can use ``DebugOption`` class constants to pick a value) |
+|     **height**      | string | examples: ``200px``, ``200em``, default: '200px'                                                       |
+|      **theme**      | string | ``snow``, ``bubble`` , default: snow (you can use ``ThemeOption`` class constants to pick a value)     |
+|   **placeholder**   | string |                                                                                                        |
+|      **style**      | string | ``class``, ``inline``, choose how the style will be applied.                                           |
+| **upload_handler**  | array  | (explained below) (you can use ``UploadHandlerOption`` class constants to pick a value)                |
+
 
 ### Image upload Handling
-in ***ImageInlineField*** : QuillJS transform images in base64 encoded file by default to save your files.
+in ***ImageField*** : QuillJS transform images in base64 encoded file by default to save your files.
 However, you can specify a custom endpoint to handle image uploading and pass in response the entire public URL to display the image.
 - currently handling :
-- data sending in base64 inside a json
+- data sending in ``base64`` inside a json
 - OR
-- in a multipart/form-data
+- in a ``multipart/form-data``
 ```
     'quill_extra_options' => [
         ///
@@ -237,7 +241,7 @@ create a new entry in importmap.php
         'entrypoint' => true,
     ],
 ```
-and i should be done. but read below
+and it should be done. but read below
 
 WARNING => at the moment there seems to have an issue with easyadmin with the ->addAssetMapperEntries() function 
 as I can not get it work as it should be.
@@ -283,8 +287,8 @@ Or add custom options like you would do with the normal type
         ->setFormTypeOptions([
             'quill_options' =>
                 QuillGroup::build(
-                    new BoldInlineField(),
-                    new ItalicInlineField(),
+                    new BoldField(),
+                    new ItalicField(),
                     new HeaderField(HeaderField::HEADER_OPTION_1),
                     new HeaderField(HeaderField::HEADER_OPTION_2),
                 )
