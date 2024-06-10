@@ -1,5 +1,9 @@
 import { Controller } from '@hotwired/stimulus';
 import Quill from 'quill';
+const emojiModule = {
+  name: 'emoji-toolbar',
+  enabled: 'false'
+};
 import axios from 'axios';
 import ImageUploader from './imageUploader.js';
 Quill.register('modules/imageUploader', ImageUploader);

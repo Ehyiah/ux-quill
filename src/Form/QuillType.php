@@ -18,6 +18,7 @@ class QuillType extends AbstractType
         $view->vars['attr']['quill_options'] = json_encode($options['quill_options']);
         $view->vars['attr']['quill_extra_options'] = json_encode($options['quill_extra_options']);
         $view->vars['attr']['sanitizer'] = $options['quill_extra_options']['sanitizer'];
+        $view->vars['attr']['quill_modules'] = $options['quill_modules'];
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -27,6 +28,9 @@ class QuillType extends AbstractType
             'label' => false,
             'error_bubbling' => true,
             'quill_options' => ['bold', 'italic'],
+            'quill_modules' => [
+                'resize' => [],
+            ],
             'quill_extra_options' => function (OptionsResolver $resolver) {
                 $resolver
                     ->setDefault('upload_handler', function (OptionsResolver $spoolResolver): void {

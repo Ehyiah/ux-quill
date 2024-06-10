@@ -1,6 +1,12 @@
 import { Controller } from '@hotwired/stimulus';
 import Quill from 'quill';
 import * as Options from 'quill/core/quill';
+import { EmojiModule, ExtraOptions, ModuleInterface, ResizeModule, uploadOptions } from './modules.d.ts';
+
+const emojiModule: EmojiModule = {
+    name: 'emoji-toolbar',
+    enabled: 'false',
+};
 
 import axios from 'axios';
 
@@ -30,19 +36,6 @@ Image.prototype.format = function (name, value) {
     } else {
         this.domNode.removeAttribute(name);
     }
-}
-
-type ExtraOptions = {
-    theme: string;
-    debug: string|null;
-    height: string|null;
-    placeholder: string|null;
-    upload_handler: uploadOptions;
-    style: string;
-}
-type uploadOptions = {
-    type: string;
-    path: string;
 }
 
 export default class extends Controller {
