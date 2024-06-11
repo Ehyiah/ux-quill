@@ -3,6 +3,8 @@
 namespace Ehyiah\QuillJsBundle\Form;
 
 use Ehyiah\QuillJsBundle\DTO\Options\DebugOption;
+use Ehyiah\QuillJsBundle\DTO\Options\Modules\EmojiModule;
+use Ehyiah\QuillJsBundle\DTO\Options\Modules\ResizeModule;
 use Ehyiah\QuillJsBundle\DTO\Options\StyleOption;
 use Ehyiah\QuillJsBundle\DTO\Options\ThemeOption;
 use Symfony\Component\Form\AbstractType;
@@ -18,7 +20,6 @@ class QuillType extends AbstractType
         $view->vars['attr']['quill_options'] = json_encode($options['quill_options']);
         $view->vars['attr']['quill_extra_options'] = json_encode($options['quill_extra_options']);
         $view->vars['attr']['sanitizer'] = $options['quill_extra_options']['sanitizer'];
-        $view->vars['attr']['quill_modules'] = $options['quill_modules'];
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -28,9 +29,6 @@ class QuillType extends AbstractType
             'label' => false,
             'error_bubbling' => true,
             'quill_options' => ['bold', 'italic'],
-            'quill_modules' => [
-                'resize' => [],
-            ],
             'quill_extra_options' => function (OptionsResolver $resolver) {
                 $resolver
                     ->setDefault('upload_handler', function (OptionsResolver $spoolResolver): void {
@@ -76,6 +74,13 @@ class QuillType extends AbstractType
                     ->setDefault('style', StyleOption::QUILL_STYLE_CLASS)
                     ->setAllowedTypes('style', 'string')
                     ->setAllowedValues('style', [StyleOption::QUILL_STYLE_INLINE, StyleOption::QUILL_STYLE_CLASS])
+                ;
+                $resolver
+                    ->setDefault('modules', [
+                        new EmojiModule(),
+                        new ResizeModule(),
+                    ])
+                    ->setAllowedTypes('modules', ['string', 'array'])
                 ;
             },
         ]);

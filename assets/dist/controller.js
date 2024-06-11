@@ -1,9 +1,6 @@
 import { Controller } from '@hotwired/stimulus';
 import Quill from 'quill';
-const emojiModule = {
-  name: 'emoji-toolbar',
-  enabled: 'false'
-};
+import mergeModules from "./modules.js";
 import axios from 'axios';
 import ImageUploader from './imageUploader.js';
 Quill.register('modules/imageUploader', ImageUploader);
@@ -32,13 +29,15 @@ Image.prototype.format = function (name, value) {
 export default class _Class extends Controller {
   connect() {
     const toolbarOptionsValue = this.toolbarOptionsValue;
+    const modulesOptions = this.extraOptionsValue.modules;
+    const enabledModules = {
+      "toolbar": toolbarOptionsValue,
+      "resize": {}
+    };
+    const mergedModules = mergeModules(modulesOptions, enabledModules);
     const options = {
       debug: this.extraOptionsValue.debug,
-      modules: {
-        toolbar: toolbarOptionsValue,
-        'emoji-toolbar': true,
-        resize: {}
-      },
+      modules: mergedModules,
       placeholder: this.extraOptionsValue.placeholder,
       theme: this.extraOptionsValue.theme,
       style: this.extraOptionsValue.style

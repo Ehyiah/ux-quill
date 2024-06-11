@@ -5,7 +5,7 @@ export type ExtraOptions = {
     placeholder: string|null;
     upload_handler: uploadOptions;
     style: string;
-    modules: Array<any>;
+    modules: Array<ModuleInterface>;
 }
 
 export type uploadOptions = {
@@ -15,10 +15,11 @@ export type uploadOptions = {
 
 interface ModuleInterface {
     name: string;
+    options: string|Array<any>;
 }
 
 export interface EmojiModule extends ModuleInterface {
-    enabled: string;
+    options: string;
 }
 
 export interface ResizeModule extends ModuleInterface {

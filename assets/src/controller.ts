@@ -1,12 +1,8 @@
 import { Controller } from '@hotwired/stimulus';
 import Quill from 'quill';
 import * as Options from 'quill/core/quill';
-import { EmojiModule, ExtraOptions, ModuleInterface, ResizeModule, uploadOptions } from './modules.d.ts';
-
-const emojiModule: EmojiModule = {
-    name: 'emoji-toolbar',
-    enabled: 'false',
-};
+import { EmojiModule, ExtraOptions, ModuleInterface, ResizeModule, uploadOptions } from './typesmodules.d.ts';
+import mergeModules from './modules.ts';
 
 import axios from 'axios';
 
@@ -58,14 +54,18 @@ export default class extends Controller {
 
     connect() {
         const toolbarOptionsValue = this.toolbarOptionsValue;
+        const modulesOptions = this.extraOptionsValue.modules;
+
+        const enabledModules = {
+            "toolbar": toolbarOptionsValue,
+            "resize": {},
+        };
+
+        const mergedModules = mergeModules(modulesOptions, enabledModules);
 
         const options: Options = {
             debug: this.extraOptionsValue.debug,
-            modules: {
-                toolbar: toolbarOptionsValue,
-                'emoji-toolbar': true,
-                resize: {},
-            },
+            modules: mergedModules,
             placeholder: this.extraOptionsValue.placeholder,
             theme: this.extraOptionsValue.theme,
             style: this.extraOptionsValue.style,

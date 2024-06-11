@@ -7,7 +7,8 @@ final class EmojiModule implements ModuleInterface
     public const NAME = 'emoji-toolbar';
 
     public function __construct(
-        public string $enabled = "true",
+        public string $name = self::NAME,
+        public string $options = "true",
     ) {
     }
 }
