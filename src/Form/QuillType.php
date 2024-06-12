@@ -18,8 +18,18 @@ class QuillType extends AbstractType
     public function buildView(FormView $view, FormInterface $form, array $options): void
     {
         $view->vars['attr']['quill_options'] = json_encode($options['quill_options']);
-        $view->vars['attr']['quill_extra_options'] = json_encode($options['quill_extra_options']);
         $view->vars['attr']['sanitizer'] = $options['quill_extra_options']['sanitizer'];
+
+        $fields = $options['quill_options'];
+        $modules = $options['quill_extra_options']['modules'];
+        foreach ($fields as $field) {
+            if (in_array('emoji', $field, true)) {
+                $modules[] = new EmojiModule();
+            }
+        }
+        $modules[] = new ResizeModule();
+        $options['quill_extra_options']['modules'] = $modules;
+        $view->vars['attr']['quill_extra_options'] = json_encode($options['quill_extra_options']);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -76,11 +86,8 @@ class QuillType extends AbstractType
                     ->setAllowedValues('style', [StyleOption::QUILL_STYLE_INLINE, StyleOption::QUILL_STYLE_CLASS])
                 ;
                 $resolver
-                    ->setDefault('modules', [
-                        new EmojiModule(),
-                        new ResizeModule(),
-                    ])
-                    ->setAllowedTypes('modules', ['string', 'array'])
+                    ->setDefault('modules', [])
+                    ->setAllowedTypes('modules', ['array'])
                 ;
             },
         ]);

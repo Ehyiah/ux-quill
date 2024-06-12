@@ -58,7 +58,6 @@ export default class extends Controller {
 
         const enabledModules = {
             "toolbar": toolbarOptionsValue,
-            "resize": {},
         };
 
         const mergedModules = mergeModules(modulesOptions, enabledModules);
