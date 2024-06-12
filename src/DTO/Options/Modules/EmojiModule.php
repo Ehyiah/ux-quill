@@ -8,7 +8,7 @@ final class EmojiModule implements ModuleInterface
 
     public function __construct(
         public string $name = self::NAME,
-        public string $options = "true",
+        public string $options = 'true',
     ) {
     }
 }

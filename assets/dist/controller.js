@@ -31,8 +31,7 @@ export default class _Class extends Controller {
     const toolbarOptionsValue = this.toolbarOptionsValue;
     const modulesOptions = this.extraOptionsValue.modules;
     const enabledModules = {
-      "toolbar": toolbarOptionsValue,
-      "resize": {}
+      "toolbar": toolbarOptionsValue
     };
     const mergedModules = mergeModules(modulesOptions, enabledModules);
     const options = {
