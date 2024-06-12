@@ -10,9 +10,12 @@ final class HistoryModule implements ModuleInterface
     public const NAME = 'history';
 
     public function __construct(
-        public string $delay = "1000",
-        public string $maxStack = "100",
-        public string $userOnly = "false",
+        public string $name = self::NAME,
+        public array $options = [
+            'delay' => '1000',
+            'maxStack' => '100',
+            'userOnly' => 'false',
+        ],
     ) {
     }
 }
