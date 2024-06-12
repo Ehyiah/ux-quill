@@ -57,7 +57,7 @@ export default class extends Controller {
         const modulesOptions = this.extraOptionsValue.modules;
 
         const enabledModules = {
-            "toolbar": toolbarOptionsValue,
+            'toolbar': toolbarOptionsValue,
         };
 
         const mergedModules = mergeModules(modulesOptions, enabledModules);
