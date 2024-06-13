@@ -186,14 +186,15 @@ You can add as many Groups as you like or just One if you don't need the WYSIWYG
 
 ## quill_extra_options:
 
-|  extra_option_name  |  type  | values                                                                                                 |
-|:-------------------:|:------:|:-------------------------------------------------------------------------------------------------------|
-|      **debug**      | string | `` error``, ``warn``, ``log``, ``info``  (you can use ``DebugOption`` class constants to pick a value) |
-|     **height**      | string | examples: ``200px``, ``200em``, default: '200px'                                                       |
-|      **theme**      | string | ``snow``, ``bubble`` , default: snow (you can use ``ThemeOption`` class constants to pick a value)     |
-|   **placeholder**   | string |                                                                                                        |
-|      **style**      | string | ``class``, ``inline``, choose how the style will be applied.                                           |
-| **upload_handler**  | array  | (explained below) (you can use ``UploadHandlerOption`` class constants to pick a value)                |
+| extra_option_name  |  type  | values                                                                                                           |
+|:------------------:|:------:|:-----------------------------------------------------------------------------------------------------------------|
+|     **debug**      | string | `` error``, ``warn``, ``log``, ``info``  (you can use ``DebugOption`` class constants to pick a value)           |
+|     **height**     | string | examples: ``200px``, ``200em``, default: '200px'                                                                 |
+|     **theme**      | string | ``snow``, ``bubble`` , default: snow (you can use ``ThemeOption`` class constants to pick a value)               |
+|  **placeholder**   | string |                                                                                                                  |
+|     **style**      | string | ``class``, ``inline``, choose how the style will be applied.                                                     |
+| **upload_handler** | array  | (explained [below](#image-upload-handling) (you can use ``UploadHandlerOption`` class constants to pick a value) |
+|    **modules**     | array  | (explained [below](#modules) (you can use any class implementing ``ModuleInterface``)                            |
 
 
 ### Image upload Handling
@@ -223,6 +224,20 @@ However, you can specify a custom endpoint to handle image uploading and pass in
 ```
 - in form mode you will find a ```multipart/form-data``` in content-type headers and file will be present in $request->files named ```file```
 - then you can handle it like you would do with a FileType
+
+### Modules
+https://quilljs.com/docs/modules
+
+You can add/customize quill modules in this option field.
+You can create your own modules classes, they need to implement the ``ModuleInterface`` and add the name and options properties.
+
+|      modules       |                                                                   description                                                                    |     name      | options type |                options                |                         default options                         |
+|:------------------:|:------------------------------------------------------------------------------------------------------------------------------------------------:|:-------------:|:------------:|:-------------------------------------:|:---------------------------------------------------------------:|
+|  **EmojiModule**   |                       required if emoji Field is activated (this is done actually without automatically inside the bundle)                       | emoji-toolbar |    string    |        ``'true'``, ``'false'``        |             ``'true'`` (if EmojiField is activated)             |
+|  **ResizeModule**  |                                                                                                                                                  |    resize     |    array     |                  []                   |                                                                 |
+|  **SyntaxModule**  |                                       see official [description](https://quilljs.com/docs/modules/syntax)                                        |    syntax     |    string    |        ``'true'``, ``'false'``        |                           ``'true'``                            |
+| **KeyboardModule** |   The Keyboard module enables custom behavior for keyboard events in particular contexts [site](https://quilljs.com/docs/modules/keyboard)       |               |    array     |                                       |                                                                 |
+| **HistoryModule**  | The History module is responsible for handling undo and redo for Quill. see details on official [site](https://quilljs.com/docs/modules/history) |    history    |    array     | ``delay``, ``maxStack``, ``userOnly`` | ['delay' => '1000', 'maxStack' => '100', 'userOnly' => 'false'] |
 
 
 
