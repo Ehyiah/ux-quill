@@ -232,18 +232,23 @@ https://quilljs.com/docs/modules
 You can add/customize quill modules in this option field.
 You can create your own modules classes, they need to implement the ``ModuleInterface`` and add the name and options properties.
 
-|      modules       |                                                                   description                                                                    |     name      | options type |                options                |                         default options                         |
-|:------------------:|:------------------------------------------------------------------------------------------------------------------------------------------------:|:-------------:|:------------:|:-------------------------------------:|:---------------------------------------------------------------:|
-|  **EmojiModule**   |                       required if emoji Field is activated (this is done actually without automatically inside the bundle)                       | emoji-toolbar |    string    |        ``'true'``, ``'false'``        |             ``'true'`` (if EmojiField is activated)             |
-|  **ResizeModule**  |                                      used in ImageField,  https://www.npmjs.com/package/quill-resize-image                                       |    resize     |    array     |                  []                   |                               []                                |
-|  **SyntaxModule**  |                                       see official [description](https://quilljs.com/docs/modules/syntax)                                        |    syntax     |    string    |        ``'true'``, ``'false'``        |                           ``'true'``                            |
-| **KeyboardModule** |     The Keyboard module enables custom behavior for keyboard events in particular contexts [site](https://quilljs.com/docs/modules/keyboard)     |               |    array     |                                       |                                                                 |
-| **HistoryModule**  | The History module is responsible for handling undo and redo for Quill. see details on official [site](https://quilljs.com/docs/modules/history) |    history    |    array     | ``delay``, ``maxStack``, ``userOnly`` | ['delay' => '1000', 'maxStack' => '100', 'userOnly' => 'false'] |
+|       modules       |                                                                   description                                                                    |     name      | options type |                               options                               |                         default options                         |
+|:-------------------:|:------------------------------------------------------------------------------------------------------------------------------------------------:|:-------------:|:------------:|:-------------------------------------------------------------------:|:---------------------------------------------------------------:|
+|   **EmojiModule**   |                       required if emoji Field is activated (this is done actually without automatically inside the bundle)                       | emoji-toolbar |    string    |                       ``'true'``, ``'false'``                       |             ``'true'`` (if EmojiField is activated)             |
+|  **ResizeModule**   |                                      used in ImageField,  https://www.npmjs.com/package/quill-resize-image                                       |    resize     |    array     |                                 []                                  |                               []                                |
+|  **SyntaxModule**   |                                       see official [description](https://quilljs.com/docs/modules/syntax)                                        |    syntax     |    string    |                       ``'true'``, ``'false'``                       |                           ``'true'``                            |
+|  **HistoryModule**  | The History module is responsible for handling undo and redo for Quill. see details on official [site](https://quilljs.com/docs/modules/history) |    history    |    array     |                ``delay``, ``maxStack``, ``userOnly``                | ['delay' => '1000', 'maxStack' => '100', 'userOnly' => 'false'] |
+| **KeyboardModule**  |     The Keyboard module enables custom behavior for keyboard events in particular contexts [site](https://quilljs.com/docs/modules/keyboard)     |   keyboard    |    array     | [see next documentation section](#extend-quill-stimulus-controller) |                                -                                |
+| **ClipboardModule** |       The Clipboard handles copy, cut and paste between Quill and external applications [site](https://quilljs.com/docs/modules/clipboard)       |   clipboard   |    array     | [see next documentation section](#extend-quill-stimulus-controller) |                                -                                |
+
 
 
 ## Extend Quill stimulus controller
 If you need to extend default behavior of built-in controller, this is possible.
 exemple : you need to modify modules registration and/or add custom javascript to modify quill behaviour.
+
+Some modules like ``Keyboard`` and ``Clipboard`` need custom javascript to be written.
+The easiest way to do so is to create a custom stimulus controller to extend the default behavior.
 
 Create a new stimulus controller inside your project
 
@@ -263,6 +268,20 @@ export default class extends Controller {
     _onConnect(event) {
         // The quill has been created
         console.log(event.detail); // You can access the quill instance using the event detail
+        
+        let quill = event.detail;
+        // e.g : if you want to add a new keyboard binding
+        quill.keyboard.addBinding({
+            key: 'b',
+            shortKey: true
+        }, function(range, context) {
+            this.quill.formatText(range, 'bold', true);
+        });
+          
+        // e.g if you want to add a custom clipboard
+        quill.clipboard.addMatcher(Node.TEXT_NODE, (node, delta) => {
+            return new Delta().insert(node.data);
+        });
     }
 }
 ```
