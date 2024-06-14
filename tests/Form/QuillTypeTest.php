@@ -33,9 +33,26 @@ final class QuillTypeTest extends TestCase
     public function testBuildView(): void
     {
         $options = [
-            'quill_options' => ['bold', 'italic'],
+            'quill_options' => [
+                ['bold', 'italic'],
+                ['bold', 'underline'],
+            ],
             'quill_extra_options' => [
                 'sanitizer' => 'some_sanitizer',
+                'modules' => [
+                ],
+            ],
+        ];
+
+        $expectedOptions = [
+            'quill_options' => [
+                ['bold', 'italic'],
+                ['bold', 'underline'],
+            ],
+            'quill_extra_options' => [
+                'sanitizer' => 'some_sanitizer',
+                'modules' => [
+                ],
             ],
         ];
 
@@ -46,9 +63,9 @@ final class QuillTypeTest extends TestCase
         $this->assertArrayHasKey('quill_extra_options', $this->formView->vars['attr']);
         $this->assertArrayHasKey('sanitizer', $this->formView->vars['attr']);
 
-        $this->assertEquals(json_encode($options['quill_options']), $this->formView->vars['attr']['quill_options']);
-        $this->assertEquals(json_encode($options['quill_extra_options']), $this->formView->vars['attr']['quill_extra_options']);
-        $this->assertEquals($options['quill_extra_options']['sanitizer'], $this->formView->vars['attr']['sanitizer']);
+        $this->assertEquals(json_encode($expectedOptions['quill_options']), $this->formView->vars['attr']['quill_options']);
+        $this->assertEquals(json_encode($expectedOptions['quill_extra_options']), $this->formView->vars['attr']['quill_extra_options']);
+        $this->assertEquals($expectedOptions['quill_extra_options']['sanitizer'], $this->formView->vars['attr']['sanitizer']);
     }
 
     /**

@@ -3,6 +3,8 @@
 namespace Ehyiah\QuillJsBundle\Form;
 
 use Ehyiah\QuillJsBundle\DTO\Options\DebugOption;
+use Ehyiah\QuillJsBundle\DTO\Options\Modules\EmojiModule;
+use Ehyiah\QuillJsBundle\DTO\Options\Modules\ResizeModule;
 use Ehyiah\QuillJsBundle\DTO\Options\StyleOption;
 use Ehyiah\QuillJsBundle\DTO\Options\ThemeOption;
 use Symfony\Component\Form\AbstractType;
@@ -16,8 +18,23 @@ class QuillType extends AbstractType
     public function buildView(FormView $view, FormInterface $form, array $options): void
     {
         $view->vars['attr']['quill_options'] = json_encode($options['quill_options']);
-        $view->vars['attr']['quill_extra_options'] = json_encode($options['quill_extra_options']);
         $view->vars['attr']['sanitizer'] = $options['quill_extra_options']['sanitizer'];
+
+        $fields = $options['quill_options'];
+        $modules = $options['quill_extra_options']['modules'];
+
+        foreach ($fields as $field) {
+            if (in_array('emoji', $field, true) && !in_array(EmojiModule::NAME, array_column($modules, 'name'), true)) {
+                $modules[] = new EmojiModule();
+            }
+        }
+        foreach ($fields as $field) {
+            if (in_array('image', $field, true) && !in_array(ResizeModule::NAME, array_column($modules, 'name'), true)) {
+                $modules[] = new ResizeModule();
+            }
+        }
+        $options['quill_extra_options']['modules'] = $modules;
+        $view->vars['attr']['quill_extra_options'] = json_encode($options['quill_extra_options']);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -72,6 +89,10 @@ class QuillType extends AbstractType
                     ->setDefault('style', StyleOption::QUILL_STYLE_CLASS)
                     ->setAllowedTypes('style', 'string')
                     ->setAllowedValues('style', [StyleOption::QUILL_STYLE_INLINE, StyleOption::QUILL_STYLE_CLASS])
+                ;
+                $resolver
+                    ->setDefault('modules', [])
+                    ->setAllowedTypes('modules', ['array'])
                 ;
             },
         ]);

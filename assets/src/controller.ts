@@ -1,6 +1,8 @@
 import { Controller } from '@hotwired/stimulus';
 import Quill from 'quill';
 import * as Options from 'quill/core/quill';
+import { EmojiModule, ExtraOptions, ModuleInterface, ResizeModule, uploadOptions } from './typesmodules.d.ts';
+import mergeModules from './modules.ts';
 
 import axios from 'axios';
 
@@ -32,19 +34,6 @@ Image.prototype.format = function (name, value) {
     }
 }
 
-type ExtraOptions = {
-    theme: string;
-    debug: string|null;
-    height: string|null;
-    placeholder: string|null;
-    upload_handler: uploadOptions;
-    style: string;
-}
-type uploadOptions = {
-    type: string;
-    path: string;
-}
-
 export default class extends Controller {
     declare readonly inputTarget: HTMLInputElement;
     declare readonly editorContainerTarget: HTMLDivElement;
@@ -65,14 +54,17 @@ export default class extends Controller {
 
     connect() {
         const toolbarOptionsValue = this.toolbarOptionsValue;
+        const modulesOptions = this.extraOptionsValue.modules;
+
+        const enabledModules = {
+            'toolbar': toolbarOptionsValue,
+        };
+
+        const mergedModules = mergeModules(modulesOptions, enabledModules);
 
         const options: Options = {
             debug: this.extraOptionsValue.debug,
-            modules: {
-                toolbar: toolbarOptionsValue,
-                'emoji-toolbar': true,
-                resize: {},
-            },
+            modules: mergedModules,
             placeholder: this.extraOptionsValue.placeholder,
             theme: this.extraOptionsValue.theme,
             style: this.extraOptionsValue.style,
@@ -155,5 +147,11 @@ export default class extends Controller {
             const inputContent = this.inputTarget;
             inputContent.value = quillContent;
         })
+
+        this.dispatchEvent('connect', quill);
+    }
+
+    private dispatchEvent(name: string, payload: any = {}) {
+        this.dispatch(name, { detail: payload, prefix: 'quill' });
     }
 }

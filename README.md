@@ -17,6 +17,7 @@ If you need a easy to use WYSIWYG (with no complex configuration) into a symfony
 
 * [Customize quillJS with options and extra_options](#customize-options)
 * [Handle images uploads](#image-upload-handling)
+* [Extend Quill stimulus controller](#extend-quill-stimulus-controller)
 
 
 * [EasyAdmin Integration](#easyadmin-integration)
@@ -186,14 +187,15 @@ You can add as many Groups as you like or just One if you don't need the WYSIWYG
 
 ## quill_extra_options:
 
-|  extra_option_name  |  type  | values                                                                                                 |
-|:-------------------:|:------:|:-------------------------------------------------------------------------------------------------------|
-|      **debug**      | string | `` error``, ``warn``, ``log``, ``info``  (you can use ``DebugOption`` class constants to pick a value) |
-|     **height**      | string | examples: ``200px``, ``200em``, default: '200px'                                                       |
-|      **theme**      | string | ``snow``, ``bubble`` , default: snow (you can use ``ThemeOption`` class constants to pick a value)     |
-|   **placeholder**   | string |                                                                                                        |
-|      **style**      | string | ``class``, ``inline``, choose how the style will be applied.                                           |
-| **upload_handler**  | array  | (explained below) (you can use ``UploadHandlerOption`` class constants to pick a value)                |
+| extra_option_name  |  type  | values                                                                                                           |
+|:------------------:|:------:|:-----------------------------------------------------------------------------------------------------------------|
+|     **debug**      | string | `` error``, ``warn``, ``log``, ``info``  (you can use ``DebugOption`` class constants to pick a value)           |
+|     **height**     | string | examples: ``200px``, ``200em``, default: '200px'                                                                 |
+|     **theme**      | string | ``snow``, ``bubble`` , default: snow (you can use ``ThemeOption`` class constants to pick a value)               |
+|  **placeholder**   | string |                                                                                                                  |
+|     **style**      | string | ``class``, ``inline``, choose how the style will be applied.                                                     |
+| **upload_handler** | array  | (explained [below](#image-upload-handling) (you can use ``UploadHandlerOption`` class constants to pick a value) |
+|    **modules**     | array  | (explained [below](#modules) (you can use any class implementing ``ModuleInterface``)                            |
 
 
 ### Image upload Handling
@@ -224,6 +226,82 @@ However, you can specify a custom endpoint to handle image uploading and pass in
 - in form mode you will find a ```multipart/form-data``` in content-type headers and file will be present in $request->files named ```file```
 - then you can handle it like you would do with a FileType
 
+### Modules
+https://quilljs.com/docs/modules
+
+You can add/customize quill modules in this option field.
+You can create your own modules classes, they need to implement the ``ModuleInterface`` and add the name and options properties.
+
+|       modules       |                                                                   description                                                                    |     name      | options type |                               options                               |                         default options                         |
+|:-------------------:|:------------------------------------------------------------------------------------------------------------------------------------------------:|:-------------:|:------------:|:-------------------------------------------------------------------:|:---------------------------------------------------------------:|
+|   **EmojiModule**   |                       required if emoji Field is activated (this is done actually without automatically inside the bundle)                       | emoji-toolbar |    string    |                       ``'true'``, ``'false'``                       |             ``'true'`` (if EmojiField is activated)             |
+|  **ResizeModule**   |                                      used in ImageField,  https://www.npmjs.com/package/quill-resize-image                                       |    resize     |    array     |                                 []                                  |                               []                                |
+|  **SyntaxModule**   |                                       see official [description](https://quilljs.com/docs/modules/syntax)                                        |    syntax     |    string    |                       ``'true'``, ``'false'``                       |                           ``'true'``                            |
+|  **HistoryModule**  | The History module is responsible for handling undo and redo for Quill. see details on official [site](https://quilljs.com/docs/modules/history) |    history    |    array     |                ``delay``, ``maxStack``, ``userOnly``                | ['delay' => '1000', 'maxStack' => '100', 'userOnly' => 'false'] |
+| **KeyboardModule**  |     The Keyboard module enables custom behavior for keyboard events in particular contexts [site](https://quilljs.com/docs/modules/keyboard)     |   keyboard    |    array     | [see next documentation section](#extend-quill-stimulus-controller) |                                -                                |
+| **ClipboardModule** |       The Clipboard handles copy, cut and paste between Quill and external applications [site](https://quilljs.com/docs/modules/clipboard)       |   clipboard   |    array     | [see next documentation section](#extend-quill-stimulus-controller) |                                -                                |
+
+
+
+## Extend Quill stimulus controller
+If you need to extend default behavior of built-in controller, this is possible.
+exemple : you need to modify modules registration and/or add custom javascript to modify quill behaviour.
+
+Some modules like ``Keyboard`` and ``Clipboard`` need custom javascript to be written.
+The easiest way to do so is to create a custom stimulus controller to extend the default behavior.
+
+Create a new stimulus controller inside your project
+
+``` javascript
+// quill_extended_controller.js
+import { Controller } from '@hotwired/stimulus';
+
+export default class extends Controller {
+    connect() {
+        this.element.addEventListener('quill:connect', this._onConnect);
+    }
+
+    disconnect() {
+        this.element.removeEventListener('quill:connect', this._onConnect);
+    }
+
+    _onConnect(event) {
+        // The quill has been created
+        console.log(event.detail); // You can access the quill instance using the event detail
+        
+        let quill = event.detail;
+        // e.g : if you want to add a new keyboard binding
+        quill.keyboard.addBinding({
+            key: 'b',
+            shortKey: true
+        }, function(range, context) {
+            this.quill.formatText(range, 'bold', true);
+        });
+          
+        // e.g if you want to add a custom clipboard
+        quill.clipboard.addMatcher(Node.TEXT_NODE, (node, delta) => {
+            return new Delta().insert(node.data);
+        });
+    }
+}
+```
+
+Then in your form
+``` php
+use Ehyiah\QuillJsBundle\Form\QuillType;
+
+public function buildForm(FormBuilderInterface $builder, array $options)
+{
+    $builder
+        // ...
+        ->add('myField', QuillType::class, [
+            'attr' => [
+                'data-controller' => 'quill-extended',
+            ]
+        // ...
+    ;
+}
+```
 
 
 # Easyadmin Integration

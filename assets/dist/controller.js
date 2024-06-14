@@ -1,5 +1,6 @@
 import { Controller } from '@hotwired/stimulus';
 import Quill from 'quill';
+import mergeModules from "./modules.js";
 import axios from 'axios';
 import ImageUploader from './imageUploader.js';
 Quill.register('modules/imageUploader', ImageUploader);
@@ -28,13 +29,14 @@ Image.prototype.format = function (name, value) {
 export default class _Class extends Controller {
   connect() {
     const toolbarOptionsValue = this.toolbarOptionsValue;
+    const modulesOptions = this.extraOptionsValue.modules;
+    const enabledModules = {
+      'toolbar': toolbarOptionsValue
+    };
+    const mergedModules = mergeModules(modulesOptions, enabledModules);
     const options = {
       debug: this.extraOptionsValue.debug,
-      modules: {
-        toolbar: toolbarOptionsValue,
-        'emoji-toolbar': true,
-        resize: {}
-      },
+      modules: mergedModules,
       placeholder: this.extraOptionsValue.placeholder,
       theme: this.extraOptionsValue.theme,
       style: this.extraOptionsValue.style
@@ -101,6 +103,16 @@ export default class _Class extends Controller {
       const quillContent = quill.root.innerHTML;
       const inputContent = this.inputTarget;
       inputContent.value = quillContent;
+    });
+    this.dispatchEvent('connect', quill);
+  }
+  dispatchEvent(name, payload) {
+    if (payload === void 0) {
+      payload = {};
+    }
+    this.dispatch(name, {
+      detail: payload,
+      prefix: 'quill'
     });
   }
 }
