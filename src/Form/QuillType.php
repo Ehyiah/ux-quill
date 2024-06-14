@@ -27,7 +27,11 @@ class QuillType extends AbstractType
                 $modules[] = new EmojiModule();
             }
         }
-        $modules[] = new ResizeModule();
+        foreach ($fields as $field) {
+            if (in_array('image', $field, true)) {
+                $modules[] = new ResizeModule();
+            }
+        }
         $options['quill_extra_options']['modules'] = $modules;
         $view->vars['attr']['quill_extra_options'] = json_encode($options['quill_extra_options']);
     }

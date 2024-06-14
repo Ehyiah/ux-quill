@@ -2,7 +2,6 @@
 
 namespace Ehyiah\QuillJsBundle\Tests\Form;
 
-use Ehyiah\QuillJsBundle\DTO\Options\Modules\ResizeModule;
 use Ehyiah\QuillJsBundle\Form\QuillType;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -53,7 +52,6 @@ final class QuillTypeTest extends TestCase
             'quill_extra_options' => [
                 'sanitizer' => 'some_sanitizer',
                 'modules' => [
-                    new ResizeModule(),
                 ],
             ],
         ];
