@@ -17,6 +17,7 @@ If you need a easy to use WYSIWYG (with no complex configuration) into a symfony
 
 * [Customize quillJS with options and extra_options](#customize-options)
 * [Handle images uploads](#image-upload-handling)
+* [Extend Quill stimulus controller](#extend-quill-stimulus-controller)
 
 
 * [EasyAdmin Integration](#easyadmin-integration)
@@ -239,6 +240,49 @@ You can create your own modules classes, they need to implement the ``ModuleInte
 | **KeyboardModule** |   The Keyboard module enables custom behavior for keyboard events in particular contexts [site](https://quilljs.com/docs/modules/keyboard)       |               |    array     |                                       |                                                                 |
 | **HistoryModule**  | The History module is responsible for handling undo and redo for Quill. see details on official [site](https://quilljs.com/docs/modules/history) |    history    |    array     | ``delay``, ``maxStack``, ``userOnly`` | ['delay' => '1000', 'maxStack' => '100', 'userOnly' => 'false'] |
 
+
+## Extend Quill stimulus controller
+If you need to extend default behavior of built-in controller, this is possible.
+exemple : you need to modify modules registration and/or add custom javascript to modify quill behaviour.
+
+Create a new stimulus controller inside your project
+
+``` javascript
+// quill_extended_controller.js
+import { Controller } from '@hotwired/stimulus';
+
+export default class extends Controller {
+    connect() {
+        this.element.addEventListener('quill:connect', this._onConnect);
+    }
+
+    disconnect() {
+        this.element.removeEventListener('quill:connect', this._onConnect);
+    }
+
+    _onConnect(event) {
+        // The quill has been created
+        console.log(event.detail); // You can access the quill instance using the event detail
+    }
+}
+```
+
+Then in your form
+``` php
+use Ehyiah\QuillJsBundle\Form\QuillType;
+
+public function buildForm(FormBuilderInterface $builder, array $options)
+{
+    $builder
+        // ...
+        ->add('myField', QuillType::class, [
+            'attr' => [
+                'data-controller' => 'quill-extended',
+            ]
+        // ...
+    ;
+}
+```
 
 
 # Easyadmin Integration
