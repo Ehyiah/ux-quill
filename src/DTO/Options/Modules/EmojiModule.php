@@ -2,6 +2,10 @@
 
 namespace Ehyiah\QuillJsBundle\DTO\Options\Modules;
 
+/**
+ * To be used if the EmojiField is required in your Form
+ * Will be registered automatically
+ */
 final class EmojiModule implements ModuleInterface
 {
     public const NAME = 'emoji-toolbar';

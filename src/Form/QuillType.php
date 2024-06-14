@@ -22,13 +22,14 @@ class QuillType extends AbstractType
 
         $fields = $options['quill_options'];
         $modules = $options['quill_extra_options']['modules'];
+
         foreach ($fields as $field) {
-            if (in_array('emoji', $field, true)) {
+            if (in_array('emoji', $field, true) && !in_array('emoji-toolbar', array_column($modules, 'name'), true)) {
                 $modules[] = new EmojiModule();
             }
         }
         foreach ($fields as $field) {
-            if (in_array('image', $field, true)) {
+            if (in_array('image', $field, true) && !in_array('resize', array_column($modules, 'name'), true)) {
                 $modules[] = new ResizeModule();
             }
         }
