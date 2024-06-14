@@ -147,5 +147,11 @@ export default class extends Controller {
             const inputContent = this.inputTarget;
             inputContent.value = quillContent;
         })
+
+        this.dispatchEvent('connect', quill);
+    }
+
+    private dispatchEvent(name: string, payload: any = {}) {
+        this.dispatch(name, { detail: payload, prefix: 'quill' });
     }
 }

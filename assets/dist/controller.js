@@ -31,7 +31,7 @@ export default class _Class extends Controller {
     const toolbarOptionsValue = this.toolbarOptionsValue;
     const modulesOptions = this.extraOptionsValue.modules;
     const enabledModules = {
-      "toolbar": toolbarOptionsValue
+      'toolbar': toolbarOptionsValue
     };
     const mergedModules = mergeModules(modulesOptions, enabledModules);
     const options = {
@@ -103,6 +103,16 @@ export default class _Class extends Controller {
       const quillContent = quill.root.innerHTML;
       const inputContent = this.inputTarget;
       inputContent.value = quillContent;
+    });
+    this.dispatchEvent('connect', quill);
+  }
+  dispatchEvent(name, payload) {
+    if (payload === void 0) {
+      payload = {};
+    }
+    this.dispatch(name, {
+      detail: payload,
+      prefix: 'quill'
     });
   }
 }

@@ -1,5 +1,5 @@
 {% block quill_widget %}
-    {%- set controller_name = "ehyiah--ux-quill--quill" -%}
+    {%- set controller_name = (attr['data-controller']|default('') ~ ' ehyiah--ux-quill--quill')|trim -%}
     {% set data_set = "data-ehyiah--ux-quill--quill" %}
     {% set html_sanitizer = attr['sanitizer'] %}
 
@@ -11,7 +11,7 @@
         <div>
             <input type="hidden"
                    value="{{ value }}"
-                    {{ block('widget_attributes') }}
+                   {{ block('widget_attributes') }}
                    {{ data_set }}-target="input"
             >
         </div>
