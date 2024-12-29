@@ -4689,10 +4689,10 @@ quill2-emoji@^0.1.2:
   dependencies:
     fuse.js "^3.3.1"
 
-quill@2.0.2:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/quill/-/quill-2.0.2.tgz#5b26bc10a74e9f7fdcfdb5156b3133a3ebf0a814"
-  integrity sha512-QfazNrhMakEdRG57IoYFwffUIr04LWJxbS/ZkidRFXYCQt63c1gK6Z7IHUXMx/Vh25WgPBU42oBaNzQ0K1R/xw==
+quill@2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/quill/-/quill-2.0.3.tgz#752765a31d5a535cdc5717dc49d4e50099365eb1"
+  integrity sha512-xEYQBqfYx/sfb33VJiKnSJp8ehloavImQ2A6564GAbqG55PGw1dAWUn1MUbQB62t0azawUS2CZZhWCjO8gRvTw==
   dependencies:
     eventemitter3 "^5.0.1"
     lodash-es "^4.17.21"

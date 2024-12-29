@@ -227,20 +227,27 @@ However, you can specify a custom endpoint to handle image uploading and pass in
 - then you can handle it like you would do with a FileType
 
 ### Modules
+#### PHP configurable modules
+For these modules, you can configure them directly in your PHP form :
 https://quilljs.com/docs/modules
 
 You can add/customize quill modules in this option field.
 You can create your own modules classes, they need to implement the ``ModuleInterface`` and add the name and options properties.
 
-|       modules       |                                                                   description                                                                    |     name      | options type |                               options                               |                         default options                         |
-|:-------------------:|:------------------------------------------------------------------------------------------------------------------------------------------------:|:-------------:|:------------:|:-------------------------------------------------------------------:|:---------------------------------------------------------------:|
-|   **EmojiModule**   |                       required if emoji Field is activated (this is done actually without automatically inside the bundle)                       | emoji-toolbar |    string    |                       ``'true'``, ``'false'``                       |             ``'true'`` (if EmojiField is activated)             |
-|  **ResizeModule**   |                                      used in ImageField,  https://www.npmjs.com/package/quill-resize-image                                       |    resize     |    array     |                                 []                                  |                               []                                |
-|  **SyntaxModule**   |                                       see official [description](https://quilljs.com/docs/modules/syntax)                                        |    syntax     |    string    |                       ``'true'``, ``'false'``                       |                           ``'true'``                            |
-|  **HistoryModule**  | The History module is responsible for handling undo and redo for Quill. see details on official [site](https://quilljs.com/docs/modules/history) |    history    |    array     |                ``delay``, ``maxStack``, ``userOnly``                | ['delay' => '1000', 'maxStack' => '100', 'userOnly' => 'false'] |
-| **KeyboardModule**  |     The Keyboard module enables custom behavior for keyboard events in particular contexts [site](https://quilljs.com/docs/modules/keyboard)     |   keyboard    |    array     | [see next documentation section](#extend-quill-stimulus-controller) |                                -                                |
-| **ClipboardModule** |       The Clipboard handles copy, cut and paste between Quill and external applications [site](https://quilljs.com/docs/modules/clipboard)       |   clipboard   |    array     | [see next documentation section](#extend-quill-stimulus-controller) |                                -                                |
+|       modules       |                                                                   description                                                                    |     name      | options type |                               options                               |                          default options                          |
+|:-------------------:|:------------------------------------------------------------------------------------------------------------------------------------------------:|:-------------:|:------------:|:-------------------------------------------------------------------:|:-----------------------------------------------------------------:|
+|   **EmojiModule**   |                           required if emoji Field is activated (this is done actually automatically inside the bundle)                           | emoji-toolbar |    string    |                       ``'true'``, ``'false'``                       |              ``'true'`` (if EmojiField is activated)              |
+|  **ResizeModule**   |                                      used in ImageField,  https://www.npmjs.com/package/quill-resize-image                                       |    resize     |    array     |                                 []                                  |                                []                                 |
+|  **SyntaxModule**   |                                       see official [description](https://quilljs.com/docs/modules/syntax)                                        |    syntax     |    string    |                       ``'true'``, ``'false'``                       |                            ``'true'``                             |
+|  **HistoryModule**  | The History module is responsible for handling undo and redo for Quill. see details on official [site](https://quilljs.com/docs/modules/history) |    history    |    array     |                ``delay``, ``maxStack``, ``userOnly``                | ['delay' => '1000', 'maxStack' => '100', 'userOnly' => 'false']   |
 
+#### Other modules 
+For others modules, you will need to extends Quill controller.
+
+|       modules       |                                                                description                                                                |     name      | options type |                               options                               |                         default options                         |
+|:-------------------:|:-----------------------------------------------------------------------------------------------------------------------------------------:|:-------------:|:------------:|:-------------------------------------------------------------------:|:---------------------------------------------------------------:|
+| **KeyboardModule**  | The Keyboard module enables custom behavior for keyboard events in particular contexts [site](https://quilljs.com/docs/modules/keyboard)  |   keyboard    |    array     | [see next documentation section](#extend-quill-stimulus-controller) |                                -                                |
+| **ClipboardModule** | The Clipboard handles copy, cut and paste between Quill and external applications [site](https://quilljs.com/docs/modules/clipboard)      |   clipboard   |    array     | [see next documentation section](#extend-quill-stimulus-controller) |                                -                                |
 
 
 ## Extend Quill stimulus controller
