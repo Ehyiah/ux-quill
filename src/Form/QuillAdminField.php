@@ -4,6 +4,7 @@ namespace Ehyiah\QuillJsBundle\Form;
 
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
+use Symfony\Component\AssetMapper\AssetMapperInterface;
 
 class QuillAdminField implements FieldInterface
 {
@@ -14,7 +15,7 @@ class QuillAdminField implements FieldInterface
      */
     public static function new(string $propertyName, $label = null): self
     {
-        if (!class_exists('Symfony\\Component\\AssetMapper\\AssetMapper')) {
+        if (!interface_exists(AssetMapperInterface::class)) {
             return (new self())
                 ->addFormTheme('@QuillJs/form.html.twig', '@EasyAdmin/crud/form_theme.html.twig')
                 ->setProperty($propertyName)
