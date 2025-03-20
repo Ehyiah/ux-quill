@@ -126,14 +126,14 @@ For the most basic this is only what you have to do.
 This is where you will choose what elements you want to display in your WYSIWYG.
 You can build an array like you would do following the QuillJs official documentation
 Or use a more convenient with Autocomplete using the many Fields Object in this bundle.
-```
+```php
       QuillGroup::build(
           new HeaderField(HeaderField::HEADER_OPTION_1),
           new HeaderField(HeaderField::HEADER_OPTION_2),
       )
 ```
 This example will display a h1 and h2 header options side by side
-```
+```php
       QuillGroup::build(
           new HeaderField(HeaderField::HEADER_OPTION_1),
           new HeaderField(HeaderField::HEADER_OPTION_2),
@@ -205,7 +205,7 @@ However, you can specify a custom endpoint to handle image uploading and pass in
 - data sending in ``base64`` inside a json
 - OR
 - in a ``multipart/form-data``
-```
+```php
     'quill_extra_options' => [
         ///
         'upload_handler' => [
@@ -219,6 +219,14 @@ However, you can specify a custom endpoint to handle image uploading and pass in
 ```
   https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/JavaScript-logo.png/480px-JavaScript-logo.png
 ```
+
+In order to do so, just create a new response that will hold only the file name as contents:
+```php
+$fileName = 'https://www.my-domain.tld/my/full/path.jpg';
+
+return (new Response)->setContent($fileName);
+```
+
 - in json mode data will look like this by calling $request->getContent() and ```application/json``` in content-type headers
 ```
     "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAlgAAAJYCAQAAAAUb1BXAAAABGdBTUEAALGPC/xhBQAAACyygyyioiBqFCUIKC64x..."

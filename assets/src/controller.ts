@@ -90,6 +90,15 @@ export default class extends Controller {
                             axios
                                 .post(this.extraOptionsValue.upload_handler.path, formData)
                                 .then(response => {
+                                    setTimeout(() => {
+                                        const imgs = this.quill.root.querySelectorAll('img');
+                                        imgs.forEach(img => {
+                                            if (img.src.startsWith('data:')) {
+                                                const blot = Quill.find(img);
+                                                blot.remove();
+                                            }
+                                        });
+                                    }, 100);
                                     resolve(response.data);
                                 })
                                 .catch(err => {
@@ -123,6 +132,15 @@ export default class extends Controller {
                                         }
                                     })
                                     .then(response => {
+                                        setTimeout(() => {
+                                            const imgs = this.quill.root.querySelectorAll('img');
+                                            imgs.forEach(img => {
+                                                if (img.src.startsWith('data:')) {
+                                                    const blot = Quill.find(img);
+                                                    blot.remove();
+                                                }
+                                            });
+                                        }, 100);
                                         resolve(response.data);
                                     })
                                     .catch(err => {
@@ -151,6 +169,7 @@ export default class extends Controller {
         })
 
         this.dispatchEvent('connect', quill);
+        this.quill = quill;
     }
 
     private dispatchEvent(name: string, payload: any = {}) {
