@@ -4,7 +4,7 @@ BRANCH?= dev
 #
 # DOCKER VAR
 #
-DOCKER_COMPOSE?= docker-compose
+DOCKER_COMPOSE?= docker compose
 EXEC?= $(DOCKER_COMPOSE) exec
 EXECYARN?= $(DOCKER_COMPOSE) exec -w /var/www/symfony/assets
 

@@ -7,3 +7,12 @@ services:
     volumes:
       - .:/var/www/symfony:cached
       - ./docker/php-fpm/php.ini:/usr/local/etc/php/php.ini:delegated
+
+  encore:
+    image: node:21-alpine
+    volumes:
+      - .:/var/www/symfony:cached
+    ports:
+      - "${DEV_SERVER_PORT:-7777}:8888"
+    working_dir: /var/www/symfony/assets
+    command: [ "yarn", "watch" ]

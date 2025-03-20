@@ -57,6 +57,15 @@ export default class _Class extends Controller {
               const formData = new FormData();
               formData.append('file', file);
               axios.post(this.extraOptionsValue.upload_handler.path, formData).then(response => {
+                setTimeout(() => {
+                  const imgs = this.quill.root.querySelectorAll('img');
+                  imgs.forEach(img => {
+                    if (img.src.startsWith('data:')) {
+                      const blot = Quill.find(img);
+                      blot.remove();
+                    }
+                  });
+                }, 100);
                 resolve(response.data);
               }).catch(err => {
                 reject('Upload failed');
@@ -84,6 +93,15 @@ export default class _Class extends Controller {
                   'Content-Type': 'application/json'
                 }
               }).then(response => {
+                setTimeout(() => {
+                  const imgs = this.quill.root.querySelectorAll('img');
+                  imgs.forEach(img => {
+                    if (img.src.startsWith('data:')) {
+                      const blot = Quill.find(img);
+                      blot.remove();
+                    }
+                  });
+                }, 100);
                 resolve(response.data);
               }).catch(err => {
                 reject('Upload failed');
@@ -106,6 +124,7 @@ export default class _Class extends Controller {
       inputContent.value = quillContent;
     });
     this.dispatchEvent('connect', quill);
+    this.quill = quill;
   }
   dispatchEvent(name, payload) {
     if (payload === void 0) {
@@ -128,3 +147,4 @@ _Class.values = {
     default: {}
   }
 };
+//# sourceMappingURL=controller.js.map

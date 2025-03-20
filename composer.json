@@ -23,6 +23,11 @@
             "name": "Matthieu Gostiaux",
             "role": "Author",
             "email": "rei_eva@hotmail.com"
+        },
+        {
+            "name": "Maximilian Graf Schimmelmann",
+            "email": "office@bytes-commerce.de",
+            "role": "Contributor"
         }
     ],
     "require": {
