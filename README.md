@@ -177,7 +177,7 @@ You can add as many Groups as you like or just One if you don't need the WYSIWYG
 |      VideoField      |                                  add an embed video                                  |                                            -                                             |                |       video        |
 
 
-- Below is a list of fields not available in QuillJS but taken from community
+- Below is a list of fields not available in QuillJS but taken from community:
 
 |   Field    | Description  | Available options  (options are available as class constants in each Field Class)  | Default option |
 |:----------:|:------------:|:----------------------------------------------------------------------------------:|:--------------:|
@@ -185,8 +185,7 @@ You can add as many Groups as you like or just One if you don't need the WYSIWYG
 
 
 
-## quill_extra_options:
-
+## quill_extra_options
 | extra_option_name  |  type  | values                                                                                                           |
 |:------------------:|:------:|:-----------------------------------------------------------------------------------------------------------------|
 |     **debug**      | string | `` error``, ``warn``, ``log``, ``info``  (you can use ``DebugOption`` class constants to pick a value)           |
@@ -205,7 +204,7 @@ However, you can specify a custom endpoint to handle image uploading and pass in
 - data sending in ``base64`` inside a json
 - OR
 - in a ``multipart/form-data``
-```
+```php
     'quill_extra_options' => [
         ///
         'upload_handler' => [
@@ -215,6 +214,7 @@ However, you can specify a custom endpoint to handle image uploading and pass in
         ]
     ],
 ```
+
 - your endpoint must return the complete URL of the file example :
 ```
   https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/JavaScript-logo.png/480px-JavaScript-logo.png

@@ -1,9 +1,8 @@
 FROM php:8.1.0-fpm
-ARG TIMEZONE="Europe/Paris"
 
 MAINTAINER Matthieu Gostiaux<rei_eva@hotmail.com>
 
-COPY --from=composer:2.4.4 /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2.8.8 /usr/bin/composer /usr/bin/composer
 
 # Install requierements
 RUN apt-get update && apt-get install -y  --fix-missing \
@@ -30,11 +29,8 @@ RUN apt-get update && apt-get install -y  --fix-missing \
     iputils-ping \
     pkg-config \
     wget \
-    rsync
-
-# Set timezone
-RUN ln -snf /usr/share/zoneinfo/${TIMEZONE} /etc/localtime && echo ${TIMEZONE} > /etc/timezone \
-&& printf '[PHP]\ndate.timezone = "%s"\n', ${TIMEZONE} > /usr/local/etc/php/conf.d/tzone.ini
+    rsync \
+    && rm -rf /var/lib/apt/lists/*
 
 # Type docker-php-ext-install to see available extensions
 RUN docker-php-ext-configure gd --with-jpeg=/usr \
@@ -45,15 +41,17 @@ RUN docker-php-ext-configure gd --with-jpeg=/usr \
 && docker-php-source delete
 
 # Node.js
-RUN curl -sL https://deb.nodesource.com/setup_18.x -o node_setup.sh && \
+RUN curl -sL https://deb.nodesource.com/setup_22.x -o node_setup.sh && \
     bash node_setup.sh && \
     apt-get install -y nodejs && \
-    npm install npm -g
+    npm install npm -g && \
+    rm -rf /var/lib/apt/lists/*
 
 # Yarn
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
 RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
-RUN apt-get update && apt-get install -y yarn
+RUN apt-get update && apt-get install -y yarn && \
+    rm -rf /var/lib/apt/lists/*
 
 # CREATE USER
 # default values are below, but they are overwritten in make build command with your current user ID and NAME
@@ -66,9 +64,8 @@ COPY ./scripts/ /tmp/scripts/
 RUN chmod +x -R /tmp/scripts/
 RUN /tmp/scripts/create-user.sh ${APP_USER} ${APP_GROUP} ${APP_USER_ID} ${APP_GROUP_ID}
 
-RUN rm -rf /var/lib/apt/lists/*
-
 USER $APP_USER
+
 WORKDIR /var/www/symfony
 
 CMD ["php-fpm"]
