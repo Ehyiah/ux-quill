@@ -1,7 +1,7 @@
 import { Controller } from '@hotwired/stimulus';
 import Quill from 'quill';
 import mergeModules from "./modules.js";
-import axios from 'axios';
+import { handleUploadResponse, uploadStrategies } from "./upload-utils.js";
 import ImageUploader from './imageUploader.js';
 Quill.register('modules/imageUploader', ImageUploader);
 import * as Emoji from 'quill2-emoji';
@@ -49,48 +49,13 @@ export default class _Class extends Controller {
       Quill.register(Quill.import('attributors/style/font'), true);
       Quill.register(Quill.import('attributors/style/size'), true);
     }
-    if (this.extraOptionsValue.upload_handler.path !== null && this.extraOptionsValue.upload_handler.type === 'form') {
+    const uploadHandlerConfig = this.extraOptionsValue.upload_handler;
+    if (uploadHandlerConfig && uploadHandlerConfig.upload_endpoint && uploadStrategies[uploadHandlerConfig.type]) {
+      const uploadEndpoint = uploadHandlerConfig.upload_endpoint;
+      const uploadFunction = file => uploadStrategies[uploadHandlerConfig.type](uploadEndpoint, file).then(response => handleUploadResponse(response, uploadHandlerConfig.json_response_file_path));
       Object.assign(options.modules, {
         imageUploader: {
-          upload: file => {
-            return new Promise((resolve, reject) => {
-              const formData = new FormData();
-              formData.append('file', file);
-              axios.post(this.extraOptionsValue.upload_handler.path, formData).then(response => {
-                resolve(response.data);
-              }).catch(err => {
-                reject('Upload failed');
-                console.log(err);
-              });
-            });
-          }
-        }
-      });
-    }
-    if (this.extraOptionsValue.upload_handler.path !== null && this.extraOptionsValue.upload_handler.type === 'json') {
-      Object.assign(options.modules, {
-        imageUploader: {
-          upload: file => {
-            return new Promise((resolve, reject) => {
-              const reader = file => {
-                return new Promise(resolve => {
-                  const fileReader = new FileReader();
-                  fileReader.onload = () => resolve(fileReader.result);
-                  fileReader.readAsDataURL(file);
-                });
-              };
-              reader(file).then(result => axios.post(this.extraOptionsValue.upload_handler.path, result, {
-                headers: {
-                  'Content-Type': 'application/json'
-                }
-              }).then(response => {
-                resolve(response.data);
-              }).catch(err => {
-                reject('Upload failed');
-                console.log(err);
-              }));
-            });
-          }
+          upload: uploadFunction
         }
       });
     }

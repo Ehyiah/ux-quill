@@ -186,7 +186,7 @@ You can add as many Groups as you like or just One if you don't need the WYSIWYG
 
 
 ## quill_extra_options
-| extra_option_name  |  type  | values                                                                                                           |
+| extra_option name  |  type  | values                                                                                                           |
 |:------------------:|:------:|:-----------------------------------------------------------------------------------------------------------------|
 |     **debug**      | string | `` error``, ``warn``, ``log``, ``info``  (you can use ``DebugOption`` class constants to pick a value)           |
 |     **height**     | string | examples: ``200px``, ``200em``, default: '200px'                                                                 |
@@ -199,32 +199,61 @@ You can add as many Groups as you like or just One if you don't need the WYSIWYG
 
 ### Image upload Handling
 in ***ImageField*** : QuillJS transform images in base64 encoded file by default to save your files.
-However, you can specify a custom endpoint to handle image uploading and pass in response the entire public URL to display the image.
-- currently handling :
-- data sending in ``base64`` inside a json
-- OR
-- in a ``multipart/form-data``
-```php
-    'quill_extra_options' => [
-        ///
-        'upload_handler' => [
-            'type' => 'json',
-            // or 'type' => 'form',
-            'path' => '/my-custom-endpoint/upload',
-        ]
-    ],
-```
+However, you can specify a custom endpoint to handle image uploading and pass in response the entire public URL to display the image. 
+#### currently handling 2 methods :
 
-- your endpoint must return the complete URL of the file example :
-```
-  https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/JavaScript-logo.png/480px-JavaScript-logo.png
-```
-- in json mode data will look like this by calling $request->getContent() and ```application/json``` in content-type headers
+#### 1 : data sending in ``base64`` inside a ``application/json`` request
+- in json mode data will look like this by calling ``$request->getContent()`` and ```application/json``` in content-type headers
 ```
     "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAlgAAAJYCAQAAAAUb1BXAAAABGdBTUEAALGPC/xhBQAAACyygyyioiBqFCUIKC64x..."
 ```
-- in form mode you will find a ```multipart/form-data``` in content-type headers and file will be present in $request->files named ```file```
-- then you can handle it like you would do with a FileType
+#### 2 : sending in a ``multipart/form-data`` request
+- in form mode you will find a ```multipart/form-data``` in content-type headers and file will be present in $request->files named ```file``` as a ``Symfony\Component\HttpFoundation\File\UploadedFile``
+- then you can handle it like you would do with a FileType and access the file like this : 
+```php
+    /** @var \Symfony\Component\HttpFoundation\Request $request */
+    /** @var \Symfony\Component\HttpFoundation\File\UploadedFile $file */
+    $file = $request->files->get('file'))
+```
+
+#### upload mode configuration :
+**exemple of a json configuration to send request to the upload endpoint that returns a json response containing the URL to the uploaded image.**
+```php
+    'quill_extra_options' => [
+        'upload_handler' => [
+            'type' => 'json',
+            'upload_endpoint' => '/my-custom-endpoint/upload',
+            'json_response_file_path' => 'file.url'
+        ]
+    ],
+```
+see below for a detail on these options values.
+### available options in upload handler:
+| upload_handler option name  |  type  | default value | possible values                                                                                                                                                                                                                                 |
+|:---------------------------:|:------:|---------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|          **type**           | string | form          | ``json``, ``form``                                                                                                                                                                                                                              |
+|     **upload_endpoint**     | string | null          | the endpoint of your upload handler exemple : ``/upload`` or ``https://my-custom-upload-endpoint/upload``                                                                                                                                       |
+| **json_response_file_path** | string | null          | if you specify this option, that mean your upload endpoint will return you a json response the value must be the path inside the json (this option will be ignorer if the content type of the upload endpoint response is not application/json) |
+
+
+- If your response in a classic simple ``Symfony\Component\HttpFoundation\Response``, you can simply return a response like this one for exemple :
+```php
+        return new Response('https://my-website/public/assets/my-uploaded-image.jpg');
+```
+- If your response is a Json response like a ``Symfony\Component\HttpFoundation\JsonResponse``, the ``json_response_file_path`` option can be used to specify the url inside the json response.
+in the exemple below ``json_path_file_response`` must be ``'file.url'``.
+```php
+    return new JsonResponse([
+        'file' => [
+            'url' => 'https://my-website/public/assets/my-uploaded-image.jpg',
+        ]
+    ]);
+```
+- If your response is a Json response like a ``Symfony\Component\HttpFoundation\JsonResponse``, **and** the ``json_response_file_path`` is **null**.
+```php
+    return new JsonResponse('https://my-website/public/assets/my-uploaded-image.jpg');
+```
+
 
 ### Modules
 #### PHP configurable modules
@@ -258,6 +287,8 @@ Some modules like ``Keyboard`` and ``Clipboard`` need custom javascript to be wr
 The easiest way to do so is to create a custom stimulus controller to extend the default behavior.
 
 Create a new stimulus controller inside your project
+
+some events are dispatched : ``connect``, ``options``
 
 ``` javascript
 // quill_extended_controller.js

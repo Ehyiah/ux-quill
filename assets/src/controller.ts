@@ -3,8 +3,7 @@ import Quill from 'quill';
 import * as Options from 'quill/core/quill';
 import { EmojiModule, ExtraOptions, ModuleInterface, ResizeModule, uploadOptions } from './typesmodules.d.ts';
 import mergeModules from './modules.ts';
-
-import axios from 'axios';
+import { handleUploadResponse, uploadFileForm, uploadFileJson, uploadStrategies } from './upload-utils.ts';
 
 import ImageUploader from './imageUploader.js'
 Quill.register('modules/imageUploader', ImageUploader);
@@ -79,61 +78,17 @@ export default class extends Controller {
             Quill.register(Quill.import('attributors/style/size'), true);
         }
 
-        if (this.extraOptionsValue.upload_handler.path !== null && this.extraOptionsValue.upload_handler.type === 'form') {
+        const uploadHandlerConfig = this.extraOptionsValue.upload_handler;
+        if (uploadHandlerConfig && uploadHandlerConfig.upload_endpoint && uploadStrategies[uploadHandlerConfig.type]) {
+            const uploadEndpoint = uploadHandlerConfig.upload_endpoint;
+            const uploadFunction = (file) => uploadStrategies[uploadHandlerConfig.type](uploadEndpoint, file)
+                .then(response => handleUploadResponse(response, uploadHandlerConfig.json_response_file_path));
+
             Object.assign(options.modules, {
                 imageUploader: {
-                    upload: file => {
-                        return new Promise((resolve, reject) => {
-                            const formData = new FormData();
-                            formData.append('file', file);
-
-                            axios
-                                .post(this.extraOptionsValue.upload_handler.path, formData)
-                                .then(response => {
-                                    resolve(response.data);
-                                })
-                                .catch(err => {
-                                    reject('Upload failed');
-                                    console.log(err)
-                                })
-                        })
-                    }
-                }}
-            )
-        }
-
-        if (this.extraOptionsValue.upload_handler.path !== null && this.extraOptionsValue.upload_handler.type === 'json') {
-            Object.assign(options.modules, {
-                imageUploader: {
-                    upload: file => {
-                        return new Promise((resolve, reject) => {
-                            const reader = (file) => {
-                                return new Promise((resolve) => {
-                                    const fileReader = new FileReader();
-                                    fileReader.onload = () => resolve(fileReader.result);
-                                    fileReader.readAsDataURL(file);
-                                });
-                            }
-
-                            reader(file).then(result =>
-                                axios
-                                    .post(this.extraOptionsValue.upload_handler.path, result, {
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                        }
-                                    })
-                                    .then(response => {
-                                        resolve(response.data);
-                                    })
-                                    .catch(err => {
-                                        reject('Upload failed');
-                                        console.log(err)
-                                    })
-                            );
-                        })
-                    }
-                }}
-            )
+                    upload: uploadFunction
+                }
+            });
         }
 
         const heightDefined = this.extraOptionsValue.height;
