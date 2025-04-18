@@ -46,13 +46,21 @@ export function handleUploadResponse(response, jsonResponseFilePath) {
             throw new Error("Invalid json path for response: '" + jsonResponseFilePath + "'. Property '" + part + "' not found.");
           }
         }
+        if (typeof result !== 'string') {
+          result = String(result);
+        }
         resolve(result);
       } catch (error) {
         console.error(error);
-        reject("Error while processing upload response: " + error.message);
+        if (error instanceof Error) {
+          reject("Error while processing upload response: " + error.message);
+        } else {
+          reject('Unknown error while processing upload response');
+        }
       }
     } else {
-      resolve(response.data);
+      const result = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
+      resolve(result);
     }
   });
 }

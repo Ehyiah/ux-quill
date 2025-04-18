@@ -1,11 +1,13 @@
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 
-export const uploadStrategies = {
+type UploadFunction = (uploadEndpoint: string, file: File) => Promise<AxiosResponse>;
+
+export const uploadStrategies: Record<string, UploadFunction> = {
     'form': uploadFileForm,
     'json': uploadFileJson
 };
 
-export function uploadFileForm(uploadEndpoint, file) {
+export function uploadFileForm(uploadEndpoint: string, file: File): Promise<AxiosResponse> {
     return new Promise((resolve, reject) => {
         const formData = new FormData();
         formData.append('file', file);
@@ -20,9 +22,9 @@ export function uploadFileForm(uploadEndpoint, file) {
     });
 }
 
-export function uploadFileJson(uploadEndpoint, file) {
+export function uploadFileJson(uploadEndpoint: string, file: File): Promise<AxiosResponse> {
     return new Promise((resolve, reject) => {
-        const reader = (file) => {
+        const reader = (file: File): Promise<string | ArrayBuffer | null> => {
             return new Promise((resolve) => {
                 const fileReader = new FileReader();
                 fileReader.onload = () => resolve(fileReader.result);
@@ -47,7 +49,7 @@ export function uploadFileJson(uploadEndpoint, file) {
     });
 }
 
-export function handleUploadResponse(response, jsonResponseFilePath) {
+export function handleUploadResponse(response: AxiosResponse, jsonResponseFilePath?: string | null): Promise<string> {
     return new Promise((resolve, reject) => {
         const contentType = response.headers['content-type'] || '';
 
@@ -63,13 +65,26 @@ export function handleUploadResponse(response, jsonResponseFilePath) {
                         throw new Error(`Invalid json path for response: '${jsonResponseFilePath}'. Property '${part}' not found.`);
                     }
                 }
+
+                if (typeof result !== 'string') {
+                    result = String(result);
+                }
+
                 resolve(result);
-            } catch (error) {
+            } catch (error: unknown) {
                 console.error(error);
-                reject(`Error while processing upload response: ${error.message}`);
+                if (error instanceof Error) {
+                    reject(`Error while processing upload response: ${error.message}`);
+                } else {
+                    reject('Unknown error while processing upload response');
+                }
             }
         } else {
-            resolve(response.data);
+            const result = typeof response.data === 'string' ?
+                response.data :
+                JSON.stringify(response.data);
+
+            resolve(result);
         }
     });
 }

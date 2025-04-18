@@ -5,10 +5,17 @@ import { ExtraOptions } from './typesmodules.d.ts';
 import mergeModules from './modules.ts';
 import { handleUploadResponse, uploadStrategies } from './upload-utils.ts';
 
-import ImageUploader from './imageUploader.js';
+import ImageUploader from './imageUploader.ts';
 import * as Emoji from 'quill2-emoji';
 import 'quill2-emoji/dist/style.css';
 import QuillResizeImage from 'quill-resize-image';
+
+interface DOMNode extends HTMLElement {
+    getAttribute(name: string): string | null;
+    setAttribute(name: string, value: string): void;
+    removeAttribute(name: string): void;
+    hasAttribute(name: string): boolean;
+}
 
 const modules = {
     'imageUploader': ImageUploader,
@@ -23,16 +30,21 @@ Object.entries(modules).forEach(([name, module]) => {
 const Image = Quill.import('formats/image');
 const oldFormats = Image.formats;
 
-Image.formats = function(domNode) {
-    const formats = oldFormats(domNode);
+Image.formats = function(domNode: DOMNode) {
+    const formats = oldFormats.call(this, domNode);
     if (domNode.hasAttribute('style')) {
         formats.style = domNode.getAttribute('style');
     }
     return formats;
 };
 
-Image.prototype.format = function(name, value) {
-    value ? this.domNode.setAttribute(name, value) : this.domNode.removeAttribute(name);
+type ImageWithDOM = {
+    domNode: DOMNode;
+    format(name: string, value: string | boolean | null): void;
+};
+
+Image.prototype.format = function(this: ImageWithDOM, name: string, value: string | boolean | null) {
+    value ? this.domNode.setAttribute(name, String(value)) : this.domNode.removeAttribute(name);
 };
 
 export default class extends Controller {
@@ -96,7 +108,7 @@ export default class extends Controller {
         const config = this.extraOptionsValue.upload_handler;
 
         if (config?.upload_endpoint && uploadStrategies[config.type]) {
-            const uploadFunction = (file) => uploadStrategies[config.type](
+            const uploadFunction = (file: File): Promise<string> => uploadStrategies[config.type](
                 config.upload_endpoint,
                 file
             ).then(response => handleUploadResponse(

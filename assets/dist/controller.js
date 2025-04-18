@@ -2,7 +2,7 @@ import { Controller } from '@hotwired/stimulus';
 import Quill from 'quill';
 import mergeModules from "./modules.js";
 import { handleUploadResponse, uploadStrategies } from "./upload-utils.js";
-import ImageUploader from './imageUploader.js';
+import ImageUploader from "./imageUploader.js";
 import * as Emoji from 'quill2-emoji';
 import 'quill2-emoji/dist/style.css';
 import QuillResizeImage from 'quill-resize-image';
@@ -18,14 +18,14 @@ Object.entries(modules).forEach(_ref => {
 const Image = Quill.import('formats/image');
 const oldFormats = Image.formats;
 Image.formats = function (domNode) {
-  const formats = oldFormats(domNode);
+  const formats = oldFormats.call(this, domNode);
   if (domNode.hasAttribute('style')) {
     formats.style = domNode.getAttribute('style');
   }
   return formats;
 };
 Image.prototype.format = function (name, value) {
-  value ? this.domNode.setAttribute(name, value) : this.domNode.removeAttribute(name);
+  value ? this.domNode.setAttribute(name, String(value)) : this.domNode.removeAttribute(name);
 };
 export default class _Class extends Controller {
   connect() {
