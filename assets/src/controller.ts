@@ -1,37 +1,39 @@
 import { Controller } from '@hotwired/stimulus';
 import Quill from 'quill';
 import * as Options from 'quill/core/quill';
-import { EmojiModule, ExtraOptions, ModuleInterface, ResizeModule, uploadOptions } from './typesmodules.d.ts';
+import { ExtraOptions } from './typesmodules.d.ts';
 import mergeModules from './modules.ts';
-import { handleUploadResponse, uploadFileForm, uploadFileJson, uploadStrategies } from './upload-utils.ts';
+import { handleUploadResponse, uploadStrategies } from './upload-utils.ts';
 
-import ImageUploader from './imageUploader.js'
-Quill.register('modules/imageUploader', ImageUploader);
-
+import ImageUploader from './imageUploader.js';
 import * as Emoji from 'quill2-emoji';
 import 'quill2-emoji/dist/style.css';
-Quill.register('modules/emoji', Emoji);
-
 import QuillResizeImage from 'quill-resize-image';
-Quill.register('modules/resize', QuillResizeImage);
-// allow image resize and position to be reloaded after persist
+
+const modules = {
+    'imageUploader': ImageUploader,
+    'emoji': Emoji,
+    'resize': QuillResizeImage
+};
+
+Object.entries(modules).forEach(([name, module]) => {
+    Quill.register(`modules/${name}`, module);
+});
+
 const Image = Quill.import('formats/image');
 const oldFormats = Image.formats;
-Image.formats = function (domNode) {
+
+Image.formats = function(domNode) {
     const formats = oldFormats(domNode);
     if (domNode.hasAttribute('style')) {
         formats.style = domNode.getAttribute('style');
     }
     return formats;
-}
+};
 
-Image.prototype.format = function (name, value) {
-    if (value) {
-        this.domNode.setAttribute(name, value);
-    } else {
-        this.domNode.removeAttribute(name);
-    }
-}
+Image.prototype.format = function(name, value) {
+    value ? this.domNode.setAttribute(name, value) : this.domNode.removeAttribute(name);
+};
 
 export default class extends Controller {
     declare readonly inputTarget: HTMLInputElement;
@@ -52,37 +54,55 @@ export default class extends Controller {
     }
 
     connect() {
-        const toolbarOptionsValue = this.toolbarOptionsValue;
-        const modulesOptions = this.extraOptionsValue.modules;
+        const options = this.buildQuillOptions();
+        this.setupQuillStyles(options);
+        this.setupUploadHandler(options);
+        this.setupEditorHeight();
+
+        this.dispatchEvent('options', options);
+
+        const quill = new Quill(this.editorContainerTarget, options);
+        this.setupContentSync(quill);
+
+        this.dispatchEvent('connect', quill);
+    }
+
+    private buildQuillOptions(): Options {
+        const { debug, modules: modulesOptions, placeholder, theme, style } = this.extraOptionsValue;
 
         const enabledModules = {
-            'toolbar': toolbarOptionsValue,
+            'toolbar': this.toolbarOptionsValue,
         };
 
-        const mergedModules = mergeModules(modulesOptions, enabledModules);
-
-        const options: Options = {
-            debug: this.extraOptionsValue.debug,
-            modules: mergedModules,
-            placeholder: this.extraOptionsValue.placeholder,
-            theme: this.extraOptionsValue.theme,
-            style: this.extraOptionsValue.style,
+        return {
+            debug,
+            modules: mergeModules(modulesOptions, enabledModules),
+            placeholder,
+            theme,
+            style,
         };
+    }
 
+    private setupQuillStyles(options: Options) {
         if (options.style === 'inline') {
-            Quill.register(Quill.import('attributors/style/align'), true);
-            Quill.register(Quill.import('attributors/style/background'),true);
-            Quill.register(Quill.import('attributors/style/color'), true);
-            Quill.register(Quill.import('attributors/style/direction'),true);
-            Quill.register(Quill.import('attributors/style/font'), true);
-            Quill.register(Quill.import('attributors/style/size'), true);
+            const styleAttributes = ['align', 'background', 'color', 'direction', 'font', 'size'];
+            styleAttributes.forEach(attr =>
+                Quill.register(Quill.import(`attributors/style/${attr}`), true)
+            );
         }
+    }
 
-        const uploadHandlerConfig = this.extraOptionsValue.upload_handler;
-        if (uploadHandlerConfig && uploadHandlerConfig.upload_endpoint && uploadStrategies[uploadHandlerConfig.type]) {
-            const uploadEndpoint = uploadHandlerConfig.upload_endpoint;
-            const uploadFunction = (file) => uploadStrategies[uploadHandlerConfig.type](uploadEndpoint, file)
-                .then(response => handleUploadResponse(response, uploadHandlerConfig.json_response_file_path));
+    private setupUploadHandler(options: Options) {
+        const config = this.extraOptionsValue.upload_handler;
+
+        if (config?.upload_endpoint && uploadStrategies[config.type]) {
+            const uploadFunction = (file) => uploadStrategies[config.type](
+                config.upload_endpoint,
+                file
+            ).then(response => handleUploadResponse(
+                response,
+                config.json_response_file_path
+            ));
 
             Object.assign(options.modules, {
                 imageUploader: {
@@ -90,22 +110,19 @@ export default class extends Controller {
                 }
             });
         }
+    }
 
-        const heightDefined = this.extraOptionsValue.height;
-        if (null !== heightDefined) {
-            this.editorContainerTarget.style.height = heightDefined
+    private setupEditorHeight() {
+        const height = this.extraOptionsValue.height;
+        if (height !== null) {
+            this.editorContainerTarget.style.height = height;
         }
+    }
 
-        this.dispatchEvent('options', options);
-
-        const quill = new Quill(this.editorContainerTarget, options);
+    private setupContentSync(quill: Quill) {
         quill.on('text-change', () => {
-            const quillContent = quill.root.innerHTML;
-            const inputContent = this.inputTarget;
-            inputContent.value = quillContent;
-        })
-
-        this.dispatchEvent('connect', quill);
+            this.inputTarget.value = quill.root.innerHTML;
+        });
     }
 
     private dispatchEvent(name: string, payload: any = {}) {
