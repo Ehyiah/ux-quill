@@ -6,6 +6,7 @@ export type ExtraOptions = {
     upload_handler: uploadOptions;
     style: string;
     modules: Array<ModuleInterface>;
+    use_semantic_html: boolean;
 }
 
 export type uploadOptions = {

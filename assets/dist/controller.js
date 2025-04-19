@@ -100,11 +100,19 @@ export default class _Class extends Controller {
     }
     this.dispatchEvent('options', options);
     const quill = new Quill(this.editorContainerTarget, options);
-    quill.on('text-change', () => {
-      const quillContent = quill.root.innerHTML;
-      const inputContent = this.inputTarget;
-      inputContent.value = quillContent;
-    });
+    if (this.extraOptionsValue.use_semantic_html) {
+      quill.on('text-change', () => {
+        const quillContent = quill.getSemanticHTML();
+        const inputContent = this.inputTarget;
+        inputContent.value = quillContent;
+      });
+    } else {
+      quill.on('text-change', () => {
+        const quillContent = quill.root.innerHTML;
+        const inputContent = this.inputTarget;
+        inputContent.value = quillContent;
+      });
+    }
     this.dispatchEvent('connect', quill);
   }
   dispatchEvent(name, payload) {
