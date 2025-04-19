@@ -38,7 +38,9 @@
         "lint-fix": "yarn run eslint src --fix",
         "build:types": "tsc --emitDeclarationOnly",
         "test": "jest",
-        "test:watch": "jest --watch"
+        "test:simple": "jest tests/simple.test.ts",
+        "test:watch": "jest --watch",
+        "install-tests": "yarn add --dev @testing-library/jest-dom"
     },
     "devDependencies": {
         "@babel/cli": "^7.20.7",
@@ -124,9 +126,7 @@
         "testMatch": ["<rootDir>/tests/**/*.test.ts"],
         "moduleDirectories": ["node_modules", "<rootDir>/src"],
         "transform": {
-            "^.+\\.tsx?$": ["ts-jest", {
-                "isolatedModules": true
-            }]
+            "^.+\\.tsx?$": "ts-jest"
         },
         "transformIgnorePatterns": [
             "/node_modules/(?!quill|quill-resize-image|quill2-emoji)"

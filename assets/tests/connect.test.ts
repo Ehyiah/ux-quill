@@ -53,12 +53,11 @@ jest.mock('../src/upload-utils.ts', () => ({
     }
 }));
 
-// Importer d'abord les modules nécessaires puis définir nos mocks
 // Mock de la méthode dispatch du Controller
 const mockDispatch = jest.fn();
 Controller.prototype.dispatch = mockDispatch;
 
-describe('QuillController', () => {
+describe('QuillController - méthode connect', () => {
     let application: Application;
     let controller: QuillController;
     let element: HTMLElement;
@@ -86,7 +85,7 @@ describe('QuillController', () => {
         // Ajouter au document
         document.body.appendChild(element);
 
-        // Initialiser Stimulus
+        // Initialiser Stimulus correctement
         application = new Application();
         application.register('quill', QuillController);
         application.start();
@@ -104,27 +103,27 @@ describe('QuillController', () => {
         application.stop();
     });
 
-    describe('connect', () => {
-        it('devrait initialiser Quill correctement et dispatcher des événements', () => {
-            // Vérifier que les événements ont été dispatched
-            expect(mockDispatch).toHaveBeenCalledWith(
-                'options',
-                expect.objectContaining({
-                    detail: expect.any(Object),
-                    prefix: 'quill'
-                })
-            );
+    test('devrait initialiser Quill et synchroniser le contenu', () => {
+        // Pas besoin d'appeler connect car il est appelé automatiquement lors de l'initialisation du contrôleur
 
-            expect(mockDispatch).toHaveBeenCalledWith(
-                'connect',
-                expect.objectContaining({
-                    detail: expect.any(Object),
-                    prefix: 'quill'
-                })
-            );
+        // Vérifier que les événements ont été dispatched
+        expect(mockDispatch).toHaveBeenCalledWith(
+            'options',
+            expect.objectContaining({
+                detail: expect.any(Object),
+                prefix: 'quill'
+            })
+        );
 
-            // Vérifier que la valeur de l'input a été mise à jour
-            expect(inputElement.value).toBe('<p>Test content</p>');
-        });
+        expect(mockDispatch).toHaveBeenCalledWith(
+            'connect',
+            expect.objectContaining({
+                detail: expect.any(Object),
+                prefix: 'quill'
+            })
+        );
+
+        // Vérifier que la valeur de l'input a été mise à jour
+        expect(inputElement.value).toBe('<p>Test content</p>');
     });
 });
