@@ -53,7 +53,6 @@ jest.mock('../src/upload-utils.ts', () => ({
     }
 }));
 
-// Importer d'abord les modules nécessaires puis définir nos mocks
 // Mock de la méthode dispatch du Controller
 const mockDispatch = jest.fn();
 Controller.prototype.dispatch = mockDispatch;
@@ -99,7 +98,6 @@ describe('QuillController', () => {
     });
 
     afterEach(() => {
-        // Nettoyer le DOM
         document.body.removeChild(element);
         application.stop();
     });
