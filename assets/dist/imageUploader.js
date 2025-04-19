@@ -139,32 +139,55 @@ class ImageUploader {
   }
   insertBase64Image(url) {
     const range = this.range;
-    this.placeholderDelta = this.quill.insertEmbed(range.index, typedLoadingImage.blotName, "" + url, 'user');
+
+    // Utiliser directement 'imageBlot' comme nom de blot
+    this.placeholderDelta = this.quill.insertEmbed(range.index, 'imageBlot', "" + url, 'user');
   }
   insertToEditor(url) {
     const range = this.range;
     const lengthToDelete = this.calculatePlaceholderInsertLength();
 
-    // Delete the placeholder image
-    this.quill.deleteText(range.index, lengthToDelete, 'user');
+    // S'assurer que le delta est valide avant de tenter la suppression
+    if (lengthToDelete > 0) {
+      // Delete the placeholder image
+      this.quill.deleteText(range.index, lengthToDelete, 'user');
+    }
+
     // Insert the server saved image
     this.quill.insertEmbed(range.index, 'image', "" + url, 'user');
+
+    // Réinitialiser le placeholderDelta pour éviter les suppressions multiples
+    this.placeholderDelta = {
+      ops: []
+    };
     range.index++;
     this.quill.setSelection(range, 'user');
   }
-
-  // The length of the insert delta from insertBase64Image can vary depending on what part of the line the insert occurs
   calculatePlaceholderInsertLength() {
+    // Vérifier si placeholderDelta est défini et contient des opérations
+    if (!this.placeholderDelta || !this.placeholderDelta.ops || !Array.isArray(this.placeholderDelta.ops)) {
+      return 0;
+    }
     return this.placeholderDelta.ops.reduce((accumulator, deltaOperation) => {
-      const hasBarProperty = Object.prototype.hasOwnProperty.call(deltaOperation, 'insert');
-      if (hasBarProperty) accumulator++;
+      // Vérifier si deltaOperation est défini
+      if (deltaOperation && typeof deltaOperation === 'object') {
+        const hasInsertProperty = Object.prototype.hasOwnProperty.call(deltaOperation, 'insert');
+        if (hasInsertProperty) accumulator++;
+      }
       return accumulator;
     }, 0);
   }
   removeBase64Image() {
     const range = this.range;
     const lengthToDelete = this.calculatePlaceholderInsertLength();
-    this.quill.deleteText(range.index, lengthToDelete, 'user');
+    if (lengthToDelete > 0) {
+      this.quill.deleteText(range.index, lengthToDelete, 'user');
+    }
+
+    // Réinitialiser placeholderDelta pour éviter les suppressions multiples
+    this.placeholderDelta = {
+      ops: []
+    };
   }
 }
 window.ImageUploader = ImageUploader;
