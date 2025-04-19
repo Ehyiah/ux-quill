@@ -1,19 +1,30 @@
 import { Application, Controller } from '@hotwired/stimulus';
 import QuillController from '../src/controller';
 
+// Capturer les appels à new Quill()
+const mockQuillInstance = {
+    on: jest.fn().mockImplementation((event, callback) => {
+        if (event === 'text-change') {
+            callback();
+        }
+    }),
+    root: {
+        innerHTML: '<p>Test content</p>'
+    },
+    getModule: jest.fn().mockImplementation((name) => {
+        if (name === 'toolbar') {
+            return {
+                addHandler: jest.fn()
+            };
+        }
+        return {};
+    })
+};
+
 // Les mocks doivent être définis avant l'import du module à tester
 jest.mock('quill', () => {
     // Mock Quill en tant que fonction constructeur avec des méthodes statiques
-    const mockQuill = jest.fn().mockImplementation(() => ({
-        on: jest.fn().mockImplementation((event, callback) => {
-            if (event === 'text-change') {
-                callback();
-            }
-        }),
-        root: {
-            innerHTML: '<p>Test content</p>'
-        }
-    }));
+    const mockQuill = jest.fn().mockImplementation(() => mockQuillInstance);
 
     // Ajouter les méthodes statiques au mock
     mockQuill.register = jest.fn();
@@ -35,16 +46,18 @@ jest.mock('quill', () => {
     return mockQuill;
 });
 
-// Autres mocks
-jest.mock('quill2-emoji', () => ({}));
-jest.mock('quill-resize-image', () => ({}));
-jest.mock('../src/imageUploader.ts', () => ({}));
+// Mock du module de fusion
 jest.mock('../src/modules.ts', () => ({
     __esModule: true,
     default: jest.fn().mockImplementation((moduleOptions, enabledModules) => {
         return { ...moduleOptions, ...enabledModules };
     })
 }));
+
+// Autres mocks
+jest.mock('quill2-emoji', () => ({}));
+jest.mock('quill-resize-image', () => ({}));
+jest.mock('../src/imageUploader.ts', () => ({}));
 jest.mock('../src/upload-utils.ts', () => ({
     handleUploadResponse: jest.fn(),
     uploadStrategies: {
@@ -57,16 +70,18 @@ jest.mock('../src/upload-utils.ts', () => ({
 const mockDispatch = jest.fn();
 Controller.prototype.dispatch = mockDispatch;
 
-describe('QuillController', () => {
+describe('QuillController - méthode connect', () => {
     let application: Application;
     let controller: QuillController;
     let element: HTMLElement;
     let inputElement: HTMLInputElement;
     let editorElement: HTMLDivElement;
+    let Quill: any;
 
     beforeEach(() => {
-        // Réinitialiser les mocks
         jest.clearAllMocks();
+
+        Quill = require('quill');
 
         // Créer le DOM pour les tests
         element = document.createElement('div');
@@ -85,7 +100,7 @@ describe('QuillController', () => {
         // Ajouter au document
         document.body.appendChild(element);
 
-        // Initialiser Stimulus
+        // Initialiser Stimulus correctement
         application = new Application();
         application.register('quill', QuillController);
         application.start();
@@ -104,7 +119,6 @@ describe('QuillController', () => {
 
     describe('connect', () => {
         it('devrait initialiser Quill correctement et dispatcher des événements', () => {
-            // Vérifier que les événements ont été dispatched
             expect(mockDispatch).toHaveBeenCalledWith(
                 'options',
                 expect.objectContaining({
@@ -121,7 +135,6 @@ describe('QuillController', () => {
                 })
             );
 
-            // Vérifier que la valeur de l'input a été mise à jour
             expect(inputElement.value).toBe('<p>Test content</p>');
         });
     });
