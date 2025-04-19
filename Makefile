@@ -62,7 +62,13 @@ ci: ## Launch csfixer and phpstan and javascript quality check
 fixer-php: ## Launch csfixer no dry
 	$(COMPOSER) phpcsfixer
 
-.PHONY: ci fixer-php phptests
+fixer-js:  ## Corriger les problèmes de tests JavaScript
+	$(YARN) lint-fix
+
+.PHONY: ci fixer-php phptests jstests fixer-js
 
 phptests:
 	$(PHP) vendor/bin/phpunit
+
+jstests:  ## Exécuter les tests JavaScript
+	$(YARN) test
