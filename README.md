@@ -229,14 +229,14 @@ However, you can specify a custom endpoint to handle image uploading and pass in
 ```
 see below for a detail on these options values.
 ### available options in upload handler:
-| upload_handler option name  |  type  | default value | possible values                                                                                                                                                                                                                                 |
-|:---------------------------:|:------:|---------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|          **type**           | string | form          | ``json``, ``form``                                                                                                                                                                                                                              |
-|     **upload_endpoint**     | string | null          | the endpoint of your upload handler exemple : ``/upload`` or ``https://my-custom-upload-endpoint/upload``                                                                                                                                       |
-| **json_response_file_path** | string | null          | if you specify this option, that mean your upload endpoint will return you a json response the value must be the path inside the json (this option will be ignorer if the content type of the upload endpoint response is not application/json) |
+| upload_handler option name  |  type  | default value | possible values                                                                                                                                                                                                                                  |
+|:---------------------------:|:------:|---------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|          **type**           | string | form          | ``json``, ``form``                                                                                                                                                                                                                               |
+|     **upload_endpoint**     | string | null          | the endpoint of your upload handler exemple : ``/upload`` or ``https://my-custom-upload-endpoint/upload``                                                                                                                                        |
+| **json_response_file_path** | string | null          | if you specify this option, that mean your upload endpoint will return you a json response. The value must be the path inside the json (this option will be ignored if the content type of the upload endpoint response is not application/json) |
 
 
-- If your response in a classic simple ``Symfony\Component\HttpFoundation\Response``, you can simply return a response like this one for exemple :
+- If your response in a classic simple ``Symfony\Component\HttpFoundation\Response``, you can simply return a response like this one for exemple and do **not** need to specify the ``json_response_file_path`` option.
 ```php
         return new Response('https://my-website/public/assets/my-uploaded-image.jpg');
 ```
