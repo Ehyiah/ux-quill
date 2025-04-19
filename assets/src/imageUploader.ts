@@ -1,11 +1,52 @@
-import LoadingImage from './blots/image.js';
+import LoadingImage from './blots/image.ts';
+import Quill from 'quill';
+
+interface RangeStatic {
+    index: number;
+    length: number;
+}
+
+interface ImageBlot {
+    blotName: string;
+}
+
+interface ImageUploaderOptions {
+    upload: (file: File) => Promise<string>;
+}
+
+interface CustomWindow extends Window {
+    clipboardData?: DataTransfer;
+    ImageUploader?: typeof ImageUploader;
+}
+
+interface CaretPosition {
+    offsetNode: Node;
+    offset: number;
+}
+
+const typedLoadingImage = LoadingImage as ImageBlot;
+
+interface CustomDocument extends Document {
+    caretPositionFromPoint?(x: number, y: number): CaretPosition;
+    caretRangeFromPoint?(x: number, y: number): Range;
+}
+
+declare const document: CustomDocument;
+declare const window: CustomWindow;
 
 class ImageUploader {
-    constructor(quill, options) {
+    quill: Quill;
+    options: ImageUploaderOptions;
+    range: RangeStatic;
+    placeholderDelta: { ops: Array<{ insert?: any }> };
+    fileHolder: HTMLInputElement;
+
+    constructor(quill: any, options: ImageUploaderOptions) {
         this.quill = quill;
         this.options = options;
-        this.range = null;
-        this.placeholderDelta = null;
+        // Initialisation avec un range par défaut
+        this.range = { index: 0, length: 0 };
+        this.placeholderDelta = { ops: [] };
 
         if (typeof this.options.upload !== 'function')
             console.warn(
@@ -26,7 +67,10 @@ class ImageUploader {
 
     selectLocalImage() {
         this.quill.focus();
-        this.range = this.quill.getSelection();
+        const selection = this.quill.getSelection();
+        if (selection) {
+            this.range = selection;
+        }
         this.fileHolder = document.createElement('input');
         this.fileHolder.setAttribute('type', 'file');
         this.fileHolder.setAttribute('accept', 'image/*');
@@ -43,7 +87,7 @@ class ImageUploader {
         });
     }
 
-    handleDrop(evt) {
+    handleDrop(evt: DragEvent) {
         if (
             evt.dataTransfer &&
             evt.dataTransfer.files &&
@@ -64,7 +108,7 @@ class ImageUploader {
                 }
             } else {
                 const selection = document.getSelection();
-                const range = document.caretPositionFromPoint(evt.clientX, evt.clientY);
+                const range = document.caretPositionFromPoint?.(evt.clientX, evt.clientY);
                 if (selection && range) {
                     selection.setBaseAndExtent(
                         range.offsetNode,
@@ -76,36 +120,49 @@ class ImageUploader {
             }
 
             this.quill.focus();
-            this.range = this.quill.getSelection();
+            const selection = this.quill.getSelection();
+            if (selection) {
+                this.range = selection;
+            }
             const file = evt.dataTransfer.files[0];
 
             setTimeout(() => {
                 this.quill.focus();
-                this.range = this.quill.getSelection();
+                const newSelection = this.quill.getSelection();
+                if (newSelection) {
+                    this.range = newSelection;
+                }
                 this.readAndUploadFile(file);
             }, 0);
         }
     }
 
-    handlePaste(evt) {
+    handlePaste(evt: ClipboardEvent) {
         const clipboard = evt.clipboardData || window.clipboardData;
 
         // IE 11 is .files other browsers are .items
-        if (clipboard && (clipboard.items || clipboard.files)) {
+        if (clipboard && ((clipboard.items as DataTransferItemList) || (clipboard.files as FileList))) {
             const items = clipboard.items || clipboard.files;
             const IMAGE_MIME_REGEX = /^image\/(jpe?g|gif|png|svg|webp)$/i;
 
             for (let i = 0; i < items.length; i++) {
-                if (IMAGE_MIME_REGEX.test(items[i].type)) {
-                    const file = items[i].getAsFile ? items[i].getAsFile() : items[i];
+                const item = items[i] as (DataTransferItem | File);
+                if (IMAGE_MIME_REGEX.test(item.type)) {
+                    const file = 'getAsFile' in item ? item.getAsFile() : item as File;
 
                     if (file) {
                         this.quill.focus();
-                        this.range = this.quill.getSelection();
+                        const selection = this.quill.getSelection();
+                        if (selection) {
+                            this.range = selection;
+                        }
                         evt.preventDefault();
                         setTimeout(() => {
                             this.quill.focus();
-                            this.range = this.quill.getSelection();
+                            const newSelection = this.quill.getSelection();
+                            if (newSelection) {
+                                this.range = newSelection;
+                            }
                             this.readAndUploadFile(file);
                         }, 0);
                     }
@@ -114,7 +171,7 @@ class ImageUploader {
         }
     }
 
-    readAndUploadFile(file) {
+    readAndUploadFile(file: File) {
         let isUploadReject = false;
 
         const fileReader = new FileReader();
@@ -123,7 +180,7 @@ class ImageUploader {
             'load',
             () => {
                 if (!isUploadReject) {
-                    const base64ImageSrc = fileReader.result;
+                    const base64ImageSrc = fileReader.result as string;
                     this.insertBase64Image(base64ImageSrc);
                 }
             },
@@ -147,41 +204,60 @@ class ImageUploader {
     }
 
     fileChanged() {
-        const file = this.fileHolder.files[0];
-        this.readAndUploadFile(file);
+        let file: File | null = null;
+        if (this.fileHolder.files && this.fileHolder.files.length > 0) {
+            file = this.fileHolder.files[0];
+        }
+        if (file) {
+            this.readAndUploadFile(file);
+        }
     }
 
-    insertBase64Image(url) {
+    insertBase64Image(url: string) {
         const range = this.range;
 
+        // Utiliser directement 'imageBlot' comme nom de blot
         this.placeholderDelta = this.quill.insertEmbed(
             range.index,
-            LoadingImage.blotName,
+            'imageBlot',
             `${url}`,
             'user'
         );
     }
 
-    insertToEditor(url) {
+    insertToEditor(url: string) {
         const range = this.range;
-
         const lengthToDelete = this.calculatePlaceholderInsertLength();
 
-        // Delete the placeholder image
-        this.quill.deleteText(range.index, lengthToDelete, 'user');
+        // S'assurer que le delta est valide avant de tenter la suppression
+        if (lengthToDelete > 0) {
+            // Delete the placeholder image
+            this.quill.deleteText(range.index, lengthToDelete, 'user');
+        }
+
         // Insert the server saved image
         this.quill.insertEmbed(range.index, 'image', `${url}`, 'user');
+
+        // Réinitialiser le placeholderDelta pour éviter les suppressions multiples
+        this.placeholderDelta = { ops: [] };
 
         range.index++;
         this.quill.setSelection(range, 'user');
     }
 
-    // The length of the insert delta from insertBase64Image can vary depending on what part of the line the insert occurs
     calculatePlaceholderInsertLength() {
+        // Vérifier si placeholderDelta est défini et contient des opérations
+        if (!this.placeholderDelta || !this.placeholderDelta.ops || !Array.isArray(this.placeholderDelta.ops)) {
+            return 0;
+        }
+
         return this.placeholderDelta.ops.reduce((accumulator, deltaOperation) => {
-            const hasBarProperty = Object.prototype.hasOwnProperty.call(deltaOperation, 'insert');
-            if (hasBarProperty)
-                accumulator++;
+            // Vérifier si deltaOperation est défini
+            if (deltaOperation && typeof deltaOperation === 'object') {
+                const hasInsertProperty = Object.prototype.hasOwnProperty.call(deltaOperation, 'insert');
+                if (hasInsertProperty)
+                    accumulator++;
+            }
 
             return accumulator;
         }, 0);
@@ -191,7 +267,12 @@ class ImageUploader {
         const range = this.range;
         const lengthToDelete = this.calculatePlaceholderInsertLength();
 
-        this.quill.deleteText(range.index, lengthToDelete, 'user');
+        if (lengthToDelete > 0) {
+            this.quill.deleteText(range.index, lengthToDelete, 'user');
+        }
+
+        // Réinitialiser placeholderDelta pour éviter les suppressions multiples
+        this.placeholderDelta = { ops: [] };
     }
 }
 
