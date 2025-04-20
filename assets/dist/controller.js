@@ -29,11 +29,11 @@ Image.prototype.format = function (name, value) {
 export default class _Class extends Controller {
   connect() {
     const toolbarOptionsValue = this.toolbarOptionsValue;
-    const modulesOptions = this.extraOptionsValue.modules;
+    const modulesOptionsValue = this.modulesOptionsValue;
     const enabledModules = {
       'toolbar': toolbarOptionsValue
     };
-    const mergedModules = mergeModules(modulesOptions, enabledModules);
+    const mergedModules = mergeModules(modulesOptionsValue, enabledModules);
     const options = {
       debug: this.extraOptionsValue.debug,
       modules: mergedModules,
@@ -126,5 +126,9 @@ _Class.values = {
   extraOptions: {
     type: Object,
     default: {}
+  },
+  modulesOptions: {
+    type: Array,
+    default: []
   }
 };

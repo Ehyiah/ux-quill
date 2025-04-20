@@ -1,8 +1,11 @@
 <?php
 
-namespace Ehyiah\QuillJsBundle\DTO\Options\Modules;
+namespace Ehyiah\QuillJsBundle\DTO\Modules;
 
-class SyntaxModule
+/**
+ * To be used if the CodeBlock and is registered automatically
+ */
+class SyntaxModule implements ModuleInterface
 {
     public const NAME = 'syntax';
 

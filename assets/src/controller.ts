@@ -1,7 +1,7 @@
 import { Controller } from '@hotwired/stimulus';
 import Quill from 'quill';
 import * as Options from 'quill/core/quill';
-import { EmojiModule, ExtraOptions, ModuleInterface, ResizeModule, uploadOptions } from './typesmodules.d.ts';
+import { EmojiModule, ExtraOptions, ModuleInterface, ResizeModule, uploadOptions, ModuleOptions } from './typesmodules.d.ts';
 import mergeModules from './modules.ts';
 
 import axios from 'axios';
@@ -41,6 +41,7 @@ export default class extends Controller {
 
     declare readonly extraOptionsValue: ExtraOptions;
     declare readonly toolbarOptionsValue: HTMLDivElement;
+    declare readonly modulesOptionsValue: ModuleOptions;
     static values = {
         toolbarOptions: {
             type: Array,
@@ -49,18 +50,22 @@ export default class extends Controller {
         extraOptions: {
             type: Object,
             default: {},
+        },
+        modulesOptions: {
+            type: Array,
+            default: [],
         }
     }
 
     connect() {
         const toolbarOptionsValue = this.toolbarOptionsValue;
-        const modulesOptions = this.extraOptionsValue.modules;
+        const modulesOptionsValue = this.modulesOptionsValue;
 
         const enabledModules = {
             'toolbar': toolbarOptionsValue,
         };
 
-        const mergedModules = mergeModules(modulesOptions, enabledModules);
+        const mergedModules = mergeModules(modulesOptionsValue, enabledModules);
 
         const options: Options = {
             debug: this.extraOptionsValue.debug,
