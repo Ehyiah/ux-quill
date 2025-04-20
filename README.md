@@ -186,15 +186,16 @@ You can add as many Groups as you like or just One if you don't need the WYSIWYG
 
 
 ## quill_extra_options
-| extra_option_name  |  type  | values                                                                                                           |
-|:------------------:|:------:|:-----------------------------------------------------------------------------------------------------------------|
-|     **debug**      | string | `` error``, ``warn``, ``log``, ``info``  (you can use ``DebugOption`` class constants to pick a value)           |
-|     **height**     | string | examples: ``200px``, ``200em``, default: '200px'                                                                 |
-|     **theme**      | string | ``snow``, ``bubble`` , default: snow (you can use ``ThemeOption`` class constants to pick a value)               |
-|  **placeholder**   | string |                                                                                                                  |
-|     **style**      | string | ``class``, ``inline``, choose how the style will be applied.                                                     |
-| **upload_handler** | array  | (explained [below](#image-upload-handling) (you can use ``UploadHandlerOption`` class constants to pick a value) |
-|    **modules**     | array  | (explained [below](#modules) (you can use any class implementing ``ModuleInterface``)                            |
+|   extra_option_name    |  type  | values                                                                                                                                     |
+|:----------------------:|:------:|:-------------------------------------------------------------------------------------------------------------------------------------------|
+|       **debug**        | string | `` error``, ``warn``, ``log``, ``info``  (you can use ``DebugOption`` class constants to pick a value)                                     |
+|       **height**       | string | examples: ``200px``, ``200em``, default: '200px'                                                                                           |
+|       **theme**        | string | ``snow``, ``bubble`` , default: snow (you can use ``ThemeOption`` class constants to pick a value)                                         |
+|    **placeholder**     | string |                                                                                                                                            |
+|       **style**        | string | ``class``, ``inline``, choose how the style will be applied.                                                                               |
+|   **upload_handler**   | array  | (explained [below](#image-upload-handling) (you can use ``UploadHandlerOption`` class constants to pick a value)                           |
+|      **modules**       | array  | (explained [below](#modules) (you can use any class implementing ``ModuleInterface``)                                                      |
+| **use_semantic_html**  |  bool  | will use the ``getSemanticHTML()`` instead of ``innerHTML`` _(can resolve some problems like https://github.com/slab/quill/issues/3957)_   |
 
 
 ### Image upload Handling
