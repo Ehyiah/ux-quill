@@ -31,3 +31,7 @@ export type ModuleOptions = {
     name: string;
     options: Array<ModuleInterface>
 }
+
+export interface IconCustomizationOptions {
+    [key: string]: string; // Nom de l'icône -> contenu SVG ou nom du module (aria-label) -> contenu SVG
+}

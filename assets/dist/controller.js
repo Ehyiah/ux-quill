@@ -29,7 +29,6 @@ Image.prototype.format = function (name, value) {
 };
 export default class _Class extends Controller {
   connect() {
-    ToolbarCustomizer.customizeIcons(this.extraOptionsValue.custom_icons);
     const toolbarOptionsValue = this.toolbarOptionsValue;
     const modulesOptions = this.extraOptionsValue.modules;
     const enabledModules = {
@@ -101,12 +100,21 @@ export default class _Class extends Controller {
       this.editorContainerTarget.style.height = heightDefined;
     }
     this.dispatchEvent('options', options);
+    let unprocessedIcons = {};
+    if (this.extraOptionsValue.custom_icons) {
+      unprocessedIcons = ToolbarCustomizer.customizeIconsFromQuillRegistry(this.extraOptionsValue.custom_icons);
+    }
     const quill = new Quill(this.editorContainerTarget, options);
     quill.on('text-change', () => {
       const quillContent = quill.root.innerHTML;
-      const inputContent = this.inputTarget;
-      inputContent.value = quillContent;
+      this.inputTarget.value = quillContent;
     });
+    if (this.extraOptionsValue.custom_icons && Object.keys(unprocessedIcons).length > 0) {
+      ToolbarCustomizer.customizeIcons(unprocessedIcons, this.editorContainerTarget.parentElement || undefined);
+    }
+    if (this.extraOptionsValue.debug === 'info' || this.extraOptionsValue.debug === 'log') {
+      ToolbarCustomizer.debugToolbarButtons(this.editorContainerTarget.parentElement || undefined);
+    }
     this.dispatchEvent('connect', quill);
   }
   dispatchEvent(name, payload) {
