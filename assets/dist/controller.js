@@ -1,12 +1,10 @@
 import { Controller } from '@hotwired/stimulus';
 import Quill from 'quill';
 import mergeModules from "./modules.js";
+import { DynamicModuleLoader } from "./dynamicModuleLoader.js";
 import axios from 'axios';
 import ImageUploader from './imageUploader.js';
 Quill.register('modules/imageUploader', ImageUploader);
-import * as Emoji from 'quill2-emoji';
-import 'quill2-emoji/dist/style.css';
-Quill.register('modules/emoji', Emoji);
 import QuillResizeImage from 'quill-resize-image';
 Quill.register('modules/resize', QuillResizeImage);
 // allow image resize and position to be reloaded after persist
@@ -26,6 +24,12 @@ Image.prototype.format = function (name, value) {
     this.domNode.removeAttribute(name);
   }
 };
+const dynamicModules = [{
+  moduleName: 'emoji',
+  jsPath: ['quill2-emoji'],
+  cssPath: ['quill2-emoji/dist/style.css'],
+  toolbarKeyword: 'emoji'
+}];
 export default class _Class extends Controller {
   connect() {
     const toolbarOptionsValue = this.toolbarOptionsValue;
@@ -34,6 +38,7 @@ export default class _Class extends Controller {
       'toolbar': toolbarOptionsValue
     };
     const mergedModules = mergeModules(modulesOptions, enabledModules);
+    const moduleLoader = new DynamicModuleLoader(dynamicModules);
     const options = {
       debug: this.extraOptionsValue.debug,
       modules: mergedModules,
@@ -41,6 +46,7 @@ export default class _Class extends Controller {
       theme: this.extraOptionsValue.theme,
       style: this.extraOptionsValue.style
     };
+    const modulesLoadPromise = moduleLoader.loadModules(options);
     if (options.style === 'inline') {
       Quill.register(Quill.import('attributors/style/align'), true);
       Quill.register(Quill.import('attributors/style/background'), true);
@@ -99,6 +105,15 @@ export default class _Class extends Controller {
       this.editorContainerTarget.style.height = heightDefined;
     }
     this.dispatchEvent('options', options);
+    modulesLoadPromise.then(() => {
+      console.log('Tous les modules sont chargés, initialisation de Quill');
+      this.initializeQuill(options);
+    }).catch(error => {
+      console.error('Erreur lors du chargement des modules:', error);
+      this.initializeQuill(options);
+    });
+  }
+  initializeQuill(options) {
     const quill = new Quill(this.editorContainerTarget, options);
     quill.on('text-change', () => {
       const quillContent = quill.root.innerHTML;

@@ -3,15 +3,12 @@ import Quill from 'quill';
 import * as Options from 'quill/core/quill';
 import { EmojiModule, ExtraOptions, ModuleInterface, ResizeModule, uploadOptions } from './typesmodules.d.ts';
 import mergeModules from './modules.ts';
+import { DynamicModuleLoader, DynamicQuillModule } from './dynamicModuleLoader.ts';
 
 import axios from 'axios';
 
 import ImageUploader from './imageUploader.js'
 Quill.register('modules/imageUploader', ImageUploader);
-
-import * as Emoji from 'quill2-emoji';
-import 'quill2-emoji/dist/style.css';
-Quill.register('modules/emoji', Emoji);
 
 import QuillResizeImage from 'quill-resize-image';
 Quill.register('modules/resize', QuillResizeImage);
@@ -33,6 +30,15 @@ Image.prototype.format = function (name, value) {
         this.domNode.removeAttribute(name);
     }
 }
+
+const dynamicModules: DynamicQuillModule[] = [
+    {
+        moduleName: 'emoji',
+        jsPath: ['quill2-emoji'],
+        cssPath: ['quill2-emoji/dist/style.css'],
+        toolbarKeyword: 'emoji'
+    }
+];
 
 export default class extends Controller {
     declare readonly inputTarget: HTMLInputElement;
@@ -62,6 +68,8 @@ export default class extends Controller {
 
         const mergedModules = mergeModules(modulesOptions, enabledModules);
 
+        const moduleLoader = new DynamicModuleLoader(dynamicModules);
+
         const options: Options = {
             debug: this.extraOptionsValue.debug,
             modules: mergedModules,
@@ -69,6 +77,8 @@ export default class extends Controller {
             theme: this.extraOptionsValue.theme,
             style: this.extraOptionsValue.style,
         };
+
+        const modulesLoadPromise = moduleLoader.loadModules(options);
 
         if (options.style === 'inline') {
             Quill.register(Quill.import('attributors/style/align'), true);
@@ -143,14 +153,25 @@ export default class extends Controller {
 
         this.dispatchEvent('options', options);
 
-        const quill = new Quill(this.editorContainerTarget, options);
-        quill.on('text-change', () => {
-            const quillContent = quill.root.innerHTML;
-            const inputContent = this.inputTarget;
-            inputContent.value = quillContent;
-        })
+        modulesLoadPromise.then(() => {
+            console.log('Tous les modules sont chargés, initialisation de Quill');
+            this.initializeQuill(options);
+        }).catch(error => {
+            console.error('Erreur lors du chargement des modules:', error);
+            this.initializeQuill(options);
+        });
+            }
 
-        this.dispatchEvent('connect', quill);
+        private initializeQuill(options: Options): void {
+            const quill = new Quill(this.editorContainerTarget, options);
+
+            quill.on('text-change', () => {
+                const quillContent = quill.root.innerHTML;
+                const inputContent = this.inputTarget;
+                inputContent.value = quillContent;
+            });
+
+            this.dispatchEvent('connect', quill);
     }
 
     private dispatchEvent(name: string, payload: any = {}) {
