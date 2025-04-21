@@ -1043,7 +1043,7 @@
   resolved "https://registry.yarnpkg.com/@eslint/js/-/js-8.56.0.tgz#ef20350fec605a7f7035a01764731b2de0f3782b"
   integrity sha512-gMsVel9D7f2HLkBma9VbtzZRehRogVRfbr++f06nL2vnCGCNlzOD+/MUov/F4p8myyAHspEhVobgjpX64q5m6A==
 
-"@hotwired/stimulus@^3.2.1":
+"@hotwired/stimulus@^3.0.0":
   version "3.2.2"
   resolved "https://registry.yarnpkg.com/@hotwired/stimulus/-/stimulus-3.2.2.tgz#071aab59c600fed95b97939e605ff261a4251608"
   integrity sha512-eGeIqNOQpXoPAIP7tC1+1Yc1yl1xnwYqg+3mzqxyrbE5pg5YFBZcA6YoTiByJB6DKAEsiWtl6tjTJS4IYtbB7A==
@@ -4677,10 +4677,10 @@ quill-delta@^5.1.0:
     lodash.clonedeep "^4.5.0"
     lodash.isequal "^4.5.0"
 
-quill-resize-image@^1.0.4:
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/quill-resize-image/-/quill-resize-image-1.0.4.tgz#d199629e1265dced74d21e0a5814ffcbf1b8c6d8"
-  integrity sha512-CwFFRe1Wvtn9gfmUQ2Cj6R+l2VSpBKv1xGVScKiAtkljHKZx94jatJTedpw9HGN4mdWOu8AZfgIDCtkeQrmiBA==
+quill-resize-image@^1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/quill-resize-image/-/quill-resize-image-1.0.5.tgz#072533bad859d38d21056fd5ac6600841a62c5fc"
+  integrity sha512-s6yinBoRXy9jsVXdK9J8WMfv4DUO6yE0uzzBWTjOu4JwcSqzlsgYivB5KCWoPAOrdxmV1mYpvvALCWa36r5Mnw==
 
 quill2-emoji@^0.1.2:
   version "0.1.2"
