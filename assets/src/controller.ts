@@ -3,6 +3,7 @@ import Quill from 'quill';
 import * as Options from 'quill/core/quill';
 import { EmojiModule, ExtraOptions, ModuleInterface, ResizeModule, uploadOptions } from './typesmodules.d.ts';
 import mergeModules from './modules.ts';
+import { ToolbarCustomizer } from './ui/toolbarCustomizer.ts';
 
 import axios from 'axios';
 
@@ -53,6 +54,8 @@ export default class extends Controller {
     }
 
     connect() {
+        ToolbarCustomizer.customizeIcons(this.extraOptionsValue.custom_icons);
+
         const toolbarOptionsValue = this.toolbarOptionsValue;
         const modulesOptions = this.extraOptionsValue.modules;
 

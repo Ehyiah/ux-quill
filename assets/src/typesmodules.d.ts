@@ -6,6 +6,7 @@ export type ExtraOptions = {
     upload_handler: uploadOptions;
     style: string;
     modules: Array<ModuleInterface>;
+    custom_icons?: {[key: string]: string};
 }
 
 export type uploadOptions = {

@@ -1,6 +1,7 @@
 import { Controller } from '@hotwired/stimulus';
 import Quill from 'quill';
 import mergeModules from "./modules.js";
+import { ToolbarCustomizer } from "./ui/toolbarCustomizer.js";
 import axios from 'axios';
 import ImageUploader from './imageUploader.js';
 Quill.register('modules/imageUploader', ImageUploader);
@@ -28,6 +29,7 @@ Image.prototype.format = function (name, value) {
 };
 export default class _Class extends Controller {
   connect() {
+    ToolbarCustomizer.customizeIcons(this.extraOptionsValue.custom_icons);
     const toolbarOptionsValue = this.toolbarOptionsValue;
     const modulesOptions = this.extraOptionsValue.modules;
     const enabledModules = {

@@ -98,6 +98,9 @@ class QuillType extends AbstractType
                     ->setDefault('modules', [])
                     ->setAllowedTypes('modules', ['array'])
                 ;
+                $resolver
+                    ->setDefault('custom_icons', [])
+                ;
             },
         ]);
 
