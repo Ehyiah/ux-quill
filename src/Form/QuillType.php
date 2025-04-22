@@ -53,11 +53,13 @@ class QuillType extends AbstractType
                     ->setDefault('upload_handler', function (OptionsResolver $spoolResolver): void {
                         $spoolResolver->setDefaults([
                             'type' => 'form',
-                            'path' => null,
+                            'upload_endpoint' => null,
+                            'json_response_file_path' => null,
                         ]);
                         $spoolResolver->setAllowedTypes('type', ['string', 'null']);
-                        $spoolResolver->setAllowedTypes('path', ['string', 'null']);
                         $spoolResolver->setAllowedValues('type', ['json', 'form', null]);
+                        $spoolResolver->setAllowedTypes('upload_endpoint', ['string', 'null']);
+                        $spoolResolver->setAllowedTypes('json_response_file_path', ['string', 'null']);
                     })
                 ;
                 $resolver

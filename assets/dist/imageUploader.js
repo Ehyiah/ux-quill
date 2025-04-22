@@ -1,10 +1,22 @@
-import LoadingImage from './blots/image.js';
+import LoadingImage from "./blots/image.js";
+const typedLoadingImage = LoadingImage;
 class ImageUploader {
   constructor(quill, options) {
+    this.quill = void 0;
+    this.options = void 0;
+    this.range = void 0;
+    this.placeholderDelta = void 0;
+    this.fileHolder = void 0;
     this.quill = quill;
     this.options = options;
-    this.range = null;
-    this.placeholderDelta = null;
+    // Initialisation avec un range par défaut
+    this.range = {
+      index: 0,
+      length: 0
+    };
+    this.placeholderDelta = {
+      ops: []
+    };
     if (typeof this.options.upload !== 'function') console.warn('[Missing config] upload function that returns a promise is required');
     const toolbar = this.quill.getModule('toolbar');
     if (toolbar) {
@@ -17,7 +29,10 @@ class ImageUploader {
   }
   selectLocalImage() {
     this.quill.focus();
-    this.range = this.quill.getSelection();
+    const selection = this.quill.getSelection();
+    if (selection) {
+      this.range = selection;
+    }
     this.fileHolder = document.createElement('input');
     this.fileHolder.setAttribute('type', 'file');
     this.fileHolder.setAttribute('accept', 'image/*');
@@ -41,17 +56,23 @@ class ImageUploader {
         }
       } else {
         const selection = document.getSelection();
-        const range = document.caretPositionFromPoint(evt.clientX, evt.clientY);
+        const range = document.caretPositionFromPoint == null ? void 0 : document.caretPositionFromPoint(evt.clientX, evt.clientY);
         if (selection && range) {
           selection.setBaseAndExtent(range.offsetNode, range.offset, range.offsetNode, range.offset);
         }
       }
       this.quill.focus();
-      this.range = this.quill.getSelection();
+      const selection = this.quill.getSelection();
+      if (selection) {
+        this.range = selection;
+      }
       const file = evt.dataTransfer.files[0];
       setTimeout(() => {
         this.quill.focus();
-        this.range = this.quill.getSelection();
+        const newSelection = this.quill.getSelection();
+        if (newSelection) {
+          this.range = newSelection;
+        }
         this.readAndUploadFile(file);
       }, 0);
     }
@@ -64,15 +85,22 @@ class ImageUploader {
       const items = clipboard.items || clipboard.files;
       const IMAGE_MIME_REGEX = /^image\/(jpe?g|gif|png|svg|webp)$/i;
       for (let i = 0; i < items.length; i++) {
-        if (IMAGE_MIME_REGEX.test(items[i].type)) {
-          const file = items[i].getAsFile ? items[i].getAsFile() : items[i];
+        const item = items[i];
+        if (IMAGE_MIME_REGEX.test(item.type)) {
+          const file = 'getAsFile' in item ? item.getAsFile() : item;
           if (file) {
             this.quill.focus();
-            this.range = this.quill.getSelection();
+            const selection = this.quill.getSelection();
+            if (selection) {
+              this.range = selection;
+            }
             evt.preventDefault();
             setTimeout(() => {
               this.quill.focus();
-              this.range = this.quill.getSelection();
+              const newSelection = this.quill.getSelection();
+              if (newSelection) {
+                this.range = newSelection;
+              }
               this.readAndUploadFile(file);
             }, 0);
           }
@@ -101,37 +129,65 @@ class ImageUploader {
     });
   }
   fileChanged() {
-    const file = this.fileHolder.files[0];
-    this.readAndUploadFile(file);
+    let file = null;
+    if (this.fileHolder.files && this.fileHolder.files.length > 0) {
+      file = this.fileHolder.files[0];
+    }
+    if (file) {
+      this.readAndUploadFile(file);
+    }
   }
   insertBase64Image(url) {
     const range = this.range;
-    this.placeholderDelta = this.quill.insertEmbed(range.index, LoadingImage.blotName, "" + url, 'user');
+
+    // Utiliser directement 'imageBlot' comme nom de blot
+    this.placeholderDelta = this.quill.insertEmbed(range.index, 'imageBlot', "" + url, 'user');
   }
   insertToEditor(url) {
     const range = this.range;
     const lengthToDelete = this.calculatePlaceholderInsertLength();
 
-    // Delete the placeholder image
-    this.quill.deleteText(range.index, lengthToDelete, 'user');
+    // S'assurer que le delta est valide avant de tenter la suppression
+    if (lengthToDelete > 0) {
+      // Delete the placeholder image
+      this.quill.deleteText(range.index, lengthToDelete, 'user');
+    }
+
     // Insert the server saved image
     this.quill.insertEmbed(range.index, 'image', "" + url, 'user');
+
+    // Réinitialiser le placeholderDelta pour éviter les suppressions multiples
+    this.placeholderDelta = {
+      ops: []
+    };
     range.index++;
     this.quill.setSelection(range, 'user');
   }
-
-  // The length of the insert delta from insertBase64Image can vary depending on what part of the line the insert occurs
   calculatePlaceholderInsertLength() {
+    // Vérifier si placeholderDelta est défini et contient des opérations
+    if (!this.placeholderDelta || !this.placeholderDelta.ops || !Array.isArray(this.placeholderDelta.ops)) {
+      return 0;
+    }
     return this.placeholderDelta.ops.reduce((accumulator, deltaOperation) => {
-      const hasBarProperty = Object.prototype.hasOwnProperty.call(deltaOperation, 'insert');
-      if (hasBarProperty) accumulator++;
+      // Vérifier si deltaOperation est défini
+      if (deltaOperation && typeof deltaOperation === 'object') {
+        const hasInsertProperty = Object.prototype.hasOwnProperty.call(deltaOperation, 'insert');
+        if (hasInsertProperty) accumulator++;
+      }
       return accumulator;
     }, 0);
   }
   removeBase64Image() {
     const range = this.range;
     const lengthToDelete = this.calculatePlaceholderInsertLength();
-    this.quill.deleteText(range.index, lengthToDelete, 'user');
+    if (lengthToDelete > 0) {
+      this.quill.deleteText(range.index, lengthToDelete, 'user');
+    }
+
+    // Réinitialiser placeholderDelta pour éviter les suppressions multiples
+    this.placeholderDelta = {
+      ops: []
+    };
   }
 }
 window.ImageUploader = ImageUploader;

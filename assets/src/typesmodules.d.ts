@@ -11,7 +11,8 @@ export type ExtraOptions = {
 
 export type uploadOptions = {
     type: string;
-    path: string;
+    upload_endpoint: null|string;
+    json_response_file_path: null|string;
 }
 
 interface ModuleInterface {
