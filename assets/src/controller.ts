@@ -4,10 +4,7 @@ import * as Options from 'quill/core/quill';
 import { ExtraOptions } from './typesmodules.d.ts';
 import mergeModules from './modules.ts';
 import { ToolbarCustomizer } from './ui/toolbarCustomizer.ts';
-
-import axios from 'axios';
 import { handleUploadResponse, uploadStrategies } from './upload-utils.ts';
-
 import ImageUploader from './imageUploader.ts';
 import * as Emoji from 'quill2-emoji';
 import 'quill2-emoji/dist/style.css';
@@ -70,6 +67,7 @@ export default class extends Controller {
 
     connect() {
         const options = this.buildQuillOptions();
+        const unprocessedIcons = this.processIconReplacementFromQuillCore();
         this.setupQuillStyles(options);
         this.setupUploadHandler(options);
         this.setupEditorHeight();
@@ -78,6 +76,7 @@ export default class extends Controller {
 
         const quill = new Quill(this.editorContainerTarget, options);
         this.setupContentSync(quill);
+        this.processUnprocessedIcons(unprocessedIcons);
 
         this.dispatchEvent('connect', quill);
     }
@@ -148,17 +147,24 @@ export default class extends Controller {
                 inputContent.value = quillContent;
             })
         }
+
+        this.dispatchEvent('connect', quill);
+    }
+
+    private dispatchEvent(name: string, payload: any = {}) {
+        this.dispatch(name, { detail: payload, prefix: 'quill' });
+    }
+
+    private processIconReplacementFromQuillCore(): {[key: string]: string} {
         let unprocessedIcons = {};
         if (this.extraOptionsValue.custom_icons) {
             unprocessedIcons = ToolbarCustomizer.customizeIconsFromQuillRegistry(this.extraOptionsValue.custom_icons);
         }
 
-        const quill = new Quill(this.editorContainerTarget, options);
-        quill.on('text-change', () => {
-            const quillContent = quill.root.innerHTML;
-            this.inputTarget.value = quillContent;
-        });
+        return unprocessedIcons;
+    }
 
+    private processUnprocessedIcons(unprocessedIcons): void {
         if (this.extraOptionsValue.custom_icons && Object.keys(unprocessedIcons).length > 0) {
             ToolbarCustomizer.customizeIcons(
                 unprocessedIcons,
@@ -169,11 +175,5 @@ export default class extends Controller {
         if (this.extraOptionsValue.debug === 'info' || this.extraOptionsValue.debug === 'log') {
             ToolbarCustomizer.debugToolbarButtons(this.editorContainerTarget.parentElement || undefined);
         }
-
-        this.dispatchEvent('connect', quill);
-    }
-
-    private dispatchEvent(name: string, payload: any = {}) {
-        this.dispatch(name, { detail: payload, prefix: 'quill' });
     }
 }
