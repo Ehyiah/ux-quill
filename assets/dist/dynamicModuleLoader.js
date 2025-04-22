@@ -31,7 +31,12 @@ export class DynamicModuleLoader {
     }
     try {
       const primaryJsPath = module.jsPath[0];
-      const importedModule = await import(primaryJsPath);
+      let importedModule;
+      if (typeof primaryJsPath === 'function') {
+        importedModule = await primaryJsPath();
+      } else {
+        importedModule = await import(primaryJsPath);
+      }
       const moduleToUse = importedModule.default || importedModule;
       Quill.register("modules/" + module.moduleName, moduleToUse);
       if (module.jsPath.length > 1) {
@@ -48,10 +53,13 @@ export class DynamicModuleLoader {
   }
   loadModules(config) {
     const modulesToLoad = this.modules.filter(module => {
+      // First search if moduleName is present
       if (config.modules && config.modules[module.moduleName]) {
         return true;
       }
-      if (config.modules && config.modules.toolbar) {
+
+      // If module name is not found then search in toolbar options
+      if (config.modules && config.modules) {
         return this.isKeywordPresent(config.modules.toolbar, module.toolbarKeyword);
       }
       return false;

@@ -5,13 +5,7 @@ import { ExtraOptions, ModuleOptions } from './typesmodules.d.ts';
 import mergeModules from './modules.ts';
 import { ToolbarCustomizer } from './ui/toolbarCustomizer.ts';
 import { handleUploadResponse, uploadStrategies } from './upload-utils.ts';
-import * as Emoji from 'quill2-emoji';
-import 'quill2-emoji/dist/style.css';
 import { DynamicModuleLoader, DynamicQuillModule } from './dynamicModuleLoader.ts';
-import ImageUploader from './imageUploader.js'
-Quill.register('modules/imageUploader', ImageUploader);
-
-import QuillResizeImage from 'quill-resize-image';
 
 interface DOMNode extends HTMLElement {
     getAttribute(name: string): string | null;
@@ -19,16 +13,6 @@ interface DOMNode extends HTMLElement {
     removeAttribute(name: string): void;
     hasAttribute(name: string): boolean;
 }
-
-const modules = {
-    'imageUploader': ImageUploader,
-    'emoji': Emoji,
-    'resize': QuillResizeImage
-};
-
-Object.entries(modules).forEach(([name, module]) => {
-    Quill.register(`modules/${name}`, module);
-});
 
 const Image = Quill.import('formats/image');
 const oldFormats = Image.formats;
@@ -56,6 +40,16 @@ const dynamicModules: DynamicQuillModule[] = [
         jsPath: ['quill2-emoji'],
         cssPath: ['quill2-emoji/dist/style.css'],
         toolbarKeyword: 'emoji'
+    },
+    {
+        moduleName: 'imageUploader',
+        jsPath: [() => import('./imageUploader.js')],  // Fonction d'import pour le module local
+        toolbarKeyword: 'upload_handler',
+    },
+    {
+        moduleName: 'resize',
+        jsPath: ['quill-resize-image'],
+        toolbarKeyword: 'image'
     }
 ];
 
@@ -84,35 +78,35 @@ export default class extends Controller {
 
     connect() {
         const options = this.buildQuillOptions();
-        const unprocessedIcons = this.processIconReplacementFromQuillCore();
         this.setupQuillStyles(options);
         this.setupUploadHandler(options);
         this.setupEditorHeight();
 
         this.dispatchEvent('options', options);
 
-        const quill = new Quill(this.editorContainerTarget, options);
-        this.setupContentSync(quill);
-        this.processUnprocessedIcons(unprocessedIcons);
+        const moduleLoader = new DynamicModuleLoader(dynamicModules);
+        const modulesLoadPromise = moduleLoader.loadModules(options);
 
-        this.dispatchEvent('connect', quill);
+        const unprocessedIcons = this.processIconReplacementFromQuillCore();
+
+        modulesLoadPromise.then(() => {
+            console.log('Tous les modules sont chargés, initialisation de Quill');
+            this.initializeQuill(options, unprocessedIcons);
+        }).catch(error => {
+            console.error('Erreur lors du chargement des modules:', error);
+            this.initializeQuill(options, unprocessedIcons);
+        });
     }
 
     private buildQuillOptions(): Options {
         const { debug, placeholder, theme, style } = this.extraOptionsValue;
-
-        const enabledModules = {
+        const enabledModules: Options = {
             'toolbar': this.toolbarOptionsValue,
         };
-
         const mergedModules = mergeModules(this.modulesOptionsValue, enabledModules);
 
         return {
             debug,
-        const moduleLoader = new DynamicModuleLoader(dynamicModules);
-
-        const options: Options = {
-            debug: this.extraOptionsValue.debug,
             modules: mergedModules,
             placeholder,
             theme,
@@ -121,8 +115,6 @@ export default class extends Controller {
     }
 
     private setupQuillStyles(options: Options) {
-        const modulesLoadPromise = moduleLoader.loadModules(options);
-
         if (options.style === 'inline') {
             const styleAttributes = ['align', 'background', 'color', 'direction', 'font', 'size'];
             styleAttributes.forEach(attr =>
@@ -158,46 +150,29 @@ export default class extends Controller {
         }
     }
 
+    private initializeQuill(options: Options, unprocessedIcons): void {
+        const quill = new Quill(this.editorContainerTarget, options);
+        this.setupContentSync(quill);
+
+        this.processUnprocessedIcons(unprocessedIcons);
+
+        this.dispatchEvent('connect', quill);
+    }
+
     private setupContentSync(quill: Quill) {
         if (this.extraOptionsValue.use_semantic_html) {
             quill.on('text-change', () => {
                 const quillContent = quill.getSemanticHTML();
                 const inputContent = this.inputTarget;
                 inputContent.value = quillContent;
-            })
+            });
         } else {
             quill.on('text-change', () => {
                 const quillContent = quill.root.innerHTML;
                 const inputContent = this.inputTarget;
                 inputContent.value = quillContent;
-            })
-        }
-        const heightDefined = this.extraOptionsValue.height;
-        if (null !== heightDefined) {
-            this.editorContainerTarget.style.height = heightDefined
-        }
-
-        this.dispatchEvent('options', options);
-
-        modulesLoadPromise.then(() => {
-            console.log('Tous les modules sont chargés, initialisation de Quill');
-            this.initializeQuill(options);
-        }).catch(error => {
-            console.error('Erreur lors du chargement des modules:', error);
-            this.initializeQuill(options);
-        });
-            }
-
-        private initializeQuill(options: Options): void {
-            const quill = new Quill(this.editorContainerTarget, options);
-
-            quill.on('text-change', () => {
-                const quillContent = quill.root.innerHTML;
-                const inputContent = this.inputTarget;
-                inputContent.value = quillContent;
             });
-
-        this.dispatchEvent('connect', quill);
+        }
     }
 
     private dispatchEvent(name: string, payload: any = {}) {
@@ -213,7 +188,7 @@ export default class extends Controller {
         return unprocessedIcons;
     }
 
-    private processUnprocessedIcons(unprocessedIcons): void {
+    private processUnprocessedIcons(unprocessedIcons: {[key: string]: string}): void {
         if (this.extraOptionsValue.custom_icons && Object.keys(unprocessedIcons).length > 0) {
             ToolbarCustomizer.customizeIcons(
                 unprocessedIcons,
