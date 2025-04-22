@@ -98,6 +98,11 @@ class QuillType extends AbstractType
                     ->setDefault('modules', [])
                     ->setAllowedTypes('modules', ['array'])
                 ;
+                $resolver
+                    ->setDefault('use_semantic_html', false)
+                    ->setAllowedTypes('use_semantic_html', 'bool')
+                    ->setAllowedValues('use_semantic_html', [true, false])
+                ;
             },
         ]);
 
