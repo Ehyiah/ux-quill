@@ -1,0 +1,244 @@
+name: Test Bundle Installation
+
+on:
+    workflow_dispatch:
+    push:
+        branches: [ main ]
+    pull_request:
+        branches: [ main ]
+
+jobs:
+    test_bundle_install:
+        name: Install Bundle
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: true
+            matrix:
+                php-version: ['8.1', '8.2', '8.3', '8.4']
+                symfony-version: ['6.4', '7.0', '7.1', '7.2']
+                exclude:
+                    - php-version: '8.1'
+                      symfony-version: '7.0'
+                    - php-version: '8.1'
+                      symfony-version: '7.1'
+                    - php-version: '8.1'
+                      symfony-version: '7.2'
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: ${{ matrix.php-version }}
+                  extensions: mbstring, xml, ctype, iconv, intl, dom, filter, json
+                  coverage: none
+                  tools: composer:v2
+
+            - name: Installation de la CLI Symfony
+              run: |
+                # Installation de la CLI Symfony pour les tests
+                curl -1sLf 'https://dl.cloudsmith.io/public/symfony/stable/setup.deb.sh' | sudo -E bash
+                sudo apt install symfony-cli || echo "Impossible d'installer la CLI Symfony, on continuera avec le serveur PHP intégré"
+
+            - name: Création d'un nouveau projet Symfony
+              run: |
+                  composer create-project symfony/skeleton:"^${{ matrix.symfony-version }}" test-project-${{ matrix.php-version }}-${{ matrix.symfony-version }}
+                  cd test-project-${{ matrix.php-version }}-${{ matrix.symfony-version }}
+                  composer require webapp symfony/asset-mapper
+
+            - name: Installation du bundle QuillJs
+              working-directory: test-project-${{ matrix.php-version }}-${{ matrix.symfony-version }}
+              run: |
+                  # Installer notre bundle depuis le dépôt local
+                  composer config repositories.local '{"type": "path", "url": "../", "options": {"symlink": true}}'
+                  composer require ehyiah/ux-quill:@dev
+                  
+                  # Vérifier que le bundle est correctement installé dans composer.json
+                  cat composer.json | grep ehyiah/ux-quill
+
+            - name: Vérification de l'Asset Mapper
+              working-directory: test-project-${{ matrix.php-version }}-${{ matrix.symfony-version }}
+              run: |
+                # Vérifier les entrées d'assets mappés
+                bin/console debug:asset-map | grep -i quill
+
+            - name: Vérification de l'installation du bundle
+              working-directory: test-project-${{ matrix.php-version }}-${{ matrix.symfony-version }}
+              run: |
+                  # Vérifier que le bundle est bien enregistré dans le kernel
+                  grep -r "Ehyiah\\\\QuillJsBundle" config/
+                  
+                  # Vérifier que les services sont bien chargés
+                  bin/console debug:container | grep -i quill
+
+            - name: Créer un formulaire test avec QuillJs
+              working-directory: test-project-${{ matrix.php-version }}-${{ matrix.symfony-version }}
+              run: |
+                  mkdir -p src/Form
+                  cat > src/Form/TestQuillType.php << 'EOL'
+                  <?php
+                  
+                  namespace App\Form;
+                  
+                  use Ehyiah\QuillJsBundle\Form\QuillType;
+                  use Symfony\Component\Form\AbstractType;
+                  use Symfony\Component\Form\FormBuilderInterface;
+                  
+                  class TestQuillType extends AbstractType
+                  {
+                      public function buildForm(FormBuilderInterface $builder, array $options)
+                      {
+                          $builder->add('content', QuillType::class, [
+                          ]);
+                      }
+                  }
+                  EOL
+                  
+                  # Vérifier que le fichier a été créé
+                  cat src/Form/TestQuillType.php
+
+            - name: Test de fonctionnement
+              working-directory: test-project-${{ matrix.php-version }}-${{ matrix.symfony-version }}
+              run: |
+                  # Créer un contrôleur pour tester le formulaire
+                  mkdir -p src/Controller
+                  cat > src/Controller/TestController.php << 'EOL'
+                  <?php
+                  
+                  namespace App\Controller;
+                  
+                  use App\Form\TestQuillType;
+                  use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+                  use Symfony\Component\HttpFoundation\Response;
+                  use Symfony\Component\Routing\Attribute\Route;
+                  
+                  class TestController extends AbstractController
+                  {
+                      #[Route('/test-quill', name: 'test_quill')]
+                      public function index(): Response
+                      {
+                          $form = $this->createForm(TestQuillType::class);
+                  
+                          return $this->render('test/index.html.twig', [
+                              'form' => $form->createView(),
+                          ]);
+                      }
+                  }
+                  EOL
+                  
+                  # Créer un template pour afficher le formulaire
+                  mkdir -p templates/test
+                  cat > templates/test/index.html.twig << 'EOL'
+                  {% extends 'base.html.twig' %}
+                  
+                  {% block title %}Test QuillJs{% endblock %}
+                  
+                  {% block body %}
+                      <h1>Test du bundle QuillJs</h1>
+                      {{ form_start(form) }}
+                          {{ form_row(form.content) }}
+                      {{ form_end(form) }}
+                  {% endblock %}
+                  EOL
+                  
+                  # Vérifier la configuration d'importmap.php si elle existe
+                  cat config/importmap.php 2>/dev/null || echo "Fichier importmap.php introuvable"
+                  
+                  # Compiler les assets avec AssetMapper
+                  bin/console asset-map:compile
+                  
+                  # Préparer l'environnement pour le test
+                  bin/console cache:clear --env=prod
+                  bin/console debug:router
+                  
+                  # Recalculer le même port dynamique
+                  PHP_MAJOR=$(echo "${{ matrix.php-version }}" | cut -d'.' -f1)
+                  PHP_MINOR=$(echo "${{ matrix.php-version }}" | cut -d'.' -f2)
+                  SYM_MAJOR=$(echo "${{ matrix.symfony-version }}" | cut -d'.' -f1)
+                  SYM_MINOR=$(echo "${{ matrix.symfony-version }}" | cut -d'.' -f2)
+                  PORT=$((8000 + PHP_MAJOR * 1000 + PHP_MINOR * 100 + SYM_MAJOR * 10 + SYM_MINOR))
+                  
+                  # Démarrer le serveur avec plus de vérifications
+                  SERVER_PORT=$PORT symfony server:start -d --no-tls --port=$PORT && echo "Serveur Symfony démarré sur le port $PORT" || \
+                    (echo "Serveur Symfony n'a pas démarré, tentative avec le serveur PHP intégré" && \
+                     php -S localhost:$PORT -t public & echo "Serveur PHP démarré sur le port $PORT")
+                  
+                  # Vérifier que le serveur répond
+                  sleep 5  # Attendre que le serveur démarre
+                  curl -v http://localhost:$PORT/ || (echo "❌ Le serveur ne répond pas" && exit 1)
+                  
+                  # Afficher les logs pour diagnostiquer les éventuels problèmes
+                  test -f var/log/dev.log && tail -n 50 var/log/dev.log || echo "Aucun fichier de log trouvé"
+                  
+                  # Vérifier la réponse HTTP avec détails (pour le diagnostic)
+                  curl -v http://localhost:$PORT/test-quill
+                  
+                  # Vérifier le code HTTP et échouer si ce n'est pas 200
+                  echo "Vérification que l'application renvoie bien un code HTTP 200..."
+                  HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:$PORT/test-quill)
+                  echo "Statut HTTP: $HTTP_STATUS"
+                  if [ "$HTTP_STATUS" -ne 200 ]; then
+                    echo "❌ ERREUR: Le endpoint /test-quill n'a pas retourné un statut HTTP 200 (statut actuel: $HTTP_STATUS)"
+                    exit 1
+                  fi
+                  echo "✅ L'application répond avec un statut HTTP 200"
+
+            - name: Vérification du rendu HTML QuillJs
+              working-directory: test-project-${{ matrix.php-version }}-${{ matrix.symfony-version }}
+              run: |
+                  echo "Vérification de la présence des éléments HTML du composant QuillJs..."
+                  
+                  # Recalculer le même port dynamique
+                  PHP_MAJOR=$(echo "${{ matrix.php-version }}" | cut -d'.' -f1)
+                  PHP_MINOR=$(echo "${{ matrix.php-version }}" | cut -d'.' -f2)
+                  SYM_MAJOR=$(echo "${{ matrix.symfony-version }}" | cut -d'.' -f1)
+                  SYM_MINOR=$(echo "${{ matrix.symfony-version }}" | cut -d'.' -f2)
+                  PORT=$((8000 + PHP_MAJOR * 1000 + PHP_MINOR * 100 + SYM_MAJOR * 10 + SYM_MINOR))
+                  
+                  # Récupérer le contenu HTML de la page avec le port calculé
+                  HTML_CONTENT=$(curl -s http://localhost:$PORT/test-quill)
+                  
+                  # Créer un fichier temporaire unique pour éviter les conflits
+                  TEMP_FILE="quill_response_php${PHP_MAJOR}${PHP_MINOR}_sym${SYM_MAJOR}${SYM_MINOR}.html"
+                  echo "$HTML_CONTENT" > $TEMP_FILE
+                  
+                  # Vérifier la présence de la div quill-container
+                  if ! grep -q 'div class="quill-container"' $TEMP_FILE; then
+                    echo "❌ ERREUR: La div avec la classe 'quill-container' est absente"
+                    exit 1
+                  fi
+                  
+                  # Vérifier la présence de data-controller="ehyiah--ux-quill--quill"
+                  if ! grep -q 'data-controller="ehyiah--ux-quill--quill"' $TEMP_FILE; then
+                    echo "❌ ERREUR: L'attribut data-controller est absent ou incorrect"
+                    exit 1
+                  fi
+                  
+                  # Vérifier la présence de data-ehyiah--ux-quill--quill-toolbar-options-value
+                  if ! grep -q 'data-ehyiah--ux-quill--quill-toolbar-options-value' $TEMP_FILE; then
+                    echo "❌ ERREUR: L'attribut data-ehyiah--ux-quill--quill-toolbar-options-value est absent"
+                    exit 1
+                  fi
+                  
+                  # Vérifier la présence de data-ehyiah--ux-quill--quill-extra-options-value
+                  if ! grep -q 'data-ehyiah--ux-quill--quill-extra-options-value' $TEMP_FILE; then
+                    echo "❌ ERREUR: L'attribut data-ehyiah--ux-quill--quill-extra-options-value est absent"
+                    exit 1
+                  fi
+                  
+                  # Vérifier la présence de data-ehyiah--ux-quill--quill-modules-options-value
+                  if ! grep -q 'data-ehyiah--ux-quill--quill-modules-options-value' $TEMP_FILE; then
+                    echo "❌ ERREUR: L'attribut data-ehyiah--ux-quill--quill-modules-options-value est absent"
+                    exit 1
+                  fi
+                  
+                  rm $TEMP_FILE
+                  
+                  echo "✅ Tous les éléments HTML du composant QuillJs sont présents dans la page"
+
+            - name: Rapport final
+              working-directory: test-project-${{ matrix.php-version }}-${{ matrix.symfony-version }}
+              run: |
+                  echo "✅ Installation du bundle ehyiah/ux-quill terminée avec succès sur Symfony ${{ matrix.symfony-version }} et PHP ${{ matrix.php-version }} avec AssetMapper"
