@@ -1,6 +1,6 @@
 <?php
 
-namespace Ehyiah\QuillJsBundle\DTO\Options\Modules;
+namespace Ehyiah\QuillJsBundle\DTO\Modules;
 
 /**
  * To be used if the EmojiField is required in your Form

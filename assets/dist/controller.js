@@ -1,102 +1,110 @@
 import { Controller } from '@hotwired/stimulus';
 import Quill from 'quill';
 import mergeModules from "./modules.js";
-import { ToolbarCustomizer } from "./ui/toolbarCustomizer.js";
-import { handleUploadResponse, uploadStrategies } from "./upload-utils.js";
-import ImageUploader from "./imageUploader.js";
+import axios from 'axios';
+import ImageUploader from './imageUploader.js';
+Quill.register('modules/imageUploader', ImageUploader);
 import * as Emoji from 'quill2-emoji';
 import 'quill2-emoji/dist/style.css';
+Quill.register('modules/emoji', Emoji);
 import QuillResizeImage from 'quill-resize-image';
-const modules = {
-  'imageUploader': ImageUploader,
-  'emoji': Emoji,
-  'resize': QuillResizeImage
-};
-Object.entries(modules).forEach(_ref => {
-  let [name, module] = _ref;
-  Quill.register("modules/" + name, module);
-});
+Quill.register('modules/resize', QuillResizeImage);
+// allow image resize and position to be reloaded after persist
 const Image = Quill.import('formats/image');
 const oldFormats = Image.formats;
 Image.formats = function (domNode) {
-  const formats = oldFormats.call(this, domNode);
+  const formats = oldFormats(domNode);
   if (domNode.hasAttribute('style')) {
     formats.style = domNode.getAttribute('style');
   }
   return formats;
 };
 Image.prototype.format = function (name, value) {
-  value ? this.domNode.setAttribute(name, String(value)) : this.domNode.removeAttribute(name);
+  if (value) {
+    this.domNode.setAttribute(name, value);
+  } else {
+    this.domNode.removeAttribute(name);
+  }
 };
 export default class _Class extends Controller {
   connect() {
-    const options = this.buildQuillOptions();
-    const unprocessedIcons = this.processIconReplacementFromQuillCore();
-    this.setupQuillStyles(options);
-    this.setupUploadHandler(options);
-    this.setupEditorHeight();
-    this.dispatchEvent('options', options);
-    const quill = new Quill(this.editorContainerTarget, options);
-    this.setupContentSync(quill);
-    this.processUnprocessedIcons(unprocessedIcons);
-    this.dispatchEvent('connect', quill);
-  }
-  buildQuillOptions() {
-    const {
-      debug,
-      modules: modulesOptions,
-      placeholder,
-      theme,
-      style
-    } = this.extraOptionsValue;
+    const toolbarOptionsValue = this.toolbarOptionsValue;
+    const modulesOptionsValue = this.modulesOptionsValue;
     const enabledModules = {
-      'toolbar': this.toolbarOptionsValue
+      'toolbar': toolbarOptionsValue
     };
-    return {
-      debug,
-      modules: mergeModules(modulesOptions, enabledModules),
-      placeholder,
-      theme,
-      style
+    const mergedModules = mergeModules(modulesOptionsValue, enabledModules);
+    const options = {
+      debug: this.extraOptionsValue.debug,
+      modules: mergedModules,
+      placeholder: this.extraOptionsValue.placeholder,
+      theme: this.extraOptionsValue.theme,
+      style: this.extraOptionsValue.style
     };
-  }
-  setupQuillStyles(options) {
     if (options.style === 'inline') {
-      const styleAttributes = ['align', 'background', 'color', 'direction', 'font', 'size'];
-      styleAttributes.forEach(attr => Quill.register(Quill.import("attributors/style/" + attr), true));
+      Quill.register(Quill.import('attributors/style/align'), true);
+      Quill.register(Quill.import('attributors/style/background'), true);
+      Quill.register(Quill.import('attributors/style/color'), true);
+      Quill.register(Quill.import('attributors/style/direction'), true);
+      Quill.register(Quill.import('attributors/style/font'), true);
+      Quill.register(Quill.import('attributors/style/size'), true);
     }
-  }
-  setupUploadHandler(options) {
-    const config = this.extraOptionsValue.upload_handler;
-    if (config != null && config.upload_endpoint && uploadStrategies[config.type]) {
-      const uploadFunction = file => uploadStrategies[config.type](config.upload_endpoint, file).then(response => handleUploadResponse(response, config.json_response_file_path));
+    if (this.extraOptionsValue.upload_handler.path !== null && this.extraOptionsValue.upload_handler.type === 'form') {
       Object.assign(options.modules, {
         imageUploader: {
-          upload: uploadFunction
+          upload: file => {
+            return new Promise((resolve, reject) => {
+              const formData = new FormData();
+              formData.append('file', file);
+              axios.post(this.extraOptionsValue.upload_handler.path, formData).then(response => {
+                resolve(response.data);
+              }).catch(err => {
+                reject('Upload failed');
+                console.log(err);
+              });
+            });
+          }
         }
       });
     }
-  }
-  setupEditorHeight() {
-    const height = this.extraOptionsValue.height;
-    if (height !== null) {
-      this.editorContainerTarget.style.height = height;
-    }
-  }
-  setupContentSync(quill) {
-    if (this.extraOptionsValue.use_semantic_html) {
-      quill.on('text-change', () => {
-        const quillContent = quill.getSemanticHTML();
-        const inputContent = this.inputTarget;
-        inputContent.value = quillContent;
+    if (this.extraOptionsValue.upload_handler.path !== null && this.extraOptionsValue.upload_handler.type === 'json') {
+      Object.assign(options.modules, {
+        imageUploader: {
+          upload: file => {
+            return new Promise((resolve, reject) => {
+              const reader = file => {
+                return new Promise(resolve => {
+                  const fileReader = new FileReader();
+                  fileReader.onload = () => resolve(fileReader.result);
+                  fileReader.readAsDataURL(file);
+                });
+              };
+              reader(file).then(result => axios.post(this.extraOptionsValue.upload_handler.path, result, {
+                headers: {
+                  'Content-Type': 'application/json'
+                }
+              }).then(response => {
+                resolve(response.data);
+              }).catch(err => {
+                reject('Upload failed');
+                console.log(err);
+              }));
+            });
+          }
+        }
       });
-    } else {
-      quill.on('text-change', () => {
-        const quillContent = quill.root.innerHTML;
-        const inputContent = this.inputTarget;
-        inputContent.value = quillContent;
-      });
     }
+    const heightDefined = this.extraOptionsValue.height;
+    if (null !== heightDefined) {
+      this.editorContainerTarget.style.height = heightDefined;
+    }
+    this.dispatchEvent('options', options);
+    const quill = new Quill(this.editorContainerTarget, options);
+    quill.on('text-change', () => {
+      const quillContent = quill.root.innerHTML;
+      const inputContent = this.inputTarget;
+      inputContent.value = quillContent;
+    });
     this.dispatchEvent('connect', quill);
   }
   dispatchEvent(name, payload) {
@@ -108,21 +116,6 @@ export default class _Class extends Controller {
       prefix: 'quill'
     });
   }
-  processIconReplacementFromQuillCore() {
-    let unprocessedIcons = {};
-    if (this.extraOptionsValue.custom_icons) {
-      unprocessedIcons = ToolbarCustomizer.customizeIconsFromQuillRegistry(this.extraOptionsValue.custom_icons);
-    }
-    return unprocessedIcons;
-  }
-  processUnprocessedIcons(unprocessedIcons) {
-    if (this.extraOptionsValue.custom_icons && Object.keys(unprocessedIcons).length > 0) {
-      ToolbarCustomizer.customizeIcons(unprocessedIcons, this.editorContainerTarget.parentElement || undefined);
-    }
-    if (this.extraOptionsValue.debug === 'info' || this.extraOptionsValue.debug === 'log') {
-      ToolbarCustomizer.debugToolbarButtons(this.editorContainerTarget.parentElement || undefined);
-    }
-  }
 }
 _Class.targets = ['input', 'editorContainer'];
 _Class.values = {
@@ -133,5 +126,9 @@ _Class.values = {
   extraOptions: {
     type: Object,
     default: {}
+  },
+  modulesOptions: {
+    type: Array,
+    default: []
   }
 };

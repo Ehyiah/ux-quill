@@ -21,7 +21,7 @@ If you need a easy to use WYSIWYG (with no complex configuration) into a symfony
 
 
 * [EasyAdmin Integration](#easyadmin-integration)
-* [EasyAdmin Usage](#usage)
+* [EasyAdmin Usage](#easyadmin-usage)
 
 ## Installation
 ### Step 1 Require bundle
@@ -194,13 +194,12 @@ You can add as many Groups as you like or just One if you don't need the WYSIWYG
 |    **placeholder**    | string |                                                                                                                  |
 |       **style**       | string | ``class``, ``inline``, choose how the style will be applied.                                                     |
 |  **upload_handler**   | array  | (explained [below](#image-upload-handling) (you can use ``UploadHandlerOption`` class constants to pick a value) |
-|      **modules**      | array  | (explained [below](#modules) (you can use any class implementing ``ModuleInterface``)                            |
 | **use_semantic_html** |  bool  | will use the ``getSemanticHTML()`` instead of ``innerHTML`` _(can resolve some problems like https://github.com/slab/quill/issues/3957)_   |
 |   **custom_icons**    | array  | customize icons by passing a SVG to replace the default quill icon (explained [below](#icons)                    |
 
 
 ### Image upload Handling
-in ***ImageField*** : QuillJS transform images in base64 encoded file by default to save your files.
+in ***ImageField*** : QuillJS transforms images in base64 encoded file by default to save your files.
 However, you can specify a custom endpoint to handle image uploading and pass in response the entire public URL to display the image. 
 #### currently handling 2 methods :
 
@@ -257,23 +256,31 @@ in the exemple below ``json_path_file_response`` must be ``'file.url'``.
 ```
 
 
-### Modules
-#### PHP configurable modules
+## Modules
+### PHP configurable modules
 For these modules, you can configure them directly in your PHP form :
 https://quilljs.com/docs/modules
 
 You can add/customize quill modules in this option field.
 You can create your own modules classes, they need to implement the ``ModuleInterface`` and add the name and options properties.
+Some modules are automatically loaded when they are need in fields.
 
-|       modules       |                                                                   description                                                                    |     name      | options type |                               options                               |                          default options                          |
-|:-------------------:|:------------------------------------------------------------------------------------------------------------------------------------------------:|:-------------:|:------------:|:-------------------------------------------------------------------:|:-----------------------------------------------------------------:|
-|   **EmojiModule**   |                           required if emoji Field is activated (this is done actually automatically inside the bundle)                           | emoji-toolbar |    string    |                       ``'true'``, ``'false'``                       |              ``'true'`` (if EmojiField is activated)              |
-|  **ResizeModule**   |                                      used in ImageField,  https://www.npmjs.com/package/quill-resize-image                                       |    resize     |    array     |                                 []                                  |                                []                                 |
-|  **SyntaxModule**   |                                       see official [description](https://quilljs.com/docs/modules/syntax)                                        |    syntax     |    string    |                       ``'true'``, ``'false'``                       |                            ``'true'``                             |
-|  **HistoryModule**  | The History module is responsible for handling undo and redo for Quill. see details on official [site](https://quilljs.com/docs/modules/history) |    history    |    array     |                ``delay``, ``maxStack``, ``userOnly``                | ['delay' => '1000', 'maxStack' => '100', 'userOnly' => 'false']   |
+```php
+    'modules' => [
+        new SyntaxModules(),
+    ],
+```
 
-#### Other modules 
-For others modules, you will need to extends Quill controller.
+
+|       modules       |                                                                          description                                                                           |     name      | options type |                options                |                         default options                         |
+|:-------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------------------:|:-------------:|:------------:|:-------------------------------------:|:---------------------------------------------------------------:|
+|   **EmojiModule**   |                                  required if emoji Field is activated (this is done actually automatically inside the bundle)                                  | emoji-toolbar |    string    |                 NONE                  |                           ``'true'``                            |
+|  **ResizeModule**   |                                             used in ImageField,  https://www.npmjs.com/package/quill-resize-image                                              |    resize     |    array     |                  []                   |                               []                                |
+|  **SyntaxModule**   | To use with CodeBlockField field (this is done actually automatically inside the bundle) see official [description](https://quilljs.com/docs/modules/syntax)   |    syntax     |    string    |             NONE                      |                             ``'true'``                          |
+|  **HistoryModule**  |        The History module is responsible for handling undo and redo for Quill. see details on official [site](https://quilljs.com/docs/modules/history)        |    history    |    array     | ``delay``, ``maxStack``, ``userOnly`` | ['delay' => '1000', 'maxStack' => '100', 'userOnly' => 'false'] |
+
+### Other modules 
+For others modules, you will need to extends Quill controller (see below) to use them.
 
 |       modules       |                                                                description                                                                |     name      | options type |                               options                               |                         default options                         |
 |:-------------------:|:-----------------------------------------------------------------------------------------------------------------------------------------:|:-------------:|:------------:|:-------------------------------------------------------------------:|:---------------------------------------------------------------:|
@@ -408,7 +415,7 @@ in your dashboard
 ```
 don't forget to recompile assets (yarn build/watch or npm equivalent).
 
-## EasyAdmin
+## EasyAdmin usage
 Then you can use the QuillAdminField like this :
 ```
     QuillAdminField::new('quill')

@@ -1,6 +1,6 @@
 <?php
 
-namespace Ehyiah\QuillJsBundle\DTO\Options\Modules;
+namespace Ehyiah\QuillJsBundle\DTO\Modules;
 
 /**
  * For options explanation see https://quilljs.com/docs/modules/history

@@ -5,7 +5,6 @@ export type ExtraOptions = {
     placeholder: string|null;
     upload_handler: uploadOptions;
     style: string;
-    modules: Array<ModuleInterface>;
     use_semantic_html: boolean;
     custom_icons?: {[key: string]: string};
 }
@@ -26,6 +25,10 @@ export interface EmojiModule extends ModuleInterface {
 }
 
 export interface ResizeModule extends ModuleInterface {
+    options: Array<any>;
+}
+
+export interface SyntaxModule extends ModuleInterface {
     options: Array<any>;
 }
 

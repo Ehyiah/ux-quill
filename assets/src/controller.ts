@@ -1,7 +1,7 @@
 import { Controller } from '@hotwired/stimulus';
 import Quill from 'quill';
 import * as Options from 'quill/core/quill';
-import { ExtraOptions } from './typesmodules.d.ts';
+import { EmojiModule, ExtraOptions, ModuleInterface, ResizeModule, uploadOptions, ModuleOptions } from './typesmodules.d.ts';
 import mergeModules from './modules.ts';
 import { ToolbarCustomizer } from './ui/toolbarCustomizer.ts';
 import { handleUploadResponse, uploadStrategies } from './upload-utils.ts';
@@ -54,6 +54,7 @@ export default class extends Controller {
 
     declare readonly extraOptionsValue: ExtraOptions;
     declare readonly toolbarOptionsValue: HTMLDivElement;
+    declare readonly modulesOptionsValue: ModuleOptions;
     static values = {
         toolbarOptions: {
             type: Array,
@@ -62,6 +63,10 @@ export default class extends Controller {
         extraOptions: {
             type: Object,
             default: {},
+        },
+        modulesOptions: {
+            type: Array,
+            default: [],
         }
     }
 
@@ -71,6 +76,19 @@ export default class extends Controller {
         this.setupQuillStyles(options);
         this.setupUploadHandler(options);
         this.setupEditorHeight();
+
+        const modulesOptionsValue = this.modulesOptionsValue;
+        const mergedModules = mergeModules(modulesOptionsValue, enabledModules);
+
+        const options: Options = {
+            debug: this.extraOptionsValue.debug,
+            modules: mergedModules,
+            placeholder: this.extraOptionsValue.placeholder,
+            theme: this.extraOptionsValue.theme,
+            style: this.extraOptionsValue.style,
+        };
+
+
 
         this.dispatchEvent('options', options);
 
