@@ -132,13 +132,6 @@ export default class extends Controller {
     }
 
     private setupContentSync(quill: Quill) {
-        quill.on('text-change', () => {
-            this.inputTarget.value = quill.root.innerHTML;
-        });
-        this.dispatchEvent('options', options);
-
-        const quill = new Quill(this.editorContainerTarget, options);
-
         if (this.extraOptionsValue.use_semantic_html) {
             quill.on('text-change', () => {
                 const quillContent = quill.getSemanticHTML();
@@ -152,8 +145,6 @@ export default class extends Controller {
                 inputContent.value = quillContent;
             })
         }
-
-        this.dispatchEvent('connect', quill);
     }
 
     private dispatchEvent(name: string, payload: any = {}) {
