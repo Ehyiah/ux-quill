@@ -105,6 +105,9 @@ class QuillType extends AbstractType
                     ->setAllowedTypes('use_semantic_html', 'bool')
                     ->setAllowedValues('use_semantic_html', [true, false])
                 ;
+                $resolver
+                    ->setDefault('custom_icons', [])
+                ;
             },
         ]);
 

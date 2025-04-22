@@ -3,6 +3,9 @@ import Quill from 'quill';
 import * as Options from 'quill/core/quill';
 import { ExtraOptions } from './typesmodules.d.ts';
 import mergeModules from './modules.ts';
+import { ToolbarCustomizer } from './ui/toolbarCustomizer.ts';
+
+import axios from 'axios';
 import { handleUploadResponse, uploadStrategies } from './upload-utils.ts';
 
 import ImageUploader from './imageUploader.ts';
@@ -145,6 +148,29 @@ export default class extends Controller {
                 inputContent.value = quillContent;
             })
         }
+        let unprocessedIcons = {};
+        if (this.extraOptionsValue.custom_icons) {
+            unprocessedIcons = ToolbarCustomizer.customizeIconsFromQuillRegistry(this.extraOptionsValue.custom_icons);
+        }
+
+        const quill = new Quill(this.editorContainerTarget, options);
+        quill.on('text-change', () => {
+            const quillContent = quill.root.innerHTML;
+            this.inputTarget.value = quillContent;
+        });
+
+        if (this.extraOptionsValue.custom_icons && Object.keys(unprocessedIcons).length > 0) {
+            ToolbarCustomizer.customizeIcons(
+                unprocessedIcons,
+                this.editorContainerTarget.parentElement || undefined
+            );
+        }
+
+        if (this.extraOptionsValue.debug === 'info' || this.extraOptionsValue.debug === 'log') {
+            ToolbarCustomizer.debugToolbarButtons(this.editorContainerTarget.parentElement || undefined);
+        }
+
+        this.dispatchEvent('connect', quill);
     }
 
     private dispatchEvent(name: string, payload: any = {}) {
