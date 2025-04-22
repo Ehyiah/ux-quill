@@ -5,9 +5,12 @@ import { ExtraOptions, ModuleOptions } from './typesmodules.d.ts';
 import mergeModules from './modules.ts';
 import { ToolbarCustomizer } from './ui/toolbarCustomizer.ts';
 import { handleUploadResponse, uploadStrategies } from './upload-utils.ts';
-import ImageUploader from './imageUploader.ts';
 import * as Emoji from 'quill2-emoji';
 import 'quill2-emoji/dist/style.css';
+import { DynamicModuleLoader, DynamicQuillModule } from './dynamicModuleLoader.ts';
+import ImageUploader from './imageUploader.js'
+Quill.register('modules/imageUploader', ImageUploader);
+
 import QuillResizeImage from 'quill-resize-image';
 
 interface DOMNode extends HTMLElement {
@@ -46,6 +49,15 @@ type ImageWithDOM = {
 Image.prototype.format = function(this: ImageWithDOM, name: string, value: string | boolean | null) {
     value ? this.domNode.setAttribute(name, String(value)) : this.domNode.removeAttribute(name);
 };
+
+const dynamicModules: DynamicQuillModule[] = [
+    {
+        moduleName: 'emoji',
+        jsPath: ['quill2-emoji'],
+        cssPath: ['quill2-emoji/dist/style.css'],
+        toolbarKeyword: 'emoji'
+    }
+];
 
 export default class extends Controller {
     declare readonly inputTarget: HTMLInputElement;
@@ -97,6 +109,10 @@ export default class extends Controller {
 
         return {
             debug,
+        const moduleLoader = new DynamicModuleLoader(dynamicModules);
+
+        const options: Options = {
+            debug: this.extraOptionsValue.debug,
             modules: mergedModules,
             placeholder,
             theme,
@@ -105,6 +121,8 @@ export default class extends Controller {
     }
 
     private setupQuillStyles(options: Options) {
+        const modulesLoadPromise = moduleLoader.loadModules(options);
+
         if (options.style === 'inline') {
             const styleAttributes = ['align', 'background', 'color', 'direction', 'font', 'size'];
             styleAttributes.forEach(attr =>
@@ -154,6 +172,30 @@ export default class extends Controller {
                 inputContent.value = quillContent;
             })
         }
+        const heightDefined = this.extraOptionsValue.height;
+        if (null !== heightDefined) {
+            this.editorContainerTarget.style.height = heightDefined
+        }
+
+        this.dispatchEvent('options', options);
+
+        modulesLoadPromise.then(() => {
+            console.log('Tous les modules sont chargés, initialisation de Quill');
+            this.initializeQuill(options);
+        }).catch(error => {
+            console.error('Erreur lors du chargement des modules:', error);
+            this.initializeQuill(options);
+        });
+            }
+
+        private initializeQuill(options: Options): void {
+            const quill = new Quill(this.editorContainerTarget, options);
+
+            quill.on('text-change', () => {
+                const quillContent = quill.root.innerHTML;
+                const inputContent = this.inputTarget;
+                inputContent.value = quillContent;
+            });
 
         this.dispatchEvent('connect', quill);
     }
