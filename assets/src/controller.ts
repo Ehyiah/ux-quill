@@ -1,7 +1,7 @@
 import { Controller } from '@hotwired/stimulus';
 import Quill from 'quill';
 import * as Options from 'quill/core/quill';
-import { EmojiModule, ExtraOptions, ModuleInterface, ResizeModule, uploadOptions, ModuleOptions } from './typesmodules.d.ts';
+import { ExtraOptions, ModuleOptions } from './typesmodules.d.ts';
 import mergeModules from './modules.ts';
 import { ToolbarCustomizer } from './ui/toolbarCustomizer.ts';
 import { handleUploadResponse, uploadStrategies } from './upload-utils.ts';
@@ -77,19 +77,6 @@ export default class extends Controller {
         this.setupUploadHandler(options);
         this.setupEditorHeight();
 
-        const modulesOptionsValue = this.modulesOptionsValue;
-        const mergedModules = mergeModules(modulesOptionsValue, enabledModules);
-
-        const options: Options = {
-            debug: this.extraOptionsValue.debug,
-            modules: mergedModules,
-            placeholder: this.extraOptionsValue.placeholder,
-            theme: this.extraOptionsValue.theme,
-            style: this.extraOptionsValue.style,
-        };
-
-
-
         this.dispatchEvent('options', options);
 
         const quill = new Quill(this.editorContainerTarget, options);
@@ -100,15 +87,17 @@ export default class extends Controller {
     }
 
     private buildQuillOptions(): Options {
-        const { debug, modules: modulesOptions, placeholder, theme, style } = this.extraOptionsValue;
+        const { debug, placeholder, theme, style } = this.extraOptionsValue;
 
         const enabledModules = {
             'toolbar': this.toolbarOptionsValue,
         };
 
+        const mergedModules = mergeModules(this.modulesOptionsValue, enabledModules);
+
         return {
             debug,
-            modules: mergeModules(modulesOptions, enabledModules),
+            modules: mergedModules,
             placeholder,
             theme,
             style,
