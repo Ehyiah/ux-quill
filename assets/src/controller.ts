@@ -1,14 +1,11 @@
 import { Controller } from '@hotwired/stimulus';
 import Quill from 'quill';
 import * as Options from 'quill/core/quill';
-import { ExtraOptions } from './typesmodules.d.ts';
+import { ExtraOptions, ModuleOptions } from './typesmodules.d.ts';
 import mergeModules from './modules.ts';
+import { ToolbarCustomizer } from './ui/toolbarCustomizer.ts';
 import { handleUploadResponse, uploadStrategies } from './upload-utils.ts';
-
-import ImageUploader from './imageUploader.ts';
-import * as Emoji from 'quill2-emoji';
-import 'quill2-emoji/dist/style.css';
-import QuillResizeImage from 'quill-resize-image';
+import { DynamicModuleLoader, DynamicQuillModule } from './dynamicModuleLoader.ts';
 
 interface DOMNode extends HTMLElement {
     getAttribute(name: string): string | null;
@@ -16,16 +13,6 @@ interface DOMNode extends HTMLElement {
     removeAttribute(name: string): void;
     hasAttribute(name: string): boolean;
 }
-
-const modules = {
-    'imageUploader': ImageUploader,
-    'emoji': Emoji,
-    'resize': QuillResizeImage
-};
-
-Object.entries(modules).forEach(([name, module]) => {
-    Quill.register(`modules/${name}`, module);
-});
 
 const Image = Quill.import('formats/image');
 const oldFormats = Image.formats;
@@ -47,6 +34,25 @@ Image.prototype.format = function(this: ImageWithDOM, name: string, value: strin
     value ? this.domNode.setAttribute(name, String(value)) : this.domNode.removeAttribute(name);
 };
 
+const dynamicModules: DynamicQuillModule[] = [
+    {
+        moduleName: 'emoji',
+        jsPath: ['quill2-emoji'],
+        cssPath: ['quill2-emoji/dist/style.css'],
+        toolbarKeyword: 'emoji'
+    },
+    {
+        moduleName: 'imageUploader',
+        jsPath: [() => import('./imageUploader.js')],  // Fonction d'import pour le module local
+        toolbarKeyword: 'upload_handler',
+    },
+    {
+        moduleName: 'resize',
+        jsPath: ['quill-resize-image'],
+        toolbarKeyword: 'image'
+    }
+];
+
 export default class extends Controller {
     declare readonly inputTarget: HTMLInputElement;
     declare readonly editorContainerTarget: HTMLDivElement;
@@ -54,6 +60,7 @@ export default class extends Controller {
 
     declare readonly extraOptionsValue: ExtraOptions;
     declare readonly toolbarOptionsValue: HTMLDivElement;
+    declare readonly modulesOptionsValue: ModuleOptions;
     static values = {
         toolbarOptions: {
             type: Array,
@@ -62,6 +69,10 @@ export default class extends Controller {
         extraOptions: {
             type: Object,
             default: {},
+        },
+        modulesOptions: {
+            type: Array,
+            default: [],
         }
     }
 
@@ -73,22 +84,30 @@ export default class extends Controller {
 
         this.dispatchEvent('options', options);
 
-        const quill = new Quill(this.editorContainerTarget, options);
-        this.setupContentSync(quill);
+        const moduleLoader = new DynamicModuleLoader(dynamicModules);
+        const modulesLoadPromise = moduleLoader.loadModules(options);
 
-        this.dispatchEvent('connect', quill);
+        const unprocessedIcons = this.processIconReplacementFromQuillCore();
+
+        modulesLoadPromise.then(() => {
+            console.log('Tous les modules sont chargés, initialisation de Quill');
+            this.initializeQuill(options, unprocessedIcons);
+        }).catch(error => {
+            console.error('Erreur lors du chargement des modules:', error);
+            this.initializeQuill(options, unprocessedIcons);
+        });
     }
 
     private buildQuillOptions(): Options {
-        const { debug, modules: modulesOptions, placeholder, theme, style } = this.extraOptionsValue;
-
-        const enabledModules = {
+        const { debug, placeholder, theme, style } = this.extraOptionsValue;
+        const enabledModules: Options = {
             'toolbar': this.toolbarOptionsValue,
         };
+        const mergedModules = mergeModules(this.modulesOptionsValue, enabledModules);
 
         return {
             debug,
-            modules: mergeModules(modulesOptions, enabledModules),
+            modules: mergedModules,
             placeholder,
             theme,
             style,
@@ -131,13 +150,54 @@ export default class extends Controller {
         }
     }
 
+    private initializeQuill(options: Options, unprocessedIcons): void {
+        const quill = new Quill(this.editorContainerTarget, options);
+        this.setupContentSync(quill);
+
+        this.processUnprocessedIcons(unprocessedIcons);
+
+        this.dispatchEvent('connect', quill);
+    }
+
     private setupContentSync(quill: Quill) {
-        quill.on('text-change', () => {
-            this.inputTarget.value = quill.root.innerHTML;
-        });
+        if (this.extraOptionsValue.use_semantic_html) {
+            quill.on('text-change', () => {
+                const quillContent = quill.getSemanticHTML();
+                const inputContent = this.inputTarget;
+                inputContent.value = quillContent;
+            });
+        } else {
+            quill.on('text-change', () => {
+                const quillContent = quill.root.innerHTML;
+                const inputContent = this.inputTarget;
+                inputContent.value = quillContent;
+            });
+        }
     }
 
     private dispatchEvent(name: string, payload: any = {}) {
         this.dispatch(name, { detail: payload, prefix: 'quill' });
+    }
+
+    private processIconReplacementFromQuillCore(): {[key: string]: string} {
+        let unprocessedIcons = {};
+        if (this.extraOptionsValue.custom_icons) {
+            unprocessedIcons = ToolbarCustomizer.customizeIconsFromQuillRegistry(this.extraOptionsValue.custom_icons);
+        }
+
+        return unprocessedIcons;
+    }
+
+    private processUnprocessedIcons(unprocessedIcons: {[key: string]: string}): void {
+        if (this.extraOptionsValue.custom_icons && Object.keys(unprocessedIcons).length > 0) {
+            ToolbarCustomizer.customizeIcons(
+                unprocessedIcons,
+                this.editorContainerTarget.parentElement || undefined
+            );
+        }
+
+        if (this.extraOptionsValue.debug === 'info' || this.extraOptionsValue.debug === 'log') {
+            ToolbarCustomizer.debugToolbarButtons(this.editorContainerTarget.parentElement || undefined);
+        }
     }
 }

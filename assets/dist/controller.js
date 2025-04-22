@@ -1,20 +1,9 @@
 import { Controller } from '@hotwired/stimulus';
 import Quill from 'quill';
 import mergeModules from "./modules.js";
+import { ToolbarCustomizer } from "./ui/toolbarCustomizer.js";
 import { handleUploadResponse, uploadStrategies } from "./upload-utils.js";
-import ImageUploader from "./imageUploader.js";
-import * as Emoji from 'quill2-emoji';
-import 'quill2-emoji/dist/style.css';
-import QuillResizeImage from 'quill-resize-image';
-const modules = {
-  'imageUploader': ImageUploader,
-  'emoji': Emoji,
-  'resize': QuillResizeImage
-};
-Object.entries(modules).forEach(_ref => {
-  let [name, module] = _ref;
-  Quill.register("modules/" + name, module);
-});
+import { DynamicModuleLoader } from "./dynamicModuleLoader.js";
 const Image = Quill.import('formats/image');
 const oldFormats = Image.formats;
 Image.formats = function (domNode) {
@@ -27,6 +16,21 @@ Image.formats = function (domNode) {
 Image.prototype.format = function (name, value) {
   value ? this.domNode.setAttribute(name, String(value)) : this.domNode.removeAttribute(name);
 };
+const dynamicModules = [{
+  moduleName: 'emoji',
+  jsPath: ['quill2-emoji'],
+  cssPath: ['quill2-emoji/dist/style.css'],
+  toolbarKeyword: 'emoji'
+}, {
+  moduleName: 'imageUploader',
+  jsPath: [() => import("./imageUploader.js")],
+  // Fonction d'import pour le module local
+  toolbarKeyword: 'upload_handler'
+}, {
+  moduleName: 'resize',
+  jsPath: ['quill-resize-image'],
+  toolbarKeyword: 'image'
+}];
 export default class _Class extends Controller {
   connect() {
     const options = this.buildQuillOptions();
@@ -34,14 +38,20 @@ export default class _Class extends Controller {
     this.setupUploadHandler(options);
     this.setupEditorHeight();
     this.dispatchEvent('options', options);
-    const quill = new Quill(this.editorContainerTarget, options);
-    this.setupContentSync(quill);
-    this.dispatchEvent('connect', quill);
+    const moduleLoader = new DynamicModuleLoader(dynamicModules);
+    const modulesLoadPromise = moduleLoader.loadModules(options);
+    const unprocessedIcons = this.processIconReplacementFromQuillCore();
+    modulesLoadPromise.then(() => {
+      console.log('Tous les modules sont chargés, initialisation de Quill');
+      this.initializeQuill(options, unprocessedIcons);
+    }).catch(error => {
+      console.error('Erreur lors du chargement des modules:', error);
+      this.initializeQuill(options, unprocessedIcons);
+    });
   }
   buildQuillOptions() {
     const {
       debug,
-      modules: modulesOptions,
       placeholder,
       theme,
       style
@@ -49,9 +59,10 @@ export default class _Class extends Controller {
     const enabledModules = {
       'toolbar': this.toolbarOptionsValue
     };
+    const mergedModules = mergeModules(this.modulesOptionsValue, enabledModules);
     return {
       debug,
-      modules: mergeModules(modulesOptions, enabledModules),
+      modules: mergedModules,
       placeholder,
       theme,
       style
@@ -80,10 +91,26 @@ export default class _Class extends Controller {
       this.editorContainerTarget.style.height = height;
     }
   }
+  initializeQuill(options, unprocessedIcons) {
+    const quill = new Quill(this.editorContainerTarget, options);
+    this.setupContentSync(quill);
+    this.processUnprocessedIcons(unprocessedIcons);
+    this.dispatchEvent('connect', quill);
+  }
   setupContentSync(quill) {
-    quill.on('text-change', () => {
-      this.inputTarget.value = quill.root.innerHTML;
-    });
+    if (this.extraOptionsValue.use_semantic_html) {
+      quill.on('text-change', () => {
+        const quillContent = quill.getSemanticHTML();
+        const inputContent = this.inputTarget;
+        inputContent.value = quillContent;
+      });
+    } else {
+      quill.on('text-change', () => {
+        const quillContent = quill.root.innerHTML;
+        const inputContent = this.inputTarget;
+        inputContent.value = quillContent;
+      });
+    }
   }
   dispatchEvent(name, payload) {
     if (payload === void 0) {
@@ -93,6 +120,21 @@ export default class _Class extends Controller {
       detail: payload,
       prefix: 'quill'
     });
+  }
+  processIconReplacementFromQuillCore() {
+    let unprocessedIcons = {};
+    if (this.extraOptionsValue.custom_icons) {
+      unprocessedIcons = ToolbarCustomizer.customizeIconsFromQuillRegistry(this.extraOptionsValue.custom_icons);
+    }
+    return unprocessedIcons;
+  }
+  processUnprocessedIcons(unprocessedIcons) {
+    if (this.extraOptionsValue.custom_icons && Object.keys(unprocessedIcons).length > 0) {
+      ToolbarCustomizer.customizeIcons(unprocessedIcons, this.editorContainerTarget.parentElement || undefined);
+    }
+    if (this.extraOptionsValue.debug === 'info' || this.extraOptionsValue.debug === 'log') {
+      ToolbarCustomizer.debugToolbarButtons(this.editorContainerTarget.parentElement || undefined);
+    }
   }
 }
 _Class.targets = ['input', 'editorContainer'];
@@ -104,5 +146,9 @@ _Class.values = {
   extraOptions: {
     type: Object,
     default: {}
+  },
+  modulesOptions: {
+    type: Array,
+    default: []
   }
 };

@@ -5,7 +5,8 @@ export type ExtraOptions = {
     placeholder: string|null;
     upload_handler: uploadOptions;
     style: string;
-    modules: Array<ModuleInterface>;
+    use_semantic_html: boolean;
+    custom_icons?: {[key: string]: string};
 }
 
 export type uploadOptions = {
@@ -27,7 +28,15 @@ export interface ResizeModule extends ModuleInterface {
     options: Array<any>;
 }
 
+export interface SyntaxModule extends ModuleInterface {
+    options: Array<any>;
+}
+
 export type ModuleOptions = {
     name: string;
     options: Array<ModuleInterface>
+}
+
+export interface IconCustomizationOptions {
+    [key: string]: string; // Nom de l'icône -> contenu SVG ou nom du module (aria-label) -> contenu SVG
 }

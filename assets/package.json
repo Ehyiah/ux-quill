@@ -1,7 +1,7 @@
 {
     "name": "@ehyiah/ux-quill",
     "description": "Symfony bundle to use Quill JS text editor",
-    "version": "2.0.3",
+    "version": "2.0.7",
     "license": "MIT",
     "main": "dist/controller.js",
     "symfony": {
@@ -19,14 +19,13 @@
         },
         "importmap": {
             "@hotwired/stimulus": "^3.0.0",
-            "file-loader": "^6.2.0",
+            "quill2-emoji": "^0.1.2",
+            "quill2-emoji/dist/style.css": "^0.1.2",
             "quill": "2.0.3",
             "quill/dist/quill.snow.css": "2.0.3",
             "quill/dist/quill.bubble.css": "2.0.3",
-            "axios": "^1.8.4",
-            "quill2-emoji": "^0.1.2",
-            "quill2-emoji/dist/style.css": "^0.1.2",
-            "quill-resize-image": "^1.0.4"
+            "axios": "^1.4.0",
+            "quill-resize-image": "^1.0.5"
         }
     },
     "scripts": {
@@ -56,13 +55,13 @@
         "@types/quill": "^2.0.14",
         "@typescript-eslint/eslint-plugin": "^5.2.0",
         "@typescript-eslint/parser": "^5.2.0",
+        "babel-plugin-module-resolver": "^5.0.2",
         "core-js": "^3.30.2",
         "eslint": "^8.1.0",
         "eslint-config-prettier": "^8.0.0",
         "eslint-plugin-jest": "^25.2.2",
         "jest": "^29.5.0",
         "jest-environment-jsdom": "^29.5.0",
-        "quill2-emoji": "^0.1.2",
         "ts-jest": "^29.1.0",
         "ts-loader": "^9.0.0",
         "typescript": "^4.9.5",
@@ -71,18 +70,17 @@
         "webpack-notifier": "^1.15.0"
     },
     "peerDependencies": {
-        "@hotwired/stimulus": "^3.0.0",
-        "file-loader": "^6.2.0",
-        "quill": "2.0.3"
+        "@hotwired/stimulus": "^3.0.0"
     },
     "dependencies": {
-        "axios": "^1.8.4",
+        "@hotwired/stimulus": "^3.0.0",
+        "axios": "^1.4.0",
         "eventemitter3": "^5.0.1",
         "file-loader": "^6.2.0",
         "lodash-es": "^4.17.21",
         "quill": "2.0.3",
         "quill-delta": "^5.1.0",
-        "quill-resize-image": "^1.0.4",
+        "quill-resize-image": "^1.0.5",
         "quill2-emoji": "^0.1.2"
     },
     "eslintConfig": {

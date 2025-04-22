@@ -16,4 +16,13 @@ module.exports = {
     },
     targets: "> 0.20%, not dead",
     include: "src/*",
+    plugins: [
+        ["module-resolver", {
+            root: ['./src'],
+            alias: {
+                '@src': './src',
+                '@ui': './src/ui',
+            }
+        }]
+    ]
 };
