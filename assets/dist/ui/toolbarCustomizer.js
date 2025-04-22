@@ -14,9 +14,8 @@ export class ToolbarCustomizer {
       toolbars.forEach(toolbar => {
         const buttons = toolbar.querySelectorAll('button');
         buttons.forEach(button => {
-          var _Array$from$find;
           const ariaLabel = button.getAttribute('aria-label');
-          const classMatch = (_Array$from$find = Array.from(button.classList).find(cls => cls.startsWith('ql-'))) == null ? void 0 : _Array$from$find.replace('ql-', '');
+          const classMatch = Array.from(button.classList).find(cls => cls.startsWith('ql-'))?.replace('ql-', '');
           let svgContent;
 
           // 1. search by aria-label
@@ -72,9 +71,9 @@ export class ToolbarCustomizer {
     setTimeout(() => {
       const toolbars = container ? container.querySelector('.ql-toolbar') ? [container.querySelector('.ql-toolbar')] : [] : Array.from(document.querySelectorAll('.ql-toolbar'));
       toolbars.forEach((toolbar, i) => {
-        console.group("Toolbar #" + (i + 1));
+        console.group(`Toolbar #${i + 1}`);
         toolbar.querySelectorAll('button').forEach((btn, j) => {
-          console.log("Button #" + (j + 1) + ":", {
+          console.log(`Button #${j + 1}:`, {
             class: Array.from(btn.classList).join(', '),
             ariaLabel: btn.getAttribute('aria-label'),
             value: btn.getAttribute('value'),

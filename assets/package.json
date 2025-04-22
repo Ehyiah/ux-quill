@@ -35,7 +35,11 @@
         "build": "babel src --extensions .ts -d dist",
         "lint": "yarn run eslint src",
         "lint-fix": "yarn run eslint src --fix",
-        "build:types": "tsc --emitDeclarationOnly"
+        "build:types": "tsc --emitDeclarationOnly",
+        "test": "jest",
+        "test:simple": "jest tests/simple.test.ts",
+        "test:watch": "jest --watch",
+        "install-tests": "yarn add --dev @testing-library/jest-dom"
     },
     "devDependencies": {
         "@babel/cli": "^7.20.7",
@@ -56,6 +60,9 @@
         "eslint": "^8.1.0",
         "eslint-config-prettier": "^8.0.0",
         "eslint-plugin-jest": "^25.2.2",
+        "jest": "^29.5.0",
+        "jest-environment-jsdom": "^29.5.0",
+        "ts-jest": "^29.1.0",
         "ts-loader": "^9.0.0",
         "typescript": "^4.9.5",
         "webpack": "^5.99.6",
@@ -104,5 +111,26 @@
         "tabWidth": 4,
         "jsxBracketSameLine": true,
         "singleQuote": true
+    },
+    "jest": {
+        "preset": "ts-jest",
+        "testEnvironment": "jsdom",
+        "setupFilesAfterEnv": ["<rootDir>/tests/setup/jest.setup.ts"],
+        "moduleNameMapper": {
+            "\\.(css|less)$": "<rootDir>/tests/setup/__mocks__/styleMock.js",
+            "^../src/blots/image$": "<rootDir>/tests/setup/__mocks__/image.ts",
+            "^quill$": "<rootDir>/tests/setup/__mocks__/quill.ts"
+        },
+        "testMatch": ["<rootDir>/tests/**/*.test.ts"],
+        "moduleDirectories": ["node_modules", "<rootDir>/src"],
+        "transform": {
+            "^.+\\.tsx?$": "ts-jest"
+        },
+        "transformIgnorePatterns": [
+            "/node_modules/(?!quill|quill-resize-image|quill2-emoji)"
+        ],
+        "rootDir": ".",
+        "moduleFileExtensions": ["ts", "js", "json"],
+        "modulePaths": ["<rootDir>"]
     }
 }
