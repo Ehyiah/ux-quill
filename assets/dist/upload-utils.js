@@ -43,7 +43,7 @@ export function handleUploadResponse(response, jsonResponseFilePath) {
           if (result && typeof result === 'object' && part in result) {
             result = result[part];
           } else {
-            throw new Error("Invalid json path for response: '" + jsonResponseFilePath + "'. Property '" + part + "' not found.");
+            throw new Error(`Invalid json path for response: '${jsonResponseFilePath}'. Property '${part}' not found.`);
           }
         }
         if (typeof result !== 'string') {
@@ -53,7 +53,7 @@ export function handleUploadResponse(response, jsonResponseFilePath) {
       } catch (error) {
         console.error(error);
         if (error instanceof Error) {
-          reject("Error while processing upload response: " + error.message);
+          reject(`Error while processing upload response: ${error.message}`);
         } else {
           reject('Unknown error while processing upload response');
         }

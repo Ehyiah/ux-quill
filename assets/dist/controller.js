@@ -31,7 +31,22 @@ const dynamicModules = [{
   jsPath: ['quill-resize-image'],
   toolbarKeyword: 'image'
 }];
-export default class _Class extends Controller {
+export default class extends Controller {
+  static targets = ['input', 'editorContainer'];
+  static values = (() => ({
+    toolbarOptions: {
+      type: Array,
+      default: []
+    },
+    extraOptions: {
+      type: Object,
+      default: {}
+    },
+    modulesOptions: {
+      type: Array,
+      default: []
+    }
+  }))();
   connect() {
     const options = this.buildQuillOptions();
     this.setupQuillStyles(options);
@@ -71,12 +86,12 @@ export default class _Class extends Controller {
   setupQuillStyles(options) {
     if (options.style === 'inline') {
       const styleAttributes = ['align', 'background', 'color', 'direction', 'font', 'size'];
-      styleAttributes.forEach(attr => Quill.register(Quill.import("attributors/style/" + attr), true));
+      styleAttributes.forEach(attr => Quill.register(Quill.import(`attributors/style/${attr}`), true));
     }
   }
   setupUploadHandler(options) {
     const config = this.extraOptionsValue.upload_handler;
-    if (config != null && config.upload_endpoint && uploadStrategies[config.type]) {
+    if (config?.upload_endpoint && uploadStrategies[config.type]) {
       const uploadFunction = file => uploadStrategies[config.type](config.upload_endpoint, file).then(response => handleUploadResponse(response, config.json_response_file_path));
       Object.assign(options.modules, {
         imageUploader: {
@@ -137,18 +152,3 @@ export default class _Class extends Controller {
     }
   }
 }
-_Class.targets = ['input', 'editorContainer'];
-_Class.values = {
-  toolbarOptions: {
-    type: Array,
-    default: []
-  },
-  extraOptions: {
-    type: Object,
-    default: {}
-  },
-  modulesOptions: {
-    type: Array,
-    default: []
-  }
-};

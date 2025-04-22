@@ -1,32 +1,33 @@
+function _tsRewriteRelativeImportExtensions(t, e) { return "string" == typeof t && /^\.\.?\//.test(t) ? t.replace(/\.(tsx)$|((?:\.d)?)((?:\.[^./]+)?)\.([cm]?)ts$/i, function (t, s, r, n, o) { return s ? e ? ".jsx" : ".js" : !r || n && o ? r + n + "." + o.toLowerCase() + "js" : t; }) : t; }
 import Quill from 'quill';
 export class DynamicModuleLoader {
+  modules = [];
+  loadPromise = (() => Promise.resolve())();
   constructor(modules) {
     if (modules === void 0) {
       modules = [];
     }
-    this.modules = [];
-    this.loadPromise = Promise.resolve();
     this.modules = modules;
   }
   isKeywordPresent(config, keyword) {
     if (!config) return false;
     const configStr = JSON.stringify(config);
-    return configStr.includes("\"" + keyword + "\"") || configStr.includes(":\"" + keyword + "\"");
+    return configStr.includes(`"${keyword}"`) || configStr.includes(`:"${keyword}"`);
   }
   async loadModule(module) {
-    console.log("Loading module " + module.moduleName + "...");
+    console.log(`Loading module ${module.moduleName}...`);
     if (module.cssPath && module.cssPath.length > 0) {
       for (const cssPath of module.cssPath) {
         try {
-          await import(cssPath);
-          console.log("CSS " + cssPath + " du module " + module.moduleName + " charg\xE9");
+          await import(_tsRewriteRelativeImportExtensions(cssPath));
+          console.log(`CSS ${cssPath} du module ${module.moduleName} chargé`);
         } catch (error) {
-          console.error("Error while loading du CSS " + cssPath + " pour " + module.moduleName + ":", error);
+          console.error(`Error while loading du CSS ${cssPath} pour ${module.moduleName}:`, error);
         }
       }
     }
     if (module.jsPath.length === 0) {
-      console.warn("Please specify a JS path " + module.moduleName);
+      console.warn(`Please specify a JS path ${module.moduleName}`);
       return;
     }
     try {
@@ -35,19 +36,19 @@ export class DynamicModuleLoader {
       if (typeof primaryJsPath === 'function') {
         importedModule = await primaryJsPath();
       } else {
-        importedModule = await import(primaryJsPath);
+        importedModule = await import(_tsRewriteRelativeImportExtensions(primaryJsPath));
       }
       const moduleToUse = importedModule.default || importedModule;
-      Quill.register("modules/" + module.moduleName, moduleToUse);
+      Quill.register(`modules/${module.moduleName}`, moduleToUse);
       if (module.jsPath.length > 1) {
         for (let i = 1; i < module.jsPath.length; i++) {
-          await import(module.jsPath[i]);
-          console.log("Module JS suppl\xE9mentaire " + module.jsPath[i] + " charg\xE9");
+          await import(_tsRewriteRelativeImportExtensions(module.jsPath[i]));
+          console.log(`Module JS supplémentaire ${module.jsPath[i]} chargé`);
         }
       }
-      console.log("Module " + module.moduleName + " loaded");
+      console.log(`Module ${module.moduleName} loaded`);
     } catch (error) {
-      console.error("Error while loading " + module.moduleName + ":", error);
+      console.error(`Error while loading ${module.moduleName}:`, error);
       throw error;
     }
   }

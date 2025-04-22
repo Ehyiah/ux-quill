@@ -1,12 +1,12 @@
 import LoadingImage from "./blots/image.js";
 const typedLoadingImage = LoadingImage;
 class ImageUploader {
+  quill;
+  options;
+  range;
+  placeholderDelta;
+  fileHolder;
   constructor(quill, options) {
-    this.quill = void 0;
-    this.options = void 0;
-    this.range = void 0;
-    this.placeholderDelta = void 0;
-    this.fileHolder = void 0;
     this.quill = quill;
     this.options = options;
     // Initialisation avec un range par défaut
@@ -56,7 +56,7 @@ class ImageUploader {
         }
       } else {
         const selection = document.getSelection();
-        const range = document.caretPositionFromPoint == null ? void 0 : document.caretPositionFromPoint(evt.clientX, evt.clientY);
+        const range = document.caretPositionFromPoint?.(evt.clientX, evt.clientY);
         if (selection && range) {
           selection.setBaseAndExtent(range.offsetNode, range.offset, range.offsetNode, range.offset);
         }
@@ -141,7 +141,7 @@ class ImageUploader {
     const range = this.range;
 
     // Utiliser directement 'imageBlot' comme nom de blot
-    this.placeholderDelta = this.quill.insertEmbed(range.index, 'imageBlot', "" + url, 'user');
+    this.placeholderDelta = this.quill.insertEmbed(range.index, 'imageBlot', `${url}`, 'user');
   }
   insertToEditor(url) {
     const range = this.range;
@@ -154,7 +154,7 @@ class ImageUploader {
     }
 
     // Insert the server saved image
-    this.quill.insertEmbed(range.index, 'image', "" + url, 'user');
+    this.quill.insertEmbed(range.index, 'image', `${url}`, 'user');
 
     // Réinitialiser le placeholderDelta pour éviter les suppressions multiples
     this.placeholderDelta = {
