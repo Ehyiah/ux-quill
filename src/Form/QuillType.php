@@ -9,6 +9,7 @@ use Ehyiah\QuillJsBundle\DTO\Modules\EmojiModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\ModuleInterface;
 use Ehyiah\QuillJsBundle\DTO\Modules\ResizeModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\SyntaxModule;
+use Ehyiah\QuillJsBundle\DTO\Modules\TableModule;
 use Ehyiah\QuillJsBundle\DTO\Options\DebugOption;
 use Ehyiah\QuillJsBundle\DTO\Options\StyleOption;
 use Ehyiah\QuillJsBundle\DTO\Options\ThemeOption;
@@ -151,11 +152,18 @@ class QuillType extends AbstractType
                 'fieldIdentifier' => (new CodeBlockField())->getOption(),
                 'moduleClass' => SyntaxModule::class,
             ],
+            [
+                'moduleName' => TableModule::NAME,
+                'fieldIdentifier' => 'table-better',
+                'moduleClass' => TableModule::class,
+            ],
         ];
     }
 
     /**
      * Ajoute un module au tableau des modules s'il n'existe pas déjà et si un champ correspondant est présent
+     * permet une configuration par défaut des modules lorsque ceux-ci sont nécessaires
+     * Si le module a été mis par l'utilisateur, alors la version de l'utilisateur sera conservée
      *
      * @param array<mixed> $fields Tableau des champs à vérifier
      * @param array<array<string, string>> $modules Tableau des modules à compléter

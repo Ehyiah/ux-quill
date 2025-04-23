@@ -50,6 +50,12 @@ const dynamicModules: DynamicQuillModule[] = [
         moduleName: 'resize',
         jsPath: ['quill-resize-image'],
         toolbarKeyword: 'image'
+    },
+    {
+        moduleName: 'table-better',
+        jsPath: ['quill-table-better'],
+        cssPath: ['quill-table-better/dist/quill-table-better.css'],
+        toolbarKeyword: 'table-better'
     }
 ];
 

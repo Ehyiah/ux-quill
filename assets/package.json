@@ -25,7 +25,9 @@
             "quill/dist/quill.snow.css": "2.0.3",
             "quill/dist/quill.bubble.css": "2.0.3",
             "axios": "^1.4.0",
-            "quill-resize-image": "^1.0.5"
+            "quill-resize-image": "^1.0.5",
+            "quill-table-better": "^1.1.6",
+            "quill-table-better/dist/quill-table-better.css": "^1.1.6"
         }
     },
     "scripts": {
@@ -81,6 +83,7 @@
         "quill": "2.0.3",
         "quill-delta": "^5.1.0",
         "quill-resize-image": "^1.0.5",
+        "quill-table-better": "^1.1.6",
         "quill2-emoji": "^0.1.2"
     },
     "eslintConfig": {
@@ -115,14 +118,21 @@
     "jest": {
         "preset": "ts-jest",
         "testEnvironment": "jsdom",
-        "setupFilesAfterEnv": ["<rootDir>/tests/setup/jest.setup.ts"],
+        "setupFilesAfterEnv": [
+            "<rootDir>/tests/setup/jest.setup.ts"
+        ],
         "moduleNameMapper": {
             "\\.(css|less)$": "<rootDir>/tests/setup/__mocks__/styleMock.js",
             "^../src/blots/image$": "<rootDir>/tests/setup/__mocks__/image.ts",
             "^quill$": "<rootDir>/tests/setup/__mocks__/quill.ts"
         },
-        "testMatch": ["<rootDir>/tests/**/*.test.ts"],
-        "moduleDirectories": ["node_modules", "<rootDir>/src"],
+        "testMatch": [
+            "<rootDir>/tests/**/*.test.ts"
+        ],
+        "moduleDirectories": [
+            "node_modules",
+            "<rootDir>/src"
+        ],
         "transform": {
             "^.+\\.tsx?$": "ts-jest"
         },
@@ -130,7 +140,13 @@
             "/node_modules/(?!quill|quill-resize-image|quill2-emoji)"
         ],
         "rootDir": ".",
-        "moduleFileExtensions": ["ts", "js", "json"],
-        "modulePaths": ["<rootDir>"]
+        "moduleFileExtensions": [
+            "ts",
+            "js",
+            "json"
+        ],
+        "modulePaths": [
+            "<rootDir>"
+        ]
     }
 }
