@@ -40,7 +40,6 @@ class QuillType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'sanitize_html' => false,
             'label' => false,
             'error_bubbling' => true,
             'quill_options' => ['bold', 'italic'],
