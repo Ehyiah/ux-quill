@@ -11,6 +11,10 @@ const mockQuillInstance = {
     root: {
         innerHTML: '<p>Test content</p>'
     },
+    clipboard: {
+        convert: jest.fn().mockReturnValue({ ops: [] }) // Add this mock
+    },
+    updateContents: jest.fn(), // Also add this if your code calls it
     getModule: jest.fn().mockImplementation((name) => {
         if (name === 'toolbar') {
             return {
