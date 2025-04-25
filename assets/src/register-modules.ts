@@ -1,6 +1,6 @@
 import Quill from 'quill';
 
-import ImageUploader from './imageUploader.js'
+import ImageUploader from './imageUploader.ts'
 Quill.register('modules/imageUploader', ImageUploader);
 
 import * as Emoji from 'quill2-emoji';
