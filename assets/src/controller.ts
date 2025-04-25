@@ -5,7 +5,7 @@ import { ExtraOptions, ModuleOptions } from './typesmodules.d.ts';
 import mergeModules from './modules.ts';
 import { ToolbarCustomizer } from './ui/toolbarCustomizer.ts';
 import { handleUploadResponse, uploadStrategies } from './upload-utils.ts';
-import { DynamicModuleLoader, DynamicQuillModule } from './dynamicModuleLoader.ts';
+import './register-modules.ts';
 
 interface DOMNode extends HTMLElement {
     getAttribute(name: string): string | null;
@@ -33,25 +33,6 @@ type ImageWithDOM = {
 Image.prototype.format = function(this: ImageWithDOM, name: string, value: string | boolean | null) {
     value ? this.domNode.setAttribute(name, String(value)) : this.domNode.removeAttribute(name);
 };
-
-const dynamicModules: DynamicQuillModule[] = [
-    {
-        moduleName: 'emoji',
-        jsPath: ['quill2-emoji'],
-        cssPath: ['quill2-emoji/dist/style.css'],
-        toolbarKeyword: 'emoji'
-    },
-    {
-        moduleName: 'imageUploader',
-        jsPath: [() => import('./imageUploader.js')],  // Fonction d'import pour le module local
-        toolbarKeyword: 'upload_handler',
-    },
-    {
-        moduleName: 'resize',
-        jsPath: ['quill-resize-image'],
-        toolbarKeyword: 'image'
-    }
-];
 
 export default class extends Controller {
     declare readonly inputTarget: HTMLInputElement;
@@ -84,18 +65,9 @@ export default class extends Controller {
 
         this.dispatchEvent('options', options);
 
-        const moduleLoader = new DynamicModuleLoader(dynamicModules);
-        const modulesLoadPromise = moduleLoader.loadModules(options);
-
         const unprocessedIcons = this.processIconReplacementFromQuillCore();
 
-        modulesLoadPromise.then(() => {
-            console.log('Tous les modules sont chargés, initialisation de Quill');
-            this.initializeQuill(options, unprocessedIcons);
-        }).catch(error => {
-            console.error('Erreur lors du chargement des modules:', error);
-            this.initializeQuill(options, unprocessedIcons);
-        });
+        this.initializeQuill(options, unprocessedIcons);
     }
 
     private buildQuillOptions(): Options {
