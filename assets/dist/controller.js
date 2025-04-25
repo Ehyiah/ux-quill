@@ -3,7 +3,7 @@ import Quill from 'quill';
 import mergeModules from "./modules.js";
 import { ToolbarCustomizer } from "./ui/toolbarCustomizer.js";
 import { handleUploadResponse, uploadStrategies } from "./upload-utils.js";
-import { DynamicModuleLoader } from "./dynamicModuleLoader.js";
+import "./register-modules.js";
 const Image = Quill.import('formats/image');
 const oldFormats = Image.formats;
 Image.formats = function (domNode) {
@@ -16,26 +16,6 @@ Image.formats = function (domNode) {
 Image.prototype.format = function (name, value) {
   value ? this.domNode.setAttribute(name, String(value)) : this.domNode.removeAttribute(name);
 };
-const dynamicModules = [{
-  moduleName: 'emoji',
-  jsPath: ['quill2-emoji'],
-  cssPath: ['quill2-emoji/dist/style.css'],
-  toolbarKeyword: 'emoji'
-}, {
-  moduleName: 'imageUploader',
-  jsPath: [() => import("./imageUploader.js")],
-  // Fonction d'import pour le module local
-  toolbarKeyword: 'upload_handler'
-}, {
-  moduleName: 'resize',
-  jsPath: ['quill-resize-image'],
-  toolbarKeyword: 'image'
-}, {
-  moduleName: 'table-better',
-  jsPath: ['quill-table-better'],
-  cssPath: ['quill-table-better/dist/quill-table-better.css'],
-  toolbarKeyword: 'table-better'
-}];
 export default class extends Controller {
   static targets = ['input', 'editorContainer'];
   static values = (() => ({
@@ -58,16 +38,8 @@ export default class extends Controller {
     this.setupUploadHandler(options);
     this.setupEditorHeight();
     this.dispatchEvent('options', options);
-    const moduleLoader = new DynamicModuleLoader(dynamicModules);
-    const modulesLoadPromise = moduleLoader.loadModules(options);
     const unprocessedIcons = this.processIconReplacementFromQuillCore();
-    modulesLoadPromise.then(() => {
-      console.log('Tous les modules sont chargés, initialisation de Quill');
-      this.initializeQuill(options, unprocessedIcons);
-    }).catch(error => {
-      console.error('Erreur lors du chargement des modules:', error);
-      this.initializeQuill(options, unprocessedIcons);
-    });
+    this.initializeQuill(options, unprocessedIcons);
   }
   buildQuillOptions() {
     const {
@@ -118,11 +90,6 @@ export default class extends Controller {
     this.dispatchEvent('connect', quill);
   }
   setupContentSync(quill) {
-    // set initial content as a delta for better compatibility and allow table-module to work
-    const initialData = quill.clipboard.convert({
-      html: this.inputTarget.value
-    });
-    quill.updateContents(initialData);
     if (this.extraOptionsValue.use_semantic_html) {
       quill.on('text-change', () => {
         const quillContent = quill.getSemanticHTML();
