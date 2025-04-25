@@ -90,6 +90,11 @@ export default class extends Controller {
     this.dispatchEvent('connect', quill);
   }
   setupContentSync(quill) {
+    // set initial content as a delta for better compatibility and allow table-module to work
+    const initialData = quill.clipboard.convert({
+      html: this.inputTarget.value
+    });
+    quill.updateContents(initialData);
     if (this.extraOptionsValue.use_semantic_html) {
       quill.on('text-change', () => {
         const quillContent = quill.getSemanticHTML();

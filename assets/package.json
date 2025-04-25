@@ -72,7 +72,16 @@
         "webpack-notifier": "^1.15.0"
     },
     "peerDependencies": {
-        "@hotwired/stimulus": "^3.0.0"
+        "@hotwired/stimulus": "^3.0.0",
+        "axios": "^1.4.0",
+        "eventemitter3": "^5.0.1",
+        "file-loader": "^6.2.0",
+        "lodash-es": "^4.17.21",
+        "quill": "2.0.3",
+        "quill-delta": "^5.1.0",
+        "quill-resize-image": "^1.0.5",
+        "quill-table-better": "^1.1.6",
+        "quill2-emoji": "^0.1.2"
     },
     "dependencies": {
         "@hotwired/stimulus": "^3.0.0",
