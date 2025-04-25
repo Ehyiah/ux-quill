@@ -1,3 +1,5 @@
+// this file is no more used at the moment, but it could be useful in the future
+
 import Quill from 'quill';
 
 export interface DynamicQuillModule {
@@ -99,3 +101,36 @@ export class DynamicModuleLoader {
         return this.loadPromise;
     }
 }
+
+// use this object for autoconfigure this class
+// currently having problems while using webpack encore
+const dynamicModules: DynamicQuillModule[] = [
+    {
+        moduleName: 'emoji',
+        jsPath: ['quill2-emoji'],
+        cssPath: ['quill2-emoji/dist/style.css'],
+        toolbarKeyword: 'emoji'
+    },
+    {
+        moduleName: 'imageUploader',
+        jsPath: [() => import('./imageUploader.js')],  // Fonction d'import pour le module local
+        toolbarKeyword: 'upload_handler',
+    },
+    {
+        moduleName: 'resize',
+        jsPath: ['quill-resize-image'],
+        toolbarKeyword: 'image'
+    }
+];
+
+// set this in connect
+const moduleLoader = new DynamicModuleLoader(dynamicModules);
+const modulesLoadPromise = moduleLoader.loadModules(options);
+
+modulesLoadPromise.then(() => {
+    console.log('Tous les modules sont chargés, initialisation de Quill');
+    this.initializeQuill(options, unprocessedIcons);
+}).catch(error => {
+    console.error('Erreur lors du chargement des modules:', error);
+    this.initializeQuill(options, unprocessedIcons);
+});
