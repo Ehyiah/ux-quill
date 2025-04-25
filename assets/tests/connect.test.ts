@@ -62,6 +62,7 @@ jest.mock('../src/modules.ts', () => ({
 jest.mock('quill2-emoji', () => ({}));
 jest.mock('quill-resize-image', () => ({}));
 jest.mock('../src/imageUploader.ts', () => ({}));
+jest.mock('../src/register-modules.ts', () => ({}));
 jest.mock('../src/upload-utils.ts', () => ({
     handleUploadResponse: jest.fn(),
     uploadStrategies: {
