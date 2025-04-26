@@ -61,8 +61,8 @@ class ImageUploader {
         this.handleDrop = this.handleDrop.bind(this);
         this.handlePaste = this.handlePaste.bind(this);
 
-        this.quill.root.addEventListener('drop', this.handleDrop, false);
-        this.quill.root.addEventListener('paste', this.handlePaste, false);
+        this.quill.root.addEventListener('drop', this.handleDrop, true);
+        this.quill.root.addEventListener('paste', this.handlePaste, true);
     }
 
     selectLocalImage() {
