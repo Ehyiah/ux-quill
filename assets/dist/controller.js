@@ -48,6 +48,7 @@ export default class extends Controller {
       theme,
       style
     } = this.extraOptionsValue;
+    const readOnly = this.extraOptionsValue.read_only;
     const enabledModules = {
       'toolbar': this.toolbarOptionsValue
     };
@@ -57,7 +58,8 @@ export default class extends Controller {
       modules: mergedModules,
       placeholder,
       theme,
-      style
+      style,
+      readOnly
     };
   }
   setupQuillStyles(options) {
