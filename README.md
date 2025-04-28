@@ -75,11 +75,11 @@ in a twig template :
     <div>{{ myField|raw }}</div>
 ```
 
-you can of course sanitize HTML if you need to for security reason, but don't forget to configure it
+you can sanitize HTML if you need to for security reason, but don't forget to configure it
 to your needs as many html balise and style elements will be removed by default.
 Same goes in your Form configuration
+The sanitizer is used to re-render content in your editor in the hidden (not at the submission). For sanitizing in the submission use the classic way (see https://symfony.com/doc/current/html_sanitizer.html)
 ```
-    'sanitize_html' => false,
     'sanitizer' => 'my_awesome_sanitizer_config
 ```
 
