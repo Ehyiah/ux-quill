@@ -40,7 +40,6 @@ jobs:
               run: |
                 # Installation de la CLI Symfony pour les tests
                 curl -1sLf 'https://dl.cloudsmith.io/public/symfony/stable/setup.deb.sh' | sudo -E bash
-                sudo apt install symfony-cli || echo "Impossible d'installer la CLI Symfony, on continuera avec le serveur PHP intégré"
 
             - name: Création d'un nouveau projet Symfony
               run: |
