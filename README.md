@@ -264,7 +264,7 @@ https://quilljs.com/docs/modules
 
 You can add/customize quill modules in this option field.
 You can create your own modules classes, they need to implement the ``ModuleInterface`` and add the name and options properties.
-Some modules are automatically loaded when they are need in fields.
+Some modules are automatically loaded when they are needed in fields.
 
 ```php
     'modules' => [
@@ -273,15 +273,16 @@ Some modules are automatically loaded when they are need in fields.
 ```
 
 
-|       modules       |                                                                          description                                                                           |     name      | options type |                options                |                         default options                         |
-|:-------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------------------:|:-------------:|:------------:|:-------------------------------------:|:---------------------------------------------------------------:|
-|   **EmojiModule**   |                                  required if emoji Field is activated (this is done actually automatically inside the bundle)                                  | emoji-toolbar |    string    |                 NONE                  |                           ``'true'``                            |
-|  **ResizeModule**   |                                             used in ImageField,  https://www.npmjs.com/package/quill-resize-image                                              |    resize     |    array     |                  []                   |                               []                                |
-|  **SyntaxModule**   | To use with CodeBlockField field (this is done actually automatically inside the bundle) see official [description](https://quilljs.com/docs/modules/syntax)   |    syntax     |    string    |             NONE                      |                             ``'true'``                          |
-|  **HistoryModule**  |        The History module is responsible for handling undo and redo for Quill. see details on official [site](https://quilljs.com/docs/modules/history)        |    history    |    array     | ``delay``, ``maxStack``, ``userOnly`` | ['delay' => '1000', 'maxStack' => '100', 'userOnly' => 'false'] |
+|       modules        | auto-imported |                                                                   description                                                                    |     name      | options type |                options                |                         default options                         |
+|:--------------------:|:-------------:|:------------------------------------------------------------------------------------------------------------------------------------------------:|:-------------:|:------------:|:-------------------------------------:|:---------------------------------------------------------------:|
+|   **EmojiModule**    |      YES      |                                                       required if emoji Field is activated                                                       | emoji-toolbar |    string    |                 NONE                  |                           ``'true'``                            |
+|   **ResizeModule**   |      YES      |                                      used in ImageField,  https://www.npmjs.com/package/quill-resize-image                                       |    resize     |    array     |                  []                   |                               []                                |
+|   **SyntaxModule**   |      YES      |                      To use with CodeBlockField field, see official [description](https://quilljs.com/docs/modules/syntax)                       |    syntax     |    string    |                 NONE                  |                           ``'true'``                            |
+|  **HistoryModule**   |      NO       | The History module is responsible for handling undo and redo for Quill. see details on official [site](https://quilljs.com/docs/modules/history) |    history    |    array     | ``delay``, ``maxStack``, ``userOnly`` | ['delay' => '1000', 'maxStack' => '100', 'userOnly' => 'false'] |
+| **SmartLinksModule** |      NO       |                                        automatic recognition of links (can be customized within options)                                         |  smartLinks   |    array     |             ``linkRegex``             |                 ['linkRegex' => '/https?:\/\/[^\s]+/']          |
 
 ### Other modules 
-For others modules, you will need to extends Quill controller (see below) to use them.
+For other modules, you will need to extends Quill controller (see below) to use them.
 
 |       modules       |                                                                description                                                                |     name      | options type |                               options                               |                         default options                         |
 |:-------------------:|:-----------------------------------------------------------------------------------------------------------------------------------------:|:-------------:|:------------:|:-------------------------------------------------------------------:|:---------------------------------------------------------------:|
