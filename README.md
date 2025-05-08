@@ -4,9 +4,11 @@ Symfony UX Bundle implementing the Quill JS Wysiwyg https://quilljs.com/
 
 If you need a easy to use WYSIWYG (with no complex configuration) into a symfony project this is what you need.
 
+It comes with some extra features out of the box like image uploading to custom endpoint instead of base64 only.
+
 2.x.x tags cover the new Quill v2
 
-1.x.x tags cover the Quill v1.3.7
+1.x.x tags cover the Quill v1.3.7 (no maintained)
 
 * [Installation](#installation)
 
@@ -16,7 +18,11 @@ If you need a easy to use WYSIWYG (with no complex configuration) into a symfony
 
 
 * [Customize quillJS with options and extra_options](#customize-options)
+
 * [Handle images uploads](#image-upload-handling)
+* [Handle images uploads security](#upload-endpoint-security)
+
+
 * [Extend Quill stimulus controller](#extend-quill-stimulus-controller)
 
 
@@ -239,6 +245,7 @@ see below for a detail on these options values.
 | **json_response_file_path** | string | null          | if you specify this option, that mean your upload endpoint will return you a json response. The value must be the path inside the json (this option will be ignored if the content type of the upload endpoint response is not application/json) |
 |       **security**          | array  | null          | see below for available options                                                                                                                                                                                                                  |
 
+#### upload endpoint security:
 | security options |  type  | default values |  possible values   | explaination                                                                                                                                                                                                     |
 |:----------------:|:------:|:--------------:|:------------------:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 |     **type**     | string |      null      | ``jwt``, ``basic`` | with ``jwt`` a header will be added in the post request ``'authorization'  => 'Bearer MY_JWT_TOKEN'``, with ``basic`` a header will be added in the post request ``'basic' => 'Basic YmFiYXI6cGFzcy1iYWJhcg=='`` |
