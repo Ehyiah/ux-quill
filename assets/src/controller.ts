@@ -1,7 +1,7 @@
 import { Controller } from '@hotwired/stimulus';
 import Quill from 'quill';
 import * as Options from 'quill/core/quill';
-import { ExtraOptions, ModuleOptions } from './typesmodules.d.ts';
+import { ExtraOptions, ModuleOptions } from './types.d.ts';
 import mergeModules from './modules.ts';
 import { ToolbarCustomizer } from './ui/toolbarCustomizer.ts';
 import { handleUploadResponse, uploadStrategies } from './upload-utils.ts';
