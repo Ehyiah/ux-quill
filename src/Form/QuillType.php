@@ -29,7 +29,7 @@ class QuillType extends AbstractType
         $modules = $options['modules'];
 
         foreach ($this->getAutomaticModulesToConfigure() as $config) {
-            $this->addModuleIfRequired($fields, $modules, $config['moduleName'], $config['fieldIdentifier'], $config['moduleClass']);
+            $this->addAutoModuleIfRequired($fields, $modules, $config['moduleName'], $config['fieldIdentifier'], $config['moduleClass']);
         }
 
         $view->vars['attr']['quill_extra_options'] = json_encode($options['quill_extra_options']);
@@ -167,7 +167,7 @@ class QuillType extends AbstractType
      * @param string $fieldIdentifier Identifiant du champ à rechercher
      * @param string $moduleClass Classe du module à instancier
      */
-    private function addModuleIfRequired(array $fields, array &$modules, string $moduleName, string $fieldIdentifier, string $moduleClass): void
+    private function addAutoModuleIfRequired(array $fields, array &$modules, string $moduleName, string $fieldIdentifier, string $moduleClass): void
     {
         if (in_array($moduleName, array_column($modules, 'name'), true)) {
             return;

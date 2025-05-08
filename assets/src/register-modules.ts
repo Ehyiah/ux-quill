@@ -9,3 +9,6 @@ Quill.register('modules/emoji', Emoji);
 
 import QuillResizeImage from 'quill-resize-image';
 Quill.register('modules/resize', QuillResizeImage);
+
+import {SmartLinks} from './modules/smartLinks.ts';
+Quill.register('modules/smartLinks', SmartLinks);
