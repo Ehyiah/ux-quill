@@ -4,7 +4,7 @@ export const uploadStrategies = {
   'json': uploadFileJson
 };
 function applyAuthConfig(config, authConfig) {
-  if (!authConfig || authConfig.type === 'none') {
+  if (!authConfig) {
     return config;
   }
   const newConfig = {

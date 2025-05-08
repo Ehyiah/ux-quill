@@ -19,7 +19,7 @@ export const uploadStrategies: Record<string, UploadFunction> = {
 };
 
 function applyAuthConfig(config: AxiosRequestConfig, authConfig?: AuthConfig): AxiosRequestConfig {
-    if (!authConfig || authConfig.type === 'none') {
+    if (!authConfig) {
         return config;
     }
 
