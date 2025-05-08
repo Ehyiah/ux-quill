@@ -103,7 +103,8 @@ export default class extends Controller {
         if (config?.upload_endpoint && uploadStrategies[config.type]) {
             const uploadFunction = (file: File): Promise<string> => uploadStrategies[config.type](
                 config.upload_endpoint,
-                file
+                file,
+                config.security,
             ).then(response => handleUploadResponse(
                 response,
                 config.json_response_file_path

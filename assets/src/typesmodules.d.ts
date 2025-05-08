@@ -14,6 +14,12 @@ export type uploadOptions = {
     type: string;
     upload_endpoint: null|string;
     json_response_file_path: null|string;
+    security?: {
+        type: string;
+        jwt_token?: string;
+        username?: string;
+        password?: string;
+    }
 }
 
 interface ModuleInterface {
