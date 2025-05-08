@@ -7,6 +7,7 @@ export type ExtraOptions = {
     style: string;
     use_semantic_html: boolean;
     custom_icons?: {[key: string]: string};
+    read_only: boolean;
 }
 
 export type uploadOptions = {

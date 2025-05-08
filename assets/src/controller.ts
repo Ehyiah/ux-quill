@@ -72,6 +72,7 @@ export default class extends Controller {
 
     private buildQuillOptions(): Options {
         const { debug, placeholder, theme, style } = this.extraOptionsValue;
+        const readOnly = this.extraOptionsValue.read_only;
         const enabledModules: Options = {
             'toolbar': this.toolbarOptionsValue,
         };
@@ -83,6 +84,7 @@ export default class extends Controller {
             placeholder,
             theme,
             style,
+            readOnly,
         };
     }
 

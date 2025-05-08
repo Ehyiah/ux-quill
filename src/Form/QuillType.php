@@ -104,6 +104,10 @@ class QuillType extends AbstractType
                 $resolver
                     ->setDefault('custom_icons', [])
                 ;
+                $resolver
+                    ->setDefault('read_only', false)
+                    ->setAllowedTypes('read_only', 'bool')
+                ;
             },
         ]);
 
