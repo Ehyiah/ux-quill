@@ -71,7 +71,7 @@ export default class extends Controller {
   setupUploadHandler(options) {
     const config = this.extraOptionsValue.upload_handler;
     if (config?.upload_endpoint && uploadStrategies[config.type]) {
-      const uploadFunction = file => uploadStrategies[config.type](config.upload_endpoint, file).then(response => handleUploadResponse(response, config.json_response_file_path));
+      const uploadFunction = file => uploadStrategies[config.type](config.upload_endpoint, file, config.security).then(response => handleUploadResponse(response, config.json_response_file_path));
       Object.assign(options.modules, {
         imageUploader: {
           upload: uploadFunction

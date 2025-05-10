@@ -51,11 +51,26 @@ class QuillType extends AbstractType
                             'type' => 'form',
                             'upload_endpoint' => null,
                             'json_response_file_path' => null,
+                            'security' => function (OptionsResolver $resolver) {
+                                $resolver->setDefaults([
+                                    'type' => null,
+                                    'jwt_token' => null,
+                                    'username' => null,
+                                    'password' => null,
+                                ]);
+                                $resolver->setAllowedTypes('type', ['string']);
+                                $resolver->setAllowedValues('type', ['basic', 'jwt']);
+                                $resolver->setAllowedTypes('jwt_token', ['string', 'null']);
+                                $resolver->setAllowedTypes('username', ['string', 'null']);
+                                $resolver->setAllowedTypes('password', ['string', 'null']);
+                            },
                         ]);
                         $spoolResolver->setAllowedTypes('type', ['string', 'null']);
                         $spoolResolver->setAllowedValues('type', ['json', 'form', null]);
                         $spoolResolver->setAllowedTypes('upload_endpoint', ['string', 'null']);
                         $spoolResolver->setAllowedTypes('json_response_file_path', ['string', 'null']);
+                        $spoolResolver->setAllowedTypes('security', ['array', 'null']);
+                        $spoolResolver->setDefault('security', null);
                     })
                 ;
                 $resolver
