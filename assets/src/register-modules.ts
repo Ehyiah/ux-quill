@@ -12,3 +12,6 @@ Quill.register('modules/resize', QuillResizeImage);
 
 import {SmartLinks} from './modules/smartLinks.ts';
 Quill.register('modules/smartLinks', SmartLinks);
+
+import {Counter} from './modules/counterModule.ts';
+Quill.register('modules/counter', Counter);
