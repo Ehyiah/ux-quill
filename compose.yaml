@@ -1,7 +1,8 @@
 services:
     php:
         build:
-            context: docker/php-fpm
+            context: docker/php
         volumes:
             - .:/var/www/symfony:cached
-            - ./docker/php-fpm/php.ini:/usr/local/etc/php/php.ini:delegated
+            - ./docker/php/php.ini:/usr/local/etc/php/php.ini:delegated
+        tty: true
