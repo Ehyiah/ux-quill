@@ -7,7 +7,7 @@ class CounterModule implements ModuleInterface
     public const NAME = 'counter';
 
     /**
-     * @param array<string, string> $options
+     * @param array<string, string|bool> $options
      */
     public function __construct(
         public string $name = self::NAME,
