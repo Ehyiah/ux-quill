@@ -8,3 +8,5 @@ import QuillResizeImage from 'quill-resize-image';
 Quill.register('modules/resize', QuillResizeImage);
 import { SmartLinks } from "./modules/smartLinks.js";
 Quill.register('modules/smartLinks', SmartLinks);
+import { Counter } from "./modules/counterModule.js";
+Quill.register('modules/counter', Counter);
