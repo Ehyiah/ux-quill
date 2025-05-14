@@ -47,6 +47,7 @@ export class Counter {
             container.style.border = '1px solid #ccc'
             container.style.borderWidth = '0px 1px 1px 1px'
             container.style.padding = '5px 15px'
+            container.classList.add('quill-counter-container')
             this.quillContainer.parentElement?.appendChild(container);
         }
 
