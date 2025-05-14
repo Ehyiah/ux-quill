@@ -1,10 +1,12 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 
 export type AuthConfig = {
-    type: 'jwt' | 'basic';
-    jwt_token?: string;       // Used for JWT
-    username?: string;        // Used for Basic Auth
-    password?: string;        // Used for Basic Auth
+    type: 'jwt' | 'basic' | 'custom_header';
+    jwt_token?: string;             // Used for JWT
+    username?: string;              // Used for Basic Auth
+    password?: string;              // Used for Basic Auth
+    custom_header?: string;         // Used for sending a custom Header
+    custom_header_value?: string;   // Used for sending a custom Header
 };
 
 type UploadFunction = (
@@ -47,6 +49,14 @@ function applyAuthConfig(config: AxiosRequestConfig, authConfig?: AuthConfig): A
                 newConfig.headers['Authorization'] = `Basic ${encoded}`;
             } else {
                 console.error('Basic auth configured but missing credentials');
+            }
+            break;
+
+        case 'custom_header':
+            if (authConfig.custom_header_value) {
+                newConfig.headers[authConfig.custom_header] = authConfig.custom_header_value;
+            } else {
+                console.error('custom_header auth configured but no custom_header_value provided');
             }
             break;
     }

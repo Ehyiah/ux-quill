@@ -57,12 +57,16 @@ class QuillType extends AbstractType
                                     'jwt_token' => null,
                                     'username' => null,
                                     'password' => null,
+                                    'custom_header' => null,
+                                    'custom_header_value' => null,
                                 ]);
                                 $resolver->setAllowedTypes('type', ['string']);
                                 $resolver->setAllowedValues('type', ['basic', 'jwt']);
                                 $resolver->setAllowedTypes('jwt_token', ['string', 'null']);
                                 $resolver->setAllowedTypes('username', ['string', 'null']);
                                 $resolver->setAllowedTypes('password', ['string', 'null']);
+                                $resolver->setAllowedTypes('custom_header', ['string', 'null']);
+                                $resolver->setAllowedTypes('custom_header_value', ['string', 'null']);
                             },
                         ]);
                         $spoolResolver->setAllowedTypes('type', ['string', 'null']);
