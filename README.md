@@ -202,7 +202,7 @@ You can add as many Groups as you like or just One if you don't need the WYSIWYG
 |  **upload_handler**   | array  | (explained [below](#image-upload-handling) (you can use ``UploadHandlerOption`` class constants to pick a value)                         |
 | **use_semantic_html** |  bool  | will use the ``getSemanticHTML()`` instead of ``innerHTML`` _(can resolve some problems like https://github.com/slab/quill/issues/3957)_ |
 |   **custom_icons**    | array  | customize icons by passing a SVG to replace the default quill icon (explained [below](#icons)                                            |
-|     **read_ony**      |  bool  | to display quill in readOnly mode                                                                                                        |
+|     **read_only**     |  bool  | to display quill in readOnly mode                                                                                                        |
 
 
 ### Image upload Handling
