@@ -27,7 +27,7 @@ jobs:
               working-directory: ./assets
 
             - name: Publish on NPM
-              run: yarn publish
+              run: yarn publish --access public
               working-directory: ./assets
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
