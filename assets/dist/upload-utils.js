@@ -30,6 +30,13 @@ function applyAuthConfig(config, authConfig) {
         console.error('Basic auth configured but missing credentials');
       }
       break;
+    case 'custom_header':
+      if (authConfig.custom_header_value) {
+        newConfig.headers[authConfig.custom_header] = authConfig.custom_header_value;
+      } else {
+        console.error('custom_header auth configured but no custom_header_value provided');
+      }
+      break;
   }
   return newConfig;
 }
