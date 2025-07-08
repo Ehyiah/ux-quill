@@ -97,14 +97,21 @@ export default class extends Controller {
         const quillContent = quill.getSemanticHTML();
         const inputContent = this.inputTarget;
         inputContent.value = quillContent;
+        this.bubbles(inputContent);
       });
     } else {
       quill.on('text-change', () => {
         const quillContent = quill.root.innerHTML;
         const inputContent = this.inputTarget;
         inputContent.value = quillContent;
+        this.bubbles(inputContent);
       });
     }
+  }
+  bubbles(inputContent) {
+    inputContent.dispatchEvent(new Event('change', {
+      bubbles: true
+    }));
   }
   dispatchEvent(name, payload) {
     if (payload === void 0) {
