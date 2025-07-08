@@ -32,7 +32,9 @@
             >
         </div>
 
-        <div>
+        <div
+            data-live-ignore {# necessary when using live component because otherwise quill instance is not re-attached after live component reload the DOM #}
+        >
             <div class="quill-editor"
                  {{ data_set }}-target="editorContainer"
             >
