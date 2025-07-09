@@ -92,21 +92,12 @@ export default class extends Controller {
     this.dispatchEvent('connect', quill);
   }
   setupContentSync(quill) {
-    if (this.extraOptionsValue.use_semantic_html) {
-      quill.on('text-change', () => {
-        const quillContent = quill.getSemanticHTML();
-        const inputContent = this.inputTarget;
-        inputContent.value = quillContent;
-        this.bubbles(inputContent);
-      });
-    } else {
-      quill.on('text-change', () => {
-        const quillContent = quill.root.innerHTML;
-        const inputContent = this.inputTarget;
-        inputContent.value = quillContent;
-        this.bubbles(inputContent);
-      });
-    }
+    quill.on('text-change', () => {
+      const quillContent = this.extraOptionsValue?.use_semantic_html ? quill.getSemanticHTML() : quill.root.innerHTML;
+      const inputContent = this.inputTarget;
+      inputContent.value = quillContent;
+      this.bubbles(inputContent);
+    });
   }
   bubbles(inputContent) {
     inputContent.dispatchEvent(new Event('change', {
