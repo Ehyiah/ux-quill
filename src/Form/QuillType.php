@@ -188,7 +188,7 @@ class QuillType extends AbstractType
      * Si le module a été mis par l'utilisateur, alors la version de l'utilisateur sera conservée
      *
      * @param array<mixed> $fields Tableau des champs à vérifier
-     * @param array<array<string, string>> $modules Tableau des modules à compléter
+     * @param array<array<string, string>|object> $modules Tableau des modules à compléter
      * @param string $moduleName Nom du module à vérifier
      * @param string $fieldIdentifier Identifiant du champ à rechercher
      * @param string $moduleClass Classe du module à instancier

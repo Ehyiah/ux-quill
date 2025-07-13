@@ -10,7 +10,7 @@ final class DirectionField implements QuillBlockFieldInterface
 
     private string $options;
 
-    public function __construct(?string $option = self::DIRECTION_FIELD_OPTION_RTL)
+    public function __construct(string $option = self::DIRECTION_FIELD_OPTION_RTL)
     {
         $this->options = $option;
     }

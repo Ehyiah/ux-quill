@@ -17,7 +17,7 @@ class QuillJsExtension extends Extension implements PrependExtensionInterface
         // Register the QuillJS form theme if TwigBundle is available
         $bundles = $container->getParameter('kernel.bundles');
 
-        if (isset($bundles['TwigBundle'])) {
+        if (is_array($bundles) && isset($bundles['TwigBundle'])) {
             $container->prependExtensionConfig('twig', ['form_themes' => ['@QuillJs/form.html.twig']]);
         }
 
@@ -42,7 +42,7 @@ class QuillJsExtension extends Extension implements PrependExtensionInterface
 
         $bundles = $container->getParameter('kernel.bundles');
 
-        if (isset($bundles['EasyAdminBundle'])) {
+        if (is_array($bundles) && isset($bundles['EasyAdminBundle'])) {
             $container
                 ->setDefinition('form.ux-quill-js', new Definition(QuillAdminField::class))
                 ->addTag('form.type_admin')
@@ -56,9 +56,12 @@ class QuillJsExtension extends Extension implements PrependExtensionInterface
         if (!interface_exists(AssetMapperInterface::class)) {
             return false;
         }
+        $bundlesMetadata = $container->getParameter('kernel.bundles_metadata');
+        if (!is_array($bundlesMetadata)) {
+            return false;
+        }
 
         // check that FrameworkBundle 6.3 or higher is installed
-        $bundlesMetadata = $container->getParameter('kernel.bundles_metadata');
         if (!isset($bundlesMetadata['FrameworkBundle'])) {
             return false;
         }

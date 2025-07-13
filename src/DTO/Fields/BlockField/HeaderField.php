@@ -11,7 +11,7 @@ final class HeaderField implements QuillBlockFieldInterface
 
     private int $options;
 
-    public function __construct(?int $options = self::HEADER_OPTION_1)
+    public function __construct(int $options = self::HEADER_OPTION_1)
     {
         $this->options = $options;
     }
