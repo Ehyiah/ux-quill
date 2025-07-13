@@ -24,6 +24,7 @@ use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ImageField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ItalicField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\LinkField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\StrikeField;
+use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\TableField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\UnderlineField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\VideoField;
 use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillBlockFieldInterface;
@@ -91,6 +92,7 @@ final class QuillGroup implements QuillGroupInterface
             new VideoField(),
             new EmojiField(),
             new CleanField(),
+            new TableField(),
         ];
 
         $fields = array_merge($stylingFields, $orgaFields, $otherFields);

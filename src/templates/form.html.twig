@@ -26,7 +26,11 @@
     >
         <div>
             <input type="hidden"
-                   value="{{ value }}"
+                    {% if html_sanitizer is not null %}
+                        value="{{ value|sanitize_html(html_sanitizer) }}"
+                    {% else %}
+                        value="{{ value }}"
+                    {% endif %}
                    {{ block('widget_attributes') }}
                    {{ data_set }}-target="input"
             >
@@ -36,11 +40,6 @@
             <div class="quill-editor"
                  {{ data_set }}-target="editorContainer"
             >
-                {% if html_sanitizer is not null %}
-                    {{ value|raw|sanitize_html(html_sanitizer) }}
-                {% else %}
-                    {{ value|raw }}
-                {% endif %}
             </div>
         </div>
     </div>
