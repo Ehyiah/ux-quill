@@ -9,3 +9,7 @@ Quill.register('modules/resize', QuillResizeImage);
 import QuillTableBetter from 'quill-table-better';
 import 'quill-table-better/dist/quill-table-better.css';
 Quill.register('modules/table-better', QuillTableBetter);
+import { SmartLinks } from "./modules/smartLinks.js";
+Quill.register('modules/smartLinks', SmartLinks);
+import { Counter } from "./modules/counterModule.js";
+Quill.register('modules/counter', Counter);

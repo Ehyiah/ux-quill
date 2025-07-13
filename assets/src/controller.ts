@@ -1,7 +1,7 @@
 import { Controller } from '@hotwired/stimulus';
 import Quill from 'quill';
 import * as Options from 'quill/core/quill';
-import { ExtraOptions, ModuleOptions } from './typesmodules.d.ts';
+import { ExtraOptions, ModuleOptions } from './types.d.ts';
 import mergeModules from './modules.ts';
 import { ToolbarCustomizer } from './ui/toolbarCustomizer.ts';
 import { handleUploadResponse, uploadStrategies } from './upload-utils.ts';
@@ -72,6 +72,7 @@ export default class extends Controller {
 
     private buildQuillOptions(): Options {
         const { debug, placeholder, theme, style } = this.extraOptionsValue;
+        const readOnly = this.extraOptionsValue.read_only;
         const enabledModules: Options = {
             'toolbar': this.toolbarOptionsValue,
         };
@@ -83,6 +84,7 @@ export default class extends Controller {
             placeholder,
             theme,
             style,
+            readOnly,
         };
     }
 
@@ -101,7 +103,8 @@ export default class extends Controller {
         if (config?.upload_endpoint && uploadStrategies[config.type]) {
             const uploadFunction = (file: File): Promise<string> => uploadStrategies[config.type](
                 config.upload_endpoint,
-                file
+                file,
+                config.security,
             ).then(response => handleUploadResponse(
                 response,
                 config.json_response_file_path

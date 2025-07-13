@@ -4,9 +4,11 @@ Symfony UX Bundle implementing the Quill JS Wysiwyg https://quilljs.com/
 
 If you need a easy to use WYSIWYG (with no complex configuration) into a symfony project this is what you need.
 
+It comes with some extra features out of the box like image uploading to custom endpoint instead of base64 only.
+
 2.x.x tags cover the new Quill v2
 
-1.x.x tags cover the Quill v1.3.7
+1.x.x tags cover the Quill v1.3.7 (no maintained)
 
 * [Installation](#installation)
 
@@ -16,7 +18,11 @@ If you need a easy to use WYSIWYG (with no complex configuration) into a symfony
 
 
 * [Customize quillJS with options and extra_options](#customize-options)
+
 * [Handle images uploads](#image-upload-handling)
+* [Handle images uploads security](#upload-endpoint-security)
+
+
 * [Extend Quill stimulus controller](#extend-quill-stimulus-controller)
 
 
@@ -77,8 +83,6 @@ in a twig template :
 
 you can sanitize HTML if you need to for security reason, but don't forget to configure it
 to your needs as many html balise and style elements will be removed by default.
-Same goes in your Form configuration
-The sanitizer is used to re-render content in your editor in the hidden (not at the submission). For sanitizing in the submission use the classic way (see https://symfony.com/doc/current/html_sanitizer.html)
 ```
     'sanitizer' => 'my_awesome_sanitizer_config
 ```
@@ -186,16 +190,17 @@ You can add as many Groups as you like or just One if you don't need the WYSIWYG
 
 
 ## quill_extra_options
-|   extra_option_name   |  type  | values                                                                                                           |
-|:---------------------:|:------:|:-----------------------------------------------------------------------------------------------------------------|
-|       **debug**       | string | `` error``, ``warn``, ``log``, ``info``  (you can use ``DebugOption`` class constants to pick a value)           |
-|      **height**       | string | examples: ``200px``, ``200em``, default: '200px'                                                                 |
-|       **theme**       | string | ``snow``, ``bubble`` , default: snow (you can use ``ThemeOption`` class constants to pick a value)               |
-|    **placeholder**    | string |                                                                                                                  |
-|       **style**       | string | ``class``, ``inline``, choose how the style will be applied.                                                     |
-|  **upload_handler**   | array  | (explained [below](#image-upload-handling) (you can use ``UploadHandlerOption`` class constants to pick a value) |
-| **use_semantic_html** |  bool  | will use the ``getSemanticHTML()`` instead of ``innerHTML`` _(can resolve some problems like https://github.com/slab/quill/issues/3957)_   |
-|   **custom_icons**    | array  | customize icons by passing a SVG to replace the default quill icon (explained [below](#icons)                    |
+|   extra_option_name   |  type  | values                                                                                                                                   |
+|:---------------------:|:------:|:-----------------------------------------------------------------------------------------------------------------------------------------|
+|       **debug**       | string | `` error``, ``warn``, ``log``, ``info``  (you can use ``DebugOption`` class constants to pick a value)                                   |
+|      **height**       | string | examples: ``200px``, ``200em``, default: '200px'                                                                                         |
+|       **theme**       | string | ``snow``, ``bubble`` , default: snow (you can use ``ThemeOption`` class constants to pick a value)                                       |
+|    **placeholder**    | string |                                                                                                                                          |
+|       **style**       | string | ``class``, ``inline``, choose how the style will be applied.                                                                             |
+|  **upload_handler**   | array  | (explained [below](#image-upload-handling) (you can use ``UploadHandlerOption`` class constants to pick a value)                         |
+| **use_semantic_html** |  bool  | will use the ``getSemanticHTML()`` instead of ``innerHTML`` _(can resolve some problems like https://github.com/slab/quill/issues/3957)_ |
+|   **custom_icons**    | array  | customize icons by passing a SVG to replace the default quill icon (explained [below](#icons)                                            |
+|     **read_only**     |  bool  | to display quill in readOnly mode                                                                                                        |
 
 
 ### Image upload Handling
@@ -228,6 +233,7 @@ However, you can specify a custom endpoint to handle image uploading and pass in
         ]
     ],
 ```
+
 see below for a detail on these options values.
 ### available options in upload handler:
 | upload_handler option name  |  type  | default value | possible values                                                                                                                                                                                                                                  |
@@ -235,7 +241,32 @@ see below for a detail on these options values.
 |          **type**           | string | form          | ``json``, ``form``                                                                                                                                                                                                                               |
 |     **upload_endpoint**     | string | null          | the endpoint of your upload handler exemple : ``/upload`` or ``https://my-custom-upload-endpoint/upload``                                                                                                                                        |
 | **json_response_file_path** | string | null          | if you specify this option, that mean your upload endpoint will return you a json response. The value must be the path inside the json (this option will be ignored if the content type of the upload endpoint response is not application/json) |
+|       **security**          | array  | null          | see below for available options                                                                                                                                                                                                                  |
 
+#### upload endpoint security:
+|     security options     |  type  |    used with     | default values |            possible values             | explaination                                                                                                                                                                                                                                                                                                                              |
+|:------------------------:|:------:|:----------------:|:--------------:|:--------------------------------------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|         **type**         | string |                  |      null      | ``jwt``, ``basic``, ``custom_header``  | with ``jwt`` a header will be added in the post request ``'authorization'  => 'Bearer MY_JWT_TOKEN'``, with ``basic`` a header will be added in the post request ``'authorization' => 'Basic YmFiYXI6cGFzcy1iYWJhcg=='`` with ``custom_header`` a header will be added in the post request ``'custom_header' => 'custom_header_value=='`` |
+|      **jwt_token**       | string |       jwt        |      null      |                                        | pass a valid JWT token for your upload endpoint (don't specify Bearer, it will be added automatically)                                                                                                                                                                                                                                    |
+|       **username**       | string |      basic       |      null      |                                        | the username of your basic http user                                                                                                                                                                                                                                                                                                      |
+|       **password**       | string |      basic       |      null      |                                        | the password of your basic http user                                                                                                                                                                                                                                                                                                      |
+|    **custom_header**     | string |  custom_header   |      null      |                                        | the key used for your custom header                                                                                                                                                                                                                                                                                                       |
+|  **custom_header_value** | string |  custom_header   |      null      |                                        | the value that will be passed in your custom header                                                                                                                                                                                                                                                                                       |
+
+**exemple of a json configuration with jwt security.**
+```php
+    'quill_extra_options' => [
+        'upload_handler' => [
+            'type' => 'json',
+            'upload_endpoint' => '/my-custom-endpoint/upload',
+            'json_response_file_path' => 'file.url',
+            'security' => [
+                'type' => 'jwt',
+                'jwt_token' => 'my_jwt_token',
+            ],
+        ]
+    ],
+```
 
 - If your response in a classic simple ``Symfony\Component\HttpFoundation\Response``, you can simply return a response like this one for exemple and do **not** need to specify the ``json_response_file_path`` option.
 ```php
@@ -263,7 +294,7 @@ https://quilljs.com/docs/modules
 
 You can add/customize quill modules in this option field.
 You can create your own modules classes, they need to implement the ``ModuleInterface`` and add the name and options properties.
-Some modules are automatically loaded when they are need in fields.
+Some modules are automatically loaded when they are needed in fields.
 
 ```php
     'modules' => [
@@ -276,16 +307,19 @@ Some modules are automatically loaded when they are need in fields.
     ],
 ```
 
-|      modules      |                                                                         description                                                                          |     name      | options type |                    options                    |                         default options                         |
-|:-----------------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------:|:-------------:|:------------:|:---------------------------------------------:|:---------------------------------------------------------------:|
-|  **EmojiModule**  |                                 required if emoji Field is activated (this is done actually automatically inside the bundle)                                 | emoji-toolbar |    string    |                     NONE                      |                           ``'true'``                            |
-| **ResizeModule**  |                                            used in ImageField,  https://www.npmjs.com/package/quill-resize-image                                             |    resize     |    array     |                      []                       |                               []                                |
-| **SyntaxModule**  | To use with CodeBlockField field (this is done actually automatically inside the bundle) see official [description](https://quilljs.com/docs/modules/syntax) |    syntax     |    string    |                     NONE                      |                           ``'true'``                            |
-| **HistoryModule** |       The History module is responsible for handling undo and redo for Quill. see details on official [site](https://quilljs.com/docs/modules/history)       |    history    |    array     |     ``delay``, ``maxStack``, ``userOnly``     | ['delay' => '1000', 'maxStack' => '100', 'userOnly' => 'false'] |
-|  **TableModule**  |          The Table module is responsible for handling table options. see details on repository [site](https://github.com/attoae/quill-table-better)          | table-better  |    array     | https://github.com/attoae/quill-table-better  |      see ``Ehyiah\QuillJsBundle\DTO\Modules\TableModule``       |
 
-### Other modules with manual config needed
-For others modules, you will need to extends Quill controller (see below) to use them.
+|       modules        | auto-imported |                                                                                                                                              description                                                                                                                                              |     name      | options type |                                                     options                                                     |                                                                                    default options                                                                                     |
+|:--------------------:|:-------------:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:-------------:|:------------:|:---------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+|   **EmojiModule**    |      YES      |                                                                                                                                 required if emoji Field is activated                                                                                                                                  | emoji-toolbar |    string    |                                                      NONE                                                       |                                                                                       ``'true'``                                                                                       |
+|   **ResizeModule**   |      YES      |                                                                                                                 used in ImageField,  https://www.npmjs.com/package/quill-resize-image                                                                                                                 |    resize     |    array     |                                                       []                                                        |                                                                                           []                                                                                           |
+|   **SyntaxModule**   |      YES      |                                                                                                 To use with CodeBlockField field, see official [description](https://quilljs.com/docs/modules/syntax)                                                                                                 |    syntax     |    string    |                                                      NONE                                                       |                                                                                       ``'true'``                                                                                       |
+|  **HistoryModule**   |      NO       |                                                                           The History module is responsible for handling undo and redo for Quill. see details on official [site](https://quilljs.com/docs/modules/history)                                                                            |    history    |    array     |                                      ``delay``, ``maxStack``, ``userOnly``                                      |                                                            ['delay' => '1000', 'maxStack' => '100', 'userOnly' => 'false']                                                             |
+| **SmartLinksModule** |      NO       |                                                                                                                   automatic recognition of links (can be customized within options)                                                                                                                   |  smartLinks   |    array     |                                                  ``linkRegex``                                                  |                                                                         ['linkRegex' => '/https?:\/\/[^\s]+/']                                                                         |
+|  **CounterModule**   |      NO       | Count of number and Words inside WYSIWYG (display below WYSIWYG instance by default or inside a custom html Element if you want : specify an ID in *_container with the '#') characters counter display 1 character by default because Quill is instanciated with a <p></p> that count as 1 character |    counter    |    array     | ``words``, ``words_label``, ``words_container``, ``characters``, ``characters_label``, ``characters_container`` | ['words' => true, 'words_label' => 'Number of words : ', 'words_container' => '', 'characters' => true, 'characters_label' => 'Number of characters : ', 'characters_container' => ''] |
+|  **TableModule**     |      YES      |                                          The Table module is responsible for handling table options. see details on repository [site](https://github.com/attoae/quill-table-better)                                                                                                                   | table-better  |    array     |                                 https://github.com/attoae/quill-table-better                                    |                                                                   see ``Ehyiah\QuillJsBundle\DTO\Modules\TableModule``                                                                 |
+
+### Other modules 
+For other modules, you will need to extends Quill controller (see below) to use them.
 
 |       modules       |                                                                description                                                                |     name      | options type |                               options                               |                         default options                         |
 |:-------------------:|:-----------------------------------------------------------------------------------------------------------------------------------------:|:-------------:|:------------:|:-------------------------------------------------------------------:|:---------------------------------------------------------------:|

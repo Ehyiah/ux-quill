@@ -30,7 +30,7 @@ class QuillType extends AbstractType
         $modules = $options['modules'];
 
         foreach ($this->getAutomaticModulesToConfigure() as $config) {
-            $this->addModuleIfRequired($fields, $modules, $config['moduleName'], $config['fieldIdentifier'], $config['moduleClass']);
+            $this->addAutoModuleIfRequired($fields, $modules, $config['moduleName'], $config['fieldIdentifier'], $config['moduleClass']);
         }
 
         $view->vars['attr']['quill_extra_options'] = json_encode($options['quill_extra_options']);
@@ -51,11 +51,30 @@ class QuillType extends AbstractType
                             'type' => 'form',
                             'upload_endpoint' => null,
                             'json_response_file_path' => null,
+                            'security' => function (OptionsResolver $resolver) {
+                                $resolver->setDefaults([
+                                    'type' => null,
+                                    'jwt_token' => null,
+                                    'username' => null,
+                                    'password' => null,
+                                    'custom_header' => null,
+                                    'custom_header_value' => null,
+                                ]);
+                                $resolver->setAllowedTypes('type', ['string']);
+                                $resolver->setAllowedValues('type', ['basic', 'jwt']);
+                                $resolver->setAllowedTypes('jwt_token', ['string', 'null']);
+                                $resolver->setAllowedTypes('username', ['string', 'null']);
+                                $resolver->setAllowedTypes('password', ['string', 'null']);
+                                $resolver->setAllowedTypes('custom_header', ['string', 'null']);
+                                $resolver->setAllowedTypes('custom_header_value', ['string', 'null']);
+                            },
                         ]);
                         $spoolResolver->setAllowedTypes('type', ['string', 'null']);
                         $spoolResolver->setAllowedValues('type', ['json', 'form', null]);
                         $spoolResolver->setAllowedTypes('upload_endpoint', ['string', 'null']);
                         $spoolResolver->setAllowedTypes('json_response_file_path', ['string', 'null']);
+                        $spoolResolver->setAllowedTypes('security', ['array', 'null']);
+                        $spoolResolver->setDefault('security', null);
                     })
                 ;
                 $resolver
@@ -103,6 +122,10 @@ class QuillType extends AbstractType
                 ;
                 $resolver
                     ->setDefault('custom_icons', [])
+                ;
+                $resolver
+                    ->setDefault('read_only', false)
+                    ->setAllowedTypes('read_only', 'bool')
                 ;
             },
         ]);
@@ -170,7 +193,7 @@ class QuillType extends AbstractType
      * @param string $fieldIdentifier Identifiant du champ à rechercher
      * @param string $moduleClass Classe du module à instancier
      */
-    private function addModuleIfRequired(array $fields, array &$modules, string $moduleName, string $fieldIdentifier, string $moduleClass): void
+    private function addAutoModuleIfRequired(array $fields, array &$modules, string $moduleName, string $fieldIdentifier, string $moduleClass): void
     {
         if (in_array($moduleName, array_column($modules, 'name'), true)) {
             return;

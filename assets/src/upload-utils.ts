@@ -1,19 +1,82 @@
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 
-type UploadFunction = (uploadEndpoint: string, file: File) => Promise<AxiosResponse>;
+export type AuthConfig = {
+    type: 'jwt' | 'basic' | 'custom_header';
+    jwt_token?: string;             // Used for JWT
+    username?: string;              // Used for Basic Auth
+    password?: string;              // Used for Basic Auth
+    custom_header?: string;         // Used for sending a custom Header
+    custom_header_value?: string;   // Used for sending a custom Header
+};
+
+type UploadFunction = (
+    uploadEndpoint: string,
+    file: File,
+    authConfig?: AuthConfig
+) => Promise<AxiosResponse>;
 
 export const uploadStrategies: Record<string, UploadFunction> = {
     'form': uploadFileForm,
     'json': uploadFileJson
 };
 
-export function uploadFileForm(uploadEndpoint: string, file: File): Promise<AxiosResponse> {
+function applyAuthConfig(config: AxiosRequestConfig, authConfig?: AuthConfig): AxiosRequestConfig {
+    if (!authConfig) {
+        return config;
+    }
+
+    const newConfig = { ...config };
+
+    if (!newConfig.headers) {
+        newConfig.headers = {};
+    }
+
+    switch (authConfig.type) {
+        case 'jwt':
+            if (authConfig.jwt_token) {
+                newConfig.headers['Authorization'] = `Bearer ${authConfig.jwt_token}`;
+            } else {
+                console.error('JWT auth configured but no token provided');
+            }
+            break;
+
+        case 'basic':
+            if (authConfig.username && authConfig.password) {
+                const credentials = `${authConfig.username}:${authConfig.password}`;
+                const encoded = typeof btoa === 'function'
+                    ? btoa(credentials)
+                    : Buffer.from(credentials).toString('base64');
+                newConfig.headers['Authorization'] = `Basic ${encoded}`;
+            } else {
+                console.error('Basic auth configured but missing credentials');
+            }
+            break;
+
+        case 'custom_header':
+            if (authConfig.custom_header_value) {
+                newConfig.headers[authConfig.custom_header] = authConfig.custom_header_value;
+            } else {
+                console.error('custom_header auth configured but no custom_header_value provided');
+            }
+            break;
+    }
+
+    return newConfig;
+}
+
+export function uploadFileForm(
+    uploadEndpoint: string,
+    file: File,
+    authConfig?: AuthConfig
+): Promise<AxiosResponse> {
     return new Promise((resolve, reject) => {
         const formData = new FormData();
         formData.append('file', file);
 
+        const config = applyAuthConfig({}, authConfig);
+
         axios
-            .post(uploadEndpoint, formData)
+            .post(uploadEndpoint, formData, config)
             .then(response => resolve(response))
             .catch(err => {
                 console.error(err);
@@ -22,7 +85,11 @@ export function uploadFileForm(uploadEndpoint: string, file: File): Promise<Axio
     });
 }
 
-export function uploadFileJson(uploadEndpoint: string, file: File): Promise<AxiosResponse> {
+export function uploadFileJson(
+    uploadEndpoint: string,
+    file: File,
+    authConfig?: AuthConfig
+): Promise<AxiosResponse> {
     return new Promise((resolve, reject) => {
         const reader = (file: File): Promise<string | ArrayBuffer | null> => {
             return new Promise((resolve) => {
@@ -33,23 +100,28 @@ export function uploadFileJson(uploadEndpoint: string, file: File): Promise<Axio
         };
 
         reader(file)
-            .then(result =>
-                axios
-                    .post(uploadEndpoint, result, {
-                        headers: {
-                            'Content-Type': 'application/json',
-                        }
-                    })
+            .then(result => {
+                const config = applyAuthConfig({
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                }, authConfig);
+
+                return axios
+                    .post(uploadEndpoint, result, config)
                     .then(response => resolve(response))
                     .catch(err => {
                         console.error(err);
                         reject('Upload failed');
-                    })
-            );
+                    });
+            });
     });
 }
 
-export function handleUploadResponse(response: AxiosResponse, jsonResponseFilePath?: string | null): Promise<string> {
+export function handleUploadResponse(
+    response: AxiosResponse,
+    jsonResponseFilePath?: string | null
+): Promise<string> {
     return new Promise((resolve, reject) => {
         const contentType = response.headers['content-type'] || '';
 

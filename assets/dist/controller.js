@@ -48,6 +48,7 @@ export default class extends Controller {
       theme,
       style
     } = this.extraOptionsValue;
+    const readOnly = this.extraOptionsValue.read_only;
     const enabledModules = {
       'toolbar': this.toolbarOptionsValue
     };
@@ -57,7 +58,8 @@ export default class extends Controller {
       modules: mergedModules,
       placeholder,
       theme,
-      style
+      style,
+      readOnly
     };
   }
   setupQuillStyles(options) {
@@ -69,7 +71,7 @@ export default class extends Controller {
   setupUploadHandler(options) {
     const config = this.extraOptionsValue.upload_handler;
     if (config?.upload_endpoint && uploadStrategies[config.type]) {
-      const uploadFunction = file => uploadStrategies[config.type](config.upload_endpoint, file).then(response => handleUploadResponse(response, config.json_response_file_path));
+      const uploadFunction = file => uploadStrategies[config.type](config.upload_endpoint, file, config.security).then(response => handleUploadResponse(response, config.json_response_file_path));
       Object.assign(options.modules, {
         imageUploader: {
           upload: uploadFunction

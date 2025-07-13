@@ -24,23 +24,18 @@ up: ## Up the images
 down: ## Down the images
 	$(DOCKER_COMPOSE) down
 
-destroy: down ## Destroy all containers and images
-	-docker rm $$(docker ps -a -q)
-	-docker rmi $$(docker images -q)
-
-## don't forget this if you dont want makefile to get files with this name
-.PHONY: build up down destroy update install vendor
+.PHONY: build up down update install vendor
 
 ##@ Composer
 vendor: composer.lock ## Install composer dependency
 	$(COMPOSER) install
 
 ##@ Assets
-assets: node_modules ## Install assets
+assets: node_modules ## Compile bundle assets for prod
 	$(EXECYARN) php rm -rf ./dist
 	$(YARN) build
 
-watch: node_modules ## Watch front update
+watch: node_modules ## Watch bundle assets
 	$(YARN) watch
 
 node_modules: assets ## Install yarn dependency

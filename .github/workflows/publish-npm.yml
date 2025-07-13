@@ -1,0 +1,33 @@
+name: Publish NPM Package
+
+on:
+    release:
+        types:
+            - created
+            - edited
+    push:
+        tags:
+            - '*'
+
+jobs:
+    publish-npm-package:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '22.x'
+                  registry-url: 'https://registry.npmjs.org'
+
+            - name: Install
+              run: yarn install
+              working-directory: ./assets
+
+            - name: Publish on NPM
+              run: yarn publish --access public
+              working-directory: ./assets
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
