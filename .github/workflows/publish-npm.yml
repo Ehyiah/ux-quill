@@ -22,12 +22,23 @@ jobs:
                   node-version: '22.x'
                   registry-url: 'https://registry.npmjs.org'
 
-            - name: Install
+            - name: Install dependencies
+              working-directory: ./assets
               run: yarn install
-              working-directory: ./assets
 
-            - name: Publish on NPM
-              run: yarn publish --access public
+            - name: Get new tag version
+              id: get_version
+              run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+            - name: Set package.json version to tag version
               working-directory: ./assets
+              run: |
+                  npm version --no-git-tag-version ${{ steps.get_version.outputs.VERSION }}
+              env:
+                  NPM_CONFIG_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
+
+            - name: Publish new version on NPM
+              working-directory: ./assets
+              run: yarn publish --access public
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
