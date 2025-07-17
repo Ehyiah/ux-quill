@@ -2,13 +2,9 @@
 
 Symfony UX Bundle implementing the Quill JS Wysiwyg https://quilljs.com/
 
-If you need a easy to use WYSIWYG (with no complex configuration) into a symfony project this is what you need.
+If you need an easy-to-use WYSIWYG (with no complex configuration) into a symfony project, this is what you need.
 
 It comes with some extra features out of the box like image uploading to custom endpoint instead of base64 only.
-
-2.x.x tags cover the new Quill v2
-
-1.x.x tags cover the Quill v1.3.7 (no maintained)
 
 * [Installation](#installation)
 
@@ -204,16 +200,16 @@ You can add as many Groups as you like or just One if you don't need the WYSIWYG
 
 
 ### Image upload Handling
-in ***ImageField*** : QuillJS transforms images in base64 encoded file by default to save your files.
+In ***ImageField*** : QuillJS transforms images in a base64 encoded file by default to save your files.
 However, you can specify a custom endpoint to handle image uploading and pass in response the entire public URL to display the image. 
 #### currently handling 2 methods :
 
-#### 1 : data sending in ``base64`` inside a ``application/json`` request
-- in json mode data will look like this by calling ``$request->getContent()`` and ```application/json``` in content-type headers
+#### 1: data sending in ``base64`` inside a ``application/json`` request
+- in JSON mode data will look like this by calling ``$request->getContent()`` and ```application/json``` in content-type headers
 ```
     "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAlgAAAJYCAQAAAAUb1BXAAAABGdBTUEAALGPC/xhBQAAACyygyyioiBqFCUIKC64x..."
 ```
-#### 2 : sending in a ``multipart/form-data`` request
+#### 2: sending in a ``multipart/form-data`` request
 - in form mode you will find a ```multipart/form-data``` in content-type headers and file will be present in $request->files named ```file``` as a ``Symfony\Component\HttpFoundation\File\UploadedFile``
 - then you can handle it like you would do with a FileType and access the file like this : 
 ```php
@@ -223,7 +219,7 @@ However, you can specify a custom endpoint to handle image uploading and pass in
 ```
 
 #### upload mode configuration :
-**exemple of a json configuration to send request to the upload endpoint that returns a json response containing the URL to the uploaded image.**
+**example of a JSON configuration to send a request to the upload endpoint that returns a JSON response containing the URL to the uploaded image.**
 ```php
     'quill_extra_options' => [
         'upload_handler' => [
@@ -253,7 +249,7 @@ see below for a detail on these options values.
 |    **custom_header**     | string |  custom_header   |      null      |                                        | the key used for your custom header                                                                                                                                                                                                                                                                                                       |
 |  **custom_header_value** | string |  custom_header   |      null      |                                        | the value that will be passed in your custom header                                                                                                                                                                                                                                                                                       |
 
-**exemple of a json configuration with jwt security.**
+**example of a JSON configuration with jwt security.**
 ```php
     'quill_extra_options' => [
         'upload_handler' => [
@@ -272,7 +268,7 @@ see below for a detail on these options values.
 ```php
         return new Response('https://my-website/public/assets/my-uploaded-image.jpg');
 ```
-- If your response is a Json response like a ``Symfony\Component\HttpFoundation\JsonResponse``, the ``json_response_file_path`` option can be used to specify the url inside the json response.
+- If your response is a JSON response like a ``Symfony\Component\HttpFoundation\JsonResponse``, the ``json_response_file_path`` option can be used to specify the url inside the json response.
 in the exemple below ``json_path_file_response`` must be ``'file.url'``.
 ```php
     return new JsonResponse([
@@ -281,7 +277,7 @@ in the exemple below ``json_path_file_response`` must be ``'file.url'``.
         ]
     ]);
 ```
-- If your response is a Json response like a ``Symfony\Component\HttpFoundation\JsonResponse``, **and** the ``json_response_file_path`` is **null**.
+- If your response is a JSON response like a ``Symfony\Component\HttpFoundation\JsonResponse``, **and** the ``json_response_file_path`` is **null**.
 ```php
     return new JsonResponse('https://my-website/public/assets/my-uploaded-image.jpg');
 ```
@@ -327,7 +323,7 @@ For other modules, you will need to extends Quill controller (see below) to use 
 | **ClipboardModule** | The Clipboard handles copy, cut and paste between Quill and external applications [site](https://quilljs.com/docs/modules/clipboard)      |   clipboard   |    array     | [see next documentation section](#extend-quill-stimulus-controller) |                                -                                |
 
 ### icons
-You can customize icons used in toolbar, pass the toolbar name and a new svg
+You can customize icons used in the toolbar, pass the toolbar name and a new svg
 exemple :
 ```php
     'quill_extra_options' => [
@@ -341,7 +337,7 @@ exemple :
 
 # Extend Quill stimulus controller
 If you need to extend the default behavior of the built-in controller, this is possible.
-Exemple: you need to modify modules registration and/or add custom JavaScript to modify quill behavior.
+For example, you need to modify module registration and/or add custom JavaScript to modify quill behavior.
 
 Some modules like ``Keyboard`` and ``Clipboard`` need custom JavaScript to be written.
 The easiest way to do so is to create a custom stimulus controller to extend the default behavior.
@@ -471,7 +467,7 @@ in your **Dashboard** controller
 ```
     .addEntry('quill-admin', './assets/quill-admin.js')
 ```
-don't forget to recompile assets (yarn build/watch or npm equivalent).
+remember to recompile assets (yarn build/watch or npm equivalent).
 
 ## EasyAdmin Field usage
 Then you can use the QuillAdminField like this :
