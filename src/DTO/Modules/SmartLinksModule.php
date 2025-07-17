@@ -11,7 +11,7 @@ class SmartLinksModule implements ModuleInterface
      */
     public function __construct(
         public string $name = self::NAME,
-        public array $options = [
+        public $options = [
             'linkRegex' => '/https?:\/\/[^\s]+/',
         ],
     ) {

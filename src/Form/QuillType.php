@@ -4,6 +4,7 @@ namespace Ehyiah\QuillJsBundle\Form;
 
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\CodeBlockField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\EmojiField;
+use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\FormulaField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ImageField;
 use Ehyiah\QuillJsBundle\DTO\Modules\EmojiModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\ModuleInterface;
@@ -35,6 +36,9 @@ class QuillType extends AbstractType
 
         $view->vars['attr']['quill_extra_options'] = json_encode($options['quill_extra_options']);
         $view->vars['attr']['quill_modules_options'] = json_encode($modules);
+
+        $assets = $this->getBuiltInAssets($fields, $modules, $options);
+        $view->vars['quill_assets'] = $assets;
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -42,7 +46,7 @@ class QuillType extends AbstractType
         $resolver->setDefaults([
             'label' => false,
             'error_bubbling' => true,
-            'quill_options' => ['bold', 'italic'],
+            'quill_options' => [['bold', 'italic']],
             'modules' => [],
             'quill_extra_options' => function (OptionsResolver $resolver) {
                 $resolver
@@ -126,6 +130,10 @@ class QuillType extends AbstractType
                 $resolver
                     ->setDefault('read_only', false)
                     ->setAllowedTypes('read_only', 'bool')
+                ;
+                $resolver
+                    ->setDefault('assets', [])
+                    ->setAllowedTypes('assets', ['array'])
                 ;
             },
         ]);
@@ -215,5 +223,56 @@ class QuillType extends AbstractType
                 return;
             }
         }
+    }
+
+    /**
+     * @param array<mixed> $fields
+     * @param array<mixed> $modules
+     * @param array<mixed> $options
+     *
+     * @return array<mixed>
+     */
+    private function getBuiltInAssets(array $fields, array $modules, array $options): array
+    {
+        $assets['styleSheets'] = [];
+        $assets['scripts'] = [];
+
+        foreach ($fields as $fieldGroup) {
+            if (in_array((new FormulaField())->getOption(), $fieldGroup, true)) {
+                $assets['styleSheets']['katex'] = 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css';
+                $assets['scripts']['katex'] = 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js';
+            }
+        }
+
+        foreach ($modules as $module) {
+            if ($module instanceof SyntaxModule) {
+                $assets['styleSheets']['highlight'] = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css';
+                $assets['scripts']['highlight'] = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js';
+            }
+        }
+
+        if (isset($options['quill_extra_options']['assets']) && count($options['quill_extra_options']['assets']) > 0) {
+            $assets = $this->getCustomAssets($options['quill_extra_options']['assets'], $assets);
+        }
+
+        return $assets;
+    }
+
+    /**
+     * @param array<mixed> $customAssets
+     * @param array<mixed> $assets
+     *
+     * @return array<mixed>
+     */
+    private function getCustomAssets(array $customAssets, array $assets): array
+    {
+        if (isset($customAssets['styleSheets'])) {
+            $assets['styleSheets'] = array_merge($assets['styleSheets'], $customAssets['styleSheets']);
+        }
+        if (isset($customAssets['scripts'])) {
+            $assets['scripts'] = array_merge($assets['scripts'], $customAssets['scripts']);
+        }
+
+        return $assets;
     }
 }

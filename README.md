@@ -113,7 +113,7 @@ For the most basic this is only what you have to do.
                         new HeaderField(HeaderField::HEADER_OPTION_2),
                         // and many more
                     ),
-                    // Or add all available fields at once
+                    // Or add all built-in available fields at once
                     QuillGroup::buildWithAllFields()
                 ]
             ])
@@ -186,7 +186,7 @@ You can add as many Groups as you like or just One if you don't need the WYSIWYG
 
 
 ## quill_extra_options
-|   extra_option_name   |  type  | values                                                                                                                                   |
+|   extra_option_name   |  type  | details                                                                                                                                  |
 |:---------------------:|:------:|:-----------------------------------------------------------------------------------------------------------------------------------------|
 |       **debug**       | string | `` error``, ``warn``, ``log``, ``info``  (you can use ``DebugOption`` class constants to pick a value)                                   |
 |      **height**       | string | examples: ``200px``, ``200em``, default: '200px'                                                                                         |
@@ -197,7 +197,38 @@ You can add as many Groups as you like or just One if you don't need the WYSIWYG
 | **use_semantic_html** |  bool  | will use the ``getSemanticHTML()`` instead of ``innerHTML`` _(can resolve some problems like https://github.com/slab/quill/issues/3957)_ |
 |   **custom_icons**    | array  | customize icons by passing a SVG to replace the default quill icon (explained [below](#icons)                                            |
 |     **read_only**     |  bool  | to display quill in readOnly mode                                                                                                        |
+|      **assets**       | array  | if you need to add custom assets _(stylesheets or scripts via a CDN address)_ [assets exemple](#assets-example)                          |
 
+#### assets example
+```php
+    'assets' => [
+        'styleSheets' => [
+            "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css",
+            "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css",
+        ],
+        'scripts' => [
+            "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js",
+            "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js",
+        ]
+    ],
+```
+
+OR associative array, this will allow you to **override** default built-in CDN assets for katex _(use for FormulaField)_ and highlight _(use for CodeBlockField)_
+
+```php
+    'quill_extra_options' => [
+        'assets' => [
+            'styleSheets' => [ // to add some CSS stylesheets
+                'katex' => 'https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css'
+                'highlight' => 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css'
+            ],
+            'scripts' => [ // to add some JavaScript
+                'katex' => 'https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js',
+                'highlight' => 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/highlight.min.js'
+            ],
+        ]
+    ]
+```
 
 ### Image upload Handling
 In ***ImageField*** : QuillJS transforms images in a base64 encoded file by default to save your files.

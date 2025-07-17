@@ -14,7 +14,7 @@ final class HistoryModule implements ModuleInterface
      */
     public function __construct(
         public string $name = self::NAME,
-        public array $options = [
+        public $options = [
             'delay' => '1000',
             'maxStack' => '100',
             'userOnly' => 'false',
