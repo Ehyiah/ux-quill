@@ -96,7 +96,9 @@ export default class extends Controller {
     const initialData = quill.clipboard.convert({
       html: this.inputTarget.value
     });
+    this.dispatchEvent('hydrate:before', initialData);
     quill.updateContents(initialData);
+    this.dispatchEvent('hydrate:after', quill);
     if (this.extraOptionsValue.use_semantic_html) {
       quill.on('text-change', () => {
         const quillContent = quill.getSemanticHTML();
