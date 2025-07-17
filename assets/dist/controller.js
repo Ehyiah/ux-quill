@@ -99,19 +99,17 @@ export default class extends Controller {
     this.dispatchEvent('hydrate:before', initialData);
     quill.updateContents(initialData);
     this.dispatchEvent('hydrate:after', quill);
-    if (this.extraOptionsValue.use_semantic_html) {
-      quill.on('text-change', () => {
-        const quillContent = quill.getSemanticHTML();
-        const inputContent = this.inputTarget;
-        inputContent.value = quillContent;
-      });
-    } else {
-      quill.on('text-change', () => {
-        const quillContent = quill.root.innerHTML;
-        const inputContent = this.inputTarget;
-        inputContent.value = quillContent;
-      });
-    }
+    quill.on('text-change', () => {
+      const quillContent = this.extraOptionsValue?.use_semantic_html ? quill.getSemanticHTML() : quill.root.innerHTML;
+      const inputContent = this.inputTarget;
+      inputContent.value = quillContent;
+      this.bubbles(inputContent);
+    });
+  }
+  bubbles(inputContent) {
+    inputContent.dispatchEvent(new Event('change', {
+      bubbles: true
+    }));
   }
   dispatchEvent(name, payload) {
     if (payload === void 0) {
