@@ -2,7 +2,7 @@
 
 ## PHP modifications
 - Move from twig template to JavaScript hydration of quill initial content. Move logic inside JavaScript for better compatibility with deltas, so initial content is now set in JavaScript and not in the template anymore (because of the table module)
-- Remove sanitizer options see the below points :
+- Remove sanitizer options see the below points : (symfony/html-sanitizer is no longer required when installing the bundle)
   1. If ``sanitize_html`` first level option was present, it was sanitizing HTML before passing it to the quill instance. It doesn't really make sense and was preventing the table module from working.
   2. Remove from ``quill_extra_options`` the ``sanitizer`` option, use **symfony default** sanitizing process when saving data instead. See [Official doc here](#https://symfony.com/doc/current/html_sanitizer.html#sanitizing-html-from-form-input)
 

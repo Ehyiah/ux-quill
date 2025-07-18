@@ -30,8 +30,7 @@
         "symfony/stimulus-bundle": "^2.9.1",
         "twig/extra-bundle": "^2.12|^3.0",
         "symfony/twig-bundle": "^6.1|^7.0",
-        "symfony/form": "^6.1|^7.0",
-        "symfony/html-sanitizer": "^6.1|^7.0"
+        "symfony/form": "^6.1|^7.0"
     },
     "require-dev": {
         "phpstan/phpstan": "^2.1.17",
