@@ -14,5 +14,5 @@ interface ModuleInterface
     /**
      * @param array<mixed>|int|string $options
      */
-    public function __construct(string $name, $options);
+    public function __construct(string $name, array|int|string $options);
 }
