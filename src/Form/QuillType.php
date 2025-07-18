@@ -25,7 +25,6 @@ class QuillType extends AbstractType
     public function buildView(FormView $view, FormInterface $form, array $options): void
     {
         $view->vars['attr']['quill_options'] = json_encode($options['quill_options']);
-        $view->vars['attr']['sanitizer'] = $options['quill_extra_options']['sanitizer'];
 
         $fields = $options['quill_options'];
         $modules = $options['modules'];
@@ -105,10 +104,6 @@ class QuillType extends AbstractType
                 $resolver
                     ->setDefault('placeholder', 'Quill editor')
                     ->setAllowedTypes('placeholder', 'string')
-                ;
-                $resolver
-                    ->setDefault('sanitizer', null)
-                    ->setAllowedTypes('sanitizer', ['string', 'null'])
                 ;
                 $resolver
                     ->setDefault('style', StyleOption::QUILL_STYLE_CLASS)

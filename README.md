@@ -77,12 +77,6 @@ in a twig template :
     <div>{{ myField|raw }}</div>
 ```
 
-you can sanitize HTML if you need to for security reason, but don't forget to configure it
-to your needs as many html balise and style elements will be removed by default.
-```
-    'sanitizer' => 'my_awesome_sanitizer_config
-```
-
 
 For the most basic this is only what you have to do.
 # Customize Options
