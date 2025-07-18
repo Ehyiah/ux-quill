@@ -1,7 +1,6 @@
 {% block quill_widget %}
     {%- set controller_name = (attr['data-controller']|default('') ~ ' ehyiah--ux-quill--quill')|trim -%}
     {% set data_set = "data-ehyiah--ux-quill--quill" %}
-    {% set html_sanitizer = attr['sanitizer'] %}
 
     {% if form.vars is defined  %}
         {% if form.vars['quill_assets']['styleSheets'] is defined %}
@@ -27,11 +26,7 @@
     >
         <div>
             <input type="hidden"
-                    {% if html_sanitizer is not null %}
-                        value="{{ value|sanitize_html(html_sanitizer) }}"
-                    {% else %}
-                        value="{{ value }}"
-                    {% endif %}
+                    value="{{ value }}"
                    {{ block('widget_attributes') }}
                    {{ data_set }}-target="input"
             >

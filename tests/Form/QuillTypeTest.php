@@ -52,16 +52,14 @@ final class QuillTypeTest extends TestCase
         if (isset($this->formView->vars['quill_assets']['scripts']['highlight'])) {
             $this->assertEquals('https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js', $this->formView->vars['quill_assets']['scripts']['highlight']);
         }
-        $this->assertCount(4, $this->formView->vars['attr']);
+        $this->assertCount(3, $this->formView->vars['attr']);
         $this->assertArrayHasKey('quill_options', $this->formView->vars['attr']);
         $this->assertArrayHasKey('quill_extra_options', $this->formView->vars['attr']);
-        $this->assertArrayHasKey('sanitizer', $this->formView->vars['attr']);
         $this->assertArrayHasKey('quill_modules_options', $this->formView->vars['attr']);
 
         $this->assertEquals(json_encode($expectedOptions['quill_options']), $this->formView->vars['attr']['quill_options']);
         $this->assertEquals(json_encode($expectedOptions['quill_extra_options']), $this->formView->vars['attr']['quill_extra_options']);
         $this->assertEquals(json_encode($expectedOptions['modules']), $this->formView->vars['attr']['quill_modules_options']);
-        $this->assertEquals($expectedOptions['quill_extra_options']['sanitizer'], $this->formView->vars['attr']['sanitizer']);
     }
 
     public static function provideOptionsToBuildView(): Generator
@@ -76,7 +74,6 @@ final class QuillTypeTest extends TestCase
                     ['emoji'],
                 ],
                 'quill_extra_options' => [
-                    'sanitizer' => 'some_sanitizer',
                 ],
                 'modules' => [],
             ],
@@ -89,7 +86,6 @@ final class QuillTypeTest extends TestCase
                     ['emoji'],
                 ],
                 'quill_extra_options' => [
-                    'sanitizer' => 'some_sanitizer',
                 ],
                 'modules' => [
                     new EmojiModule(),
@@ -105,7 +101,6 @@ final class QuillTypeTest extends TestCase
                     ['bold', 'underline'],
                 ],
                 'quill_extra_options' => [
-                    'sanitizer' => 'some_sanitizer',
                 ],
                 'modules' => [],
             ],
@@ -115,7 +110,6 @@ final class QuillTypeTest extends TestCase
                     ['bold', 'underline'],
                 ],
                 'quill_extra_options' => [
-                    'sanitizer' => 'some_sanitizer',
                 ],
                 'modules' => [
                 ],

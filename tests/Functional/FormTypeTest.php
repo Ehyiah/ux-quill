@@ -60,7 +60,6 @@ final class FormTypeTest extends TestCase
                 'theme' => ThemeOption::QUILL_THEME_SNOW,
                 'placeholder' => 'Éditeur de texte riche',
                 'height' => '300px',
-                'sanitizer' => 'custom_sanitizer',
             ],
             'modules' => [
                 new EmojiModule(),
@@ -80,7 +79,6 @@ final class FormTypeTest extends TestCase
         $this->assertArrayHasKey('quill_options', $contentView->vars['attr']);
         $this->assertArrayHasKey('quill_extra_options', $contentView->vars['attr']);
         $this->assertArrayHasKey('quill_modules_options', $contentView->vars['attr']);
-        $this->assertArrayHasKey('sanitizer', $contentView->vars['attr']);
 
         $quillOptions = json_decode($contentView->vars['attr']['quill_options'], true);
         $this->assertIsArray($quillOptions);
@@ -90,8 +88,6 @@ final class FormTypeTest extends TestCase
         $this->assertEquals(ThemeOption::QUILL_THEME_SNOW, $extraOptions['theme']);
         $this->assertEquals('Éditeur de texte riche', $extraOptions['placeholder']);
         $this->assertEquals('300px', $extraOptions['height']);
-
-        $this->assertEquals('custom_sanitizer', $contentView->vars['attr']['sanitizer']);
 
         $modulesOptions = json_decode($contentView->vars['attr']['quill_modules_options'], true);
         $this->assertIsArray($modulesOptions);
