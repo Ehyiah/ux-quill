@@ -10,9 +10,12 @@ final class EmojiModule implements ModuleInterface
 {
     public const NAME = 'emoji-toolbar';
 
+    /**
+     * @param string $options
+     */
     public function __construct(
         public string $name = self::NAME,
-        public string $options = 'true',
+        public $options = 'true',
     ) {
     }
 }

@@ -9,9 +9,12 @@ class SyntaxModule implements ModuleInterface
 {
     public const NAME = 'syntax';
 
+    /**
+     * @param string $options
+     */
     public function __construct(
         public string $name = self::NAME,
-        public string $options = 'true',
+        public $options = 'true',
     ) {
     }
 }

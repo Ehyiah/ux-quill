@@ -16,7 +16,7 @@ final class ResizeModule implements ModuleInterface
      */
     public function __construct(
         public string $name = self::NAME,
-        public array $options = [],
+        public $options = [],
     ) {
     }
 }

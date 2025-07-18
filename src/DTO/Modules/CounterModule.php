@@ -11,7 +11,7 @@ class CounterModule implements ModuleInterface
      */
     public function __construct(
         public string $name = self::NAME,
-        public array $options = [
+        public $options = [
             'words' => true,
             'words_label' => 'Number of words : ',
             'words_container' => '',

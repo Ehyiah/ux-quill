@@ -40,8 +40,18 @@ final class QuillTypeTest extends TestCase
     {
         $this->quillType->buildView($this->formView, $this->form, $options);
 
-        $this->assertCount(2, $this->formView->vars);
+        $this->assertCount(3, $this->formView->vars);
         $this->assertArrayHasKey('attr', $this->formView->vars);
+        $this->assertArrayHasKey('quill_assets', $this->formView->vars);
+        $this->assertCount(2, $this->formView->vars['quill_assets']);
+        $this->assertArrayHasKey('styleSheets', $this->formView->vars['quill_assets']);
+        if (isset($this->formView->vars['quill_assets']['styleSheets']['highlight'])) {
+            $this->assertEquals('https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css', $this->formView->vars['quill_assets']['styleSheets']['highlight']);
+        }
+        $this->assertArrayHasKey('scripts', $this->formView->vars['quill_assets']);
+        if (isset($this->formView->vars['quill_assets']['scripts']['highlight'])) {
+            $this->assertEquals('https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js', $this->formView->vars['quill_assets']['scripts']['highlight']);
+        }
         $this->assertCount(4, $this->formView->vars['attr']);
         $this->assertArrayHasKey('quill_options', $this->formView->vars['attr']);
         $this->assertArrayHasKey('quill_extra_options', $this->formView->vars['attr']);

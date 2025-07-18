@@ -30,7 +30,7 @@ final class TableModule implements ModuleInterface
         /**
          * @var array<string, string|string[]>
          */
-        public array $options = [
+        public $options = [
             self::MENU_OPTION => ['column', 'row', 'merge', 'table', 'cell', 'wrap', 'copy', 'delete'],
             self::LANGUAGE_TOOLBAR_TABLE_OPTION => 'true', // must be set to true to show the table toolbar options
             self::LANGUAGE_OPTION => self::LANGUAGE_OPTION_EN_US,
