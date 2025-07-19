@@ -1,11 +1,9 @@
 # https://help.github.com/en/actions
 name: CI process for Symfony UX Quill bundle
 on:
-    push:
     pull_request:
         branches:
             - main
-            - dev
 
 jobs:
     quality:
