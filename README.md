@@ -195,16 +195,18 @@ You can add as many Groups as you like or just One if you don't need the WYSIWYG
 
 #### assets example
 ```php
-    'assets' => [
-        'styleSheets' => [
-            "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css",
-            "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css",
-        ],
-        'scripts' => [
-            "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js",
-            "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js",
-        ]
-    ],
+    'quill_extra_options' => [
+       'assets' => [
+           'styleSheets' => [
+               "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css",
+               "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css",
+           ],
+           'scripts' => [
+               "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js",
+               "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js",
+           ]
+       ],
+    ]
 ```
 
 OR associative array, this will allow you to **override** default built-in CDN assets for katex _(use for FormulaField)_ and highlight _(use for CodeBlockField)_
@@ -220,7 +222,7 @@ OR associative array, this will allow you to **override** default built-in CDN a
                 'katex' => 'https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js',
                 'highlight' => 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/highlight.min.js'
             ],
-        ]
+        ],
     ]
 ```
 
