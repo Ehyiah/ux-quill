@@ -1,11 +1,9 @@
 name: Tests JavaScript
 
 on:
-    push:
     pull_request:
         branches:
             - main
-            - dev
 
 jobs:
     test:
