@@ -1,7 +1,7 @@
 {
     "name": "@ehyiah/ux-quill",
     "description": "Symfony bundle to use Quill JS text editor",
-    "version": "2.4.0",
+    "version": "3.0.0",
     "license": "MIT",
     "main": "dist/controller.js",
     "symfony": {
