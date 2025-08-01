@@ -60,10 +60,12 @@ fixer-php: ## Launch csfixer no dry
 fixer-js:  ## Corriger les problèmes de tests JavaScript
 	$(YARN) lint-fix
 
-.PHONY: ci fixer-php phptests jstests fixer-js
+.PHONY: ci fixer-php phptests jstests fixer-js tests
 
 phptests:
 	$(PHP) vendor/bin/phpunit
 
 jstests:  ## Exécuter les tests JavaScript
 	$(YARN) test
+
+tests: phptests jstests

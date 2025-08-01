@@ -10,10 +10,6 @@ Quill.register('modules/emoji', Emoji);
 import QuillResizeImage from 'quill-resize-image';
 Quill.register('modules/resize', QuillResizeImage);
 
-import QuillTableBetter from 'quill-table-better';
-import 'quill-table-better/dist/quill-table-better.css'
-Quill.register('modules/table-better', QuillTableBetter);
-
 import {SmartLinks} from './modules/smartLinks.ts';
 Quill.register('modules/smartLinks', SmartLinks);
 

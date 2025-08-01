@@ -5,7 +5,10 @@ import { ExtraOptions, ModuleOptions } from './types.d.ts';
 import mergeModules from './modules.ts';
 import { ToolbarCustomizer } from './ui/toolbarCustomizer.ts';
 import { handleUploadResponse, uploadStrategies } from './upload-utils.ts';
+
 import './register-modules.ts';
+import QuillTableBetter from 'quill-table-better';
+import 'quill-table-better/dist/quill-table-better.css'
 
 interface DOMNode extends HTMLElement {
     getAttribute(name: string): string | null;
@@ -59,6 +62,7 @@ export default class extends Controller {
 
     connect() {
         const options = this.buildQuillOptions();
+        this.dynamicModuleRegister(options);
         this.setupQuillStyles(options);
         this.setupUploadHandler(options);
         this.setupEditorHeight();
@@ -180,6 +184,17 @@ export default class extends Controller {
 
         if (this.extraOptionsValue.debug === 'info' || this.extraOptionsValue.debug === 'log') {
             ToolbarCustomizer.debugToolbarButtons(this.editorContainerTarget.parentElement || undefined);
+        }
+    }
+
+    private dynamicModuleRegister(options: Options)
+    {
+        const isTablePresent = options.modules.toolbar
+            .flat(Infinity)
+            .some(item => typeof item === 'string' && item === 'table-better');
+
+        if (isTablePresent) {
+            Quill.register('modules/table-better', QuillTableBetter);
         }
     }
 }
