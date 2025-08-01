@@ -10,3 +10,4 @@ vendor/
 assets/node_modules
 compose.override.yaml
 /.phpunit.cache/
+*.map

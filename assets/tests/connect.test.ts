@@ -12,9 +12,9 @@ const mockQuillInstance = {
         innerHTML: '<p>Test content</p>'
     },
     clipboard: {
-        convert: jest.fn().mockReturnValue({ ops: [] }) // Add this mock
+        convert: jest.fn().mockReturnValue({ ops: [] })
     },
-    updateContents: jest.fn(), // Also add this if your code calls it
+    updateContents: jest.fn(),
     getModule: jest.fn().mockImplementation((name) => {
         if (name === 'toolbar') {
             return {
@@ -58,7 +58,10 @@ jest.mock('../src/modules.ts', () => ({
     })
 }));
 
-// Autres mocks
+jest.mock('quill-table-better', () => ({
+    QuillTableBetter: jest.fn()
+}));
+
 jest.mock('quill2-emoji', () => ({}));
 jest.mock('quill-resize-image', () => ({}));
 jest.mock('../src/imageUploader.ts', () => ({}));
