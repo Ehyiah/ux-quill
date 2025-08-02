@@ -5943,6 +5943,11 @@ quill-table-better@^1.2.1:
     lodash.merge "^4.6.2"
     webpack-merge "^5.8.0"
 
+quill-toggle-fullscreen-button@^0.1.4:
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/quill-toggle-fullscreen-button/-/quill-toggle-fullscreen-button-0.1.4.tgz#3023e3dc9d6364328decb726806837e9ffe1b002"
+  integrity sha512-fWaxq76ENl+WXQhpXfcUt1lfgEM3hKqsLq6+OuSqRQt1fW0i4DGVHD4/750EgZ2FYJK8mI9akDuR4D0eP4YKAA==
+
 quill2-emoji@^0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/quill2-emoji/-/quill2-emoji-0.1.2.tgz#70ad7dc72455f23b0d74ad0c0766885ca2ef92bb"
