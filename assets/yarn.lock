@@ -5932,6 +5932,13 @@ quill-resize-image@^1.0.5:
   resolved "https://registry.yarnpkg.com/quill-resize-image/-/quill-resize-image-1.0.5.tgz#072533bad859d38d21056fd5ac6600841a62c5fc"
   integrity sha512-s6yinBoRXy9jsVXdK9J8WMfv4DUO6yE0uzzBWTjOu4JwcSqzlsgYivB5KCWoPAOrdxmV1mYpvvALCWa36r5Mnw==
 
+quill-stt@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/quill-stt/-/quill-stt-1.0.0.tgz#94c6565ba37b835358cc2c557b53953b9b4747c7"
+  integrity sha512-UfDljXOHTBI6tVCv3zAD4prqzKTH3L2b/T3+MEvH8ccda/zNfXqS5hSfjtkybw34w8wCNFDvc9uM2uLnE7qXwA==
+  dependencies:
+    quill "^2.0.3"
+
 quill-table-better@^1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/quill-table-better/-/quill-table-better-1.2.1.tgz#25e2bfdefa18d7715d4f7692f2104c8b6146953e"
@@ -5950,7 +5957,7 @@ quill2-emoji@^0.1.2:
   dependencies:
     fuse.js "^3.3.1"
 
-quill@2.0.3:
+quill@2.0.3, quill@^2.0.3:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/quill/-/quill-2.0.3.tgz#752765a31d5a535cdc5717dc49d4e50099365eb1"
   integrity sha512-xEYQBqfYx/sfb33VJiKnSJp8ehloavImQ2A6564GAbqG55PGw1dAWUn1MUbQB62t0azawUS2CZZhWCjO8gRvTw==

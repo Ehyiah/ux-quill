@@ -15,3 +15,6 @@ Quill.register('modules/smartLinks', SmartLinks);
 
 import {Counter} from './modules/counterModule.ts';
 Quill.register('modules/counter', Counter);
+
+import SpeechToText from 'quill-stt';
+Quill.register('modules/speechToText', SpeechToText.default || SpeechToText);
