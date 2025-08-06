@@ -5927,6 +5927,11 @@ quill-delta@^5.1.0:
     lodash.clonedeep "^4.5.0"
     lodash.isequal "^4.5.0"
 
+quill-html-edit-button@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/quill-html-edit-button/-/quill-html-edit-button-3.0.0.tgz#b632ae6a5d473ce42f1ad3223e91aff02fe13464"
+  integrity sha512-ZUV3rYjEvXz+v/7f8N0Mkp2+0D8VGDj6yCYPfagSLmyshczeMawS7vZJzaJ18dJp35IfjiPnzqyVk3KCI8qN1w==
+
 quill-resize-image@^1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/quill-resize-image/-/quill-resize-image-1.0.5.tgz#072533bad859d38d21056fd5ac6600841a62c5fc"
