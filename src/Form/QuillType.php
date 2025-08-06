@@ -7,6 +7,7 @@ use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\EmojiField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\FormulaField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ImageField;
 use Ehyiah\QuillJsBundle\DTO\Modules\EmojiModule;
+use Ehyiah\QuillJsBundle\DTO\Modules\HtmlEditModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\ModuleInterface;
 use Ehyiah\QuillJsBundle\DTO\Modules\ResizeModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\SyntaxModule;
@@ -243,6 +244,11 @@ class QuillType extends AbstractType
             if ($module instanceof SyntaxModule) {
                 $assets['styleSheets']['highlight'] = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css';
                 $assets['scripts']['highlight'] = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js';
+            }
+            if ($module instanceof HtmlEditModule && (isset($module->options['syntax']) && true === $module->options['syntax'])) {
+                $assets['styleSheets']['highlight'] = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+                $assets['scripts']['highlight'] = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js';
+                $assets['scripts']['highlight2'] = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js';
             }
         }
 
