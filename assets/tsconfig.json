@@ -16,6 +16,7 @@
         "isolatedModules": true,
         "declaration": true,
         "emitDeclarationOnly": true,
+        "skipLibCheck": true
     },
     "exclude": ["tests"],
     "include": ["src", "node_modules/quill/dist"]
