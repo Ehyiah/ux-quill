@@ -1,18 +1,23 @@
 interface SynonymModuleOptions {
     lang?: string;
+    icon?: string | HTMLElement;
 }
 
 class SynonymModule {
-    private debounceTimeout: number | null = null;
-    private popup: HTMLElement | null = null;
-    private container: HTMLElement;
-    private lang: string;
     private quill: any;
+    private lang: string;
+    private container: HTMLElement;
+    private popup: HTMLElement | null;
+    private debounceTimeout: number | null;
+    private icon: string | HTMLElement;
 
     constructor(quill: any, options: SynonymModuleOptions = {}) {
         this.quill = quill;
         this.lang = options.lang || 'fr';
+        this.icon = options.icon || '🔄';
         this.container = quill.container;
+        this.popup = null;
+        this.debounceTimeout = null;
 
         setTimeout(() => this.addToolbarButton(), 100);
     }
@@ -33,7 +38,18 @@ class SynonymModule {
             button.setAttribute('type', 'button');
             button.classList.add('ql-synonym');
             button.title = 'Trouver un synonyme';
-            button.innerHTML = '🔄';
+
+            if (typeof this.icon === 'string') {
+                const trimmed = this.icon.trim();
+                if (trimmed.startsWith('<svg')) {
+                    button.innerHTML = this.icon;
+                } else {
+                    // If simple text or emoji/icon
+                    button.textContent = this.icon;
+                }
+            } else if (this.icon instanceof HTMLElement) {
+                button.appendChild(this.icon.cloneNode(true));
+            }
 
             button.addEventListener('click', () => this.showSynonyms());
 
@@ -41,7 +57,7 @@ class SynonymModule {
         }
     }
 
-    private async showSynonyms(): Promise<void> {
+    async showSynonyms() {
         const range = this.quill.getSelection();
         if (!range || range.length === 0) return;
 
@@ -50,11 +66,9 @@ class SynonymModule {
 
         const normalized = selectedText.toLowerCase();
 
-        const url = `https://api.conceptnet.io/query?node=/c/${this.lang}/${encodeURIComponent(
-            normalized
-        )}&rel=/r/Synonym&limit=20`;
+        const url = `https://api.conceptnet.io/query?node=/c/${this.lang}/${encodeURIComponent(normalized)}&rel=/r/Synonym&limit=20`;
 
-        let data: any;
+        let data;
         try {
             const res = await fetch(url);
             data = await res.json();
@@ -68,10 +82,7 @@ class SynonymModule {
         if (Array.isArray(data.edges)) {
             data.edges.forEach((edge: any) => {
                 [edge.start, edge.end].forEach((node: any) => {
-                    if (
-                        node.language === this.lang &&
-                        node.label.toLowerCase() !== normalized
-                    ) {
+                    if (node.language === this.lang && node.label.toLowerCase() !== normalized) {
                         synonyms.add(node.label);
                     }
                 });
@@ -86,11 +97,7 @@ class SynonymModule {
         this.openPopup([...synonyms], selectedText, range);
     }
 
-    private openPopup(
-        synonyms: string[],
-        selectedText: string,
-        range: { index: number; length: number }
-    ): void {
+    openPopup(synonyms: string[], selectedText: string, range: any) {
         if (this.popup) this.closePopup();
 
         const popup = document.createElement('div');
@@ -110,33 +117,31 @@ class SynonymModule {
         popup.style.left = `${bounds.left + containerRect.left}px`;
         popup.style.top = `${bounds.top + containerRect.top + bounds.height + 5}px`;
 
-        // Header with label and close button
+        // Header avec texte + bouton fermer
         const header = document.createElement('div');
         header.style.display = 'flex';
         header.style.justifyContent = 'space-between';
         header.style.alignItems = 'center';
         header.style.marginBottom = '8px';
 
-        const label = document.createElement('span');
-        label.textContent = 'Recherche de synonymes';
-        label.style.fontWeight = 'bold';
+        const headerText = document.createElement('span');
+        headerText.textContent = 'Recherche de synonymes';
+        headerText.style.fontWeight = 'bold';
 
         const closeBtn = document.createElement('button');
-        closeBtn.textContent = '×';
-        closeBtn.title = 'Fermer';
-        closeBtn.style.background = 'transparent';
+        closeBtn.textContent = '✖';
         closeBtn.style.border = 'none';
+        closeBtn.style.background = 'transparent';
         closeBtn.style.cursor = 'pointer';
-        closeBtn.style.fontSize = '18px';
+        closeBtn.style.fontSize = '16px';
         closeBtn.style.lineHeight = '1';
+        closeBtn.style.padding = '0';
         closeBtn.addEventListener('click', () => this.closePopup());
 
-        header.appendChild(label);
+        header.appendChild(headerText);
         header.appendChild(closeBtn);
-
         popup.appendChild(header);
 
-        // Input text for user to edit / type synonym
         const input = document.createElement('input');
         input.type = 'text';
         input.value = synonyms[0] || '';
@@ -144,17 +149,7 @@ class SynonymModule {
         input.style.marginBottom = '8px';
         popup.appendChild(input);
 
-        // Debounce user input to re-query synonyms after pause
-        input.addEventListener('input', () => {
-            if (this.debounceTimeout) {
-                clearTimeout(this.debounceTimeout);
-            }
-            this.debounceTimeout = window.setTimeout(() => {
-                this.fetchAndUpdateSynonyms(input.value.toLowerCase(), synonyms, input, popup);
-            }, 500);
-        });
-
-        // List of clickable synonyms
+        // list of synonyms clickable
         const list = document.createElement('ul');
         list.style.listStyle = 'none';
         list.style.padding = '0';
@@ -162,12 +157,13 @@ class SynonymModule {
         list.style.maxHeight = '100px';
         list.style.overflowY = 'auto';
 
-        synonyms.forEach((s) => {
+        synonyms.forEach(s => {
             const li = document.createElement('li');
             li.textContent = s;
             li.style.padding = '4px 8px';
             li.style.cursor = 'pointer';
             li.style.borderRadius = '3px';
+
             li.addEventListener('mouseenter', () => {
                 li.style.background = '#eee';
             });
@@ -176,13 +172,16 @@ class SynonymModule {
             });
             li.addEventListener('click', () => {
                 input.value = s;
+                // Restart search if input is modified
+                this.debounceSearch(input.value);
             });
+
             list.appendChild(li);
         });
 
         popup.appendChild(list);
 
-        // Buttons OK / Cancel
+        // Boutons valider / annuler
         const buttons = document.createElement('div');
         buttons.style.textAlign = 'right';
 
@@ -207,57 +206,77 @@ class SynonymModule {
         buttons.appendChild(btnOk);
         popup.appendChild(buttons);
 
+        input.addEventListener('input', () => {
+            this.debounceSearch(input.value);
+        });
+
         this.container.appendChild(popup);
         input.focus();
         this.popup = popup;
     }
 
-    private async fetchAndUpdateSynonyms(
-        word: string,
-        synonyms: string[],
-        input: HTMLInputElement,
-        popup: HTMLElement
-    ): Promise<void> {
-        if (!word) return;
+    debounceSearch(value: string) {
+        if (this.debounceTimeout) {
+            clearTimeout(this.debounceTimeout);
+        }
+        this.debounceTimeout = window.setTimeout(() => {
+            this.searchSynonyms(value);
+        }, 400);
+    }
 
-        const url = `https://api.conceptnet.io/query?node=/c/${this.lang}/${encodeURIComponent(
-            word
-        )}&rel=/r/Synonym&limit=20`;
+    async searchSynonyms(term: string) {
+        if (!term) return;
 
-        let data: any;
+        const normalized = term.toLowerCase();
+
+        const url = `https://api.conceptnet.io/query?node=/c/${this.lang}/${encodeURIComponent(normalized)}&rel=/r/Synonym&limit=20`;
+
+        let data;
         try {
             const res = await fetch(url);
             data = await res.json();
         } catch {
-            // silently fail or optionally alert
+            // Pas d’alerte ici pour ne pas gêner UX
             return;
         }
 
-        const newSynonyms = new Set<string>();
+        const synonyms = new Set<string>();
 
         if (Array.isArray(data.edges)) {
             data.edges.forEach((edge: any) => {
                 [edge.start, edge.end].forEach((node: any) => {
-                    if (node.language === this.lang && node.label.toLowerCase() !== word) {
-                        newSynonyms.add(node.label);
+                    if (node.language === this.lang && node.label.toLowerCase() !== normalized) {
+                        synonyms.add(node.label);
                     }
                 });
             });
         }
 
-        if (newSynonyms.size === 0) return;
+        if (synonyms.size === 0) {
+            this.updateSynonymList([]);
 
-        // Update synonym list in popup
-        const ul = popup.querySelector('ul');
-        if (!ul) return;
+            return;
+        }
 
-        ul.innerHTML = '';
-        newSynonyms.forEach((s) => {
+        this.updateSynonymList([...synonyms]);
+    }
+
+    updateSynonymList(synonyms: string[]) {
+        if (!this.popup) return;
+
+        const list = this.popup.querySelector('ul');
+        const input = this.popup.querySelector('input');
+        if (!list || !input) return;
+
+        list.innerHTML = '';
+
+        synonyms.forEach(s => {
             const li = document.createElement('li');
             li.textContent = s;
             li.style.padding = '4px 8px';
             li.style.cursor = 'pointer';
             li.style.borderRadius = '3px';
+
             li.addEventListener('mouseenter', () => {
                 li.style.background = '#eee';
             });
@@ -265,13 +284,17 @@ class SynonymModule {
                 li.style.background = 'transparent';
             });
             li.addEventListener('click', () => {
-                input.value = s;
+                if (input) {
+                    input.value = s;
+                    this.debounceSearch(input.value);
+                }
             });
-            ul.appendChild(li);
+
+            list.appendChild(li);
         });
     }
 
-    private closePopup(): void {
+    closePopup() {
         if (this.popup && this.popup.parentNode) {
             this.popup.parentNode.removeChild(this.popup);
             this.popup = null;
