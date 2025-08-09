@@ -8,9 +8,10 @@ import { handleUploadResponse, uploadStrategies } from './upload-utils.ts';
 
 import './register-modules.ts';
 import QuillTableBetter from 'quill-table-better';
-import 'quill-table-better/dist/quill-table-better.css'
-import Synonym from 'quill-synonym';
-import 'quill-synonym/dist/synonym.css';
+import 'quill-table-better/dist/quill-table-better.css';
+
+import SynonymModule from './modules/synonym.ts';
+Quill.register('modules/synonym', SynonymModule);
 
 interface DOMNode extends HTMLElement {
     getAttribute(name: string): string | null;
@@ -198,118 +199,6 @@ export default class extends Controller {
             .some(item => typeof item === 'string' && item === 'table-better');
         if (isTablePresent) {
             Quill.register('modules/table-better', QuillTableBetter);
-        }
-
-        const isSynonymPresent = options.modules.toolbar.container
-            .flat(Infinity)
-            .some(item => typeof item === 'string' && item === 'synonym');
-        if (isSynonymPresent) {
-            Quill.register('modules/synonym', Synonym);
-
-            // const handler = function(this: any) {
-            //     const quill = this.quill;
-            //     const range = quill?.getSelection?.();
-            //     if (!range || range.length === 0) {
-            //         return;
-            //     }
-            //     const text = quill.getText(range.index, range.length).trim();
-            //     if (!text) return;
-            //
-            //     fetch('https://api.datamuse.com/words?ml=' + encodeURIComponent(text))
-            //         .then(r => r.json())
-            //         .then((list: any[]) => {
-            //             if (!Array.isArray(list) || list.length === 0) return;
-            //             const choices = list.slice(0, 5).map((x: any) => x.word);
-            //             const replacement = window.prompt(`Synonymes pour "${text}" :\n` + choices.join(', ') + `\n\nEntrez votre choix:`, choices[0] || '');
-            //             if (replacement && replacement !== text) {
-            //                 quill.deleteText(range.index, range.length, 'user');
-            //                 quill.insertText(range.index, replacement, 'user');
-            //                 quill.setSelection(range.index + replacement.length, 0, 'user');
-            //             }
-            //         })
-            //         .catch(() => {});
-            // };
-
-            // const handler = function(this: any, lang: string = 'fr') {
-            //     console.log('babar')
-            //     const quill = this.quill;
-            //     const range = quill?.getSelection?.();
-            //     if (!range || range.length === 0) {
-            //         return;
-            //     }
-            //
-            //     const text = quill.getText(range.index, range.length).trim();
-            //     if (!text) return;
-            //
-            //     const originalLower = text.toLowerCase();
-            //     const apiUrl = `https://api.conceptnet.io/query?node=/c/${lang}/${encodeURIComponent(originalLower)}&rel=/r/Synonym&limit=50`;
-            //
-            //     console.log(`[ConceptNet] Recherche de synonymes pour "${text}" (${lang})`);
-            //     console.log(`[ConceptNet] URL : ${apiUrl}`);
-            //
-            //     fetch(apiUrl)
-            //         .then(r => r.json())
-            //         .then(data => {
-            //             console.log("[ConceptNet] Réponse brute :", data);
-            //
-            //             if (!Array.isArray(data.edges) || data.edges.length === 0) {
-            //                 console.warn("[ConceptNet] Aucun synonyme trouvé.");
-            //                 return;
-            //             }
-            //
-            //             const choices: string[] = [];
-            //
-            //             data.edges.forEach((edge: any) => {
-            //                 const start = edge.start;
-            //                 const end = edge.end;
-            //
-            //                 [start, end].forEach(node => {
-            //                     if (
-            //                         node.language === lang &&
-            //                         node.label &&
-            //                         node.label.toLowerCase() !== originalLower &&
-            //                         !choices.includes(node.label)
-            //                     ) {
-            //                         choices.push(node.label);
-            //                     }
-            //                 });
-            //             });
-            //
-            //             console.log("[ConceptNet] Synonymes filtrés :", choices);
-            //
-            //             if (choices.length === 0) {
-            //                 console.warn("[ConceptNet] Aucun synonyme valide après filtrage.");
-            //                 return;
-            //             }
-            //
-            //             const replacement = window.prompt(
-            //                 `Synonymes pour "${text}" (${lang}) :\n` + choices.join(', ') + `\n\nEntrez votre choix :`,
-            //                 choices[0] || ''
-            //             );
-            //
-            //             if (replacement && replacement !== text) {
-            //                 quill.deleteText(range.index, range.length, 'user');
-            //                 quill.insertText(range.index, replacement, 'user');
-            //                 quill.setSelection(range.index + replacement.length, 0, 'user');
-            //             }
-            //         })
-            //         .catch(err => {
-            //             console.error("[ConceptNet] Erreur lors de la requête :", err);
-            //         });
-            // };
-
-            const handler = function(this: any, lang: string = 'fr') {
-                console.log("[Synonym Handler] Called with lang =", lang);
-                console.log("[Synonym Handler] this.quill =", this?.quill);
-                alert("Handler exécuté !");
-            };
-
-            if (!options.modules.toolbar.handlers || typeof options.modules.toolbar.handlers !== 'object') {
-                options.modules.toolbar.handlers = {};
-            }
-            Object.assign(options.modules.toolbar.handlers, {
-                synonym: handler
-            });
         }
     }
 }

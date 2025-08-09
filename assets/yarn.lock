@@ -5932,11 +5932,6 @@ quill-resize-image@^1.0.5:
   resolved "https://registry.yarnpkg.com/quill-resize-image/-/quill-resize-image-1.0.5.tgz#072533bad859d38d21056fd5ac6600841a62c5fc"
   integrity sha512-s6yinBoRXy9jsVXdK9J8WMfv4DUO6yE0uzzBWTjOu4JwcSqzlsgYivB5KCWoPAOrdxmV1mYpvvALCWa36r5Mnw==
 
-quill-synonym@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/quill-synonym/-/quill-synonym-1.0.3.tgz#43e50a7dc5e013e281d5e7fd96c25bec74b875ba"
-  integrity sha512-fB5xym/aTJaG5B/U4OykEG9M7pWPhYIShWNf59DNyrInOLiI7V5e0WU8wg9DSuRqawrmbGE3TfmJwuJ8f10xaQ==
-
 quill-table-better@^1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/quill-table-better/-/quill-table-better-1.2.1.tgz#25e2bfdefa18d7715d4f7692f2104c8b6146953e"

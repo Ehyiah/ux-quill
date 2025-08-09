@@ -2,21 +2,24 @@
 
 namespace Ehyiah\QuillJsBundle\DTO\Modules;
 
-/**
- * To be used if the Synonym is required in your Form
- * Will be registered automatically
- * For more options see https://github.com/uluumbch/quill-synonym
- */
 final class SynonymModule implements ModuleInterface
 {
     public const NAME = 'synonym';
+
+    /**
+     * see for more details on supported languages https://github.com/commonsense/conceptnet5/wiki/Languages
+     */
+    public const LANG_OPTION = 'lang';
+
 
     public function __construct(
         public string $name = self::NAME,
         /**
          * @var array<string, string|string[]>
          */
-        public $options = true,
+        public $options = [
+            self::LANG_OPTION => 'fr',
+        ],
     ) {
     }
 }

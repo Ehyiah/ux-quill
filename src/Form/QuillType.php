@@ -183,11 +183,6 @@ class QuillType extends AbstractType
                 'fieldIdentifier' => 'table-better',
                 'moduleClass' => TableModule::class,
             ],
-            [
-                'moduleName' => SynonymModule::NAME,
-                'fieldIdentifier' => 'synonym',
-                'moduleClass' => SynonymModule::class,
-            ],
         ];
     }
 
