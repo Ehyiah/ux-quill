@@ -1,6 +1,7 @@
 interface SynonymModuleOptions {
     lang?: string;
     icon?: string | HTMLElement;
+    headerText?: string;
 }
 
 class SynonymModule {
@@ -10,11 +11,13 @@ class SynonymModule {
     private popup: HTMLElement | null;
     private debounceTimeout: number | null;
     private icon: string | HTMLElement;
+    private headerText: string;
 
     constructor(quill: any, options: SynonymModuleOptions = {}) {
         this.quill = quill;
         this.lang = options.lang || 'fr';
         this.icon = options.icon || '🔄';
+        this.headerText = options.headerText || 'Recherche de synonymes';
         this.container = quill.container;
         this.popup = null;
         this.debounceTimeout = null;
@@ -125,7 +128,7 @@ class SynonymModule {
         header.style.marginBottom = '8px';
 
         const headerText = document.createElement('span');
-        headerText.textContent = 'Recherche de synonymes';
+        headerText.textContent = this.headerText;
         headerText.style.fontWeight = 'bold';
 
         const closeBtn = document.createElement('button');
