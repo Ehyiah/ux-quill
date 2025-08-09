@@ -73,10 +73,6 @@ class SynonymModule {
         });
       });
     }
-    if (synonyms.size === 0) {
-      alert('Aucun synonyme trouvé');
-      return;
-    }
     this.openPopup([...synonyms], selectedText, range);
   }
   openPopup(synonyms, selectedText, range) {
@@ -131,25 +127,33 @@ class SynonymModule {
     list.style.margin = '0 0 8px 0';
     list.style.maxHeight = '100px';
     list.style.overflowY = 'auto';
-    synonyms.forEach(s => {
-      const li = document.createElement('li');
-      li.textContent = s;
-      li.style.padding = '4px 8px';
-      li.style.cursor = 'pointer';
-      li.style.borderRadius = '3px';
-      li.addEventListener('mouseenter', () => {
-        li.style.background = '#eee';
+    if (synonyms.length === 0) {
+      const noResult = document.createElement('li');
+      noResult.textContent = 'Aucun synonyme trouvé.';
+      noResult.style.padding = '8px';
+      noResult.style.color = '#888';
+      noResult.style.fontStyle = 'italic';
+      list.appendChild(noResult);
+    } else {
+      synonyms.forEach(s => {
+        const li = document.createElement('li');
+        li.textContent = s;
+        li.style.padding = '4px 8px';
+        li.style.cursor = 'pointer';
+        li.style.borderRadius = '3px';
+        li.addEventListener('mouseenter', () => {
+          li.style.background = '#eee';
+        });
+        li.addEventListener('mouseleave', () => {
+          li.style.background = 'transparent';
+        });
+        li.addEventListener('click', () => {
+          input.value = s;
+          this.debounceSearch(input.value);
+        });
+        list.appendChild(li);
       });
-      li.addEventListener('mouseleave', () => {
-        li.style.background = 'transparent';
-      });
-      li.addEventListener('click', () => {
-        input.value = s;
-        // Restart search if input is modified
-        this.debounceSearch(input.value);
-      });
-      list.appendChild(li);
-    });
+    }
     popup.appendChild(list);
 
     // Boutons valider / annuler
@@ -222,26 +226,35 @@ class SynonymModule {
     const input = this.popup.querySelector('input');
     if (!list || !input) return;
     list.innerHTML = '';
-    synonyms.forEach(s => {
-      const li = document.createElement('li');
-      li.textContent = s;
-      li.style.padding = '4px 8px';
-      li.style.cursor = 'pointer';
-      li.style.borderRadius = '3px';
-      li.addEventListener('mouseenter', () => {
-        li.style.background = '#eee';
+    if (synonyms.length === 0) {
+      const noResult = document.createElement('li');
+      noResult.textContent = 'Aucun synonyme trouvé.';
+      noResult.style.padding = '8px';
+      noResult.style.color = '#888';
+      noResult.style.fontStyle = 'italic';
+      list.appendChild(noResult);
+    } else {
+      synonyms.forEach(s => {
+        const li = document.createElement('li');
+        li.textContent = s;
+        li.style.padding = '4px 8px';
+        li.style.cursor = 'pointer';
+        li.style.borderRadius = '3px';
+        li.addEventListener('mouseenter', () => {
+          li.style.background = '#eee';
+        });
+        li.addEventListener('mouseleave', () => {
+          li.style.background = 'transparent';
+        });
+        li.addEventListener('click', () => {
+          if (input) {
+            input.value = s;
+            this.debounceSearch(input.value);
+          }
+        });
+        list.appendChild(li);
       });
-      li.addEventListener('mouseleave', () => {
-        li.style.background = 'transparent';
-      });
-      li.addEventListener('click', () => {
-        if (input) {
-          input.value = s;
-          this.debounceSearch(input.value);
-        }
-      });
-      list.appendChild(li);
-    });
+    }
   }
   closePopup() {
     if (this.popup && this.popup.parentNode) {
