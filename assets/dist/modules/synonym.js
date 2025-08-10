@@ -7,6 +7,9 @@ class SynonymModule {
   icon;
   headerText;
   noSynonymText;
+  cache;
+  currentSearchController;
+  outsideClickListener;
   constructor(quill, options) {
     if (options === void 0) {
       options = {};
@@ -19,6 +22,9 @@ class SynonymModule {
     this.popup = null;
     this.debounceTimeout = null;
     this.noSynonymText = options.noSynonymText || 'Aucun synonyme trouvé : {word}';
+    this.cache = new Map();
+    this.currentSearchController = null;
+    this.outsideClickListener = null;
     setTimeout(() => this.addToolbarButton(), 100);
   }
   addToolbarButton() {
@@ -112,6 +118,8 @@ class SynonymModule {
   openPopup(synonyms, selectedText, range) {
     if (this.popup) this.closePopup();
     const popup = document.createElement('div');
+    popup.setAttribute('role', 'dialog');
+    popup.setAttribute('aria-modal', 'true');
     popup.style.position = 'absolute';
     popup.style.zIndex = '1000';
     popup.style.background = '#fff';
@@ -146,6 +154,7 @@ class SynonymModule {
     header.style.alignItems = 'center';
     header.style.marginBottom = '12px';
     const headerText = document.createElement('span');
+    headerText.id = 'synonym-popup-title';
     headerText.textContent = this.headerText + (selectedText ? ` : "${selectedText}"` : '');
     headerText.style.fontWeight = '700';
     headerText.style.fontSize = '1.1rem';
@@ -171,6 +180,7 @@ class SynonymModule {
     header.appendChild(headerText);
     header.appendChild(closeBtn);
     popup.appendChild(header);
+    popup.setAttribute('aria-labelledby', headerText.id);
     const input = document.createElement('input');
     input.type = 'text';
     input.value = selectedText || synonyms[0] || '';
@@ -227,11 +237,7 @@ class SynonymModule {
         li.addEventListener('click', () => {
           const val = s;
           if (val && val !== selectedText) {
-            // keep quill formats of selected word to reuse them on new word
-            const formats = this.quill.getFormat(range.index, range.length);
-            this.quill.deleteText(range.index, range.length, 'user');
-            this.quill.insertText(range.index, val, formats, 'user');
-            this.quill.setSelection(range.index + val.length, 0, 'user');
+            this.replaceText(range, val, true);
           }
           this.closePopup();
         });
@@ -278,9 +284,7 @@ class SynonymModule {
     btnOk.addEventListener('click', () => {
       const val = input.value.trim();
       if (val && val !== selectedText) {
-        this.quill.deleteText(range.index, range.length, 'user');
-        this.quill.insertText(range.index, val, 'user');
-        this.quill.setSelection(range.index + val.length, 0, 'user');
+        this.replaceText(range, val, true);
       }
       this.closePopup();
     });
@@ -290,9 +294,24 @@ class SynonymModule {
     input.addEventListener('input', () => {
       this.debounceSearch(input.value);
     });
+    input.addEventListener('keydown', ev => {
+      if (ev.key === 'Enter') {
+        ev.preventDefault();
+        btnOk.click();
+      } else if (ev.key === 'Escape') {
+        ev.preventDefault();
+        this.closePopup();
+      }
+    });
     this.container.appendChild(popup);
     input.focus();
     this.popup = popup;
+    this.outsideClickListener = e => {
+      if (this.popup && !this.popup.contains(e.target)) {
+        this.closePopup();
+      }
+    };
+    document.addEventListener('mousedown', this.outsideClickListener);
   }
   debounceSearch(value) {
     if (this.debounceTimeout) {
@@ -308,9 +327,23 @@ class SynonymModule {
     }
     if (!term) return [];
     const normalized = term.toLowerCase();
+    const cacheKey = `${this.lang}:${normalized}`;
+    if (this.cache.has(cacheKey)) {
+      return this.cache.get(cacheKey);
+    }
+    let signal;
+    if (options.cancellable) {
+      if (this.currentSearchController) {
+        this.currentSearchController.abort();
+      }
+      this.currentSearchController = new AbortController();
+      signal = this.currentSearchController.signal;
+    }
     const url = `https://api.conceptnet.io/query?node=/c/${this.lang}/${encodeURIComponent(normalized)}&rel=/r/Synonym&limit=20`;
     try {
-      const res = await fetch(url);
+      const res = await fetch(url, {
+        signal
+      });
       const data = await res.json();
       const synonyms = new Set();
       if (Array.isArray(data.edges)) {
@@ -322,18 +355,42 @@ class SynonymModule {
           });
         });
       }
-      return [...synonyms];
+      const result = [...synonyms];
+      this.cache.set(cacheKey, result);
+      return result;
     } catch (e) {
-      if (options.silent) {
+      if (options.silent || e && e.name === 'AbortError') {
         return [];
       }
       throw e;
+    } finally {
+      if (options.cancellable) {
+        this.currentSearchController = null;
+      }
     }
+  }
+  replaceText(range, val, preserveFormats) {
+    if (preserveFormats === void 0) {
+      preserveFormats = true;
+    }
+    if (!val) return;
+    const formats = preserveFormats ? this.quill.getFormat(range.index, range.length) : undefined;
+    this.quill.deleteText(range.index, range.length, 'user');
+    if (preserveFormats) {
+      this.quill.insertText(range.index, val, formats, 'user');
+    } else {
+      this.quill.insertText(range.index, val, 'user');
+    }
+    this.quill.setSelection(range.index + val.length, 0, 'user');
+  }
+  applyStyles(el, styles) {
+    Object.assign(el.style, styles);
   }
   async searchSynonyms(term) {
     if (!term) return;
     const synonyms = await this.fetchSynonyms(term, {
-      silent: true
+      silent: true,
+      cancellable: true
     });
     this.updateSynonymList(synonyms);
   }
@@ -377,6 +434,21 @@ class SynonymModule {
     if (this.popup && this.popup.parentNode) {
       this.popup.parentNode.removeChild(this.popup);
       this.popup = null;
+    }
+    if (this.outsideClickListener) {
+      document.removeEventListener('mousedown', this.outsideClickListener);
+      this.outsideClickListener = null;
+    }
+  }
+  destroy() {
+    this.closePopup();
+    if (this.debounceTimeout) {
+      clearTimeout(this.debounceTimeout);
+      this.debounceTimeout = null;
+    }
+    if (this.currentSearchController) {
+      this.currentSearchController.abort();
+      this.currentSearchController = null;
     }
   }
 }
