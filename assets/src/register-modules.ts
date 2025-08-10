@@ -15,3 +15,6 @@ Quill.register('modules/smartLinks', SmartLinks);
 
 import {Counter} from './modules/counterModule.ts';
 Quill.register('modules/counter', Counter);
+
+import ReadingTime from './modules/readtimeModule.ts';
+Quill.register('modules/readingTime', ReadingTime);

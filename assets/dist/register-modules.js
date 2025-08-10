@@ -10,3 +10,5 @@ import { SmartLinks } from "./modules/smartLinks.js";
 Quill.register('modules/smartLinks', SmartLinks);
 import { Counter } from "./modules/counterModule.js";
 Quill.register('modules/counter', Counter);
+import ReadingTime from "./modules/readtimeModule.js";
+Quill.register('modules/readingTime', ReadingTime);
