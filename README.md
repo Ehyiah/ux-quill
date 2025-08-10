@@ -14,6 +14,8 @@ It comes with some extra features out of the box like image uploading to custom 
 
 
 * [Customize quillJS with options and extra_options](#customize-options)
+* [List of available Fields](#available-fields)
+* [List of available Modules](#modules)
 
 * [Handle images uploads](#image-upload-handling)
 * [Handle images uploads security](#upload-endpoint-security)
@@ -141,7 +143,7 @@ This example will display a h1 and h2 header options side by side and another Gr
 
 You can add as many Groups as you like or just One if you don't need the WYSIWYG options to have spaces between them.
 
-### Available Fields 
+### Available Fields
 - Below is the list of available fields from QuillJS (https://v2.quilljs.com/docs/formats)
 
 |        Field         |                                     Description                                      |   Available options    (options are available as class constants in each Field Class)    | Default option | QuillJS field name |
@@ -339,7 +341,8 @@ Example of how to use modules:
 |  **HistoryModule**   |      NO       | The History module is responsible for handling undo and redo for Quill. see details on official [site](https://quilljs.com/docs/modules/history)                                                                                                                                                      |    history    |    array     |                                      ``delay``, ``maxStack``, ``userOnly``                                      |                                                            ['delay' => '1000', 'maxStack' => '100', 'userOnly' => 'false']                                                             |
 | **SmartLinksModule** |      NO       | automatic recognition of links (can be customized within options)                                                                                                                                                                                                                                     |  smartLinks   |    array     |                                                  ``linkRegex``                                                  |                                                                         ['linkRegex' => '/https?:\/\/[^\s]+/']                                                                         |
 |  **CounterModule**   |      NO       | Count of number and Words inside WYSIWYG (display below WYSIWYG instance by default or inside a custom html Element if you want : specify an ID in *_container with the '#') characters counter display 1 character by default because Quill is instantiated with a <p></p> that count as 1 character |    counter    |    array     | ``words``, ``words_label``, ``words_container``, ``characters``, ``characters_label``, ``characters_container`` | ['words' => true, 'words_label' => 'Number of words : ', 'words_container' => '', 'characters' => true, 'characters_label' => 'Number of characters : ', 'characters_container' => ''] |
-|   **TableModule**    |      YES      | The Table module is responsible for handling table options. see details on repository [site](https://github.com/attoae/quill-table-better)                                                                                                                                                            | table-better  |    array     |                                 https://github.com/attoae/quill-table-better                                    |                                                                   see ``Ehyiah\QuillJsBundle\DTO\Modules\TableModule``                                                                 |
+|   **TableModule**    |      YES      | The Table module is responsible for handling table options. see details on repository [site](https://github.com/attoae/quill-table-better)                                                                                                                                                            | table-better  |    array     |                                  https://github.com/attoae/quill-table-better                                   |                                                                  see ``Ehyiah\QuillJsBundle\DTO\Modules\TableModule``                                                                  |
+|  **SynonymModule**   |      NO       | The Table module allow you to search over an API for a word synonym.                                                                                                                                                                                                                                  |   synonym     |    array     |                                   `lang`, `icon`, `headerText`, `noSynonymText`                                 |                                                              see ``Ehyiah\QuillJsBundle\DTO\Modules\SynonymModule``                                                                    |
 
 ### Other modules that need custom JavaScript
 For other modules, you will need to extend Quill controller (see below) to use them as they required custom JavaScript as you cannot configure them in PHP.
