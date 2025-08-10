@@ -50,9 +50,54 @@ class SynonymModule {
   }
   async showSynonyms() {
     const range = this.quill.getSelection();
-    if (!range || range.length === 0) return;
-    const selectedText = this.quill.getText(range.index, range.length).trim();
-    if (!selectedText) return;
+    if (!range) return;
+    let selectedText = null;
+    let usedRange = null; // object with { index, length }
+
+    // If there's a selection, use it
+    if (range.length && range.length > 0) {
+      selectedText = this.quill.getText(range.index, range.length).trim();
+      if (!selectedText) return;
+      usedRange = {
+        index: range.index,
+        length: range.length
+      };
+    } else {
+      // No selection: find the word under the cursor
+      const fullText = this.quill.getText(0, this.quill.getLength());
+      const pos = range.index;
+      let start = pos;
+      let end = pos;
+
+      // use Unicode-aware letter matcher (letters, marks), allow apostrophes and hyphens
+      const letterRe = /[\p{L}\p{M}'’\-]/u;
+
+      // move start back while previous char is part of word
+      while (start > 0 && letterRe.test(fullText.charAt(start - 1))) {
+        start--;
+      }
+      // move end forward while char is part of word
+      while (end < fullText.length && letterRe.test(fullText.charAt(end))) {
+        end++;
+      }
+
+      // slice found word
+      const word = fullText.slice(start, end).trim();
+      if (!word) return;
+
+      // optionally select the word in the editor so the user sees it
+      try {
+        this.quill.setSelection(start, end - start, 'user');
+      } catch (e) {
+        // ignore if setSelection fails for any reason
+      }
+      selectedText = word;
+      usedRange = {
+        index: start,
+        length: end - start
+      };
+    }
+    if (!selectedText || !usedRange) return;
     const normalized = selectedText.toLowerCase();
     const url = `https://api.conceptnet.io/query?node=/c/${this.lang}/${encodeURIComponent(normalized)}&rel=/r/Synonym&limit=20`;
     let data;
@@ -73,7 +118,7 @@ class SynonymModule {
         });
       });
     }
-    this.openPopup([...synonyms], selectedText, range);
+    this.openPopup([...synonyms], selectedText, usedRange);
   }
   openPopup(synonyms, selectedText, range) {
     if (this.popup) this.closePopup();
