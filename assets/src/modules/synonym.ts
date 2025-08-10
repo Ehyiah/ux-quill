@@ -259,8 +259,10 @@ class SynonymModule {
                 li.addEventListener('click', () => {
                     const val = s;
                     if (val && val !== selectedText) {
+                        // Récupérer les formats du texte sélectionné
+                        const formats = this.quill.getFormat(range.index, range.length);
                         this.quill.deleteText(range.index, range.length, 'user');
-                        this.quill.insertText(range.index, val, 'user');
+                        this.quill.insertText(range.index, val, formats, 'user');
                         this.quill.setSelection(range.index + val.length, 0, 'user');
                     }
                     this.closePopup();
