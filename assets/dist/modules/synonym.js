@@ -71,7 +71,7 @@ class SynonymModule {
       let end = pos;
 
       // use Unicode-aware letter matcher (letters, marks), allow apostrophes and hyphens
-      const letterRe = /[\p{L}\p{M}'’\-]/u;
+      const letterRe = /[\p{L}\p{M}'’-]/u;
 
       // move start back while previous char is part of word
       while (start > 0 && letterRe.test(fullText.charAt(start - 1))) {
@@ -131,7 +131,7 @@ class SynonymModule {
     popup.style.width = '320px';
     popup.style.padding = '16px 20px';
     popup.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.12)';
-    popup.style.fontFamily = `'Segoe UI', Tahoma, Geneva, Verdana, sans-serif`;
+    popup.style.fontFamily = '\'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif';
     popup.style.color = '#333';
     popup.style.userSelect = 'none';
     popup.style.transition = 'opacity 0.3s ease';

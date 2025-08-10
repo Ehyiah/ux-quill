@@ -9,7 +9,6 @@ use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ImageField;
 use Ehyiah\QuillJsBundle\DTO\Modules\EmojiModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\ModuleInterface;
 use Ehyiah\QuillJsBundle\DTO\Modules\ResizeModule;
-use Ehyiah\QuillJsBundle\DTO\Modules\SynonymModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\SyntaxModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\TableModule;
 use Ehyiah\QuillJsBundle\DTO\Options\DebugOption;
