@@ -110,32 +110,15 @@ class SynonymModule {
 
         if (!selectedText || !usedRange) return;
 
-        const normalized = selectedText.toLowerCase();
-
-        const url = `https://api.conceptnet.io/query?node=/c/${this.lang}/${encodeURIComponent(normalized)}&rel=/r/Synonym&limit=20`;
-
-        let data;
+        let synonyms: string[] = [];
         try {
-            const res = await fetch(url);
-            data = await res.json();
+            synonyms = await this.fetchSynonyms(selectedText, { silent: false });
         } catch {
             alert('Erreur lors de la récupération des synonymes');
             return;
         }
 
-        const synonyms = new Set<string>();
-
-        if (Array.isArray(data.edges)) {
-            data.edges.forEach((edge: any) => {
-                [edge.start, edge.end].forEach((node: any) => {
-                    if (node.language === this.lang && node.label.toLowerCase() !== normalized) {
-                        synonyms.add(node.label);
-                    }
-                });
-            });
-        }
-
-        this.openPopup([...synonyms], selectedText, usedRange);
+        this.openPopup(synonyms, selectedText, usedRange);
     }
 
     openPopup(synonyms: string[], selectedText: string, range: any) {
@@ -358,41 +341,42 @@ class SynonymModule {
         }, 400);
     }
 
+    private async fetchSynonyms(term: string, options: { silent?: boolean } = {}): Promise<string[]> {
+        if (!term) return [];
+
+        const normalized = term.toLowerCase();
+        const url = `https://api.conceptnet.io/query?node=/c/${this.lang}/${encodeURIComponent(normalized)}&rel=/r/Synonym&limit=20`;
+
+        try {
+            const res = await fetch(url);
+            const data = await res.json();
+            const synonyms = new Set<string>();
+
+            if (Array.isArray(data.edges)) {
+                data.edges.forEach((edge: any) => {
+                    [edge.start, edge.end].forEach((node: any) => {
+                        if (node.language === this.lang && node.label.toLowerCase() !== normalized) {
+                            synonyms.add(node.label);
+                        }
+                    });
+                });
+            }
+
+            return [...synonyms];
+        } catch (e) {
+            if (options.silent) {
+                return [];
+            }
+            throw e;
+        }
+    }
+
     async searchSynonyms(term: string) {
         if (!term) return;
 
-        const normalized = term.toLowerCase();
+        const synonyms = await this.fetchSynonyms(term, { silent: true });
 
-        const url = `https://api.conceptnet.io/query?node=/c/${this.lang}/${encodeURIComponent(normalized)}&rel=/r/Synonym&limit=20`;
-
-        let data;
-        try {
-            const res = await fetch(url);
-            data = await res.json();
-        } catch {
-            // Pas d’alerte ici pour ne pas gêner UX
-            return;
-        }
-
-        const synonyms = new Set<string>();
-
-        if (Array.isArray(data.edges)) {
-            data.edges.forEach((edge: any) => {
-                [edge.start, edge.end].forEach((node: any) => {
-                    if (node.language === this.lang && node.label.toLowerCase() !== normalized) {
-                        synonyms.add(node.label);
-                    }
-                });
-            });
-        }
-
-        if (synonyms.size === 0) {
-            this.updateSynonymList([]);
-
-            return;
-        }
-
-        this.updateSynonymList([...synonyms]);
+        this.updateSynonymList(synonyms);
     }
 
     updateSynonymList(synonyms: string[]) {
