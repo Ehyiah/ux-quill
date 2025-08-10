@@ -6,6 +6,7 @@ class SynonymModule {
   debounceTimeout;
   icon;
   headerText;
+  noSynonymText;
   constructor(quill, options) {
     if (options === void 0) {
       options = {};
@@ -17,6 +18,7 @@ class SynonymModule {
     this.container = quill.container;
     this.popup = null;
     this.debounceTimeout = null;
+    this.noSynonymText = options.noSynonymText || 'Aucun synonyme trouvé : {word}';
     setTimeout(() => this.addToolbarButton(), 100);
   }
   addToolbarButton() {
@@ -54,7 +56,6 @@ class SynonymModule {
     let selectedText = null;
     let usedRange = null; // object with { index, length }
 
-    // If there's a selection, use it
     if (range.length && range.length > 0) {
       selectedText = this.quill.getText(range.index, range.length).trim();
       if (!selectedText) return;
@@ -126,34 +127,47 @@ class SynonymModule {
     popup.style.position = 'absolute';
     popup.style.zIndex = '1000';
     popup.style.background = '#fff';
-    popup.style.border = '1px solid #ccc';
-    popup.style.padding = '10px';
-    popup.style.borderRadius = '4px';
-    popup.style.width = '300px';
-    popup.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
-    popup.style.fontFamily = 'Arial, sans-serif';
+    popup.style.borderRadius = '12px';
+    popup.style.width = '320px';
+    popup.style.padding = '16px 20px';
+    popup.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.12)';
+    popup.style.fontFamily = `'Segoe UI', Tahoma, Geneva, Verdana, sans-serif`;
+    popup.style.color = '#333';
+    popup.style.userSelect = 'none';
+    popup.style.transition = 'opacity 0.3s ease';
     const bounds = this.quill.getBounds(range.index, range.length);
     const containerRect = this.container.getBoundingClientRect();
     popup.style.left = `${bounds.left + containerRect.left}px`;
-    popup.style.top = `${bounds.top + containerRect.top + bounds.height + 5}px`;
+    popup.style.top = `${bounds.top + containerRect.top + bounds.height + 10}px`;
 
     // Header avec texte + bouton fermer
     const header = document.createElement('div');
     header.style.display = 'flex';
     header.style.justifyContent = 'space-between';
     header.style.alignItems = 'center';
-    header.style.marginBottom = '8px';
+    header.style.marginBottom = '12px';
     const headerText = document.createElement('span');
     headerText.textContent = this.headerText;
-    headerText.style.fontWeight = 'bold';
+    headerText.style.fontWeight = '700';
+    headerText.style.fontSize = '1.1rem';
+    headerText.style.color = '#222';
     const closeBtn = document.createElement('button');
     closeBtn.textContent = '✖';
     closeBtn.style.border = 'none';
     closeBtn.style.background = 'transparent';
     closeBtn.style.cursor = 'pointer';
-    closeBtn.style.fontSize = '16px';
+    closeBtn.style.fontSize = '20px';
     closeBtn.style.lineHeight = '1';
     closeBtn.style.padding = '0';
+    closeBtn.style.color = '#888';
+    closeBtn.style.transition = 'color 0.3s ease';
+    closeBtn.title = 'Fermer';
+    closeBtn.addEventListener('mouseenter', () => {
+      closeBtn.style.color = '#555';
+    });
+    closeBtn.addEventListener('mouseleave', () => {
+      closeBtn.style.color = '#888';
+    });
     closeBtn.addEventListener('click', () => this.closePopup());
     header.appendChild(headerText);
     header.appendChild(closeBtn);
@@ -162,19 +176,37 @@ class SynonymModule {
     input.type = 'text';
     input.value = synonyms[0] || '';
     input.style.width = '100%';
-    input.style.marginBottom = '8px';
+    input.style.padding = '10px 14px';
+    input.style.fontSize = '1rem';
+    input.style.border = '1.8px solid #ddd';
+    input.style.borderRadius = '8px';
+    input.style.marginBottom = '12px';
+    input.style.transition = 'border-color 0.3s ease';
+    input.style.outline = 'none';
+    input.addEventListener('focus', () => {
+      input.style.borderColor = '#4a90e2';
+      input.style.boxShadow = '0 0 8px rgba(74,144,226,0.3)';
+    });
+    input.addEventListener('blur', () => {
+      input.style.borderColor = '#ddd';
+      input.style.boxShadow = 'none';
+    });
     popup.appendChild(input);
 
-    // list of synonyms clickable
+    // Liste des synonymes
     const list = document.createElement('ul');
     list.style.listStyle = 'none';
     list.style.padding = '0';
-    list.style.margin = '0 0 8px 0';
-    list.style.maxHeight = '100px';
+    list.style.margin = '0 0 12px 0';
+    list.style.maxHeight = '130px';
     list.style.overflowY = 'auto';
+    list.style.borderRadius = '8px';
+    list.style.border = '1px solid #eee';
+    list.style.backgroundColor = '#fafafa';
+    list.style.boxShadow = 'inset 0 1px 3px rgb(0 0 0 / 0.1)';
     if (synonyms.length === 0) {
       const noResult = document.createElement('li');
-      noResult.textContent = 'Aucun synonyme trouvé.';
+      noResult.textContent = this.noSynonymText.replace('{word}', selectedText);
       noResult.style.padding = '8px';
       noResult.style.color = '#888';
       noResult.style.fontStyle = 'italic';
@@ -183,18 +215,24 @@ class SynonymModule {
       synonyms.forEach(s => {
         const li = document.createElement('li');
         li.textContent = s;
-        li.style.padding = '4px 8px';
+        li.style.padding = '8px 14px';
         li.style.cursor = 'pointer';
-        li.style.borderRadius = '3px';
+        li.style.borderRadius = '6px';
+        li.style.transition = 'background-color 0.25s ease';
         li.addEventListener('mouseenter', () => {
-          li.style.background = '#eee';
+          li.style.backgroundColor = '#e6f0ff';
         });
         li.addEventListener('mouseleave', () => {
-          li.style.background = 'transparent';
+          li.style.backgroundColor = 'transparent';
         });
         li.addEventListener('click', () => {
-          input.value = s;
-          this.debounceSearch(input.value);
+          const val = s;
+          if (val && val !== selectedText) {
+            this.quill.deleteText(range.index, range.length, 'user');
+            this.quill.insertText(range.index, val, 'user');
+            this.quill.setSelection(range.index + val.length, 0, 'user');
+          }
+          this.closePopup();
         });
         list.appendChild(li);
       });
@@ -206,10 +244,38 @@ class SynonymModule {
     buttons.style.textAlign = 'right';
     const btnCancel = document.createElement('button');
     btnCancel.textContent = 'Annuler';
-    btnCancel.style.marginRight = '8px';
+    btnCancel.style.marginRight = '12px';
+    btnCancel.style.padding = '8px 16px';
+    btnCancel.style.backgroundColor = '#f0f0f0';
+    btnCancel.style.border = 'none';
+    btnCancel.style.borderRadius = '8px';
+    btnCancel.style.cursor = 'pointer';
+    btnCancel.style.fontWeight = '600';
+    btnCancel.style.color = '#555';
+    btnCancel.style.transition = 'background-color 0.3s ease';
+    btnCancel.addEventListener('mouseenter', () => {
+      btnCancel.style.backgroundColor = '#ddd';
+    });
+    btnCancel.addEventListener('mouseleave', () => {
+      btnCancel.style.backgroundColor = '#f0f0f0';
+    });
     btnCancel.addEventListener('click', () => this.closePopup());
     const btnOk = document.createElement('button');
     btnOk.textContent = 'Remplacer';
+    btnOk.style.padding = '8px 18px';
+    btnOk.style.backgroundColor = '#4a90e2';
+    btnOk.style.border = 'none';
+    btnOk.style.borderRadius = '8px';
+    btnOk.style.color = 'white';
+    btnOk.style.cursor = 'pointer';
+    btnOk.style.fontWeight = '600';
+    btnOk.style.transition = 'background-color 0.3s ease';
+    btnOk.addEventListener('mouseenter', () => {
+      btnOk.style.backgroundColor = '#357ABD';
+    });
+    btnOk.addEventListener('mouseleave', () => {
+      btnOk.style.backgroundColor = '#4a90e2';
+    });
     btnOk.addEventListener('click', () => {
       const val = input.value.trim();
       if (val && val !== selectedText) {
@@ -273,7 +339,7 @@ class SynonymModule {
     list.innerHTML = '';
     if (synonyms.length === 0) {
       const noResult = document.createElement('li');
-      noResult.textContent = 'Aucun synonyme trouvé.';
+      noResult.textContent = this.noSynonymText.replace('{word}', input.value);
       noResult.style.padding = '8px';
       noResult.style.color = '#888';
       noResult.style.fontStyle = 'italic';
