@@ -155,11 +155,23 @@ class SynonymModule {
         popup.style.userSelect = 'none';
         popup.style.transition = 'opacity 0.3s ease';
 
-        const bounds = this.quill.getBounds(range.index, range.length);
         const containerRect = this.container.getBoundingClientRect();
-
-        popup.style.left = `${bounds.left + containerRect.left}px`;
-        popup.style.top = `${bounds.top + containerRect.top + bounds.height + 10}px`;
+        const bounds = this.quill.getBounds(range.index, range.length);
+        const popupWidth = 320;  // largeur popup fixe
+        const popupHeight = 200; // estimation hauteur popup
+        let left = bounds.left + (bounds.width / 2) - (popupWidth / 2);
+        left = Math.max(0, Math.min(left, containerRect.width - popupWidth));
+        let top = bounds.top + bounds.height + 10;
+        if (top + popupHeight > containerRect.height) {
+            // Décaler la popup plus haut pour ne pas masquer le mot
+            const extraMargin = 70;
+            top = bounds.top - popupHeight - extraMargin;
+            if (top < 0) {
+                top = 0;
+            }
+        }
+        popup.style.left = `${left}px`;
+        popup.style.top = `${top}px`;
 
         // Header avec texte + bouton fermer
         const header = document.createElement('div');
@@ -169,7 +181,7 @@ class SynonymModule {
         header.style.marginBottom = '12px';
 
         const headerText = document.createElement('span');
-        headerText.textContent = this.headerText;
+        headerText.textContent = this.headerText + (selectedText ? ` : "${selectedText}"` : '');
         headerText.style.fontWeight = '700';
         headerText.style.fontSize = '1.1rem';
         headerText.style.color = '#222';
@@ -201,7 +213,7 @@ class SynonymModule {
 
         const input = document.createElement('input');
         input.type = 'text';
-        input.value = synonyms[0] || '';
+        input.value = selectedText || (synonyms[0] || '');
         input.style.width = '100%';
         input.style.padding = '10px 14px';
         input.style.fontSize = '1rem';
