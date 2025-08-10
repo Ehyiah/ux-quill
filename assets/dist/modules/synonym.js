@@ -72,7 +72,6 @@ class SynonymModule {
 
       // use Unicode-aware letter matcher (letters, marks), allow apostrophes and hyphens
       const letterRe = /[\p{L}\p{M}'’-]/u;
-
       // move start back while previous char is part of word
       while (start > 0 && letterRe.test(fullText.charAt(start - 1))) {
         start--;
@@ -137,13 +136,13 @@ class SynonymModule {
     popup.style.transition = 'opacity 0.3s ease';
     const containerRect = this.container.getBoundingClientRect();
     const bounds = this.quill.getBounds(range.index, range.length);
-    const popupWidth = 320; // largeur popup fixe
-    const popupHeight = 200; // estimation hauteur popup
+    const popupWidth = 320;
+    const popupHeight = 200;
     let left = bounds.left + bounds.width / 2 - popupWidth / 2;
     left = Math.max(0, Math.min(left, containerRect.width - popupWidth));
     let top = bounds.top + bounds.height + 10;
     if (top + popupHeight > containerRect.height) {
-      // Décaler la popup plus haut pour ne pas masquer le mot
+      // move popup up if it would overflow the viewport
       const extraMargin = 70;
       top = bounds.top - popupHeight - extraMargin;
       if (top < 0) {
@@ -152,8 +151,6 @@ class SynonymModule {
     }
     popup.style.left = `${left}px`;
     popup.style.top = `${top}px`;
-
-    // Header avec texte + bouton fermer
     const header = document.createElement('div');
     header.style.display = 'flex';
     header.style.justifyContent = 'space-between';
@@ -206,7 +203,7 @@ class SynonymModule {
     });
     popup.appendChild(input);
 
-    // Liste des synonymes
+    // Liste of synonyms
     const list = document.createElement('ul');
     list.style.listStyle = 'none';
     list.style.padding = '0';
@@ -241,7 +238,7 @@ class SynonymModule {
         li.addEventListener('click', () => {
           const val = s;
           if (val && val !== selectedText) {
-            // Récupérer les formats du texte sélectionné
+            // keep quill formats of selected word to reuse them on new word
             const formats = this.quill.getFormat(range.index, range.length);
             this.quill.deleteText(range.index, range.length, 'user');
             this.quill.insertText(range.index, val, formats, 'user');
@@ -253,8 +250,6 @@ class SynonymModule {
       });
     }
     popup.appendChild(list);
-
-    // Boutons valider / annuler
     const buttons = document.createElement('div');
     buttons.style.textAlign = 'right';
     const btnCancel = document.createElement('button');
