@@ -18,6 +18,7 @@ It comes with some extra features out of the box like image uploading to custom 
 * [Handle images uploads](#image-upload-handling)
 * [Handle images uploads security](#upload-endpoint-security)
 
+* [Customize toolbar icons](#icons)
 
 * [Extend Quill stimulus controller](#extend-quill-stimulus-controller)
 
@@ -173,9 +174,10 @@ You can add as many Groups as you like or just One if you don't need the WYSIWYG
 
 - Below is a list of fields not available in QuillJS but taken from community:
 
-|   Field    | Description  | Available options  (options are available as class constants in each Field Class)  | Default option |
-|:----------:|:------------:|:----------------------------------------------------------------------------------:|:--------------:|
-| EmojiField | Add an emoji |                                         -                                          |                |
+|   Field    |    Description     | Available options  (options are available as class constants in each Field Class)  | Default option |
+|:----------:|:------------------:|:----------------------------------------------------------------------------------:|:--------------:|
+| EmojiField |    Add an emoji    |                                         -                                          |                |
+| TableField | add a table field  |                                         -                                          |                |
 
 
 
@@ -349,7 +351,7 @@ For other modules, you will need to extend Quill controller (see below) to use t
 | **KeyboardModule**  | The Keyboard module enables custom behavior for keyboard events in particular contexts [site](https://quilljs.com/docs/modules/keyboard)  |   keyboard    |    array     | [see next documentation section](#extend-quill-stimulus-controller) |                                -                                |
 | **ClipboardModule** | The Clipboard handles copy, cut and paste between Quill and external applications [site](https://quilljs.com/docs/modules/clipboard)      |   clipboard   |    array     | [see next documentation section](#extend-quill-stimulus-controller) |                                -                                |
 
-### icons
+## icons
 You can customize icons used in the toolbar, pass the toolbar name and a new svg
 exemple :
 ```php
