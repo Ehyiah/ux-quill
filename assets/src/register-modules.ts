@@ -15,3 +15,7 @@ Quill.register('modules/smartLinks', SmartLinks);
 
 import {Counter} from './modules/counterModule.ts';
 Quill.register('modules/counter', Counter);
+
+import {PlaceholderModule} from './modules/placeHolderModule/placeHolderModule.ts';
+import './modules/placeHolderModule/placeHolderModule.css';
+Quill.register('modules/placeholder', PlaceholderModule);
