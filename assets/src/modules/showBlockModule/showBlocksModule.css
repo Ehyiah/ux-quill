@@ -1,0 +1,65 @@
+.ql-block-label {
+    user-select: none;
+    pointer-events: none;
+}
+
+.ql-show-blocks-btn.active {
+    background-color: #1976d2;
+    color: white;
+    border-radius: 4px;
+}
+
+/* Modal stylisée */
+
+.ql-show-blocks-modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.ql-show-blocks-modal .modal-content {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    max-width: 320px;
+    text-align: center;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+}
+
+.ql-show-blocks-modal .modal-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-around;
+}
+
+.ql-show-blocks-modal button {
+    padding: 6px 14px;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s ease;
+}
+
+.ql-show-blocks-modal button.btn-cancel {
+    background-color: #eee;
+    color: #333;
+}
+
+.ql-show-blocks-modal button.btn-cancel:hover {
+    background-color: #ddd;
+}
+
+.ql-show-blocks-modal button.btn-confirm {
+    background-color: #d32f2f;
+    color: white;
+}
+
+.ql-show-blocks-modal button.btn-confirm:hover {
+    background-color: #b71c1c;
+}

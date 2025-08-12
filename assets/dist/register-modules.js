@@ -14,3 +14,6 @@ import QuillToggleFullscreenButton from 'quill-toggle-fullscreen-button';
 Quill.register('modules/toggleFullscreen', QuillToggleFullscreenButton);
 import htmlEditButton from 'quill-html-edit-button';
 Quill.register('modules/htmlEditButton', htmlEditButton.default || htmlEditButton);
+import ShowBlocks from "./modules/showBlockModule/showBlocksModule.js";
+import "./modules/showBlockModule/showBlocksModule.css";
+Quill.register('modules/showBlocks', ShowBlocks);
