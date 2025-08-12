@@ -15,3 +15,7 @@ Quill.register('modules/smartLinks', SmartLinks);
 
 import {Counter} from './modules/counterModule.ts';
 Quill.register('modules/counter', Counter);
+
+import ShowBlocks from './modules/showBlockModule/showBlocksModule.ts';
+import './modules/showBlockModule/showBlocksModule.css';
+Quill.register('modules/showBlocks', ShowBlocks);

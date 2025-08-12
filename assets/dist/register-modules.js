@@ -10,3 +10,6 @@ import { SmartLinks } from "./modules/smartLinks.js";
 Quill.register('modules/smartLinks', SmartLinks);
 import { Counter } from "./modules/counterModule.js";
 Quill.register('modules/counter', Counter);
+import ShowBlocks from "./modules/showBlockModule/showBlocksModule.js";
+import "./modules/showBlockModule/showBlocksModule.css";
+Quill.register('modules/showBlocks', ShowBlocks);
