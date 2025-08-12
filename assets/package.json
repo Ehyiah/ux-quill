@@ -27,7 +27,8 @@
             "axios": "^1.4.0",
             "quill-resize-image": "^1.0.5",
             "quill-table-better": "^1.2.1",
-            "quill-table-better/dist/quill-table-better.css": "^1.2.1"
+            "quill-table-better/dist/quill-table-better.css": "^1.2.1",
+            "quill-stt": "^1.0.0"
         }
     },
     "scripts": {
@@ -81,7 +82,8 @@
         "quill-delta": "^5.1.0",
         "quill-resize-image": "^1.0.5",
         "quill-table-better": "^1.2.1",
-        "quill2-emoji": "^0.1.2"
+        "quill2-emoji": "^0.1.2",
+        "quill-stt": "^1.0.0"
     },
     "dependencies": {
         "@hotwired/stimulus": "^3.0.0",
@@ -92,6 +94,7 @@
         "quill": "2.0.3",
         "quill-delta": "^5.1.0",
         "quill-resize-image": "^1.0.5",
+        "quill-stt": "^1.0.0",
         "quill-table-better": "^1.2.1",
         "quill2-emoji": "^0.1.2"
     },
