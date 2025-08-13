@@ -127,9 +127,8 @@ final class QuillTypeTest extends TestCase
         $resolver = new OptionsResolver();
         $quillType->configureOptions($resolver);
 
-        $this->assertCount(5, $resolver->getDefinedOptions());
+        $this->assertCount(4, $resolver->getDefinedOptions());
         $this->assertTrue($resolver->hasDefault('label'));
-        $this->assertTrue($resolver->hasDefault('error_bubbling'));
         $this->assertTrue($resolver->hasDefault('quill_options'));
         $this->assertTrue($resolver->hasDefault('quill_extra_options'));
         $this->assertTrue($resolver->hasDefault('modules'));
