@@ -10,5 +10,7 @@ import { SmartLinks } from "./modules/smartLinks.js";
 Quill.register('modules/smartLinks', SmartLinks);
 import { Counter } from "./modules/counterModule.js";
 Quill.register('modules/counter', Counter);
+import QuillToggleFullscreenButton from 'quill-toggle-fullscreen-button';
+Quill.register('modules/toggleFullscreen', QuillToggleFullscreenButton);
 import htmlEditButton from 'quill-html-edit-button';
 Quill.register('modules/htmlEditButton', htmlEditButton.default || htmlEditButton);

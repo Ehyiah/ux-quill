@@ -28,6 +28,7 @@
             "quill-resize-image": "^1.0.5",
             "quill-table-better": "^1.2.1",
             "quill-table-better/dist/quill-table-better.css": "^1.2.1",
+            "quill-toggle-fullscreen-button": "^0.1.4",
             "quill-html-edit-button": "^3.0.0"
         }
     },
@@ -82,6 +83,7 @@
         "quill-delta": "^5.1.0",
         "quill-resize-image": "^1.0.5",
         "quill-table-better": "^1.2.1",
+        "quill-toggle-fullscreen-button": "^0.1.4",
         "quill2-emoji": "^0.1.2",
         "quill-html-edit-button": "^3.0.0"
     },
@@ -96,6 +98,7 @@
         "quill-html-edit-button": "^3.0.0",
         "quill-resize-image": "^1.0.5",
         "quill-table-better": "^1.2.1",
+        "quill-toggle-fullscreen-button": "^0.1.4",
         "quill2-emoji": "^0.1.2"
     },
     "eslintConfig": {
