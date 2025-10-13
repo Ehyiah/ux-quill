@@ -10,5 +10,5 @@ import { SmartLinks } from "./modules/smartLinks.js";
 Quill.register('modules/smartLinks', SmartLinks);
 import { Counter } from "./modules/counterModule.js";
 Quill.register('modules/counter', Counter);
-import SpeechToText from 'quill-stt';
-Quill.register('modules/speechToText', SpeechToText.default || SpeechToText);
+import SpeechToText from "./modules/speechToText.js";
+Quill.register('modules/speechToText', SpeechToText);

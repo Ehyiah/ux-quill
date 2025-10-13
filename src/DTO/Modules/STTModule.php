@@ -2,9 +2,6 @@
 
 namespace Ehyiah\QuillJsBundle\DTO\Modules;
 
-/**
- * For more options see https://github.com/tac0dev/quill-stt
- */
 final class STTModule implements ModuleInterface
 {
     public const NAME = 'speechToText';
@@ -20,6 +17,11 @@ final class STTModule implements ModuleInterface
             'visualizer' => true,
             'waveformColor' => '#4285f4',
             'histogramColor' => '#25D366',
+            'debug' => false,
+            'buttonTitleStart' => 'Start listening',
+            'buttonTitleStop' => 'Stop listening',
+            'titleInactive' => 'Inactive',
+            'titleActive' => 'Listening...',
         ],
     ) {
     }
