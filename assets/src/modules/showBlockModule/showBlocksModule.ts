@@ -10,71 +10,290 @@ type BlockElement = HTMLElement & { draggable?: boolean };
 
 const BLOCK_TAGS = ['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'PRE', 'BLOCKQUOTE', 'LI', 'DIV'];
 
+function injectStyles() {
+    const styleId = 'ql-show-blocks-styles';
+    if (document.getElementById(styleId)) {
+        return;
+    }
+
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.textContent = `
+        .ql-block-label {
+            user-select: none;
+            pointer-events: none;
+        }
+
+        /* Contours des blocs avec bordure plus épaisse */
+        .ql-show-block {
+            border: 4px dashed #1976d2 !important;
+            padding: 25px 10px 10px 35px !important;
+            margin: 8px 0 !important;
+            position: relative !important;
+            min-height: 40px !important;
+            cursor: grab !important;
+        }
+
+        .ql-show-block:hover {
+            border-color: #0d47a1 !important;
+            background-color: rgba(25, 118, 210, 0.05) !important;
+        }
+
+        .ql-show-block:active {
+            cursor: grabbing !important;
+        }
+
+        .ql-show-block.dragging {
+            opacity: 0.4 !important;
+            border-style: solid !important;
+        }
+
+        .ql-show-block.drag-over {
+            background-color: rgba(25, 118, 210, 0.2) !important;
+            border-color: #0d47a1 !important;
+            border-style: solid !important;
+        }
+
+        /* Poignée de drag */
+        .ql-drag-handle {
+            position: absolute;
+            left: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 40px;
+            background: #1976d2;
+            border-radius: 4px;
+            cursor: grab !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            user-select: none;
+            z-index: 100;
+            transition: background-color 0.2s ease;
+        }
+
+        .ql-drag-handle:hover {
+            background-color: #0d47a1;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .ql-drag-handle:active {
+            cursor: grabbing !important;
+        }
+
+        .ql-drag-handle::before {
+            content: '⋮⋮';
+            letter-spacing: -2px;
+            font-size: 14px;
+        }
+
+        .ql-drag-handle.dragging {
+            background-color: #0d47a1;
+        }
+
+        .ql-drag-placeholder {
+            border: 4px dashed #ff9800 !important;
+            background-color: rgba(255, 152, 0, 0.1) !important;
+            min-height: 40px;
+            margin: 8px 0;
+        }
+
+        .ql-show-blocks-btn.active {
+            background-color: #1976d2 !important;
+            color: white !important;
+            border-radius: 4px;
+        }
+
+        /* Modal stylisée */
+        .ql-show-blocks-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .ql-show-blocks-modal .modal-content {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 320px;
+            text-align: center;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+        }
+
+        .ql-show-blocks-modal .modal-actions {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .ql-show-blocks-modal button {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s ease;
+        }
+
+        .ql-show-blocks-modal button.btn-cancel {
+            background-color: #eee;
+            color: #333;
+        }
+
+        .ql-show-blocks-modal button.btn-cancel:hover {
+            background-color: #ddd;
+        }
+
+        .ql-show-blocks-modal button.btn-confirm {
+            background-color: #d32f2f;
+            color: white;
+        }
+
+        .ql-show-blocks-modal button.btn-confirm:hover {
+            background-color: #b71c1c;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
 export default class ShowBlocks {
     private quill: Quill;
     private options: ShowBlocksOptions;
     private toolbarButton?: HTMLElement;
     private container: HTMLElement;
     private modal?: HTMLElement;
+    private draggedElement: BlockElement | null = null;
+    private boundHandleDragOver: (evt: DragEvent) => void;
+    private boundHandleDragLeave: (evt: DragEvent) => void;
+    private boundHandleDrop: (evt: DragEvent) => void;
+    private wasReadOnly: boolean = false;
 
     constructor(quill: Quill, options: ShowBlocksOptions = {}) {
         this.quill = quill;
         this.options = {
-            enabled: true,
             confirmDeletion: false,
             toolbarIcon: '¶',
             ...options,
+            // Forcer enabled à false au démarrage, peu importe les options passées
+            enabled: false,
         };
 
         this.container = this.quill.root;
 
-        if (this.options.enabled) {
-            this.enable();
-        }
+        // Créer les handlers liés une seule fois
+        this.boundHandleDragOver = this.handleDragOver.bind(this);
+        this.boundHandleDragLeave = this.handleDragLeave.bind(this);
+        this.boundHandleDrop = this.handleDrop.bind(this);
 
-        this.addToolbarButton();
+        // Injecter les styles CSS
+        injectStyles();
+
+        // Attendre que la toolbar soit prête
+        setTimeout(() => {
+            this.addToolbarButton();
+        }, 100);
+
+        // Écouter les changements dans l'éditeur pour mettre à jour les labels
+        this.quill.on('text-change', () => {
+            if (this.options.enabled) {
+                setTimeout(() => this.renderLabels(), 0);
+            }
+        });
     }
 
     private enable() {
+        console.log('ShowBlocks: Enabling - rendering labels');
+        // Ajouter un indicateur visuel
+        this.container.style.userSelect = 'none';
+        this.container.setAttribute('data-reorganization-mode', 'true');
+
         this.renderLabels();
         this.attachDragAndDrop();
     }
 
     private disable() {
+        console.log('ShowBlocks: Disabling - clearing labels');
+        // Retirer l'indicateur visuel
+        this.container.style.userSelect = '';
+        this.container.removeAttribute('data-reorganization-mode');
+
         this.clearLabels();
         this.detachDragAndDrop();
     }
 
     private addToolbarButton() {
-        const toolbar = this.quill.getModule('toolbar') as any;
-        if (!toolbar) return;
+        // Essayer plusieurs stratégies pour trouver la toolbar
+        const editorContainer = this.quill.container;
+        let toolbarElement: HTMLElement | null = null;
+
+        // Stratégie 1: previousElementSibling
+        if (editorContainer.previousElementSibling?.classList.contains('ql-toolbar')) {
+            toolbarElement = editorContainer.previousElementSibling as HTMLElement;
+        }
+
+        // Stratégie 2: chercher dans le parent
+        if (!toolbarElement && editorContainer.parentElement) {
+            toolbarElement = editorContainer.parentElement.querySelector('.ql-toolbar');
+        }
+
+        // Stratégie 3: module toolbar
+        if (!toolbarElement) {
+            const toolbar = this.quill.getModule('toolbar') as any;
+            if (toolbar && toolbar.container) {
+                toolbarElement = toolbar.container;
+            }
+        }
+
+        if (!toolbarElement) {
+            console.warn('ShowBlocks: Toolbar not found');
+            return;
+        }
 
         this.toolbarButton = document.createElement('button');
         this.toolbarButton.type = 'button';
+        this.toolbarButton.className = 'ql-show-blocks-btn';
         this.toolbarButton.setAttribute('aria-label', 'Afficher les blocs');
         this.toolbarButton.innerHTML = this.options.toolbarIcon || '¶';
-        this.toolbarButton.classList.add('ql-show-blocks-btn');
-        this.toolbarButton.style.cursor = 'pointer';
-        this.toolbarButton.style.fontSize = '16px';
-        this.toolbarButton.style.userSelect = 'none';
+        this.toolbarButton.style.cssText = `
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            user-select: none;
+            padding: 3px 5px;
+            margin: 0 2px;
+            border: 1px solid transparent;
+        `;
 
-        this.toolbarButton.addEventListener('click', () => {
+        this.toolbarButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            console.log('ShowBlocks button clicked, current state:', this.options.enabled);
+
             if (this.options.enabled) {
+                console.log('Disabling ShowBlocks');
                 this.disable();
                 this.options.enabled = false;
                 this.toolbarButton?.classList.remove('active');
             } else {
+                console.log('Enabling ShowBlocks');
                 this.enable();
                 this.options.enabled = true;
                 this.toolbarButton?.classList.add('active');
             }
         });
 
-        toolbar.container.appendChild(this.toolbarButton);
-
-        if (this.options.enabled) {
-            this.toolbarButton.classList.add('active');
-        }
+        toolbarElement.appendChild(this.toolbarButton);
+        console.log('ShowBlocks: Button added to toolbar');
     }
 
     private renderLabels() {
@@ -82,28 +301,40 @@ export default class ShowBlocks {
         const children = Array.from(this.container.children) as BlockElement[];
         children.forEach(block => {
             if (BLOCK_TAGS.includes(block.tagName)) {
+                // Ajouter la classe pour afficher le contour
+                block.classList.add('ql-show-block');
+
+                // Ajouter le label et la poignée seulement s'ils n'existent pas déjà
                 if (!block.querySelector('.ql-block-label')) {
                     const label = document.createElement('div');
                     label.className = 'ql-block-label';
                     label.textContent = block.tagName.toLowerCase();
-                    block.style.position = 'relative';
                     label.style.cssText = `
             position: absolute;
-            top: 0;
-            left: 0;
+            top: 4px;
+            left: 30px;
             background: #1976d2;
             color: white;
             font-size: 10px;
             font-weight: 700;
-            padding: 0 5px;
-            border-bottom-right-radius: 4px;
+            padding: 2px 6px;
+            border-radius: 3px;
             user-select: none;
             pointer-events: none;
             z-index: 10;
           `;
                     block.prepend(label);
-                    block.draggable = true;
-                    block.style.cursor = 'move';
+
+                    // Créer la poignée de drag
+                    const dragHandle = document.createElement('div');
+                    dragHandle.className = 'ql-drag-handle';
+                    dragHandle.draggable = true;
+                    dragHandle.title = 'Glisser pour déplacer le bloc';
+
+                    // Stocker une référence au bloc parent sur la poignée
+                    (dragHandle as any).parentBlock = block;
+
+                    block.prepend(dragHandle);
 
                     if (this.options.confirmDeletion) {
                         block.addEventListener('keydown', (evt) => {
@@ -113,6 +344,18 @@ export default class ShowBlocks {
                             }
                         });
                     }
+
+                    // Attacher les événements drag & drop à la poignée
+                    this.attachDragAndDropToHandle(dragHandle);
+                }
+
+                // Attacher les événements drop au bloc lui-même
+                if (!block.hasAttribute('data-drop-enabled')) {
+                    block.addEventListener('dragover', this.boundHandleDragOver);
+                    block.addEventListener('dragleave', this.boundHandleDragLeave);
+                    block.addEventListener('drop', this.boundHandleDrop);
+                    block.setAttribute('data-drop-enabled', 'true');
+                    console.log('Drop handlers attached to block:', block.tagName);
                 }
             }
         });
@@ -121,24 +364,52 @@ export default class ShowBlocks {
     private clearLabels() {
         const children = Array.from(this.container.children) as BlockElement[];
         children.forEach(block => {
+            // Supprimer le label s'il existe
             const label = block.querySelector('.ql-block-label');
             if (label) {
                 label.remove();
+            }
+
+            // Supprimer la poignée de drag s'il existe
+            const handle = block.querySelector('.ql-drag-handle');
+            if (handle) {
+                handle.remove();
+            }
+
+            // Toujours supprimer la classe et réinitialiser les propriétés pour TOUS les blocs
+            if (BLOCK_TAGS.includes(block.tagName)) {
+                block.classList.remove('ql-show-block');
+                block.removeAttribute('data-drop-enabled');
                 block.draggable = false;
                 block.style.cursor = '';
             }
         });
     }
 
+    private attachDragAndDropToHandle(handle: HTMLElement) {
+        handle.addEventListener('dragstart', this.handleDragStart);
+        handle.addEventListener('dragend', this.handleDragEnd);
+    }
+
     private attachDragAndDrop() {
         const blocks = Array.from(this.container.children) as BlockElement[];
+        console.log('Attaching drag and drop to', blocks.length, 'blocks');
 
         blocks.forEach(block => {
             if (BLOCK_TAGS.includes(block.tagName)) {
-                block.addEventListener('dragstart', this.handleDragStart);
-                block.addEventListener('dragover', this.handleDragOver);
-                block.addEventListener('drop', this.handleDrop.bind(this));
-                block.addEventListener('dragend', this.handleDragEnd);
+                const handle = block.querySelector('.ql-drag-handle') as HTMLElement;
+                if (handle) {
+                    this.attachDragAndDropToHandle(handle);
+                    console.log('Handle attached to:', block.tagName);
+                }
+
+                // Attacher les événements drop au bloc
+                if (!block.hasAttribute('data-drop-enabled')) {
+                    block.addEventListener('dragover', this.boundHandleDragOver);
+                    block.addEventListener('dragleave', this.boundHandleDragLeave);
+                    block.addEventListener('drop', this.boundHandleDrop);
+                    block.setAttribute('data-drop-enabled', 'true');
+                }
             }
         });
     }
@@ -147,55 +418,138 @@ export default class ShowBlocks {
         const blocks = Array.from(this.container.children) as BlockElement[];
         blocks.forEach(block => {
             if (BLOCK_TAGS.includes(block.tagName)) {
-                block.removeEventListener('dragstart', this.handleDragStart);
-                block.removeEventListener('dragover', this.handleDragOver);
-                block.removeEventListener('drop', this.handleDrop.bind(this));
-                block.removeEventListener('dragend', this.handleDragEnd);
+                const handle = block.querySelector('.ql-drag-handle') as HTMLElement;
+                if (handle) {
+                    handle.removeEventListener('dragstart', this.handleDragStart);
+                    handle.removeEventListener('dragend', this.handleDragEnd);
+                }
+
+                block.removeEventListener('dragover', this.boundHandleDragOver);
+                block.removeEventListener('dragleave', this.boundHandleDragLeave);
+                block.removeEventListener('drop', this.boundHandleDrop);
+                block.removeAttribute('data-drop-enabled');
             }
         });
     }
 
-    private draggedElement: BlockElement | null = null;
-
     private handleDragStart = (evt: DragEvent) => {
-        this.draggedElement = evt.currentTarget as BlockElement;
-        evt.dataTransfer?.setData('text/plain', '');
-        evt.dataTransfer!.effectAllowed = 'move';
-        // ajouter un style lors du drag
-        this.draggedElement.style.opacity = '0.4';
+        console.log('=== DRAG START EVENT ===');
+        const handle = evt.currentTarget as HTMLElement;
+        console.log('Handle element:', handle);
+
+        // Récupérer le bloc parent depuis la poignée
+        this.draggedElement = (handle as any).parentBlock as BlockElement;
+        console.log('Parent block found:', this.draggedElement);
+
+        if (!this.draggedElement) {
+            console.error('Could not find parent block for drag handle');
+            return;
+        }
+
+        if (!evt.dataTransfer) {
+            console.error('No dataTransfer available');
+            return;
+        }
+
+        evt.dataTransfer.setData('text/plain', 'block-drag');
+        evt.dataTransfer.effectAllowed = 'move';
+
+        // Ajouter une classe pour le feedback visuel
+        this.draggedElement.classList.add('dragging');
+        handle.classList.add('dragging');
+
+        console.log('Drag started successfully for:', this.draggedElement.tagName);
     };
 
     private handleDragOver = (evt: DragEvent) => {
         evt.preventDefault();
-        evt.dataTransfer!.dropEffect = 'move';
+        evt.stopPropagation();
+
+        if (!evt.dataTransfer) {
+            console.warn('No dataTransfer in dragover');
+            return;
+        }
+
+        evt.dataTransfer.dropEffect = 'move';
+
+        const target = evt.currentTarget as BlockElement;
+        if (target !== this.draggedElement) {
+            target.classList.add('drag-over');
+        }
+    };
+
+    private handleDragLeave = (evt: DragEvent) => {
+        const target = evt.currentTarget as BlockElement;
+        target.classList.remove('drag-over');
     };
 
     private handleDrop(evt: DragEvent) {
+        console.log('=== DROP EVENT ===');
         evt.preventDefault();
-        if (!this.draggedElement) return;
+        evt.stopPropagation();
+
         const target = evt.currentTarget as BlockElement;
-        if (target === this.draggedElement) return;
+        console.log('Drop target:', target.tagName);
+        target.classList.remove('drag-over');
+
+        if (!this.draggedElement) {
+            console.warn('No dragged element');
+            return;
+        }
+
+        if (target === this.draggedElement) {
+            console.log('Dropped on self, ignoring');
+            return;
+        }
+
+        console.log('Dropping block:', this.draggedElement.tagName, 'onto', target.tagName);
 
         // Réordonnancer les blocs dans le DOM
         const parent = this.container;
-        // insérer avant ou après selon la position de la souris
         const mouseY = evt.clientY;
         const targetRect = target.getBoundingClientRect();
-        if (mouseY < targetRect.top + targetRect.height / 2) {
+        const middleY = targetRect.top + targetRect.height / 2;
+
+        console.log('Mouse Y:', mouseY, 'Middle Y:', middleY);
+
+        // Insérer avant ou après selon la position de la souris
+        if (mouseY < middleY) {
+            console.log('Inserting before target');
             parent.insertBefore(this.draggedElement, target);
         } else {
+            console.log('Inserting after target');
             parent.insertBefore(this.draggedElement, target.nextSibling);
         }
 
-        this.draggedElement.style.opacity = '1';
-        this.draggedElement = null;
+        // Nettoyer les classes
+        this.draggedElement.classList.remove('dragging');
+
+        // Nettoyer les poignées
+        const handle = this.draggedElement.querySelector('.ql-drag-handle');
+        if (handle) {
+            handle.classList.remove('dragging');
+        }
+
+        // Notifier Quill du changement pour synchroniser le contenu
+        this.quill.update('user');
+
+        console.log('Block moved successfully');
     }
 
     private handleDragEnd = (evt: DragEvent) => {
+        const handle = evt.currentTarget as HTMLElement;
+        handle.classList.remove('dragging');
+
         if (this.draggedElement) {
-            this.draggedElement.style.opacity = '1';
+            this.draggedElement.classList.remove('dragging');
             this.draggedElement = null;
         }
+
+        // Nettoyer toutes les classes drag-over restantes
+        const blocks = Array.from(this.container.children) as BlockElement[];
+        blocks.forEach(block => {
+            block.classList.remove('drag-over');
+        });
     };
 
     private confirmAndDeleteBlock(block: BlockElement) {

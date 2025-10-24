@@ -16,8 +16,8 @@ final class ShowBlocksModule implements ModuleInterface
          * @var array<string, string|string[]>
          */
         public $options = [
-            self::MENU_OPTION => true,
-            self::MENU_CONFIRM_DELETION => true,
+            self::MENU_OPTION => false,
+            self::MENU_CONFIRM_DELETION => false,
         ],
     ) {
     }

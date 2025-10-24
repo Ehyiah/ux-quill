@@ -23,9 +23,4 @@ import htmlEditButton from 'quill-html-edit-button';
 Quill.register('modules/htmlEditButton', htmlEditButton.default || htmlEditButton);
 
 import ShowBlocks from './modules/showBlockModule/showBlocksModule.ts';
-import './modules/showBlockModule/showBlocksModule.css';
-Quill.register('modules/showBlocks', ShowBlocks);
-
-import ShowBlocks from './modules/showBlockModule/showBlocksModule.ts';
-import './modules/showBlockModule/showBlocksModule.css';
 Quill.register('modules/showBlocks', ShowBlocks);
