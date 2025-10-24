@@ -17,3 +17,7 @@ Quill.register('modules/htmlEditButton', htmlEditButton.default || htmlEditButto
 import ShowBlocks from "./modules/showBlockModule/showBlocksModule.js";
 import "./modules/showBlockModule/showBlocksModule.css";
 Quill.register('modules/showBlocks', ShowBlocks);
+
+import ShowBlocks from "./modules/showBlockModule/showBlocksModule.js";
+import "./modules/showBlockModule/showBlocksModule.css";
+Quill.register('modules/showBlocks', ShowBlocks);
