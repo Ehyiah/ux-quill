@@ -14,3 +14,5 @@ import QuillToggleFullscreenButton from 'quill-toggle-fullscreen-button';
 Quill.register('modules/toggleFullscreen', QuillToggleFullscreenButton);
 import htmlEditButton from 'quill-html-edit-button';
 Quill.register('modules/htmlEditButton', htmlEditButton.default || htmlEditButton);
+import GalleryModule from "./modules/gallery/gallery-module.js";
+Quill.register('modules/mediaGallery', GalleryModule.default || GalleryModule);

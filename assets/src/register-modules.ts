@@ -21,3 +21,6 @@ Quill.register('modules/toggleFullscreen', QuillToggleFullscreenButton);
 
 import htmlEditButton from 'quill-html-edit-button';
 Quill.register('modules/htmlEditButton', htmlEditButton.default || htmlEditButton);
+
+import GalleryModule from './modules/gallery/gallery-module.ts'
+Quill.register('modules/mediaGallery', GalleryModule.default || GalleryModule);
