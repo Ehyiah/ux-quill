@@ -1,5 +1,10 @@
 import { uploadStrategies, handleUploadResponse } from "./../../upload-utils.js";
 export default class GalleryModal {
+  module;
+  container;
+  nextUrl;
+  prevUrl;
+  images;
   constructor(module) {
     this.module = module;
     this.container = null;
@@ -32,15 +37,15 @@ export default class GalleryModal {
           </button>
         </div>
         <div class="quill-media-grid" id="media-grid">
-          <p style="text-align:center;width:100%">Chargement...</p>
+          <p style="text-align:center;width:100%">${this.module.options.messageLoadingOption}</p>
         </div>
         <div class="quill-media-footer">
-          <button class="prev-btn" disabled>⟨ Précédent</button>
+          <button class="prev-btn" disabled>${this.module.options.messagePrevPageOption}</button>
           <label class="upload-btn">
             <input type="file" style="display:none" />
-            ⬆️ Upload
+              ${this.module.options.uploadTitle}
           </label>
-          <button class="next-btn" disabled>Suivant ⟩</button>
+          <button class="next-btn" disabled>${this.module.options.messageNextPageOption}</button>
         </div>
       </div>
     `;
@@ -62,12 +67,11 @@ export default class GalleryModal {
       fileInput.disabled = true;
       try {
         const response = await uploadStrategies['form'](this.module.options.uploadEndpoint, file, this.module.options.authConfig);
-        const imageUrl = await handleUploadResponse(response, this.module.options.jsonResponseFilePath);
-        console.log('Upload réussi :', imageUrl);
+        await handleUploadResponse(response, this.module.options.jsonResponseFilePath);
         await this.loadImages();
       } catch (e) {
-        console.error('Erreur upload :', e);
-        alert('Échec de l’upload');
+        console.error('Error upload :', e);
+        alert('Upload error');
       } finally {
         fileInput.disabled = false;
         fileInput.value = '';
@@ -79,8 +83,14 @@ export default class GalleryModal {
     if (url === void 0) {
       url = null;
     }
+    if (!this.container) {
+      return;
+    }
     const grid = this.container.querySelector('#media-grid');
-    grid.innerHTML = `<p style="text-align:center;width:100%">Chargement...</p>`;
+    if (!grid) {
+      return;
+    }
+    grid.innerHTML = `<p style="text-align:center;width:100%">${this.module.options.messageLoadingOption}</p>`;
     try {
       const data = await this.module.list(url);
       this.images = data.data || [];
@@ -90,14 +100,14 @@ export default class GalleryModal {
       this.updatePaginationButtons();
     } catch (e) {
       console.error(e);
-      grid.innerHTML = `<p style="color:red;text-align:center;">Erreur de chargement</p>`;
+      grid.innerHTML = `<p style="color:red;text-align:center;">${this.module.options.messageErrorOption}</p>`;
     }
   }
   renderGrid() {
     const grid = this.container.querySelector('#media-grid');
     grid.innerHTML = '';
     if (this.images.length === 0) {
-      grid.innerHTML = `<p style="text-align:center;width:100%">Aucune image</p>`;
+      grid.innerHTML = `<p style="text-align:center;width:100%">${this.module.options.messageNoImageOption}</p>`;
       return;
     }
     this.images.forEach(img => {

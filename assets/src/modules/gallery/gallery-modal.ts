@@ -1,7 +1,14 @@
 import { uploadStrategies, handleUploadResponse } from './../../upload-utils.ts';
+import GalleryModule from './gallery-module';
 
 export default class GalleryModal {
-    constructor(module) {
+    private module: GalleryModule;
+    private container: HTMLDivElement|null;
+    private nextUrl: null;
+    private prevUrl: null;
+    private images: any[];
+
+    constructor(module: GalleryModule) {
         this.module = module
         this.container = null
         this.images = []
@@ -36,18 +43,15 @@ export default class GalleryModal {
           </button>
         </div>
         <div class="quill-media-grid" id="media-grid">
-<!--        // TODO MAKE AN OPTION-->
-          <p style="text-align:center;width:100%">Chargement...</p>
+          <p style="text-align:center;width:100%">${this.module.options.messageLoadingOption}</p>
         </div>
         <div class="quill-media-footer">
-<!--        // TODO MAKE AN OPTION-->
-          <button class="prev-btn" disabled>⟨ Précédent</button>
+          <button class="prev-btn" disabled>${this.module.options.messagePrevPageOption}</button>
           <label class="upload-btn">
             <input type="file" style="display:none" />
-            ⬆️ Upload
+              ${this.module.options.uploadTitle}
           </label>
-<!--        // TODO MAKE AN OPTION-->
-          <button class="next-btn" disabled>Suivant ⟩</button>
+          <button class="next-btn" disabled>${this.module.options.messageNextPageOption}</button>
         </div>
       </div>
     `
@@ -78,11 +82,7 @@ export default class GalleryModal {
                     this.module.options.authConfig
                 );
 
-                const imageUrl = await handleUploadResponse(response, this.module.options.jsonResponseFilePath);
-
-                // TODO MAKE AN OPTION
-                console.log('Upload réussi :', imageUrl);
-
+                await handleUploadResponse(response, this.module.options.jsonResponseFilePath);
                 await this.loadImages();
             } catch (e) {
                 console.error('Error upload :', e);
@@ -97,8 +97,16 @@ export default class GalleryModal {
     }
 
     async loadImages(url = null) {
+        if (!this.container) {
+            return
+        }
+
         const grid = this.container.querySelector('#media-grid')
-        grid.innerHTML = '<p style="text-align:center;width:100%">Chargement...</p>'
+        if (!grid) {
+            return
+        }
+
+        grid.innerHTML = `<p style="text-align:center;width:100%">${this.module.options.messageLoadingOption}</p>`
 
         try {
             const data = await this.module.list(url)
@@ -109,18 +117,17 @@ export default class GalleryModal {
             this.updatePaginationButtons()
         } catch (e) {
             console.error(e)
-            // TODO MAKE AN OPTION
-            grid.innerHTML = '<p style="color:red;text-align:center;">Erreur de chargement</p>'
+            grid.innerHTML = `<p style="color:red;text-align:center;">${this.module.options.messageErrorOption}</p>`
         }
     }
+
 
     renderGrid() {
         const grid = this.container.querySelector('#media-grid')
         grid.innerHTML = ''
 
         if (this.images.length === 0) {
-            // TODO MAKE AN OPTION
-            grid.innerHTML = '<p style="text-align:center;width:100%">Aucune image</p>'
+            grid.innerHTML = `<p style="text-align:center;width:100%">${this.module.options.messageNoImageOption}</p>`
             return
         }
 

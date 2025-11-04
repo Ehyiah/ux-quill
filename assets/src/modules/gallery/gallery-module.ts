@@ -1,64 +1,88 @@
-import GalleryModal from './gallery-modal.ts'
+import GalleryModal from './gallery-modal.ts';
+import Quill from 'quill';
+
+type MediaGalleryOptions = {
+    uploadEndpoint: string;
+    listEndpoint: string;
+    icon: string;
+    buttonTitle: string;
+    uploadTitle: string;
+    messageLoadingOption: string;
+    messageNextPageOption: string;
+    messagePrevPageOption: string;
+    messageErrorOption: string;
+    messageNoImageOption: string;
+}
 
 export default class GalleryModule {
-    constructor(quill, options = {}) {
+    private quill: Quill;
+    public options: MediaGalleryOptions;
+    private modal: GalleryModal;
+
+    constructor(quill: Quill, options: MediaGalleryOptions) {
         this.quill = quill
         this.options = {
             uploadEndpoint: options.uploadEndpoint || '',
             listEndpoint: options.listEndpoint || '',
-            icon: options.icon || GalleryModule.defaultIcon,
+            icon: options.icon,
+            buttonTitle: options.buttonTitle || '',
+            uploadTitle: options.uploadTitle || '',
+            messageLoadingOption: options.messageLoadingOption || '',
+            messageNextPageOption: options.messageNextPageOption || '',
+            messagePrevPageOption: options.messagePrevPageOption || '',
+            messageErrorOption: options.messageErrorOption || '',
+            messageNoImageOption: options.messageNoImageOption || '',
         }
 
-        this.injectCss()
+        this.injectCss();
 
-        this.modal = new GalleryModal(this)
-        this.addToolbarButton()
+        this.modal = new GalleryModal(this);
+        this.addToolbarButton();
     }
 
     addToolbarButton() {
-        const toolbar = this.quill.getModule('toolbar')
-        if (!toolbar || !toolbar.container) return
+        const toolbar = this.quill.getModule('toolbar');
+        if (!toolbar || !toolbar.container) return;
 
-        if (toolbar.container.querySelector('.ql-gallery')) return
+        if (toolbar.container.querySelector('.ql-gallery')) return;
 
-        const button = document.createElement('button')
-        button.type = 'button'
-        button.classList.add('ql-gallery')
-        button.innerHTML = this.options.icon
-        // TODO MAKE AN OPTION
-        button.title = 'Ouvrir la galerie'
-        button.addEventListener('click', () => this.open())
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.classList.add('ql-gallery');
+        button.innerHTML = this.options.icon;
+        button.title = this.options.buttonTitle;
+        button.addEventListener('click', () => this.open());
 
-        const group = toolbar.container.querySelector('.ql-formats:last-child')
-        if (group) group.appendChild(button)
-        else toolbar.container.appendChild(button)
+        const group = toolbar.container.querySelector('.ql-formats:last-child');
+        if (group) group.appendChild(button);
+        else toolbar.container.appendChild(button);
     }
 
     open() {
-        this.modal.open()
+        this.modal.open();
     }
 
     insertImage(url) {
-        const range = this.quill.getSelection(true)
+        const range = this.quill.getSelection(true);
         if (range) {
-            this.quill.insertEmbed(range.index, 'image', url, 'user')
-            this.quill.setSelection(range.index + 1)
+            this.quill.insertEmbed(range.index, 'image', url, 'user');
+            this.quill.setSelection(range.index + 1);
         }
     }
 
     async list(url = null) {
-        const endpoint = url || this.options.listEndpoint
+        const endpoint = url || this.options.listEndpoint;
 
-        const response = await fetch(endpoint)
-        if (!response.ok) throw new Error(`Erreur while loading : ${response.statusText}`)
-        return response.json()
+        const response = await fetch(endpoint);
+        if (!response.ok) throw new Error(`Erreur while loading : ${response.statusText}`);
+        return response.json();
     }
 
     injectCss() {
-        if (document.getElementById('quill-gallery-styles')) return
+        if (document.getElementById('quill-gallery-styles')) return;
 
-        const style = document.createElement('style')
-        style.id = 'quill-gallery-styles'
+        const style = document.createElement('style');
+        style.id = 'quill-gallery-styles';
         style.textContent = `
       .quill-media-modal {
         position: fixed;
@@ -162,19 +186,8 @@ export default class GalleryModule {
         from { transform: scale(0.95); opacity: 0; }
         to { transform: scale(1); opacity: 1; }
       }
-    `
+    `;
 
-        document.head.appendChild(style)
-    }
-
-    static get defaultIcon() {
-        return `
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-        <rect x="3" y="4" width="18" height="16" rx="2" ry="2"
-              stroke="currentColor" stroke-width="2" fill="none"/>
-        <circle cx="8" cy="9" r="2" fill="currentColor"/>
-        <path d="M21 15l-5-5L5 21" stroke="currentColor" stroke-width="2" fill="none"/>
-      </svg>
-    `
+        document.head.appendChild(style);
     }
 }

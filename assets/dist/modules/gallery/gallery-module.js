@@ -1,14 +1,21 @@
 import GalleryModal from "./gallery-modal.js";
 export default class GalleryModule {
+  quill;
+  options;
+  modal;
   constructor(quill, options) {
-    if (options === void 0) {
-      options = {};
-    }
     this.quill = quill;
     this.options = {
       uploadEndpoint: options.uploadEndpoint || '',
       listEndpoint: options.listEndpoint || '',
-      icon: options.icon || GalleryModule.defaultIcon
+      icon: options.icon,
+      buttonTitle: options.buttonTitle || '',
+      uploadTitle: options.uploadTitle || '',
+      messageLoadingOption: options.messageLoadingOption || '',
+      messageNextPageOption: options.messageNextPageOption || '',
+      messagePrevPageOption: options.messagePrevPageOption || '',
+      messageErrorOption: options.messageErrorOption || '',
+      messageNoImageOption: options.messageNoImageOption || ''
     };
     this.injectCss();
     this.modal = new GalleryModal(this);
@@ -22,8 +29,7 @@ export default class GalleryModule {
     button.type = 'button';
     button.classList.add('ql-gallery');
     button.innerHTML = this.options.icon;
-    // TODO MAKE AN OPTION
-    button.title = 'Ouvrir la galerie';
+    button.title = this.options.buttonTitle;
     button.addEventListener('click', () => this.open());
     const group = toolbar.container.querySelector('.ql-formats:last-child');
     if (group) group.appendChild(button);else toolbar.container.appendChild(button);
@@ -44,7 +50,7 @@ export default class GalleryModule {
     }
     const endpoint = url || this.options.listEndpoint;
     const response = await fetch(endpoint);
-    if (!response.ok) throw new Error(`Erreur lors du chargement : ${response.statusText}`);
+    if (!response.ok) throw new Error(`Erreur while loading : ${response.statusText}`);
     return response.json();
   }
   injectCss() {
@@ -156,15 +162,5 @@ export default class GalleryModule {
       }
     `;
     document.head.appendChild(style);
-  }
-  static get defaultIcon() {
-    return `
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-        <rect x="3" y="4" width="18" height="16" rx="2" ry="2"
-              stroke="currentColor" stroke-width="2" fill="none"/>
-        <circle cx="8" cy="9" r="2" fill="currentColor"/>
-        <path d="M21 15l-5-5L5 21" stroke="currentColor" stroke-width="2" fill="none"/>
-      </svg>
-    `;
   }
 }
