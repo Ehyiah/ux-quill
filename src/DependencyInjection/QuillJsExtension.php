@@ -9,6 +9,8 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
+use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class QuillJsExtension extends Extension implements PrependExtensionInterface
 {
@@ -34,17 +36,18 @@ class QuillJsExtension extends Extension implements PrependExtensionInterface
 
     public function load(array $configs, ContainerBuilder $container): void
     {
-        $container
-            ->setDefinition('form.ux-quill-js', new Definition(QuillType::class))
-            ->addTag('form.type')
-            ->setPublic(false)
-        ;
+        $definition = new Definition(QuillType::class);
+        $definition->setArgument('$translator', new Reference(TranslatorInterface::class));
+        $definition->addTag('form.type');
+        $definition->setPublic(false);
+
+        $container->setDefinition('form.ux-quill-js', $definition);
 
         $bundles = $container->getParameter('kernel.bundles');
 
         if (is_array($bundles) && isset($bundles['EasyAdminBundle'])) {
             $container
-                ->setDefinition('form.ux-quill-js', new Definition(QuillAdminField::class))
+                ->setDefinition('form.ux-quill-js-admin', new Definition(QuillAdminField::class))
                 ->addTag('form.type_admin')
                 ->setPublic(false)
             ;

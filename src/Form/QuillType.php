@@ -20,9 +20,17 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Translation\TranslatableMessage;
+use Symfony\Contracts\Translation\TranslatableInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class QuillType extends AbstractType
 {
+    public function __construct(
+        private readonly TranslatorInterface $translator,
+    ) {
+    }
+
     public function buildView(FormView $view, FormInterface $form, array $options): void
     {
         $view->vars['attr']['quill_options'] = json_encode($options['quill_options']);
@@ -34,7 +42,13 @@ class QuillType extends AbstractType
             $this->addAutoModuleIfRequired($fields, $modules, $config['moduleName'], $config['fieldIdentifier'], $config['moduleClass']);
         }
 
-        $view->vars['attr']['quill_extra_options'] = json_encode($options['quill_extra_options']);
+        $extraOptions = $options['quill_extra_options'];
+
+        if (isset($extraOptions['placeholder']) && $extraOptions['placeholder'] instanceof TranslatableInterface) {
+            $extraOptions['placeholder'] = $extraOptions['placeholder']->trans($this->translator);
+        }
+
+        $view->vars['attr']['quill_extra_options'] = json_encode($extraOptions);
         $view->vars['attr']['quill_modules_options'] = json_encode($modules);
 
         $assets = $this->getBuiltInAssets($fields, $modules, $options);
@@ -104,7 +118,7 @@ class QuillType extends AbstractType
                 ;
                 $resolver
                     ->setDefault('placeholder', 'Quill editor')
-                    ->setAllowedTypes('placeholder', 'string')
+                    ->setAllowedTypes('placeholder', ['string', TranslatableMessage::class, TranslatableInterface::class])
                 ;
                 $resolver
                     ->setDefault('style', StyleOption::QUILL_STYLE_CLASS)
