@@ -233,8 +233,13 @@ class QuillType extends AbstractType
         $assets['styleSheets'] = [];
         $assets['scripts'] = [];
 
+        $formulaFieldOption = (new FormulaField())->getOption();
         foreach ($fields as $fieldGroup) {
-            if (in_array((new FormulaField())->getOption(), $fieldGroup, true)) {
+            $hasFormula = is_array($fieldGroup)
+                ? in_array($formulaFieldOption, $fieldGroup, true)
+                : $fieldGroup === $formulaFieldOption;
+
+            if ($hasFormula) {
                 $assets['styleSheets']['katex'] = 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css';
                 $assets['scripts']['katex'] = 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js';
             }
