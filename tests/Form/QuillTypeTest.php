@@ -13,6 +13,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @coversDefaultClass \Ehyiah\QuillJsBundle\Form\QuillType
@@ -27,7 +28,8 @@ final class QuillTypeTest extends TestCase
     {
         parent::setUp();
 
-        $this->quillType = new QuillType();
+        $translator = $this->createMock(TranslatorInterface::class);
+        $this->quillType = new QuillType($translator);
         $this->form = $this->createMock(FormInterface::class);
         $this->formView = new FormView();
     }
@@ -123,7 +125,8 @@ final class QuillTypeTest extends TestCase
      */
     public function testConfigureOptions(): void
     {
-        $quillType = new QuillType();
+        $translator = $this->createMock(TranslatorInterface::class);
+        $quillType = new QuillType($translator);
 
         $resolver = new OptionsResolver();
         $quillType->configureOptions($resolver);
@@ -141,7 +144,8 @@ final class QuillTypeTest extends TestCase
      */
     public function testGetBlockPrefix(): void
     {
-        $quillType = new QuillType();
+        $translator = $this->createMock(TranslatorInterface::class);
+        $quillType = new QuillType($translator);
 
         $this->assertEquals('quill', $quillType->getBlockPrefix());
     }
@@ -151,7 +155,8 @@ final class QuillTypeTest extends TestCase
      */
     public function testGetParent(): void
     {
-        $quillType = new QuillType();
+        $translator = $this->createMock(TranslatorInterface::class);
+        $quillType = new QuillType($translator);
 
         $this->assertEquals(TextareaType::class, $quillType->getParent());
     }
