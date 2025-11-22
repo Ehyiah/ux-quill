@@ -14,6 +14,8 @@ It comes with some extra features out of the box like image uploading to custom 
 
 
 * [Customize quillJS with options and extra_options](#customize-options)
+* [List of available Fields](#available-fields)
+* [List of available Modules](#modules)
 
 * [Handle images uploads](#image-upload-handling)
 * [Handle images uploads security](#upload-endpoint-security)
@@ -142,7 +144,7 @@ This example will display a h1 and h2 header options side by side and another Gr
 
 You can add as many Groups as you like or just One if you don't need the WYSIWYG options to have spaces between them.
 
-### Available Fields 
+### Available Fields
 - Below is the list of available fields from QuillJS (https://v2.quilljs.com/docs/formats)
 
 |        Field         |                                     Description                                      |   Available options    (options are available as class constants in each Field Class)    | Default option | QuillJS field name |
@@ -344,6 +346,7 @@ Example of how to use modules:
 |    **TableModule**     |      YES      | The Table module is responsible for handling table options. see details on repository [site](https://github.com/attoae/quill-table-better)                                                                                                                                                            |   table-better    |    array     |                                      https://github.com/attoae/quill-table-better                                      |                                                                    see ``Ehyiah\QuillJsBundle\DTO\Modules\TableModule``                                                                |
 | **FullScreenModule**   |      NO       | Add a FullScreen button to the toolbar [site](https://github.com/qvarts/quill-toggle-fullscreen-button)                                                                                                                                                                                               |  toggleFullscreen |    array     |   `buttonTitle`, `buttonHTML`    check https://github.com/qvarts/quill-toggle-fullscreen-button?tab=readme-ov-file#api |                                                               see ``Ehyiah\QuillJsBundle\DTO\Modules\FullScreenModule``                                                                |
 |  **HtmlEditModule**  |      NO       | The HtmlEditModule allow to edit the raw html. see details on repository [site](https://github.com/benwinding/quill-html-edit-button)                                                                                                                                                                 | htmlEditButton  |    array     |                              https://github.com/benwinding/quill-html-edit-button                               |                                                              see ``Ehyiah\QuillJsBundle\DTO\Modules\htmlEditButton``                                                                   | There is currently a conflict with tableField. Don't use both of them at the same time as the table inserted via the htmlEdit module will not be displayed |
+|  **SynonymModule**   |      NO       | The Synonym module allow you to search over an API for a word synonym.                                                                                                                                                                                                                                |   synonym     |    array     |                                   `lang`, `icon`, `headerText`, `noSynonymText`                                 |                                                              see ``Ehyiah\QuillJsBundle\DTO\Modules\SynonymModule``                                                                    |
 
 ### Other modules that need custom JavaScript
 For other modules, you will need to extend Quill controller (see below) to use them as they required custom JavaScript as you cannot configure them in PHP.
