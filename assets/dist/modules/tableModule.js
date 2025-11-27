@@ -135,7 +135,6 @@ export class TableModule {
    * Insert a new table at the current cursor position
    */
   insertTable(rows, cols) {
-    console.log('insertTable called with rows:', rows, 'cols:', cols);
     const range = this.quill.getSelection(true);
     if (!range) {
       console.error('No range selected');
@@ -145,36 +144,30 @@ export class TableModule {
 
     // Create table blot
     const tableBlot = scroll.create('table');
-    console.log('Created table blot:', tableBlot);
 
     // Create tbody blot
     const tbodyBlot = scroll.create('table-body');
-    console.log('Created tbody blot:', tbodyBlot);
 
     // Create rows and cells
     for (let row = 0; row < rows; row++) {
       const rowBlot = scroll.create('table-row', {
         row: row.toString()
       });
-      console.log(`Created row ${row}:`, rowBlot);
       for (let col = 0; col < cols; col++) {
         const cellBlot = scroll.create('table-cell', {
           row: row.toString(),
           col: col.toString()
         });
-        console.log(`Created cell [${row},${col}]:`, cellBlot);
 
         // Create a table-cell-block inside the cell
         const blockBlot = scroll.create('table-cell-block');
         blockBlot.appendChild(scroll.create('break'));
-        console.log('Created table-cell-block with break:', blockBlot);
         cellBlot.appendChild(blockBlot);
         rowBlot.appendChild(cellBlot);
       }
       tbodyBlot.appendChild(rowBlot);
     }
     tableBlot.appendChild(tbodyBlot);
-    console.log('Final table structure:', tableBlot);
 
     // Insert at cursor position
     const [leaf, offset] = this.quill.getLeaf(range.index);
@@ -184,10 +177,8 @@ export class TableModule {
 
       // Insert after current line
       parent.insertBefore(tableBlot, leaf.next || undefined);
-      console.log('Table inserted into scroll');
     }
     this.quill.update('user');
-    console.log('Quill updated');
 
     // Set cursor after table
     this.quill.setSelection(range.index + rows * cols + 1, 0, 'silent');
