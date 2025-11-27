@@ -92,12 +92,61 @@ export default class extends Controller {
     this.dispatchEvent('connect', quill);
   }
   setupContentSync(quill) {
-    // set initial content as a delta for better compatibility and allow table-module to work
-    const initialData = quill.clipboard.convert({
-      html: this.inputTarget.value
-    });
-    this.dispatchEvent('hydrate:before', initialData);
-    quill.updateContents(initialData);
+    const htmlContent = this.inputTarget.value;
+
+    // Check if HTML contains a table
+    if (htmlContent.includes('<table')) {
+      // Parse the HTML
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(htmlContent, 'text/html');
+      const tableElement = doc.querySelector('table');
+      if (tableElement) {
+        quill.setText('');
+        const scroll = quill.scroll;
+
+        // Create table blot
+        const tableBlot = scroll.create('table');
+        const tbodyBlot = scroll.create('table-body');
+
+        // Parse each row
+        const rows = tableElement.querySelectorAll('tr');
+        rows.forEach((trElement, rowIndex) => {
+          const rowBlot = scroll.create('table-row', {
+            row: rowIndex.toString()
+          });
+
+          // Parse each cell in the row
+          const cells = trElement.querySelectorAll('td, th');
+          cells.forEach((tdElement, colIndex) => {
+            const cellBlot = scroll.create('table-cell', {
+              row: rowIndex.toString(),
+              col: colIndex.toString()
+            });
+
+            // Get text content from cell
+            const textContent = tdElement.textContent || '';
+            const blockBlot = scroll.create('table-cell-block');
+            if (textContent.trim()) {
+              blockBlot.insertAt(0, textContent);
+            } else {
+              blockBlot.appendChild(scroll.create('break'));
+            }
+            cellBlot.appendChild(blockBlot);
+            rowBlot.appendChild(cellBlot);
+          });
+          tbodyBlot.appendChild(rowBlot);
+        });
+        tableBlot.appendChild(tbodyBlot);
+
+        // Insert table at position 0
+        scroll.insertBefore(tableBlot, scroll.children.head);
+      }
+    } else {
+      const initialData = quill.clipboard.convert({
+        html: htmlContent
+      });
+      quill.updateContents(initialData);
+    }
     this.dispatchEvent('hydrate:after', quill);
     quill.on('text-change', () => {
       const quillContent = this.extraOptionsValue?.use_semantic_html ? quill.getSemanticHTML() : quill.root.innerHTML;
