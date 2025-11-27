@@ -6,6 +6,7 @@ use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\CodeBlockField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\EmojiField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\FormulaField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ImageField;
+use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\TableField;
 use Ehyiah\QuillJsBundle\DTO\Modules\EmojiModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\HtmlEditModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\ModuleInterface;
@@ -194,7 +195,7 @@ class QuillType extends AbstractType
             ],
             [
                 'moduleName' => TableModule::NAME,
-                'fieldIdentifier' => 'table-better',
+                'fieldIdentifier' => (new TableField())->getOption(),
                 'moduleClass' => TableModule::class,
             ],
         ];

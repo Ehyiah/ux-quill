@@ -23,11 +23,23 @@ class QuillJsExtension extends Extension implements PrependExtensionInterface
             $container->prependExtensionConfig('twig', ['form_themes' => ['@QuillJs/form.html.twig']]);
         }
 
+        // see https://github.com/symfony/symfony/issues/53912#issuecomment-2591275217
+        // src/Resources/importmap.php
+        //        '@acme/bundle/bundle.js' => [
+        //        'path' => '@acme/bundle/bundle.js' // this maps to $bundleDir/assets/dist/bundle.js
+        //    ],
+        // '@acme/bundle/bundle.css' => [
+        //        'path' => '@acme/bundle/bundle.css', // this maps to $bundleDir/assets/dist/bundle.css
+        //        'type' => 'css' // this is important to avoid MIME Type error
+        //    ]
+        // ou mieux https://github.com/symfony/symfony/discussions/57952#discussioncomment-10310344
+        // mettre dans le dossier public comme ca pas de soucis avec webpack ou assetmapper
         if ($this->isAssetMapperAvailable($container)) {
             $container->prependExtensionConfig('framework', [
                 'asset_mapper' => [
                     'paths' => [
                         __DIR__ . '/../../assets/dist' => '@ehyiah/ux-quill',
+                        __DIR__ . '/../../assets/src/styles' => '@ehyiah/ux-quill/styles',
                     ],
                 ],
             ]);

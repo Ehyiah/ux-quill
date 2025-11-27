@@ -7,8 +7,7 @@ import { ToolbarCustomizer } from './ui/toolbarCustomizer.ts';
 import { handleUploadResponse, uploadStrategies } from './upload-utils.ts';
 
 import './register-modules.ts';
-import QuillTableBetter from 'quill-table-better';
-import 'quill-table-better/dist/quill-table-better.css';
+
 
 interface DOMNode extends HTMLElement {
     getAttribute(name: string): string | null;
@@ -20,7 +19,7 @@ interface DOMNode extends HTMLElement {
 const Image = Quill.import('formats/image');
 const oldFormats = Image.formats;
 
-Image.formats = function(domNode: DOMNode) {
+Image.formats = function (domNode: DOMNode) {
     const formats = oldFormats.call(this, domNode);
     if (domNode.hasAttribute('style')) {
         formats.style = domNode.getAttribute('style');
@@ -33,7 +32,7 @@ type ImageWithDOM = {
     format(name: string, value: string | boolean | null): void;
 };
 
-Image.prototype.format = function(this: ImageWithDOM, name: string, value: string | boolean | null) {
+Image.prototype.format = function (this: ImageWithDOM, name: string, value: string | boolean | null) {
     value ? this.domNode.setAttribute(name, String(value)) : this.domNode.removeAttribute(name);
 };
 
@@ -62,7 +61,6 @@ export default class extends Controller {
 
     connect() {
         const options = this.buildQuillOptions();
-        this.dynamicModuleRegister(options);
         this.setupQuillStyles(options);
         this.setupUploadHandler(options);
         this.setupEditorHeight();
@@ -73,6 +71,7 @@ export default class extends Controller {
 
         this.initializeQuill(options, unprocessedIcons);
     }
+
 
     private buildQuillOptions(): Options {
         const { debug, placeholder, theme, style } = this.extraOptionsValue;
@@ -140,7 +139,7 @@ export default class extends Controller {
 
     private setupContentSync(quill: Quill) {
         // set initial content as a delta for better compatibility and allow table-module to work
-        const initialData = quill.clipboard.convert({html: this.inputTarget.value})
+        const initialData = quill.clipboard.convert({ html: this.inputTarget.value })
         this.dispatchEvent('hydrate:before', initialData);
         quill.updateContents(initialData);
         this.dispatchEvent('hydrate:after', quill);
@@ -156,8 +155,7 @@ export default class extends Controller {
         });
     }
 
-    private bubbles(inputContent: HTMLInputElement)
-    {
+    private bubbles(inputContent: HTMLInputElement) {
         inputContent.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
@@ -165,7 +163,7 @@ export default class extends Controller {
         this.dispatch(name, { detail: payload, prefix: 'quill' });
     }
 
-    private processIconReplacementFromQuillCore(): {[key: string]: string} {
+    private processIconReplacementFromQuillCore(): { [key: string]: string } {
         let unprocessedIcons = {};
         if (this.extraOptionsValue.custom_icons) {
             unprocessedIcons = ToolbarCustomizer.customizeIconsFromQuillRegistry(this.extraOptionsValue.custom_icons);
@@ -174,7 +172,7 @@ export default class extends Controller {
         return unprocessedIcons;
     }
 
-    private processUnprocessedIcons(unprocessedIcons: {[key: string]: string}): void {
+    private processUnprocessedIcons(unprocessedIcons: { [key: string]: string }): void {
         if (this.extraOptionsValue.custom_icons && Object.keys(unprocessedIcons).length > 0) {
             ToolbarCustomizer.customizeIcons(
                 unprocessedIcons,
@@ -184,17 +182,6 @@ export default class extends Controller {
 
         if (this.extraOptionsValue.debug === 'info' || this.extraOptionsValue.debug === 'log') {
             ToolbarCustomizer.debugToolbarButtons(this.editorContainerTarget.parentElement || undefined);
-        }
-    }
-
-    private dynamicModuleRegister(options: Options)
-    {
-        const isTablePresent = options.modules.toolbar
-            .flat(Infinity)
-            .some(item => typeof item === 'string' && item === 'table-better');
-
-        if (isTablePresent) {
-            Quill.register('modules/table-better', QuillTableBetter);
         }
     }
 }

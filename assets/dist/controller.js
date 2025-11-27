@@ -4,8 +4,6 @@ import mergeModules from "./modules.js";
 import { ToolbarCustomizer } from "./ui/toolbarCustomizer.js";
 import { handleUploadResponse, uploadStrategies } from "./upload-utils.js";
 import "./register-modules.js";
-import QuillTableBetter from 'quill-table-better';
-import 'quill-table-better/dist/quill-table-better.css';
 const Image = Quill.import('formats/image');
 const oldFormats = Image.formats;
 Image.formats = function (domNode) {
@@ -36,7 +34,6 @@ export default class extends Controller {
   }))();
   connect() {
     const options = this.buildQuillOptions();
-    this.dynamicModuleRegister(options);
     this.setupQuillStyles(options);
     this.setupUploadHandler(options);
     this.setupEditorHeight();
@@ -136,12 +133,6 @@ export default class extends Controller {
     }
     if (this.extraOptionsValue.debug === 'info' || this.extraOptionsValue.debug === 'log') {
       ToolbarCustomizer.debugToolbarButtons(this.editorContainerTarget.parentElement || undefined);
-    }
-  }
-  dynamicModuleRegister(options) {
-    const isTablePresent = options.modules.toolbar.flat(Infinity).some(item => typeof item === 'string' && item === 'table-better');
-    if (isTablePresent) {
-      Quill.register('modules/table-better', QuillTableBetter);
     }
   }
 }

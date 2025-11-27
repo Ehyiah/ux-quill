@@ -6,7 +6,7 @@ use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillInlineFieldInterface;
 
 class TableField implements QuillInlineFieldInterface
 {
-    public const NAME = 'table-better';
+    public const NAME = 'table';
 
     public function getOption(): string
     {
