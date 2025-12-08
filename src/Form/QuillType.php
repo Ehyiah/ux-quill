@@ -44,6 +44,13 @@ class QuillType extends AbstractType
 
         $extraOptions = $options['quill_extra_options'];
 
+        // Handle callable (closure) for quill_extra_options (Symfony 8 compatibility)
+        if (is_callable($extraOptions)) {
+            $extraResolver = new OptionsResolver();
+            $extraOptions($extraResolver);
+            $extraOptions = $extraResolver->resolve([]);
+        }
+
         if (isset($extraOptions['placeholder']) && $extraOptions['placeholder'] instanceof TranslatableInterface) {
             $extraOptions['placeholder'] = $extraOptions['placeholder']->trans($this->translator);
         }
@@ -51,7 +58,7 @@ class QuillType extends AbstractType
         $view->vars['attr']['quill_extra_options'] = json_encode($extraOptions);
         $view->vars['attr']['quill_modules_options'] = json_encode($modules);
 
-        $assets = $this->getBuiltInAssets($fields, $modules, $options);
+        $assets = $this->getBuiltInAssets($fields, $modules, $extraOptions);
         $view->vars['quill_assets'] = $assets;
     }
 
@@ -62,15 +69,15 @@ class QuillType extends AbstractType
             'error_bubbling' => true,
             'quill_options' => [['bold', 'italic']],
             'modules' => [],
-            'quill_extra_options' => function (OptionsResolver $resolver) {
-                $resolver
+            'quill_extra_options' => function (OptionsResolver $extraResolver) {
+                $extraResolver
                     ->setDefault('upload_handler', function (OptionsResolver $spoolResolver): void {
                         $spoolResolver->setDefaults([
                             'type' => 'form',
                             'upload_endpoint' => null,
                             'json_response_file_path' => null,
-                            'security' => function (OptionsResolver $resolver) {
-                                $resolver->setDefaults([
+                            'security' => function (OptionsResolver $securityResolver) {
+                                $securityResolver->setDefaults([
                                     'type' => null,
                                     'jwt_token' => null,
                                     'username' => null,
@@ -78,13 +85,13 @@ class QuillType extends AbstractType
                                     'custom_header' => null,
                                     'custom_header_value' => null,
                                 ]);
-                                $resolver->setAllowedTypes('type', ['string']);
-                                $resolver->setAllowedValues('type', ['basic', 'jwt']);
-                                $resolver->setAllowedTypes('jwt_token', ['string', 'null']);
-                                $resolver->setAllowedTypes('username', ['string', 'null']);
-                                $resolver->setAllowedTypes('password', ['string', 'null']);
-                                $resolver->setAllowedTypes('custom_header', ['string', 'null']);
-                                $resolver->setAllowedTypes('custom_header_value', ['string', 'null']);
+                                $securityResolver->setAllowedTypes('type', ['string']);
+                                $securityResolver->setAllowedValues('type', ['basic', 'jwt']);
+                                $securityResolver->setAllowedTypes('jwt_token', ['string', 'null']);
+                                $securityResolver->setAllowedTypes('username', ['string', 'null']);
+                                $securityResolver->setAllowedTypes('password', ['string', 'null']);
+                                $securityResolver->setAllowedTypes('custom_header', ['string', 'null']);
+                                $securityResolver->setAllowedTypes('custom_header_value', ['string', 'null']);
                             },
                         ]);
                         $spoolResolver->setAllowedTypes('type', ['string', 'null']);
@@ -95,12 +102,12 @@ class QuillType extends AbstractType
                         $spoolResolver->setDefault('security', null);
                     })
                 ;
-                $resolver
+                $extraResolver
                     ->setDefault('debug', DebugOption::DEBUG_OPTION_ERROR)
                     ->setAllowedTypes('debug', 'string')
                     ->setAllowedValues('debug', [DebugOption::DEBUG_OPTION_ERROR, DebugOption::DEBUG_OPTION_WARNING, DebugOption::DEBUG_OPTION_LOG, DebugOption::DEBUG_OPTION_INFO])
                 ;
-                $resolver
+                $extraResolver
                     ->setDefault('height', '200px')
                     ->setAllowedTypes('height', ['string', 'null'])
                     ->setAllowedValues('height', function (?string $value) {
@@ -111,37 +118,37 @@ class QuillType extends AbstractType
                         return preg_match('/(\d+)(px$|em$|ex$|%$)/', $value);
                     })
                 ;
-                $resolver
+                $extraResolver
                     ->setDefault('theme', 'snow')
                     ->setAllowedTypes('theme', 'string')
                     ->setAllowedValues('theme', [ThemeOption::QUILL_THEME_SNOW, ThemeOption::QUILL_THEME_BUBBLE])
                 ;
-                $resolver
+                $extraResolver
                     ->setDefault('placeholder', 'Quill editor')
                     ->setAllowedTypes('placeholder', ['string', TranslatableMessage::class, TranslatableInterface::class])
                 ;
-                $resolver
+                $extraResolver
                     ->setDefault('style', StyleOption::QUILL_STYLE_CLASS)
                     ->setAllowedTypes('style', 'string')
                     ->setAllowedValues('style', [StyleOption::QUILL_STYLE_INLINE, StyleOption::QUILL_STYLE_CLASS])
                 ;
-                $resolver
+                $extraResolver
                     ->setDefault('modules', [])
                     ->setAllowedTypes('modules', ['array'])
                 ;
-                $resolver
+                $extraResolver
                     ->setDefault('use_semantic_html', false)
                     ->setAllowedTypes('use_semantic_html', 'bool')
                     ->setAllowedValues('use_semantic_html', [true, false])
                 ;
-                $resolver
+                $extraResolver
                     ->setDefault('custom_icons', [])
                 ;
-                $resolver
+                $extraResolver
                     ->setDefault('read_only', false)
                     ->setAllowedTypes('read_only', 'bool')
                 ;
-                $resolver
+                $extraResolver
                     ->setDefault('assets', [])
                     ->setAllowedTypes('assets', ['array'])
                 ;
@@ -149,6 +156,7 @@ class QuillType extends AbstractType
         ]);
 
         $resolver->setAllowedTypes('quill_options', ['array']);
+        $resolver->setAllowedTypes('quill_extra_options', ['array', 'callable']);
         $resolver->setAllowedTypes('modules', ['array']);
         $resolver->setAllowedValues('modules', function (array $values) {
             foreach ($values as $value) {
@@ -238,11 +246,11 @@ class QuillType extends AbstractType
     /**
      * @param array<mixed> $fields
      * @param array<mixed> $modules
-     * @param array<mixed> $options
+     * @param array<mixed> $extraOptions
      *
      * @return array<mixed>
      */
-    private function getBuiltInAssets(array $fields, array $modules, array $options): array
+    private function getBuiltInAssets(array $fields, array $modules, array $extraOptions): array
     {
         $assets['styleSheets'] = [];
         $assets['scripts'] = [];
@@ -271,8 +279,8 @@ class QuillType extends AbstractType
             }
         }
 
-        if (isset($options['quill_extra_options']['assets']) && count($options['quill_extra_options']['assets']) > 0) {
-            $assets = $this->getCustomAssets($options['quill_extra_options']['assets'], $assets);
+        if (isset($extraOptions['assets']) && count($extraOptions['assets']) > 0) {
+            $assets = $this->getCustomAssets($extraOptions['assets'], $assets);
         }
 
         return $assets;
