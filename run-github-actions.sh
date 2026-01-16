@@ -50,19 +50,19 @@ case $choice in
         ;;
     2)
         echo -e "\n${GREEN}Exécution du job 'quality'...${NC}"
-        docker compose exec github-actions bash -c 'act pull_request -j quality --bind -s GITHUB_TOKEN="$GITHUB_TOKEN"'
+        docker compose exec github-actions bash -c 'act pull_request -j quality --bind --use-gitignore=false --container-options "--memory=4g" -s GITHUB_TOKEN="$GITHUB_TOKEN"'
         ;;
     3)
         echo -e "\n${GREEN}Exécution du job 'security'...${NC}"
-        docker compose exec github-actions bash -c 'act pull_request -j security --bind -s GITHUB_TOKEN="$GITHUB_TOKEN"'
+        docker compose exec github-actions bash -c 'act pull_request -j security --bind --use-gitignore=false --container-options "--memory=4g" -s GITHUB_TOKEN="$GITHUB_TOKEN"'
         ;;
     4)
         echo -e "\n${GREEN}Exécution du workflow 'test-bundle-install'...${NC}"
-        docker compose exec github-actions bash -c 'act pull_request -j test_bundle_install --bind -s GITHUB_TOKEN="$GITHUB_TOKEN"'
+        docker compose exec github-actions bash -c 'act pull_request -j test_bundle_install --bind --use-gitignore=false --container-options "--memory=4g" -s GITHUB_TOKEN="$GITHUB_TOKEN"'
         ;;
     5)
         echo -e "\n${GREEN}Exécution de tous les workflows pull_request...${NC}"
-        docker compose exec github-actions bash -c 'act pull_request --bind -s GITHUB_TOKEN="$GITHUB_TOKEN"'
+        docker compose exec github-actions bash -c 'act pull_request --bind --use-gitignore=false --container-options "--memory=4g" -s GITHUB_TOKEN="$GITHUB_TOKEN"'
         ;;
     6)
         echo -e "\n${BLUE}Choisissez le job à exécuter en mode verbose:${NC}"
@@ -75,19 +75,19 @@ case $choice in
         case $verbose_choice in
             a)
                 echo -e "\n${GREEN}Exécution du job 'quality' (verbose)...${NC}"
-                docker compose exec github-actions bash -c 'act pull_request -j quality --bind -s GITHUB_TOKEN="$GITHUB_TOKEN" --verbose'
+                docker compose exec github-actions bash -c 'act pull_request -j quality --bind --use-gitignore=false --container-options "--memory=4g" -s GITHUB_TOKEN="$GITHUB_TOKEN" --verbose'
                 ;;
             b)
                 echo -e "\n${GREEN}Exécution du job 'security' (verbose)...${NC}"
-                docker compose exec github-actions bash -c 'act pull_request -j security --bind -s GITHUB_TOKEN="$GITHUB_TOKEN" --verbose'
+                docker compose exec github-actions bash -c 'act pull_request -j security --bind --use-gitignore=false --container-options "--memory=4g" -s GITHUB_TOKEN="$GITHUB_TOKEN" --verbose'
                 ;;
             c)
                 echo -e "\n${GREEN}Exécution du job 'test_bundle_install' (verbose)...${NC}"
-                docker compose exec github-actions bash -c 'act pull_request -j test_bundle_install --bind -s GITHUB_TOKEN="$GITHUB_TOKEN" --verbose'
+                docker compose exec github-actions bash -c 'act pull_request -j test_bundle_install --bind --use-gitignore=false --container-options "--memory=4g" -s GITHUB_TOKEN="$GITHUB_TOKEN" --verbose'
                 ;;
             d)
                 echo -e "\n${GREEN}Exécution de tous les workflows (verbose)...${NC}"
-                docker compose exec github-actions bash -c 'act pull_request --bind -s GITHUB_TOKEN="$GITHUB_TOKEN" --verbose'
+                docker compose exec github-actions bash -c 'act pull_request --bind --use-gitignore=false --container-options "--memory=4g" -s GITHUB_TOKEN="$GITHUB_TOKEN" --verbose'
                 ;;
             *)
                 echo -e "${YELLOW}Choix invalide!${NC}"

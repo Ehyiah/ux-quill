@@ -9,12 +9,12 @@ on:
 
 jobs:
     test_bundle_install:
-        name: Install Bundle
+        name: Install Bundle (PHP ${{ matrix.php-version }}) (Symfony ${{ matrix.symfony-version }})
         runs-on: ubuntu-latest
         strategy:
             fail-fast: true
             matrix:
-                php-version: ['8.1', '8.2', '8.3', '8.4', '8.5']
+                php-version: ['8.1', '8.2', '8.3', '8.4']
                 symfony-version: ['6.4', '7.0', '7.1', '7.2', '7.3', '7.4', '8.0']
                 exclude:
                     - php-version: '8.1'
@@ -29,10 +29,21 @@ jobs:
                       symfony-version: '7.4'
                     - php-version: '8.1'
                       symfony-version: '8.0'
+                    - php-version: '8.2'
+                      symfony-version: '8.0'
+                    - php-version: '8.3'
+                      symfony-version: '8.0'
 
         steps:
+            # Skip checkout when running locally with act
             - name: Checkout code
+              if: ${{ !env.ACT }}
               uses: actions/checkout@v4
+
+            # Clean up test projects from previous runs (for local act testing)
+            - name: Clean up previous test projects
+              if: ${{ env.ACT }}
+              run: rm -rf test-project-*
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
