@@ -37,3 +37,4 @@ export class SmartLinks {
     quill.insertText(startIndex, link, 'link', link);
   }
 }
+//# sourceMappingURL=smartLinks.js.map

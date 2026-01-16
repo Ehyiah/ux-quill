@@ -164,3 +164,4 @@ export default class GalleryModule {
     document.head.appendChild(style);
   }
 }
+//# sourceMappingURL=gallery-module.js.map

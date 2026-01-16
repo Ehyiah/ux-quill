@@ -85,3 +85,4 @@ export class ToolbarCustomizer {
     }, 100);
   }
 }
+//# sourceMappingURL=toolbarCustomizer.js.map

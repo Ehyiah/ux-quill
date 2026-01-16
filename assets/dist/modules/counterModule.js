@@ -51,3 +51,4 @@ export class Counter {
     return text.length;
   }
 }
+//# sourceMappingURL=counterModule.js.map

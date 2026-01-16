@@ -199,3 +199,4 @@ export default class GalleryModal {
     document.head.appendChild(style);
   }
 }
+//# sourceMappingURL=gallery-modal.js.map
