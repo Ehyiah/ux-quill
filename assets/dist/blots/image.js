@@ -31,4 +31,3 @@ Quill.register({
   'formats/imageBlot': LoadingImage
 });
 export default LoadingImage;
-//# sourceMappingURL=image.js.map

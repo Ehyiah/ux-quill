@@ -1,0 +1,186 @@
+/* ============================================
+   Gallery Module Styles
+   ============================================ */
+
+/* Modal container */
+.quill-media-modal {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px);
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 9999;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+/* Modal window */
+.quill-media-window {
+    background: #fff;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 900px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    animation: popIn 0.25s ease-out;
+}
+
+/* Modal header */
+.quill-media-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: #f7f7f9;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.quill-media-header h3 {
+    font-size: 1.1rem;
+    margin: 0;
+    font-weight: 600;
+    color: #333;
+}
+
+/* Media grid */
+.quill-media-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+    padding: 1rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+/* Modal footer */
+.quill-media-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background: #f7f7f9;
+    border-top: 1px solid #e0e0e0;
+}
+
+/* ============================================
+   Media Items
+   ============================================ */
+
+/* Media items */
+.quill-media-item {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.quill-media-item:hover {
+    transform: scale(1.04);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+    border: 2px solid #0d6efd;
+}
+
+/* Fade-in effect for images */
+.quill-media-item.fade-in {
+    opacity: 0;
+    animation: fadeInImage 0.4s ease forwards;
+}
+
+/* ============================================
+   Buttons
+   ============================================ */
+
+/* Close button */
+.quill-media-header .close-btn {
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #555;
+    transition: all 0.2s ease;
+}
+
+.quill-media-header .close-btn:hover {
+    background: #eee;
+    color: #000;
+    transform: rotate(90deg);
+}
+
+.quill-media-header .close-btn svg {
+    pointer-events: none;
+}
+
+/* Upload button */
+.upload-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0d6efd;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.upload-btn:hover {
+    background: #0b5ed7;
+    transform: scale(1.05);
+}
+
+.upload-btn input[type="file"] {
+    display: none;
+}
+
+/* Pagination buttons */
+.quill-media-footer button {
+    background: #0d6efd;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.2s ease;
+}
+
+.quill-media-footer button:hover:not(:disabled) {
+    background: #0b5ed7;
+}
+
+.quill-media-footer button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ============================================
+   Animations
+   ============================================ */
+
+/* Modal animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes popIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* Image fade-in animation */
+@keyframes fadeInImage {
+    from { opacity: 0; transform: scale(0.97); }
+    to { opacity: 1; transform: scale(1); }
+}

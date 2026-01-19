@@ -16,4 +16,3 @@ import htmlEditButton from 'quill-html-edit-button';
 Quill.register('modules/htmlEditButton', htmlEditButton.default || htmlEditButton);
 import GalleryModule from "./modules/gallery/gallery-module.js";
 Quill.register('modules/mediaGallery', GalleryModule.default || GalleryModule);
-//# sourceMappingURL=register-modules.js.map

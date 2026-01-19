@@ -77,7 +77,6 @@ export default class GalleryModal {
         fileInput.value = '';
       }
     });
-    this.injectCss();
   }
   async loadImages(url) {
     if (url === void 0) {
@@ -128,75 +127,4 @@ export default class GalleryModal {
     prev.disabled = !this.prevUrl;
     next.disabled = !this.nextUrl;
   }
-  injectCss() {
-    if (document.getElementById('quill-gallery-modal-styles')) return;
-    const style = document.createElement('style');
-    style.id = 'quill-gallery-modal-styles';
-    style.textContent = `
-      /* Fade-in images */
-      .quill-media-item.fade-in {
-        opacity: 0;
-        animation: fadeInImage 0.4s ease forwards;
-      }
-      @keyframes fadeInImage {
-        from { opacity: 0; transform: scale(0.97); }
-        to { opacity: 1; transform: scale(1); }
-      }
-
-      /* Close button */
-      .quill-media-header .close-btn {
-        background: transparent;
-        border: none;
-        border-radius: 50%;
-        width: 32px;
-        height: 32px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #555;
-        transition: all 0.2s ease;
-      }
-      .quill-media-header .close-btn:hover {
-        background: #eee;
-        color: #000;
-        transform: rotate(90deg);
-      }
-      .quill-media-header .close-btn svg {
-        pointer-events: none;
-      }
-
-      /* Footer layout */
-      .quill-media-footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.75rem 1rem;
-        background: #f7f7f9;
-        border-top: 1px solid #e0e0e0;
-      }
-
-      /* Upload button */
-      .upload-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #0d6efd;
-        color: white;
-        padding: 0.5rem 1rem;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 0.9rem;
-        transition: background 0.2s ease, transform 0.2s ease;
-      }
-      .upload-btn:hover {
-        background: #0b5ed7;
-        transform: scale(1.05);
-      }
-      .upload-btn input[type="file"] {
-        display: none;
-      }
-    `;
-    document.head.appendChild(style);
-  }
 }
-//# sourceMappingURL=gallery-modal.js.map

@@ -1,4 +1,5 @@
 import GalleryModal from "./gallery-modal.js";
+import "../../styles/gallery/gallery.css";
 export default class GalleryModule {
   quill;
   options;
@@ -17,7 +18,6 @@ export default class GalleryModule {
       messageErrorOption: options.messageErrorOption || '',
       messageNoImageOption: options.messageNoImageOption || ''
     };
-    this.injectCss();
     this.modal = new GalleryModal(this);
     this.addToolbarButton();
   }
@@ -53,115 +53,4 @@ export default class GalleryModule {
     if (!response.ok) throw new Error(`Erreur while loading : ${response.statusText}`);
     return response.json();
   }
-  injectCss() {
-    if (document.getElementById('quill-gallery-styles')) return;
-    const style = document.createElement('style');
-    style.id = 'quill-gallery-styles';
-    style.textContent = `
-      .quill-media-modal {
-        position: fixed;
-        inset: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        backdrop-filter: blur(5px);
-        background-color: rgba(0, 0, 0, 0.4);
-        z-index: 9999;
-        animation: fadeIn 0.2s ease-in-out;
-      }
-
-      .quill-media-window {
-        background: #fff;
-        border-radius: 12px;
-        width: 90%;
-        max-width: 900px;
-        max-height: 90vh;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-        animation: popIn 0.25s ease-out;
-      }
-
-      .quill-media-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1rem;
-        background: #f7f7f9;
-        border-bottom: 1px solid #e0e0e0;
-      }
-
-      .quill-media-header h3 {
-        font-size: 1.1rem;
-        margin: 0;
-        font-weight: 600;
-        color: #333;
-      }
-
-      .quill-media-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: 10px;
-        padding: 1rem;
-        overflow-y: auto;
-        flex: 1;
-      }
-
-      .quill-media-item {
-        width: 100%;
-        aspect-ratio: 1;
-        object-fit: cover;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-      }
-
-      .quill-media-item:hover {
-        transform: scale(1.04);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
-        border: 2px solid #0d6efd;
-      }
-
-      .quill-media-footer {
-        display: flex;
-        justify-content: space-between;
-        padding: 0.75rem 1rem;
-        background: #f7f7f9;
-        border-top: 1px solid #e0e0e0;
-      }
-
-      .quill-media-footer button {
-        background: #0d6efd;
-        color: white;
-        border: none;
-        padding: 0.5rem 1rem;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 0.9rem;
-        transition: background 0.2s ease;
-      }
-
-      .quill-media-footer button:hover:not(:disabled) {
-        background: #0b5ed7;
-      }
-
-      .quill-media-footer button:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-
-      @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-      }
-
-      @keyframes popIn {
-        from { transform: scale(0.95); opacity: 0; }
-        to { transform: scale(1); opacity: 1; }
-      }
-    `;
-    document.head.appendChild(style);
-  }
 }
-//# sourceMappingURL=gallery-module.js.map

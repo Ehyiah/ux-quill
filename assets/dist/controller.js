@@ -145,4 +145,3 @@ export default class extends Controller {
     }
   }
 }
-//# sourceMappingURL=controller.js.map

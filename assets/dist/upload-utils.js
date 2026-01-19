@@ -105,4 +105,3 @@ export function handleUploadResponse(response, jsonResponseFilePath) {
     }
   });
 }
-//# sourceMappingURL=upload-utils.js.map
