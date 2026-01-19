@@ -180,7 +180,6 @@ You can add as many Groups as you like or just One if you don't need the WYSIWYG
 | TableField | add a table field  |                                         -                                          |                |
 
 
-
 ## quill_extra_options
 |   extra_option_name   |  type  | details                                                                                                                                  |
 |:---------------------:|:------:|:-----------------------------------------------------------------------------------------------------------------------------------------|
@@ -311,6 +310,7 @@ in the exemple below ``json_path_file_response`` must be ``'file.url'``.
     return new JsonResponse('https://my-website/public/assets/my-uploaded-image.jpg');
 ```
 
+---
 
 ## Modules
 ### PHP configurable modules
@@ -350,7 +350,7 @@ Example of how to use modules:
 ### Media gallery module details
 Here is the list of options for the media gallery module : 
 
-- listEndpoint : the endpoint to get the list of images from
+- **listEndpoint** : the endpoint to get the list of images from
 The response from your endpoint must be like this : 
 ```json
 {
@@ -368,10 +368,12 @@ The response from your endpoint must be like this :
 }
 ```
 
-- uploadEndpoint : the endpoint to upload an image
-This module is using the built-in upload [configuration](#upload-mode-configuration-) and [upload security](#upload-endpoint-security)
+- **uploadEndpoint** : the endpoint to upload an image
+This module is using the built-in configurations upload :
+[configuration](#upload-mode-configuration-) and 
+[upload security](#upload-endpoint-security)
 
-- icon : the icon to use in the toolbar
+- **icon** : the icon to use in the toolbar
 pass a svg icon like others icons customization.
 
 ### Other modules that need custom JavaScript
@@ -394,6 +396,8 @@ exemple :
         ]
     ],
 ```
+
+---
 
 # Extend Quill stimulus controller
 If you need to extend the default behavior of the built-in controller, this is possible.
@@ -468,6 +472,7 @@ some events are dispatched:
     }
     ```
 
+---
 
 # Easyadmin Integration
 Integration will depend on how you handle assets in your project, AssetMapper or Webpack.
