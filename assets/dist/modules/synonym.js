@@ -1,3 +1,92 @@
+// Provider implementations
+const PROVIDERS = {
+  conceptnet: {
+    name: 'conceptnet',
+    buildUrl(lang, term) {
+      return `https://api.conceptnet.io/query?node=/c/${lang}/${encodeURIComponent(term)}&rel=/r/Synonym`;
+    },
+    parseResponse(data, lang, term) {
+      const synonyms = new Set();
+      if (Array.isArray(data.edges)) {
+        data.edges.forEach(edge => {
+          [edge.start, edge.end].forEach(node => {
+            if (node.language === lang && node.label.toLowerCase() !== term) {
+              synonyms.add(node.label);
+            }
+          });
+        });
+      }
+      return [...synonyms];
+    }
+  },
+  datamuse: {
+    name: 'datamuse',
+    buildUrl(lang, term) {
+      // Datamuse primarily supports English
+      return `https://api.datamuse.com/words?rel_syn=${encodeURIComponent(term)}&max=20`;
+    },
+    parseResponse(data, lang, term) {
+      if (Array.isArray(data)) {
+        return data.map(item => item.word).filter(word => word.toLowerCase() !== term);
+      }
+      return [];
+    }
+  },
+  freedictionary: {
+    name: 'freedictionary',
+    buildUrl(lang, term) {
+      // Free Dictionary API supports multiple languages
+      return `https://api.dictionaryapi.dev/api/v2/entries/${lang}/${encodeURIComponent(term)}`;
+    },
+    parseResponse(data, lang, term) {
+      const synonyms = new Set();
+      if (Array.isArray(data)) {
+        data.forEach(entry => {
+          if (Array.isArray(entry.meanings)) {
+            entry.meanings.forEach(meaning => {
+              if (Array.isArray(meaning.synonyms)) {
+                meaning.synonyms.forEach(synonym => {
+                  if (synonym.toLowerCase() !== term) {
+                    synonyms.add(synonym);
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+      return [...synonyms];
+    }
+  },
+  wordsapi: {
+    name: 'wordsapi',
+    requiresApiKey: true,
+    buildUrl(lang, term, apiKey) {
+      // Words API via RapidAPI - primarily English
+      return `https://wordsapiv1.p.rapidapi.com/words/${encodeURIComponent(term)}/synonyms`;
+    },
+    parseResponse(data, lang, term) {
+      const synonyms = [];
+      if (Array.isArray(data.synonyms)) {
+        return data.synonyms.filter(synonym => synonym.toLowerCase() !== term);
+      }
+      return synonyms;
+    }
+  },
+  babelnet: {
+    name: 'babelnet',
+    requiresApiKey: true,
+    buildUrl(lang, term, apiKey) {
+      // BabelNet API - Step 1: Get synset IDs
+      return `https://babelnet.io/v9/getSynsetIds?lemma=${encodeURIComponent(term)}&searchLang=${lang.toUpperCase()}&key=${apiKey}`;
+    },
+    parseResponse(data, lang, term) {
+      // This will be handled specially in fetchSynonyms for BabelNet
+      // because it requires two API calls
+      return [];
+    }
+  }
+};
 class SynonymModule {
   quill;
   lang;
@@ -10,6 +99,10 @@ class SynonymModule {
   cache;
   currentSearchController;
   outsideClickListener;
+  providers;
+  wordsApiKey;
+  babelnetApiKey;
+  debug;
   constructor(quill, options) {
     if (options === void 0) {
       options = {};
@@ -25,6 +118,36 @@ class SynonymModule {
     this.cache = new Map();
     this.currentSearchController = null;
     this.outsideClickListener = null;
+    this.wordsApiKey = options.wordsApiKey;
+    this.babelnetApiKey = options.babelnetApiKey;
+    this.debug = options.debug || false;
+
+    // Initialize providers based on options
+    const providerNames = options.providers || ['conceptnet', 'freedictionary', 'datamuse'];
+    this.providers = providerNames.filter(name => PROVIDERS[name]).map(name => PROVIDERS[name]).filter(provider => {
+      // Filter out providers that require API key if no key is provided
+      if (provider.requiresApiKey) {
+        // Check specific API keys for specific providers
+        if (provider.name === 'babelnet' && !this.babelnetApiKey) {
+          console.warn(`Provider "${provider.name}" requires a BabelNet API key but none was provided. Skipping.`);
+          return false;
+        }
+        if (provider.name === 'wordsapi' && !this.wordsApiKey) {
+          console.warn(`Provider "${provider.name}" requires a WordsAPI key but none was provided. Skipping.`);
+          return false;
+        }
+      }
+      return true;
+    });
+    if (this.debug) {
+      console.log('[SynonymModule] Initialized with options:', {
+        lang: this.lang,
+        providers: this.providers.map(p => p.name),
+        debug: this.debug,
+        hasWordsApiKey: !!this.wordsApiKey,
+        hasBabelNetApiKey: !!this.babelnetApiKey
+      });
+    }
     setTimeout(() => this.addToolbarButton(), 100);
   }
   addToolbarButton() {
@@ -329,7 +452,14 @@ class SynonymModule {
     const normalized = term.toLowerCase();
     const cacheKey = `${this.lang}:${normalized}`;
     if (this.cache.has(cacheKey)) {
+      if (this.debug) {
+        console.log(`[SynonymModule] Cache hit for "${normalized}":`, this.cache.get(cacheKey));
+      }
       return this.cache.get(cacheKey);
+    }
+    if (this.debug) {
+      console.log(`[SynonymModule] Fetching synonyms for "${normalized}" (lang: ${this.lang})`);
+      console.log(`[SynonymModule] Providers to try:`, this.providers.map(p => p.name));
     }
     let signal;
     if (options.cancellable) {
@@ -339,35 +469,192 @@ class SynonymModule {
       this.currentSearchController = new AbortController();
       signal = this.currentSearchController.signal;
     }
-    const url = `https://api.conceptnet.io/query?node=/c/${this.lang}/${encodeURIComponent(normalized)}&rel=/r/Synonym&limit=20`;
-    try {
-      const res = await fetch(url, {
-        signal
-      });
-      const data = await res.json();
-      const synonyms = new Set();
-      if (Array.isArray(data.edges)) {
-        data.edges.forEach(edge => {
-          [edge.start, edge.end].forEach(node => {
-            if (node.language === this.lang && node.label.toLowerCase() !== normalized) {
-              synonyms.add(node.label);
-            }
+    let lastError = null;
+
+    // Try each configured provider in order
+    for (const provider of this.providers) {
+      try {
+        // Get the appropriate API key for this provider
+        let apiKeyToUse;
+        if (provider.name === 'babelnet') {
+          apiKeyToUse = this.babelnetApiKey;
+        } else if (provider.name === 'wordsapi') {
+          apiKeyToUse = this.wordsApiKey;
+        }
+        const url = provider.buildUrl(this.lang, normalized, apiKeyToUse);
+        if (this.debug) {
+          console.log(`[SynonymModule] Trying provider "${provider.name}"...`);
+          console.log(`[SynonymModule] Request URL:`, url);
+        }
+
+        // Build fetch options
+        const fetchOptions = {
+          signal
+        };
+
+        // Add headers for providers that require API key
+        if (provider.name === 'wordsapi' && this.wordsApiKey) {
+          fetchOptions.headers = {
+            'X-RapidAPI-Key': this.wordsApiKey,
+            'X-RapidAPI-Host': 'wordsapiv1.p.rapidapi.com'
+          };
+          if (this.debug) {
+            console.log(`[SynonymModule] Using WordsAPI key for "${provider.name}"`);
+          }
+        }
+        // BabelNet passes the key in the URL, no need for headers
+
+        const startTime = Date.now();
+        const res = await fetch(url, fetchOptions);
+        const responseTime = Date.now() - startTime;
+        if (this.debug) {
+          console.log(`[SynonymModule] Response from "${provider.name}":`, {
+            status: res.status,
+            statusText: res.statusText,
+            responseTime: `${responseTime}ms`
           });
-        });
-      }
-      const result = [...synonyms];
-      this.cache.set(cacheKey, result);
-      return result;
-    } catch (e) {
-      if (options.silent || e && e.name === 'AbortError') {
-        return [];
-      }
-      throw e;
-    } finally {
-      if (options.cancellable) {
-        this.currentSearchController = null;
+        }
+        const data = await res.json();
+        if (this.debug) {
+          console.log(`[SynonymModule] Response data from "${provider.name}":`, data);
+        }
+        let synonyms = [];
+
+        // Special handling for BabelNet (requires 2 API calls)
+        if (provider.name === 'babelnet') {
+          const synsetIds = [];
+
+          // Extract synset IDs from first response
+          if (Array.isArray(data)) {
+            data.forEach(item => {
+              if (item.id) {
+                synsetIds.push(item.id);
+              }
+            });
+          }
+          if (this.debug) {
+            console.log(`[SynonymModule] BabelNet synset IDs:`, synsetIds);
+          }
+
+          // Fetch details for each synset ID (limit to first 3 to avoid too many requests)
+          const synonymsSet = new Set();
+          const maxSynsets = Math.min(synsetIds.length, 3);
+          for (let i = 0; i < maxSynsets; i++) {
+            const synsetId = synsetIds[i];
+            try {
+              const synsetUrl = `https://babelnet.io/v9/getSynset?id=${synsetId}&targetLang=${this.lang.toUpperCase()}&key=${this.babelnetApiKey}`;
+              if (this.debug) {
+                console.log(`[SynonymModule] Fetching BabelNet synset ${i + 1}/${maxSynsets}:`, synsetUrl);
+              }
+              const synsetRes = await fetch(synsetUrl, {
+                signal
+              });
+              const synsetData = await synsetRes.json();
+              if (this.debug) {
+                console.log(`[SynonymModule] BabelNet synset data:`, synsetData);
+              }
+
+              // Extract synonyms from senses
+              if (Array.isArray(synsetData.senses)) {
+                if (this.debug && synsetData.senses.length > 0) {
+                  console.log(`[SynonymModule] BabelNet sense structure (first sense):`, synsetData.senses[0]);
+                  // Log all lemmas in this synset
+                  const allLemmas = synsetData.senses.map(s => s.properties?.simpleLemma || 'N/A');
+                  console.log(`[SynonymModule] All lemmas in synset:`, allLemmas);
+                }
+                synsetData.senses.forEach(sense => {
+                  // Try multiple possible structures
+                  let lemma = null;
+                  let senseLang = null;
+
+                  // Structure 1: sense.properties.simpleLemma
+                  if (sense.properties) {
+                    lemma = sense.properties.simpleLemma || sense.properties.fullLemma || sense.properties.lemma;
+                    senseLang = sense.properties.language;
+                  }
+                  // Structure 2: sense.lemma directly
+                  else if (sense.lemma) {
+                    lemma = sense.lemma.lemma || sense.lemma.simpleLemma || sense.lemma;
+                    senseLang = sense.lemma.language || sense.language;
+                  }
+                  // Structure 3: direct properties on sense
+                  else {
+                    lemma = sense.simpleLemma || sense.fullLemma || sense.lemma;
+                    senseLang = sense.language;
+                  }
+
+                  // Add the lemma if it matches the target language and is not the search term
+                  if (lemma && lemma.toLowerCase() !== normalized) {
+                    // Strict language filter: only accept if language matches exactly
+                    const langMatches = senseLang === this.lang.toUpperCase();
+
+                    // Filter out Wikipedia-style entries (entries with parentheses like "Bonjour_(album)")
+                    const isNotWikipedia = !lemma.includes('(');
+                    if (langMatches && isNotWikipedia) {
+                      // Replace underscores with spaces for multi-word expressions
+                      const cleanedLemma = lemma.replace(/_/g, ' ');
+                      synonymsSet.add(cleanedLemma);
+                    }
+                  }
+                });
+              }
+            } catch (synsetError) {
+              if (this.debug) {
+                console.error(`[SynonymModule] Error fetching BabelNet synset ${synsetId}:`, synsetError);
+              }
+            }
+          }
+          synonyms = [...synonymsSet];
+        } else {
+          // Standard processing for other providers
+          synonyms = provider.parseResponse(data, this.lang, normalized);
+        }
+        if (this.debug) {
+          console.log(`[SynonymModule] Parsed synonyms from "${provider.name}":`, synonyms);
+        }
+        if (synonyms.length > 0) {
+          this.cache.set(cacheKey, synonyms);
+          if (this.debug) {
+            console.log(`[SynonymModule] ✓ Success with "${provider.name}" - Found ${synonyms.length} synonyms`);
+          }
+          return synonyms;
+        } else {
+          if (this.debug) {
+            console.log(`[SynonymModule] ✗ No synonyms found with "${provider.name}", trying next provider...`);
+          }
+        }
+      } catch (e) {
+        lastError = e;
+        if (this.debug) {
+          console.error(`[SynonymModule] ✗ Error with provider "${provider.name}":`, e);
+        }
+        // If it's an abort, don't continue to fallback
+        if (e && e.name === 'AbortError') {
+          if (this.debug) {
+            console.log(`[SynonymModule] Request aborted`);
+          }
+          if (options.silent) {
+            return [];
+          }
+          throw e;
+        }
+        // Otherwise continue to next provider (fallback)
+        continue;
+      } finally {
+        if (options.cancellable) {
+          this.currentSearchController = null;
+        }
       }
     }
+
+    // If all providers failed
+    if (this.debug) {
+      console.error(`[SynonymModule] ✗ All providers failed for "${normalized}"`);
+    }
+    if (options.silent) {
+      return [];
+    }
+    throw lastError || new Error('All synonym providers failed');
   }
   replaceText(range, val, preserveFormats) {
     if (preserveFormats === void 0) {
