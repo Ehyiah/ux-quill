@@ -6,9 +6,9 @@ interface SynonymModuleOptions {
     headerText?: string;
     noSynonymText?: string;
     providers?: ProviderName[];
-    wordsApiKey?: string; // API key for WordsAPI via RapidAPI
-    babelnetApiKey?: string; // API key for BabelNet (free tier: 1000 requests/day)
-    debug?: boolean; // Enable debug mode to log API calls and responses to console
+    wordsApiKey?: string;
+    babelnetApiKey?: string;
+    debug?: boolean;
 }
 
 interface SynonymProvider {
@@ -36,7 +36,6 @@ interface QuillLike {
     getFormat(index: number, length: number): any;
 }
 
-// Provider implementations
 const PROVIDERS: Record<ProviderName, SynonymProvider> = {
     conceptnet: {
         name: 'conceptnet',
@@ -60,7 +59,6 @@ const PROVIDERS: Record<ProviderName, SynonymProvider> = {
     datamuse: {
         name: 'datamuse',
         buildUrl(lang: string, term: string): string {
-            // Datamuse primarily supports English
             return `https://api.datamuse.com/words?rel_syn=${encodeURIComponent(term)}&max=20`;
         },
         parseResponse(data: any, lang: string, term: string): string[] {
@@ -73,7 +71,6 @@ const PROVIDERS: Record<ProviderName, SynonymProvider> = {
     freedictionary: {
         name: 'freedictionary',
         buildUrl(lang: string, term: string): string {
-            // Free Dictionary API supports multiple languages
             return `https://api.dictionaryapi.dev/api/v2/entries/${lang}/${encodeURIComponent(term)}`;
         },
         parseResponse(data: any, lang: string, term: string): string[] {
@@ -99,11 +96,10 @@ const PROVIDERS: Record<ProviderName, SynonymProvider> = {
     wordsapi: {
         name: 'wordsapi',
         requiresApiKey: true,
-        buildUrl(lang: string, term: string, apiKey?: string): string {
-            // Words API via RapidAPI - primarily English
+        buildUrl(lang: string, term: string, _apiKey?: string): string {
             return `https://wordsapiv1.p.rapidapi.com/words/${encodeURIComponent(term)}/synonyms`;
         },
-        parseResponse(data: any, lang: string, term: string): string[] {
+        parseResponse(data: any, _lang: string, term: string): string[] {
             const synonyms: string[] = [];
             if (Array.isArray(data.synonyms)) {
                 return data.synonyms.filter((synonym: string) => synonym.toLowerCase() !== term);
@@ -118,7 +114,7 @@ const PROVIDERS: Record<ProviderName, SynonymProvider> = {
             // BabelNet API - Step 1: Get synset IDs
             return `https://babelnet.io/v9/getSynsetIds?lemma=${encodeURIComponent(term)}&searchLang=${lang.toUpperCase()}&key=${apiKey}`;
         },
-        parseResponse(data: any, lang: string, term: string): string[] {
+        parseResponse(_data: any, _lang: string, _term: string): string[] {
             // This will be handled specially in fetchSynonyms for BabelNet
             // because it requires two API calls
             return [];
@@ -145,13 +141,13 @@ class SynonymModule {
 
     constructor(quill: QuillLike, options: SynonymModuleOptions = {}) {
         this.quill = quill;
-        this.lang = options.lang || 'fr';
+        this.lang = options.lang || 'en';
         this.icon = options.icon || '🔄';
-        this.headerText = options.headerText || 'Recherche de synonymes';
+        this.headerText = options.headerText || 'Look for synonyms';
         this.container = quill.container;
         this.popup = null;
         this.debounceTimeout = null;
-        this.noSynonymText = options.noSynonymText || 'Aucun synonyme trouvé : {word}';
+        this.noSynonymText = options.noSynonymText || 'No Results for : {word}';
         this.cache = new Map<string, string[]>();
         this.currentSearchController = null;
         this.outsideClickListener = null;
@@ -159,7 +155,6 @@ class SynonymModule {
         this.babelnetApiKey = options.babelnetApiKey;
         this.debug = options.debug || false;
 
-        // Initialize providers based on options
         const providerNames = options.providers || ['conceptnet', 'freedictionary', 'datamuse'];
         this.providers = providerNames
             .filter(name => PROVIDERS[name])
@@ -167,7 +162,6 @@ class SynonymModule {
             .filter(provider => {
                 // Filter out providers that require API key if no key is provided
                 if (provider.requiresApiKey) {
-                    // Check specific API keys for specific providers
                     if (provider.name === 'babelnet' && !this.babelnetApiKey) {
                         console.warn(`Provider "${provider.name}" requires a BabelNet API key but none was provided. Skipping.`);
                         return false;
@@ -215,7 +209,6 @@ class SynonymModule {
                 if (trimmed.startsWith('<svg')) {
                     button.innerHTML = this.icon;
                 } else {
-                    // If simple text or emoji/icon
                     button.textContent = this.icon;
                 }
             } else if (this.icon instanceof HTMLElement) {
@@ -279,7 +272,7 @@ class SynonymModule {
         try {
             synonyms = await this.fetchSynonyms(selectedText, { silent: false });
         } catch {
-            alert('Erreur lors de la récupération des synonymes');
+            alert('Erreur while fetching synonyms');
             return;
         }
 
@@ -530,15 +523,16 @@ class SynonymModule {
         const cacheKey = `${this.lang}:${normalized}`;
 
         if (this.cache.has(cacheKey)) {
+            const cached = this.cache.get(cacheKey);
             if (this.debug) {
-                console.log(`[SynonymModule] Cache hit for "${normalized}":`, this.cache.get(cacheKey));
+                console.log(`[SynonymModule] Cache hit for "${normalized}":`, cached);
             }
-            return this.cache.get(cacheKey)!;
+            return cached || [];
         }
 
         if (this.debug) {
-            console.log(`[SynonymModule] Fetching synonyms for "${normalized}" (lang: ${this.lang})`);
-            console.log(`[SynonymModule] Providers to try:`, this.providers.map(p => p.name));
+            console.log(`[SynonymModule] Fetching synonyms for '${normalized}' (lang: ${this.lang})`);
+            console.log('[SynonymModule] Providers to try:', this.providers.map(p => p.name));
         }
 
         let signal: AbortSignal | undefined;
@@ -566,31 +560,31 @@ class SynonymModule {
                 const url = provider.buildUrl(this.lang, normalized, apiKeyToUse);
 
                 if (this.debug) {
-                    console.log(`[SynonymModule] Trying provider "${provider.name}"...`);
-                    console.log(`[SynonymModule] Request URL:`, url);
+                    console.log(`[SynonymModule] Trying provider '${provider.name}'...`);
+                    console.log('[SynonymModule] Request URL:', url);
                 }
 
                 // Build fetch options
                 const fetchOptions: RequestInit = { signal };
 
                 // Add headers for providers that require API key
+                // BabelNet passes the key in the URL, no need for headers
                 if (provider.name === 'wordsapi' && this.wordsApiKey) {
                     fetchOptions.headers = {
                         'X-RapidAPI-Key': this.wordsApiKey,
                         'X-RapidAPI-Host': 'wordsapiv1.p.rapidapi.com'
                     };
                     if (this.debug) {
-                        console.log(`[SynonymModule] Using WordsAPI key for "${provider.name}"`);
+                        console.log(`[SynonymModule] Using WordsAPI key for '${provider.name}'`);
                     }
                 }
-                // BabelNet passes the key in the URL, no need for headers
 
                 const startTime = Date.now();
                 const res = await fetch(url, fetchOptions);
                 const responseTime = Date.now() - startTime;
 
                 if (this.debug) {
-                    console.log(`[SynonymModule] Response from "${provider.name}":`, {
+                    console.log(`[SynonymModule] Response from '${provider.name}':`, {
                         status: res.status,
                         statusText: res.statusText,
                         responseTime: `${responseTime}ms`
@@ -600,7 +594,7 @@ class SynonymModule {
                 const data = await res.json();
 
                 if (this.debug) {
-                    console.log(`[SynonymModule] Response data from "${provider.name}":`, data);
+                    console.log(`[SynonymModule] Response data from '${provider.name}':`, data);
                 }
 
                 let synonyms: string[] = [];
@@ -619,7 +613,7 @@ class SynonymModule {
                     }
 
                     if (this.debug) {
-                        console.log(`[SynonymModule] BabelNet synset IDs:`, synsetIds);
+                        console.log('[SynonymModule] BabelNet synset IDs:', synsetIds);
                     }
 
                     // Fetch details for each synset ID (limit to first 3 to avoid too many requests)
@@ -639,16 +633,16 @@ class SynonymModule {
                             const synsetData = await synsetRes.json();
 
                             if (this.debug) {
-                                console.log(`[SynonymModule] BabelNet synset data:`, synsetData);
+                                console.log('[SynonymModule] BabelNet synset data:', synsetData);
                             }
 
                             // Extract synonyms from senses
                             if (Array.isArray(synsetData.senses)) {
                                 if (this.debug && synsetData.senses.length > 0) {
-                                    console.log(`[SynonymModule] BabelNet sense structure (first sense):`, synsetData.senses[0]);
+                                    console.log('[SynonymModule] BabelNet sense structure (first sense):', synsetData.senses[0]);
                                     // Log all lemmas in this synset
                                     const allLemmas = synsetData.senses.map((s: any) => s.properties?.simpleLemma || 'N/A');
-                                    console.log(`[SynonymModule] All lemmas in synset:`, allLemmas);
+                                    console.log('[SynonymModule] All lemmas in synset:', allLemmas);
                                 }
 
                                 synsetData.senses.forEach((sense: any) => {
@@ -702,29 +696,29 @@ class SynonymModule {
                 }
 
                 if (this.debug) {
-                    console.log(`[SynonymModule] Parsed synonyms from "${provider.name}":`, synonyms);
+                    console.log(`[SynonymModule] Parsed synonyms from '${provider.name}':`, synonyms);
                 }
 
                 if (synonyms.length > 0) {
                     this.cache.set(cacheKey, synonyms);
                     if (this.debug) {
-                        console.log(`[SynonymModule] ✓ Success with "${provider.name}" - Found ${synonyms.length} synonyms`);
+                        console.log(`[SynonymModule] ✓ Success with '${provider.name}' - Found ${synonyms.length} synonyms`);
                     }
                     return synonyms;
                 } else {
                     if (this.debug) {
-                        console.log(`[SynonymModule] ✗ No synonyms found with "${provider.name}", trying next provider...`);
+                        console.log(`[SynonymModule] ✗ No synonyms found with '${provider.name}', trying next provider...`);
                     }
                 }
             } catch (e: any) {
                 lastError = e;
                 if (this.debug) {
-                    console.error(`[SynonymModule] ✗ Error with provider "${provider.name}":`, e);
+                    console.error(`[SynonymModule] ✗ Error with provider '${provider.name}':`, e);
                 }
                 // If it's an abort, don't continue to fallback
                 if (e && e.name === 'AbortError') {
                     if (this.debug) {
-                        console.log(`[SynonymModule] Request aborted`);
+                        console.log('[SynonymModule] Request aborted');
                     }
                     if (options.silent) {
                         return [];
@@ -740,9 +734,8 @@ class SynonymModule {
             }
         }
 
-        // If all providers failed
         if (this.debug) {
-            console.error(`[SynonymModule] ✗ All providers failed for "${normalized}"`);
+            console.error(`[SynonymModule] ✗ All providers failed for '${normalized}'`);
         }
         if (options.silent) {
             return [];
