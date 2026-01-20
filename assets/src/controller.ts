@@ -10,6 +10,9 @@ import './register-modules.ts';
 import QuillTableBetter from 'quill-table-better';
 import 'quill-table-better/dist/quill-table-better.css';
 
+import SynonymModule from './modules/synonym.ts';
+Quill.register('modules/synonym', SynonymModule);
+
 interface DOMNode extends HTMLElement {
     getAttribute(name: string): string | null;
     setAttribute(name: string, value: string): void;
@@ -78,7 +81,9 @@ export default class extends Controller {
         const { debug, placeholder, theme, style } = this.extraOptionsValue;
         const readOnly = this.extraOptionsValue.read_only;
         const enabledModules: Options = {
-            'toolbar': this.toolbarOptionsValue,
+            'toolbar': {
+                container: this.toolbarOptionsValue,
+            },
         };
         const mergedModules = mergeModules(this.modulesOptionsValue, enabledModules);
 
@@ -189,10 +194,9 @@ export default class extends Controller {
 
     private dynamicModuleRegister(options: Options)
     {
-        const isTablePresent = options.modules.toolbar
+        const isTablePresent = options.modules.toolbar.container
             .flat(Infinity)
             .some(item => typeof item === 'string' && item === 'table-better');
-
         if (isTablePresent) {
             Quill.register('modules/table-better', QuillTableBetter);
         }

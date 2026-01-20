@@ -14,6 +14,8 @@ It comes with some extra features out of the box like image uploading to custom 
 
 
 * [Customize quillJS with options and extra_options](#customize-options)
+* [List of available Fields](#available-fields)
+* [List of available Modules](#modules)
 
 * [Handle images uploads](#image-upload-handling)
 * [Handle images uploads security](#upload-endpoint-security)
@@ -142,7 +144,7 @@ This example will display a h1 and h2 header options side by side and another Gr
 
 You can add as many Groups as you like or just One if you don't need the WYSIWYG options to have spaces between them.
 
-### Available Fields 
+### Available Fields
 - Below is the list of available fields from QuillJS (https://v2.quilljs.com/docs/formats)
 
 |        Field         |                                     Description                                      |   Available options    (options are available as class constants in each Field Class)    | Default option | QuillJS field name |
@@ -333,17 +335,114 @@ Example of how to use modules:
     ],
 ```
 
-|        modules         | auto-imported | description                                                                                                                                                                                                                                                                                           |       name        | options type |                                                        options                                                         |                                                                                    default options                                                                                     |
-|:----------------------:|:-------------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-----------------:|:------------:|:----------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
-|    **EmojiModule**     |      YES      | required if emoji Field is activated                                                                                                                                                                                                                                                                  |   emoji-toolbar   |    string    |                                                          NONE                                                          |                                                                                       ``'true'``                                                                                       |
-|    **ResizeModule**    |      YES      | used in ImageField,  https://www.npmjs.com/package/quill-resize-image                                                                                                                                                                                                                                 |      resize       |    array     |                                                           []                                                           |                                                                                           []                                                                                           |
-|    **SyntaxModule**    |      YES      | To use with CodeBlockField field, see official [description](https://quilljs.com/docs/modules/syntax)                                                                                                                                                                                                 |      syntax       |    string    |                                                          NONE                                                          |                                                                                       ``'true'``                                                                                       |
-|   **HistoryModule**    |      NO       | The History module is responsible for handling undo and redo for Quill. see details on official [site](https://quilljs.com/docs/modules/history)                                                                                                                                                      |      history      |    array     |                                         ``delay``, ``maxStack``, ``userOnly``                                          |                                                            ['delay' => '1000', 'maxStack' => '100', 'userOnly' => 'false']                                                             |
-|  **SmartLinksModule**  |      NO       | automatic recognition of links (can be customized within options)                                                                                                                                                                                                                                     |    smartLinks     |    array     |                                                     ``linkRegex``                                                      |                                                                         ['linkRegex' => '/https?:\/\/[^\s]+/']                                                                         |
-|   **CounterModule**    |      NO       | Count of number and Words inside WYSIWYG (display below WYSIWYG instance by default or inside a custom html Element if you want : specify an ID in *_container with the '#') characters counter display 1 character by default because Quill is instantiated with a <p></p> that count as 1 character |      counter      |    array     |    ``words``, ``words_label``, ``words_container``, ``characters``, ``characters_label``, ``characters_container``     | ['words' => true, 'words_label' => 'Number of words : ', 'words_container' => '', 'characters' => true, 'characters_label' => 'Number of characters : ', 'characters_container' => ''] |
-|    **TableModule**     |      YES      | The Table module is responsible for handling table options. see details on repository [site](https://github.com/attoae/quill-table-better)                                                                                                                                                            |   table-better    |    array     |                                      https://github.com/attoae/quill-table-better                                      |                                                                    see ``Ehyiah\QuillJsBundle\DTO\Modules\TableModule``                                                                |
-| **FullScreenModule**   |      NO       | Add a FullScreen button to the toolbar [site](https://github.com/qvarts/quill-toggle-fullscreen-button)                                                                                                                                                                                               |  toggleFullscreen |    array     |   `buttonTitle`, `buttonHTML`    check https://github.com/qvarts/quill-toggle-fullscreen-button?tab=readme-ov-file#api |                                                               see ``Ehyiah\QuillJsBundle\DTO\Modules\FullScreenModule``                                                                |
-|  **HtmlEditModule**  |      NO       | The HtmlEditModule allow to edit the raw html. see details on repository [site](https://github.com/benwinding/quill-html-edit-button)                                                                                                                                                                 | htmlEditButton  |    array     |                              https://github.com/benwinding/quill-html-edit-button                               |                                                              see ``Ehyiah\QuillJsBundle\DTO\Modules\htmlEditButton``                                                                   | There is currently a conflict with tableField. Don't use both of them at the same time as the table inserted via the htmlEdit module will not be displayed |
+|       modules        | auto-imported | description                                                                                                                                                                                                                                                                                           |       name       | options type |                                                       options                                                        |                                                                                                    default options                                                                                                    |
+|:--------------------:|:-------------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:----------------:|:------------:|:--------------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+|   **EmojiModule**    |      YES      | required if emoji Field is activated                                                                                                                                                                                                                                                                  |  emoji-toolbar   |    string    |                                                         NONE                                                         |                                                                                                      ``'true'``                                                                                                       |
+|   **ResizeModule**   |      YES      | used in ImageField,  https://www.npmjs.com/package/quill-resize-image                                                                                                                                                                                                                                 |      resize      |    array     |                                                          []                                                          |                                                                                                          []                                                                                                           |
+|   **SyntaxModule**   |      YES      | To use with CodeBlockField field, see official [description](https://quilljs.com/docs/modules/syntax)                                                                                                                                                                                                 |      syntax      |    string    |                                                         NONE                                                         |                                                                                                      ``'true'``                                                                                                       |
+|  **HistoryModule**   |      NO       | The History module is responsible for handling undo and redo for Quill. see details on official [site](https://quilljs.com/docs/modules/history)                                                                                                                                                      |     history      |    array     |                                        ``delay``, ``maxStack``, ``userOnly``                                         |                                                                            ['delay' => '1000', 'maxStack' => '100', 'userOnly' => 'false']                                                                            |
+| **SmartLinksModule** |      NO       | automatic recognition of links (can be customized within options)                                                                                                                                                                                                                                     |    smartLinks    |    array     |                                                    ``linkRegex``                                                     |                                                                                        ['linkRegex' => '/https?:\/\/[^\s]+/']                                                                                         |
+|  **CounterModule**   |      NO       | Count of number and Words inside WYSIWYG (display below WYSIWYG instance by default or inside a custom html Element if you want : specify an ID in *_container with the '#') characters counter display 1 character by default because Quill is instantiated with a <p></p> that count as 1 character |     counter      |    array     |   ``words``, ``words_label``, ``words_container``, ``characters``, ``characters_label``, ``characters_container``    |                ['words' => true, 'words_label' => 'Number of words : ', 'words_container' => '', 'characters' => true, 'characters_label' => 'Number of characters : ', 'characters_container' => '']                 |
+|   **TableModule**    |      YES      | The Table module is responsible for handling table options. see details on repository [site](https://github.com/attoae/quill-table-better)                                                                                                                                                            |   table-better   |    array     |                                     https://github.com/attoae/quill-table-better                                     |                                                                                 see ``Ehyiah\QuillJsBundle\DTO\Modules\TableModule``                                                                                  |
+| **FullScreenModule** |      NO       | Add a FullScreen button to the toolbar [site](https://github.com/qvarts/quill-toggle-fullscreen-button)                                                                                                                                                                                               | toggleFullscreen |    array     | `buttonTitle`, `buttonHTML`    check https://github.com/qvarts/quill-toggle-fullscreen-button?tab=readme-ov-file#api |                                                                               see ``Ehyiah\QuillJsBundle\DTO\Modules\FullScreenModule``                                                                               |
+|  **HtmlEditModule**  |      NO       | The HtmlEditModule allow to edit the raw html. see details on repository [site](https://github.com/benwinding/quill-html-edit-button)                                                                                                                                                                 |  htmlEditButton  |    array     |                                 https://github.com/benwinding/quill-html-edit-button                                 | see ``Ehyiah\QuillJsBundle\DTO\Modules\htmlEditButton``    There is currently a conflict with tableField. Don't use both of them at the same time as the table inserted via the htmlEdit module will not be displayed |
+|   **SynonymModule**  |      NO       | The Synonym module allow you to search over an API for a word synonym.                                                                                                                                                                                                                                |   synonym        |    array     |    `lang`, `icon`, `headerText`, `noSynonymText`, `providers`, `wordsApiKey`, `babelnetApiKey`, `debug`              |                                                                                see ``Ehyiah\QuillJsBundle\DTO\Modules\SynonymModule``                                                                                 |
+
+#### SynonymModule - Detailed Configuration
+
+The SynonymModule adds a powerful synonym search feature to your editor with support for multiple API providers and automatic fallback handling.
+
+##### Available Providers
+
+The module supports 5 different synonym API providers with automatic fallback:
+
+| Provider            | Languages                      | API Key Required | Free Tier         | Notes                                                                                        |
+|:--------------------|:-------------------------------|:-----------------|:------------------|:---------------------------------------------------------------------------------------------|
+| **ConceptNet**      | Multilingual (many languages)  | No               | Yes (unlimited)   | **Recommended** - Best for multilingual support                                              |
+| **Datamuse**        | English only                   | No               | Yes (unlimited)   | Good for English synonyms                                                                    |
+| **Free Dictionary** | English only                   | No               | Yes (unlimited)   | Dictionary-based synonyms                                                                    |
+| **BabelNet**        | 271 languages                  | Yes (free)       | 1000 requests/day | Excellent multilingual coverage, requires [free registration](https://babelnet.org/register) |
+| **Words API**       | English only                   | Yes (paid)       | Limited free tier | Professional API via [RapidAPI](https://rapidapi.com/dpventures/api/wordsapi)                |
+
+##### Configuration Options
+
+| Option | Type | Default | Description |
+|:-------|:-----|:--------|:------------|
+| `lang` | string | `'en'` | Language code (e.g., 'en', 'fr', 'es', 'de', etc.) |
+| `icon` | string/HTML | SVG icon | Custom icon for the toolbar button (SVG string or emoji) |
+| `headerText` | string | `'Look for synonyms'` | Header text in the synonym popup |
+| `noSynonymText` | string | `'No Results for : {word}'` | Message when no synonyms found (`{word}` is replaced with the searched term) |
+| `providers` | array | `['conceptnet', 'datamuse', 'freedictionary']` | Array of provider names to use (in order of priority for fallback) |
+| `wordsApiKey` | string | `null` | Your RapidAPI key for Words API (required to use 'wordsapi' provider) |
+| `babelnetApiKey` | string | `null` | Your BabelNet API key (required to use 'babelnet' provider) |
+| `debug` | bool | `false` | Enable debug logging in browser console |
+
+##### Basic Usage (Free Providers Only)
+
+```php
+use Ehyiah\QuillJsBundle\DTO\Modules\SynonymModule;
+
+'modules' => [
+    new SynonymModule(),
+]
+```
+
+##### Custom Configuration Examples
+
+**Example 1: English with multiple free providers**
+```php
+new SynonymModule(
+    options: [
+        'lang' => 'en',
+        'providers' => ['datamuse', 'freedictionary', 'conceptnet'],
+        'headerText' => 'Find synonyms',
+        'icon' => '🔄',
+    ]
+)
+```
+
+**Example 2: Using BabelNet for multilingual support (requires API key)**
+```php
+new SynonymModule(
+    options: [
+        'lang' => 'es',
+        'providers' => ['babelnet', 'conceptnet'], // BabelNet first, ConceptNet as fallback
+        'babelnetApiKey' => 'your-babelnet-api-key-here',
+        'headerText' => 'Buscar sinónimos',
+    ]
+)
+```
+
+##### How to Get API Keys
+
+**BabelNet (Free - 1000 requests/day):**
+1. Register at https://babelnet.org/register
+2. Get your free API key from your account dashboard
+3. Use it in the `babelnetApiKey` option
+
+**Words API (Paid via RapidAPI):**
+1. Sign up at https://rapidapi.com
+2. Subscribe to Words API at https://rapidapi.com/dpventures/api/wordsapi
+3. Get your RapidAPI key from your account
+4. Use it in the `wordsApiKey` option
+
+##### Provider Fallback System
+
+The module automatically tries providers in the order specified. If one provider fails or returns no results, it automatically tries the next one:
+
+```php
+new SynonymModule(
+    options: [
+        'providers' => ['babelnet', 'conceptnet', 'datamuse'],
+        'babelnetApiKey' => 'your-key',
+    ]
+)
+// Will try BabelNet first → if it fails, try ConceptNet → if it fails, try Datamuse
+```
+
+##### Caching
+
+The module automatically caches synonym results per language and term to minimize API calls and improve performance.
 
 ### Other modules that need custom JavaScript
 For other modules, you will need to extend Quill controller (see below) to use them as they required custom JavaScript as you cannot configure them in PHP.

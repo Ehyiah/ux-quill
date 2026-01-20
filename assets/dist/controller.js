@@ -6,6 +6,8 @@ import { handleUploadResponse, uploadStrategies } from "./upload-utils.js";
 import "./register-modules.js";
 import QuillTableBetter from 'quill-table-better';
 import 'quill-table-better/dist/quill-table-better.css';
+import SynonymModule from "./modules/synonym.js";
+Quill.register('modules/synonym', SynonymModule);
 const Image = Quill.import('formats/image');
 const oldFormats = Image.formats;
 Image.formats = function (domNode) {
@@ -53,7 +55,9 @@ export default class extends Controller {
     } = this.extraOptionsValue;
     const readOnly = this.extraOptionsValue.read_only;
     const enabledModules = {
-      'toolbar': this.toolbarOptionsValue
+      'toolbar': {
+        container: this.toolbarOptionsValue
+      }
     };
     const mergedModules = mergeModules(this.modulesOptionsValue, enabledModules);
     return {
@@ -139,7 +143,7 @@ export default class extends Controller {
     }
   }
   dynamicModuleRegister(options) {
-    const isTablePresent = options.modules.toolbar.flat(Infinity).some(item => typeof item === 'string' && item === 'table-better');
+    const isTablePresent = options.modules.toolbar.container.flat(Infinity).some(item => typeof item === 'string' && item === 'table-better');
     if (isTablePresent) {
       Quill.register('modules/table-better', QuillTableBetter);
     }
