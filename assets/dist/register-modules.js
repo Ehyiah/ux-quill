@@ -14,5 +14,7 @@ import QuillToggleFullscreenButton from 'quill-toggle-fullscreen-button';
 Quill.register('modules/toggleFullscreen', QuillToggleFullscreenButton);
 import htmlEditButton from 'quill-html-edit-button';
 Quill.register('modules/htmlEditButton', htmlEditButton.default || htmlEditButton);
+import ReadingTime from "./modules/readtimeModule.js";
+Quill.register('modules/readingTime', ReadingTime);
 import SpeechToText from "./modules/speechToText.js";
 Quill.register('modules/speechToText', SpeechToText);
