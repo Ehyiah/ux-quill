@@ -344,7 +344,29 @@ Example of how to use modules:
 |    **TableModule**     |      YES      | The Table module is responsible for handling table options. see details on repository [site](https://github.com/attoae/quill-table-better)                                                                                                                                                            |   table-better    |    array     |                                      https://github.com/attoae/quill-table-better                                      |                                                                    see ``Ehyiah\QuillJsBundle\DTO\Modules\TableModule``                                                                |
 | **FullScreenModule**   |      NO       | Add a FullScreen button to the toolbar [site](https://github.com/qvarts/quill-toggle-fullscreen-button)                                                                                                                                                                                               |  toggleFullscreen |    array     |   `buttonTitle`, `buttonHTML`    check https://github.com/qvarts/quill-toggle-fullscreen-button?tab=readme-ov-file#api |                                                               see ``Ehyiah\QuillJsBundle\DTO\Modules\FullScreenModule``                                                                |
 |  **HtmlEditModule**  |      NO       | The HtmlEditModule allow to edit the raw html. see details on repository [site](https://github.com/benwinding/quill-html-edit-button)                                                                                                                                                                 | htmlEditButton  |    array     |                              https://github.com/benwinding/quill-html-edit-button                               |                                                              see ``Ehyiah\QuillJsBundle\DTO\Modules\htmlEditButton``                                                                   | There is currently a conflict with tableField. Don't use both of them at the same time as the table inserted via the htmlEdit module will not be displayed |
-| **ReadTimeModule**   |      NO       | The ReadTimeModule add an indication on how many minutes it will take to a person to read what your write inside the WYSIWYG editor                                                                                                                                                                   | readingTime  |    array     |                      ``wpm``, ``label``, ``suffix``, ``readTimeOk``, ``readTimeMedium``, ``target``                       |                                                             see ``Ehyiah\QuillJsBundle\DTO\Modules\ReadTimeModule``                                                                    |
+| **ReadTimeModule**   |      NO       | The ReadTimeModule add an indication on how many minutes it will take to a person to read what your write inside the WYSIWYG editor                                                                                                                                                                   | readingTime  |    array     |                      ``wpm``, ``label``, ``suffix``, ``readTimeOk``, ``readTimeMedium``, ``target``                       |                                                             ['wpm' => '200', 'label' => 'Reading time: ', 'suffix' => ' min read', 'readTimeOk' => '2', 'readTimeMedium' => '5']                                                                    |
+
+#### ReadTimeModule details
+This module calculates the estimated reading time based on the content of the editor.
+It displays the result in the toolbar by default, or in a specific element if targeted.
+
+**Options:**
+- **wpm**: Words per minute used for calculation (default: `200`)
+- **label**: Text displayed before the time (default: `'⏱ Reading time: ~ '`)
+- **suffix**: Text displayed after the time (default: `' minute(s)'`)
+- **readTimeOk**: Threshold in minutes for the "green" indicator (short read) (default: `5`)
+- **readTimeMedium**: Threshold in minutes for the "orange" indicator (medium read) (default: `8`)
+- **target**: ID selector of a DOM element to display the reading time (e.g., `'#my-counter'`). If not set, it appears in the toolbar.
+
+**Usage example:**
+```php
+    'modules' => [
+        new ReadTimeModule([
+            'wpm' => '250',
+            'target' => '#reading-time-display',
+        ]),
+    ],
+```
 
 ### Other modules that need custom JavaScript
 For other modules, you will need to extend Quill controller (see below) to use them as they required custom JavaScript as you cannot configure them in PHP.

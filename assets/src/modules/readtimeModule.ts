@@ -24,15 +24,15 @@ export default class ReadingTime {
     constructor(quill: Quill, options: ReadingTimeOptions = {}) {
         this.quill = quill;
         this.wpm = options.wpm || 200;
-        this.label = options.label || '⏱ Temps de lecture : ~';
-        this.suffix = options.suffix || ' min';
-        this.readTimeOk = options.readTimeOk || 2;
-        this.readTimeMedium = options.readTimeMedium || 5;
+        this.label = options.label || '⏱ Reading time: ~ ';
+        this.suffix = options.suffix || ' minute(s)';
+        this.readTimeOk = options.readTimeOk || 5;
+        this.readTimeMedium = options.readTimeMedium || 8;
 
         if (options.target) {
             const el = document.querySelector<HTMLElement>(options.target);
             if (!el) {
-                throw new Error(`Impossible de trouver l'élément cible : ${options.target}`);
+                throw new Error(`Cannot find target element: ${options.target}`);
             }
             this.targetElement = el;
             this.targetIsCustom = true;
@@ -54,7 +54,7 @@ export default class ReadingTime {
                 transform: translateY(-50%);
                 pointer-events: none;
                 box-sizing: border-box;
-                min-width: 48px; /* fixe un minimum pour stabiliser la largeur */
+                min-width: 48px; /* minimum to stabilise width */
             `;
 
             const toolbar = this.quill.getModule('toolbar') as any;
