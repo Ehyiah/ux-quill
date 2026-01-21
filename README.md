@@ -1,5 +1,10 @@
 # QuillJs Bundle for Symfony using Symfony UX
 
+<div align="center">
+  <img src="./quill_logo.png" alt="Melody logo" width="400"/>
+</div>
+
+
 Symfony UX Bundle implementing the Quill JS Wysiwyg https://quilljs.com/
 
 If you need an easy-to-use WYSIWYG (with no complex configuration) into a symfony project, this is what you need.
