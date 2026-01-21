@@ -344,6 +344,58 @@ Example of how to use modules:
 |    **TableModule**     |      YES      | The Table module is responsible for handling table options. see details on repository [site](https://github.com/attoae/quill-table-better)                                                                                                                                                            |   table-better    |    array     |                                      https://github.com/attoae/quill-table-better                                      |                                                                    see ``Ehyiah\QuillJsBundle\DTO\Modules\TableModule``                                                                |
 | **FullScreenModule**   |      NO       | Add a FullScreen button to the toolbar [site](https://github.com/qvarts/quill-toggle-fullscreen-button)                                                                                                                                                                                               |  toggleFullscreen |    array     |   `buttonTitle`, `buttonHTML`    check https://github.com/qvarts/quill-toggle-fullscreen-button?tab=readme-ov-file#api |                                                               see ``Ehyiah\QuillJsBundle\DTO\Modules\FullScreenModule``                                                                |
 |  **HtmlEditModule**  |      NO       | The HtmlEditModule allow to edit the raw html. see details on repository [site](https://github.com/benwinding/quill-html-edit-button)                                                                                                                                                                 | htmlEditButton  |    array     |                              https://github.com/benwinding/quill-html-edit-button                               |                                                              see ``Ehyiah\QuillJsBundle\DTO\Modules\htmlEditButton``                                                                   | There is currently a conflict with tableField. Don't use both of them at the same time as the table inserted via the htmlEdit module will not be displayed |
+|   **STTModule**      |      NO       | The Speech-to-Text module enables voice dictation using the Web Speech API. Allows users to dictate text directly into the editor with real-time audio visualization                                                                                                                                   |   speechToText  |    array     |    ``language``, ``continuous``, ``visualizer``, ``waveformColor``, ``histogramColor``, ``debug``, ``buttonTitleStart``, ``buttonTitleStop``, ``titleInactive``, ``titleStarting``, ``titleActive``    |                                                                    see ``Ehyiah\QuillJsBundle\DTO\Modules\STTModule``                                                                    |
+
+#### STTModule detailed options:
+
+| option name          | type    | description                                                                                                       | default value      | possible values                                   |
+|:--------------------:|:-------:|:------------------------------------------------------------------------------------------------------------------|:------------------:|:-------------------------------------------------:|
+| **language**         | string  | Speech recognition language in BCP 47 format (e.g., 'en-US', 'fr-FR', 'es-ES')                                   | 'en-EN'            | Any valid BCP 47 language code                    |
+| **continuous**       | boolean | If true, recognition automatically restarts after each pause. If false, user must manually restart               | false              | true, false                                       |
+| **visualizer**       | boolean | Display animated audio visualizer (equalizer with 14 columns) reflecting microphone input in real-time           | true               | true, false                                       |
+| **waveformColor**    | string  | Gradient secondary color for the audio visualizer (top part of columns)                                           | '#4285f4'          | Any valid CSS color (hex, rgb, etc.)              |
+| **histogramColor**   | string  | Primary/accent color used for visualizer gradient, toolbar button when active, and listening label                | '#25D366'          | Any valid CSS color (hex, rgb, etc.)              |
+| **debug**            | boolean | Enable debug mode to display recognition logs and events in browser console                                       | false              | true, false                                       |
+| **buttonTitleStart** | string  | Tooltip text shown on microphone button hover when recognition is inactive                                        | 'Start listening'  | Any string                                        |
+| **buttonTitleStop**  | string  | Tooltip text shown on microphone button hover when recognition is active                                          | 'Stop listening'   | Any string                                        |
+| **titleInactive**    | string  | Label text displayed in the STT bar when recognition is inactive                                                  | 'Inactive'         | Any string                                        |
+| **titleStarting**    | string  | Label text displayed in the STT bar when recognition is initializing                                              | 'Starting...'      | Any string                                        |
+| **titleActive**      | string  | Label text displayed in the STT bar during active listening                                                       | 'Listening...'     | Any string                                        |
+
+#### Example of STTModule usage:
+
+```php
+use Ehyiah\QuillJsBundle\Form\QuillType;
+use Ehyiah\QuillJsBundle\DTO\Modules\STTModule;
+
+public function buildForm(FormBuilderInterface $builder, array $options)
+{
+    $builder
+        ->add('content', QuillType::class, [
+            'quill_options' => [
+                QuillGroup::buildWithAllFields()
+            ],
+            'modules' => [
+                new STTModule(
+                    language: 'fr-FR',           // French language recognition
+                    continuous: true,             // Auto-restart after pauses
+                    visualizer: true,             // Show audio visualizer
+                    waveformColor: '#4285f4',     // Blue gradient color
+                    histogramColor: '#25D366',    // Green accent color
+                    debug: false,                 // Disable debug logs
+                    buttonTitleStart: 'Start voice dictation',
+                    buttonTitleStop: 'Stop voice dictation',
+                    titleInactive: 'Voice recognition inactive',
+                    titleStarting: 'Initializing...',
+                    titleActive: 'Listening to your voice...',
+                ),
+            ],
+        ])
+    ;
+}
+```
+
+**Note**: The Speech-to-Text module **requires a browser that supports the Web Speech API** (Chrome, Edge, Safari). If the API is not available, the module will display a disabled state with an appropriate message.
 
 ### Other modules that need custom JavaScript
 For other modules, you will need to extend Quill controller (see below) to use them as they required custom JavaScript as you cannot configure them in PHP.
