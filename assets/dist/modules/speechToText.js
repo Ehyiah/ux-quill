@@ -135,10 +135,11 @@ export default class SpeechToText {
     };
     if (this.options.debug) {
       console.log('debug activated, Speak to see what is recognized');
+      console.log(`Language used: ${this.options.language}`);
     }
     const SpeechRecognition = getSpeechRecognitionCtor();
     if (!SpeechRecognition) {
-      console.warn('[SpeechToText] Web Speech API non supportée par ce navigateur.');
+      console.warn('[SpeechToText] Web Speech API is not supported by this browser.');
       this.renderUnavailableUI();
       return;
     }
@@ -151,6 +152,11 @@ export default class SpeechToText {
   }
   bindRecognitionEvents() {
     if (!this.recognition) return;
+    this.recognition.onstart = () => {
+      if (this.options.debug) {
+        console.log('[SpeechToText] Recognition service started');
+      }
+    };
     this.recognition.onresult = event => {
       let finalText = '';
       let interimText = '';
@@ -160,12 +166,16 @@ export default class SpeechToText {
         if (res.isFinal) {
           finalText += text + ' ';
         } else {
-          // on ne garde que le dernier interim pour l’aperçu
           interimText = text;
         }
       }
-      if (interimText && this.labelEl) {
-        this.labelEl.textContent = `STT: ${this.options.titleActive} ${interimText}`;
+      if (interimText) {
+        if (this.options.debug) {
+          console.log('[SpeechToText] Interim result:', interimText);
+        }
+        if (this.labelEl) {
+          this.labelEl.textContent = `STT: ${this.options.titleActive} ${interimText}`;
+        }
       }
       if (finalText) {
         if (this.options.debug) {
@@ -178,12 +188,18 @@ export default class SpeechToText {
       }
     };
     this.recognition.onerror = event => {
-      console.error('[SpeechToText] Erreur de reconnaissance vocale:', event?.error || event);
+      console.error('[SpeechToText] Voice recognition failed:', event?.error || event);
       this.updateUIState(false);
       this.stopVisualizer();
     };
     this.recognition.onend = () => {
+      if (this.options.debug) {
+        console.log('[SpeechToText] Recognition service ended');
+      }
       if (this.options.continuous && this.isListening) {
+        if (this.options.debug) {
+          console.log('[SpeechToText] Attempting to restart (continuous mode)');
+        }
         try {
           this.recognition?.start();
         } catch {
@@ -209,19 +225,14 @@ export default class SpeechToText {
     this.quill.setSelection(index + text.length, 0, 'user');
   }
   insertFinalTranscript(text) {
-    // Insère à la position d’ancrage + longueur déjà ajoutée
     const baseIndex = this.dictationAnchorIndex ?? this.quill.getLength();
     const insertIndex = baseIndex + this.appendedChars;
     this.quill.insertText(insertIndex, text, 'user');
     this.appendedChars += text.length;
-
-    // Positionner le curseur en fin de dictée
     this.quill.setSelection(baseIndex + this.appendedChars, 0, 'user');
   }
   renderUI() {
     ensureBaseStyles();
-
-    // Bouton placé à côté de la barre sous l’éditeur (aucun bouton dans la toolbar)
     this.toolbarButton = null;
 
     // Barre en dessous (toujours visible); l’égaliseur n’est créé que si visualizer=true
@@ -229,7 +240,7 @@ export default class SpeechToText {
     const parent = container.parentElement;
     const bar = document.createElement('div');
     bar.className = 'ql-stt-bar';
-    // Expose couleurs via CSS variables
+    // Expose colors via CSS variables
     bar.style.setProperty('--stt-accent', this.options.histogramColor);
     bar.style.setProperty('--stt-accent-2', this.options.waveformColor);
     const label = document.createElement('span');
@@ -249,8 +260,6 @@ export default class SpeechToText {
         cols.push(col);
       }
     }
-
-    // Bouton icône (start/stop) placé tout à gauche
     const action = document.createElement('button');
     action.type = 'button';
     action.className = 'ql-stt-action';
@@ -285,7 +294,7 @@ export default class SpeechToText {
       btn.className = 'ql-stt';
       btn.disabled = true;
       btn.innerText = '🎤';
-      btn.title = 'Reconnaissance vocale non supportée';
+      btn.title = 'Voice recognition not supported in this browser';
       toolbar.container.appendChild(btn);
       this.toolbarButton = btn;
     }
@@ -309,7 +318,6 @@ export default class SpeechToText {
     if (this.options.visualizer) {
       if (listening) {
         this.startVisualizer().catch(() => {
-          // Repli: animation douce même sans micro
           this.startFallbackAnimation();
         });
       } else {
@@ -318,7 +326,6 @@ export default class SpeechToText {
     }
   }
   async startVisualizer() {
-    // si déjà actif, ne pas dupliquer
     if (this.animationId) return;
     const AudioCtxCtor = getAudioContextCtor();
     if (!AudioCtxCtor) {
@@ -330,6 +337,9 @@ export default class SpeechToText {
         audio: true
       });
       this.mediaStream = stream;
+      if (this.options.debug) {
+        console.log('[SpeechToText] Visualizer started (stream obtained)');
+      }
       this.audioCtx = new AudioCtxCtor();
       const source = this.audioCtx.createMediaStreamSource(stream);
       this.analyser = this.audioCtx.createAnalyser();
@@ -344,29 +354,26 @@ export default class SpeechToText {
         const cols = this.barCols.length;
         for (let i = 0; i < cols; i++) {
           const percent = i / (cols - 1 || 1);
-          // map index non-linéaire pour une animation agréable
           const idx = Math.min(bufferLength - 1, Math.floor(Math.pow(percent, 0.8) * bufferLength));
-          const v = dataArray[idx] / 255; // 0..1
-          const height = Math.max(2, Math.floor(2 + v * 16)); // 2..18px
+          const v = dataArray[idx] / 255;
+          const height = Math.max(2, Math.floor(2 + v * 16));
           this.barCols[i].style.height = `${height}px`;
         }
         this.animationId = requestAnimationFrame(draw);
       };
       this.animationId = requestAnimationFrame(draw);
     } catch (e) {
-      // Permission micro refusée
       this.startFallbackAnimation();
     }
   }
   startFallbackAnimation() {
     if (this.animationId) return;
-    // Animation douce pseudo-aléatoire
     let t = 0;
     const draw = () => {
       const cols = this.barCols.length;
       for (let i = 0; i < cols; i++) {
         const phase = t * 0.12 + i * 0.45;
-        const v = (Math.sin(phase) + 1) / 2; // 0..1
+        const v = (Math.sin(phase) + 1) / 2;
         const height = Math.max(2, Math.floor(2 + v * 16));
         this.barCols[i].style.height = `${height}px`;
       }
@@ -380,7 +387,6 @@ export default class SpeechToText {
       cancelAnimationFrame(this.animationId);
       this.animationId = null;
     }
-    // Réinitialise les colonnes
     if (this.barCols.length) {
       for (const col of this.barCols) {
         col.style.height = '2px';
@@ -413,6 +419,9 @@ export default class SpeechToText {
   }
   start() {
     if (!this.recognition || this.isListening) return;
+    if (this.options.debug) {
+      console.log('[SpeechToText] Starting recognition...');
+    }
     try {
       const sel = this.quill.getSelection(true);
       this.dictationAnchorIndex = sel ? sel.index : this.quill.getLength();
@@ -421,27 +430,29 @@ export default class SpeechToText {
       this.updateUIState(true);
     } catch (e) {
       if (this.options.debug) {
-        console.warn('[SpeechToText] recognition.start() a échoué (peut-être déjà en cours)', e);
+        console.warn('[SpeechToText] recognition.start() failed', e);
       }
     }
   }
   stop() {
     if (!this.recognition || !this.isListening) return;
+    if (this.options.debug) {
+      console.log('[SpeechToText] Stopping recognition...');
+    }
     try {
       this.recognition.stop();
     } catch (e) {
       if (this.options.debug) {
-        console.warn('[SpeechToText] recognition.stop() a échoué, tentative abort()', e);
+        console.warn('[SpeechToText] recognition.stop() failed', e);
       }
       try {
         this.recognition.abort();
       } catch (abortErr) {
         if (this.options.debug) {
-          console.warn('[SpeechToText] recognition.abort() a échoué', abortErr);
+          console.warn('[SpeechToText] recognition.abort() failed', abortErr);
         }
       }
     }
-    // Réinit de la session de dictée
     this.dictationAnchorIndex = null;
     this.appendedChars = 0;
     this.updateUIState(false);
