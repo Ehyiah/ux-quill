@@ -10,6 +10,7 @@ use Ehyiah\QuillJsBundle\Form\QuillType;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\Forms;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @coversNothing
@@ -22,7 +23,10 @@ final class FormTypeTest extends TestCase
     {
         parent::setUp();
 
+        $translator = $this->createMock(TranslatorInterface::class);
+
         $this->formFactory = Forms::createFormFactoryBuilder()
+            ->addType(new QuillType($translator))
             ->getFormFactory()
         ;
     }
