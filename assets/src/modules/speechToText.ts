@@ -10,6 +10,7 @@ type SpeechToTextOptions = {
     buttonTitleStart?: string;
     buttonTitleStop?: string;
     titleInactive?: string;
+    titleStarting?: string;
     titleActive?: string;
 };
 
@@ -32,10 +33,10 @@ const getSpeechRecognitionCtor = (): new () => MaybeRecognition | null => {
     return (w.SpeechRecognition || w.webkitSpeechRecognition || null) as new () => MaybeRecognition | null;
 };
 
-const getAudioContextCtor = (): { new (): AudioContext } | null => {
+const getAudioContextCtor = (): { new(): AudioContext } | null => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const w: any = typeof window !== 'undefined' ? window : {};
-    return (w.AudioContext || w.webkitAudioContext || null) as { new (): AudioContext } | null;
+    return (w.AudioContext || w.webkitAudioContext || null) as { new(): AudioContext } | null;
 };
 
 const ensureBaseStyles = () => {
@@ -128,7 +129,7 @@ export default class SpeechToText {
     private quill: Quill;
     private options: Required<SpeechToTextOptions>;
     private recognition: MaybeRecognition | null = null;
-    private isListening = false;
+    private currentSttState: 'inactive' | 'starting' | 'listening' = 'inactive';
 
     private toolbarButton: HTMLButtonElement | null = null;
     private actionButton: HTMLButtonElement | null = null;
@@ -149,6 +150,11 @@ export default class SpeechToText {
     private mediaStream: MediaStream | null = null;
     private animationId: number | null = null;
 
+    // Colors
+    private inactiveColor: string;
+    private startingColor: string;
+    private listeningColor: string;
+
     constructor(quill: Quill, options: SpeechToTextOptions = {}) {
         this.quill = quill;
         this.options = {
@@ -161,8 +167,13 @@ export default class SpeechToText {
             buttonTitleStart: options.buttonTitleStart ?? 'Start listening',
             buttonTitleStop: options.buttonTitleStop ?? 'Stop listening',
             titleInactive: options.titleInactive ?? 'Inactive',
+            titleStarting: options.titleStarting ?? 'Starting...',
             titleActive: options.titleActive ?? 'Listening...',
         };
+        this.inactiveColor = '#0000ff';
+        this.startingColor = '#FF0000';
+        this.listeningColor = this.options.histogramColor;
+
         if (this.options.debug) {
             console.log('debug activated, Speak to see what is recognized');
             console.log(`Language used: ${this.options.language}`);
@@ -187,9 +198,24 @@ export default class SpeechToText {
     private bindRecognitionEvents() {
         if (!this.recognition) return;
 
-        this.recognition.onstart = () => {
+        this.recognition.onstart = async () => {
             if (this.options.debug) {
-                console.log('[SpeechToText] Recognition service started');
+                console.log('[SpeechToText] Recognition service started (onstart event)');
+            }
+
+            if (this.options.visualizer) {
+                try {
+                    await this.startVisualizer();
+                    this.updateUIState('listening');
+                } catch (e) {
+                    if (this.options.debug) {
+                        console.warn('[SpeechToText] Failed to start visualizer after recognition onstart', e);
+                    }
+                    this.updateUIState('inactive');
+                    this.stopRecognitionService();
+                }
+            } else {
+                this.updateUIState('listening');
             }
         };
 
@@ -228,15 +254,16 @@ export default class SpeechToText {
 
         this.recognition.onerror = (event: any) => {
             console.error('[SpeechToText] Voice recognition failed:', event?.error || event);
-            this.updateUIState(false);
+            this.updateUIState('inactive');
             this.stopVisualizer();
         };
 
         this.recognition.onend = () => {
             if (this.options.debug) {
-                console.log('[SpeechToText] Recognition service ended');
+                console.log('[SpeechToText] Recognition service ended (onend event)');
             }
-            if (this.options.continuous && this.isListening) {
+
+            if (this.options.continuous && this.currentSttState === 'listening') {
                 if (this.options.debug) {
                     console.log('[SpeechToText] Attempting to restart (continuous mode)');
                 }
@@ -247,13 +274,13 @@ export default class SpeechToText {
                         try {
                             this.recognition?.start();
                         } catch {
-                            this.updateUIState(false);
+                            this.updateUIState('inactive');
                             this.stopVisualizer();
                         }
                     }, 300);
                 }
             } else {
-                this.updateUIState(false);
+                this.updateUIState('inactive');
                 this.stopVisualizer();
             }
         };
@@ -281,13 +308,11 @@ export default class SpeechToText {
 
         this.toolbarButton = null;
 
-        // Barre en dessous (toujours visible); l’égaliseur n’est créé que si visualizer=true
         const container = (this.quill as any).container as HTMLElement;
         const parent = container.parentElement;
 
         const bar = document.createElement('div');
         bar.className = 'ql-stt-bar';
-        // Expose colors via CSS variables
         bar.style.setProperty('--stt-accent', this.options.histogramColor);
         bar.style.setProperty('--stt-accent-2', this.options.waveformColor);
 
@@ -301,7 +326,6 @@ export default class SpeechToText {
             bars = document.createElement('div');
             bars.className = 'ql-stt-bars';
 
-            // Crée un égaliseur de 14 colonnes
             for (let i = 0; i < 14; i++) {
                 const col = document.createElement('div');
                 col.className = 'ql-stt-bar-col';
@@ -354,39 +378,56 @@ export default class SpeechToText {
         }
     }
 
-    private updateUIState(listening: boolean) {
-        this.isListening = listening;
+    private updateUIState(state: 'inactive' | 'starting' | 'listening') {
+        this.currentSttState = state;
+        const isListening = state === 'listening';
 
         if (this.toolbarButton) {
-            this.toolbarButton.style.color = listening ? this.options.histogramColor : '';
+            this.toolbarButton.style.color = isListening ? this.options.histogramColor : '';
         }
 
         if (this.labelEl) {
-            this.labelEl.textContent = listening ? 'STT: ' + this.options.titleActive : 'STT: ' + this.options.titleInactive;
-            this.labelEl.style.color = listening ? this.options.histogramColor : '#667085';
+            let labelText;
+            let labelColor;
+            switch (state) {
+                case 'starting':
+                    labelText = this.options.titleStarting;
+                    labelColor = this.startingColor;
+                    break;
+                case 'listening':
+                    labelText = this.options.titleActive;
+                    labelColor = this.options.histogramColor;
+                    break;
+                case 'inactive':
+                default:
+                    labelText = this.options.titleInactive;
+                    labelColor = this.inactiveColor;
+                    break;
+            }
+            this.labelEl.textContent = 'STT: ' + labelText;
+            this.labelEl.style.color = labelColor;
         }
 
         if (this.bottomBar) {
-            this.bottomBar.classList.toggle('is-listening', listening);
+            this.bottomBar.classList.toggle('is-listening', isListening);
         }
 
         if (this.actionButton) {
-            this.actionButton.title = listening ? this.options.buttonTitleStop : this.options.buttonTitleStart;
-            this.actionButton.setAttribute('aria-pressed', listening ? 'true' : 'false');
+            this.actionButton.title = isListening ? this.options.buttonTitleStop : this.options.buttonTitleStart;
+            this.actionButton.setAttribute('aria-pressed', isListening ? 'true' : 'false');
+            this.actionButton.disabled = state === 'starting';
         }
 
         if (this.options.visualizer) {
-            if (listening) {
-                this.startVisualizer().catch(() => {
-                    this.startFallbackAnimation();
-                });
+            if (isListening) {
+                // Le visualiseur est démarré dans onstart, pas ici
             } else {
                 this.stopVisualizer();
             }
         }
     }
 
-    private async startVisualizer() {
+    private async startVisualizer(): Promise<void> {
         if (this.animationId) return;
 
         const AudioCtxCtor = getAudioContextCtor();
@@ -396,7 +437,7 @@ export default class SpeechToText {
         }
 
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const stream = await navigator.mediaDevices.getUserMedia({audio: true});
             this.mediaStream = stream;
             if (this.options.debug) {
                 console.log('[SpeechToText] Visualizer started (stream obtained)');
@@ -432,7 +473,11 @@ export default class SpeechToText {
 
             this.animationId = requestAnimationFrame(draw);
         } catch (e) {
+            if (this.options.debug) {
+                console.warn('[SpeechToText] Failed to get audio stream for visualizer:', e);
+            }
             this.startFallbackAnimation();
+            throw e;
         }
     }
 
@@ -464,11 +509,23 @@ export default class SpeechToText {
             }
         }
         if (this.analyser) {
-            try { this.analyser.disconnect(); } catch (e) { if (this.options.debug) { console.warn('[SpeechToText] analyser.disconnect() a échoué', e); } }
+            try {
+                this.analyser.disconnect();
+            } catch (e) {
+                if (this.options.debug) {
+                    console.warn('[SpeechToText] analyser.disconnect() failed', e);
+                }
+            }
             this.analyser = null;
         }
         if (this.audioCtx) {
-            try { this.audioCtx.close(); } catch (e) { if (this.options.debug) { console.warn('[SpeechToText] audioCtx.close() a échoué', e); } }
+            try {
+                this.audioCtx.close();
+            } catch (e) {
+                if (this.options.debug) {
+                    console.warn('[SpeechToText] audioCtx.close() failed', e);
+                }
+            }
             this.audioCtx = null;
         }
         if (this.mediaStream) {
@@ -477,30 +534,35 @@ export default class SpeechToText {
         }
     }
 
-    private start() {
-        if (!this.recognition || this.isListening) return;
+    private startRecognitionService() {
+        if (!this.recognition || this.currentSttState !== 'inactive') return;
+
         if (this.options.debug) {
-            console.log('[SpeechToText] Starting recognition...');
+            console.log('[SpeechToText] Attempting to start recognition service...');
         }
+
         try {
             const sel = this.quill.getSelection(true);
             this.dictationAnchorIndex = sel ? sel.index : this.quill.getLength();
             this.appendedChars = 0;
 
+            this.updateUIState('starting');
             this.recognition.start();
-            this.updateUIState(true);
         } catch (e) {
             if (this.options.debug) {
-                console.warn('[SpeechToText] recognition.start() failed', e);
+                console.warn('[SpeechToText] recognition.start() failed immediately', e);
             }
+            this.updateUIState('inactive');
         }
     }
 
-    private stop() {
-        if (!this.recognition || !this.isListening) return;
+    private stopRecognitionService() {
+        if (!this.recognition || this.currentSttState === 'inactive') return;
+
         if (this.options.debug) {
-            console.log('[SpeechToText] Stopping recognition...');
+            console.log('[SpeechToText] Attempting to stop recognition service...');
         }
+
         try {
             this.recognition.stop();
         } catch (e) {
@@ -515,18 +577,16 @@ export default class SpeechToText {
                 }
             }
         }
-
         this.dictationAnchorIndex = null;
         this.appendedChars = 0;
-
-        this.updateUIState(false);
+        this.updateUIState('inactive');
     }
 
     private toggle() {
-        if (this.isListening) {
-            this.stop();
+        if (this.currentSttState === 'inactive') {
+            this.startRecognitionService();
         } else {
-            this.start();
+            this.stopRecognitionService();
         }
     }
 }

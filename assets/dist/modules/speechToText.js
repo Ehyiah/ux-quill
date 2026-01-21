@@ -97,7 +97,7 @@ export default class SpeechToText {
   quill;
   options;
   recognition = null;
-  isListening = false;
+  currentSttState = 'inactive';
   toolbarButton = null;
   actionButton = null;
 
@@ -116,6 +116,11 @@ export default class SpeechToText {
   analyser = null;
   mediaStream = null;
   animationId = null;
+
+  // Colors
+  inactiveColor;
+  startingColor;
+  listeningColor;
   constructor(quill, options) {
     if (options === void 0) {
       options = {};
@@ -131,8 +136,12 @@ export default class SpeechToText {
       buttonTitleStart: options.buttonTitleStart ?? 'Start listening',
       buttonTitleStop: options.buttonTitleStop ?? 'Stop listening',
       titleInactive: options.titleInactive ?? 'Inactive',
+      titleStarting: options.titleStarting ?? 'Starting...',
       titleActive: options.titleActive ?? 'Listening...'
     };
+    this.inactiveColor = '#0000ff';
+    this.startingColor = '#FF0000';
+    this.listeningColor = this.options.histogramColor;
     if (this.options.debug) {
       console.log('debug activated, Speak to see what is recognized');
       console.log(`Language used: ${this.options.language}`);
@@ -152,9 +161,23 @@ export default class SpeechToText {
   }
   bindRecognitionEvents() {
     if (!this.recognition) return;
-    this.recognition.onstart = () => {
+    this.recognition.onstart = async () => {
       if (this.options.debug) {
-        console.log('[SpeechToText] Recognition service started');
+        console.log('[SpeechToText] Recognition service started (onstart event)');
+      }
+      if (this.options.visualizer) {
+        try {
+          await this.startVisualizer();
+          this.updateUIState('listening');
+        } catch (e) {
+          if (this.options.debug) {
+            console.warn('[SpeechToText] Failed to start visualizer after recognition onstart', e);
+          }
+          this.updateUIState('inactive');
+          this.stopRecognitionService();
+        }
+      } else {
+        this.updateUIState('listening');
       }
     };
     this.recognition.onresult = event => {
@@ -189,14 +212,14 @@ export default class SpeechToText {
     };
     this.recognition.onerror = event => {
       console.error('[SpeechToText] Voice recognition failed:', event?.error || event);
-      this.updateUIState(false);
+      this.updateUIState('inactive');
       this.stopVisualizer();
     };
     this.recognition.onend = () => {
       if (this.options.debug) {
-        console.log('[SpeechToText] Recognition service ended');
+        console.log('[SpeechToText] Recognition service ended (onend event)');
       }
-      if (this.options.continuous && this.isListening) {
+      if (this.options.continuous && this.currentSttState === 'listening') {
         if (this.options.debug) {
           console.log('[SpeechToText] Attempting to restart (continuous mode)');
         }
@@ -207,13 +230,13 @@ export default class SpeechToText {
             try {
               this.recognition?.start();
             } catch {
-              this.updateUIState(false);
+              this.updateUIState('inactive');
               this.stopVisualizer();
             }
           }, 300);
         }
       } else {
-        this.updateUIState(false);
+        this.updateUIState('inactive');
         this.stopVisualizer();
       }
     };
@@ -234,13 +257,10 @@ export default class SpeechToText {
   renderUI() {
     ensureBaseStyles();
     this.toolbarButton = null;
-
-    // Barre en dessous (toujours visible); l’égaliseur n’est créé que si visualizer=true
     const container = this.quill.container;
     const parent = container.parentElement;
     const bar = document.createElement('div');
     bar.className = 'ql-stt-bar';
-    // Expose colors via CSS variables
     bar.style.setProperty('--stt-accent', this.options.histogramColor);
     bar.style.setProperty('--stt-accent-2', this.options.waveformColor);
     const label = document.createElement('span');
@@ -251,8 +271,6 @@ export default class SpeechToText {
     if (this.options.visualizer) {
       bars = document.createElement('div');
       bars.className = 'ql-stt-bars';
-
-      // Crée un égaliseur de 14 colonnes
       for (let i = 0; i < 14; i++) {
         const col = document.createElement('div');
         col.className = 'ql-stt-bar-col';
@@ -299,27 +317,44 @@ export default class SpeechToText {
       this.toolbarButton = btn;
     }
   }
-  updateUIState(listening) {
-    this.isListening = listening;
+  updateUIState(state) {
+    this.currentSttState = state;
+    const isListening = state === 'listening';
     if (this.toolbarButton) {
-      this.toolbarButton.style.color = listening ? this.options.histogramColor : '';
+      this.toolbarButton.style.color = isListening ? this.options.histogramColor : '';
     }
     if (this.labelEl) {
-      this.labelEl.textContent = listening ? 'STT: ' + this.options.titleActive : 'STT: ' + this.options.titleInactive;
-      this.labelEl.style.color = listening ? this.options.histogramColor : '#667085';
+      let labelText;
+      let labelColor;
+      switch (state) {
+        case 'starting':
+          labelText = this.options.titleStarting;
+          labelColor = this.startingColor;
+          break;
+        case 'listening':
+          labelText = this.options.titleActive;
+          labelColor = this.options.histogramColor;
+          break;
+        case 'inactive':
+        default:
+          labelText = this.options.titleInactive;
+          labelColor = this.inactiveColor;
+          break;
+      }
+      this.labelEl.textContent = 'STT: ' + labelText;
+      this.labelEl.style.color = labelColor;
     }
     if (this.bottomBar) {
-      this.bottomBar.classList.toggle('is-listening', listening);
+      this.bottomBar.classList.toggle('is-listening', isListening);
     }
     if (this.actionButton) {
-      this.actionButton.title = listening ? this.options.buttonTitleStop : this.options.buttonTitleStart;
-      this.actionButton.setAttribute('aria-pressed', listening ? 'true' : 'false');
+      this.actionButton.title = isListening ? this.options.buttonTitleStop : this.options.buttonTitleStart;
+      this.actionButton.setAttribute('aria-pressed', isListening ? 'true' : 'false');
+      this.actionButton.disabled = state === 'starting';
     }
     if (this.options.visualizer) {
-      if (listening) {
-        this.startVisualizer().catch(() => {
-          this.startFallbackAnimation();
-        });
+      if (isListening) {
+        // Le visualiseur est démarré dans onstart, pas ici
       } else {
         this.stopVisualizer();
       }
@@ -363,7 +398,11 @@ export default class SpeechToText {
       };
       this.animationId = requestAnimationFrame(draw);
     } catch (e) {
+      if (this.options.debug) {
+        console.warn('[SpeechToText] Failed to get audio stream for visualizer:', e);
+      }
       this.startFallbackAnimation();
+      throw e;
     }
   }
   startFallbackAnimation() {
@@ -397,7 +436,7 @@ export default class SpeechToText {
         this.analyser.disconnect();
       } catch (e) {
         if (this.options.debug) {
-          console.warn('[SpeechToText] analyser.disconnect() a échoué', e);
+          console.warn('[SpeechToText] analyser.disconnect() failed', e);
         }
       }
       this.analyser = null;
@@ -407,7 +446,7 @@ export default class SpeechToText {
         this.audioCtx.close();
       } catch (e) {
         if (this.options.debug) {
-          console.warn('[SpeechToText] audioCtx.close() a échoué', e);
+          console.warn('[SpeechToText] audioCtx.close() failed', e);
         }
       }
       this.audioCtx = null;
@@ -417,27 +456,28 @@ export default class SpeechToText {
       this.mediaStream = null;
     }
   }
-  start() {
-    if (!this.recognition || this.isListening) return;
+  startRecognitionService() {
+    if (!this.recognition || this.currentSttState !== 'inactive') return;
     if (this.options.debug) {
-      console.log('[SpeechToText] Starting recognition...');
+      console.log('[SpeechToText] Attempting to start recognition service...');
     }
     try {
       const sel = this.quill.getSelection(true);
       this.dictationAnchorIndex = sel ? sel.index : this.quill.getLength();
       this.appendedChars = 0;
+      this.updateUIState('starting');
       this.recognition.start();
-      this.updateUIState(true);
     } catch (e) {
       if (this.options.debug) {
-        console.warn('[SpeechToText] recognition.start() failed', e);
+        console.warn('[SpeechToText] recognition.start() failed immediately', e);
       }
+      this.updateUIState('inactive');
     }
   }
-  stop() {
-    if (!this.recognition || !this.isListening) return;
+  stopRecognitionService() {
+    if (!this.recognition || this.currentSttState === 'inactive') return;
     if (this.options.debug) {
-      console.log('[SpeechToText] Stopping recognition...');
+      console.log('[SpeechToText] Attempting to stop recognition service...');
     }
     try {
       this.recognition.stop();
@@ -455,13 +495,13 @@ export default class SpeechToText {
     }
     this.dictationAnchorIndex = null;
     this.appendedChars = 0;
-    this.updateUIState(false);
+    this.updateUIState('inactive');
   }
   toggle() {
-    if (this.isListening) {
-      this.stop();
+    if (this.currentSttState === 'inactive') {
+      this.startRecognitionService();
     } else {
-      this.start();
+      this.stopRecognitionService();
     }
   }
 }

@@ -10,7 +10,7 @@ final class STTModule implements ModuleInterface
         public string $name = self::NAME,
 
         /**
-         * @var array<string, string|string[]>
+         * @var array<string, string|string[]|bool>
          */
         public $options = [
             /*
@@ -50,7 +50,7 @@ final class STTModule implements ModuleInterface
              * Debug mode: displays logs in the console
              * Allows viewing recognized segments and potential errors
              */
-            'debug' => true,
+            'debug' => false,
 
             /*
              * Button title when recognition is inactive
@@ -73,6 +73,11 @@ final class STTModule implements ModuleInterface
              * Label text displayed in the STT bar during listening
              */
             'titleActive' => 'Listening...',
+
+            /*
+             * Label text displayed in the STT bar during voice recognition initialising
+             */
+            'titleStarting' => 'Starting...',
         ],
     ) {
     }
