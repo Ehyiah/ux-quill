@@ -56,9 +56,10 @@ export default class GalleryModule {
         button.title = this.options.buttonTitle;
         button.addEventListener('click', () => this.open());
 
-        const group = toolbar.container.querySelector('.ql-formats:last-child');
-        if (group) group.appendChild(button);
-        else toolbar.container.appendChild(button);
+        const group = document.createElement('span');
+        group.classList.add('ql-formats');
+        group.appendChild(button);
+        toolbar.container.appendChild(group);
     }
 
     open() {

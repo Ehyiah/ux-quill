@@ -126,7 +126,6 @@ export default class GalleryModal {
         }
     }
 
-
     renderGrid() {
         const grid = this.container.querySelector('#media-grid')
         grid.innerHTML = ''
