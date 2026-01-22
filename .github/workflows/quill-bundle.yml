@@ -1,5 +1,5 @@
 # https://help.github.com/en/actions
-name: CI process for Symfony UX Quill bundle
+name: Quality and Security CI
 on:
     pull_request:
         branches:
@@ -7,17 +7,19 @@ on:
 
 jobs:
     quality:
-        name: Quill bundle (PHP ${{ matrix.php-versions }})
+        name: Quality checks for Quill bundle (PHP ${{ matrix.php-versions }})
         runs-on: ubuntu-22.04
         strategy:
             fail-fast: true
             matrix:
-                php-versions: ['8.1', '8.2', '8.3']
+                php-versions: ['8.1', '8.2', '8.3', '8.4']
 
         steps:
             # —— Setup Github actions 🐙 —————————————————————————————————————————————
             # https://github.com/actions/checkout (official)
+            # Skip checkout when running locally with act
             - name: Checkout
+              if: ${{ !env.ACT }}
               uses: actions/checkout@v4
               with:
                   ref: ${{ github.head_ref }}
@@ -57,7 +59,9 @@ jobs:
 
             ## —— Static analysis ✨ —————————————————————————————————————————————————
             - name: Static analysis of PHP code (PHPStan)
-              run: ./vendor/bin/phpstan --memory-limit=1G analyse
+              run: |
+                  rm -rf /tmp/phpstan
+                  ./vendor/bin/phpstan --memory-limit=1G analyse
 
             ## —— Twig cs fixer ✨ —————————————————————————————————————————————————
             - name: Coding standards checks (twig-cs-fixer)
@@ -68,12 +72,15 @@ jobs:
               run: ./vendor/bin/phpunit
 
     security:
-        name: composer security check (PHP ${{ matrix.php-versions }})
+        name: Security checks for Quill bundle (PHP ${{ matrix.php-versions }})
         runs-on: ubuntu-22.04
         strategy:
             fail-fast: true
             matrix:
-                php-versions: ['8.1', '8.2', '8.3']
+                php-versions: ['8.1', '8.2', '8.3', '8.4']
         steps:
-            - uses: actions/checkout@v4
+            # Skip checkout when running locally with act
+            - name: Checkout
+              if: ${{ !env.ACT }}
+              uses: actions/checkout@v4
             - uses: symfonycorp/security-checker-action@v4
