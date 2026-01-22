@@ -1,17 +1,21 @@
 name: Publish NPM Package
 
 on:
-    release:
-        types:
-            - created
-            - edited
     push:
         tags:
             - '*'
+    release:
+        types:
+            - created
+
+permissions:
+    id-token: write
+    contents: read
 
 jobs:
     publish-npm-package:
         runs-on: ubuntu-latest
+
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
@@ -19,26 +23,32 @@ jobs:
             - name: Setup Node.js
               uses: actions/setup-node@v4
               with:
-                  node-version: '22.x'
+                  node-version: '24.x'
                   registry-url: 'https://registry.npmjs.org'
 
             - name: Install dependencies
               working-directory: ./assets
-              run: yarn install
+              run: yarn install --frozen-lockfile
 
-            - name: Get new tag version
+            - name: Determine version
               id: get_version
-              run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-
-            - name: Set package.json version to tag version
-              working-directory: ./assets
               run: |
-                  npm version --no-git-tag-version ${{ steps.get_version.outputs.VERSION }}
-              env:
-                  NPM_CONFIG_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
+                  if [ "${{ github.event_name }}" = "release" ]; then
+                    VERSION="${{ github.event.release.tag_name }}"
+                  else
+                    VERSION="${GITHUB_REF_NAME}"
+                  fi
+                  
+                  echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
-            - name: Publish new version on NPM
+            - name: Set package.json version
               working-directory: ./assets
-              run: yarn publish --access public
-              env:
-                  NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
+              run: npm version --no-git-tag-version ${{ steps.get_version.outputs.VERSION }}
+
+            - name: Build
+              working-directory: ./assets
+              run: yarn run build --if-present
+
+            - name: Publish to npm (OIDC)
+              working-directory: ./assets
+              run: npm publish --provenance --access public

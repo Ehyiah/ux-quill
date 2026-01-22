@@ -454,6 +454,37 @@ final class QuillTypeTest extends TestCase
 
     /**
      * @covers ::buildView
+     */
+    public function testBuildViewWithDefaultQuillExtraOptionsAsClosure(): void
+    {
+        $resolver = new OptionsResolver();
+        $this->quillType->configureOptions($resolver);
+
+        // Resolve options without providing quill_extra_options (uses default closure)
+        $options = $resolver->resolve([
+            'quill_options' => [['bold', 'italic']],
+            'modules' => [],
+        ]);
+
+        $this->quillType->buildView($this->formView, $this->form, $options);
+
+        $this->assertArrayHasKey('attr', $this->formView->vars);
+        $this->assertArrayHasKey('quill_extra_options', $this->formView->vars['attr']);
+
+        $extraOptions = json_decode($this->formView->vars['attr']['quill_extra_options'], true);
+        $this->assertIsArray($extraOptions);
+        $this->assertArrayHasKey('debug', $extraOptions);
+        $this->assertArrayHasKey('height', $extraOptions);
+        $this->assertArrayHasKey('theme', $extraOptions);
+        $this->assertArrayHasKey('placeholder', $extraOptions);
+        $this->assertEquals('error', $extraOptions['debug']);
+        $this->assertEquals('200px', $extraOptions['height']);
+        $this->assertEquals('snow', $extraOptions['theme']);
+        $this->assertEquals('Quill editor', $extraOptions['placeholder']);
+    }
+
+    /**
+     * @covers ::buildView
      *
      * @dataProvider provideCustomAssetsOptions
      */
