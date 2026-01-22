@@ -446,12 +446,14 @@ The response from your endpoint must be like this :
 ```
 
 - **uploadEndpoint** : the endpoint to upload an image
+**If not url is provided**, the button will not be displayed
 This module is using the built-in configurations upload :
 [configuration](#upload-mode-configuration-) and 
 [upload security](#upload-endpoint-security)
 
 - **icon** : the icon to use in the toolbar
 pass a svg icon like others icons customization.
+
 
 - example of a listing api endpoint for testing purpose
 ```php

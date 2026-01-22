@@ -31,6 +31,14 @@ export default class GalleryModal {
     renderModal() {
         this.container = document.createElement('div')
         this.container.classList.add('quill-media-modal')
+
+        const uploadButtonHtml = this.module.options.uploadEndpoint
+            ? `<label class="upload-btn">
+                <input type="file" style="display:none" />
+                ${this.module.options.uploadTitle}
+               </label>`
+            : '';
+
         this.container.innerHTML = `
       <div class="quill-media-window">
         <div class="quill-media-header">
@@ -47,10 +55,7 @@ export default class GalleryModal {
         </div>
         <div class="quill-media-footer">
           <button class="prev-btn" disabled>${this.module.options.messagePrevPageOption}</button>
-          <label class="upload-btn">
-            <input type="file" style="display:none" />
-              ${this.module.options.uploadTitle}
-          </label>
+          ${uploadButtonHtml}
           <button class="next-btn" disabled>${this.module.options.messageNextPageOption}</button>
         </div>
       </div>
@@ -69,29 +74,31 @@ export default class GalleryModal {
             if (this.nextUrl) this.loadImages(this.nextUrl)
         })
 
-        const fileInput = this.container.querySelector('.upload-btn input[type="file"]')
-        fileInput.addEventListener('change', async (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
+        if (this.module.options.uploadEndpoint) {
+            const fileInput = this.container.querySelector('.upload-btn input[type="file"]')
+            fileInput.addEventListener('change', async (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
 
-            fileInput.disabled = true;
-            try {
-                const response = await uploadStrategies['form'](
-                    this.module.options.uploadEndpoint,
-                    file,
-                    this.module.options.authConfig
-                );
+                fileInput.disabled = true;
+                try {
+                    const response = await uploadStrategies['form'](
+                        this.module.options.uploadEndpoint,
+                        file,
+                        this.module.options.authConfig
+                    );
 
-                await handleUploadResponse(response, this.module.options.jsonResponseFilePath);
-                await this.loadImages();
-            } catch (e) {
-                console.error('Error upload :', e);
-                alert('Upload error');
-            } finally {
-                fileInput.disabled = false;
-                fileInput.value = '';
-            }
-        });
+                    await handleUploadResponse(response, this.module.options.jsonResponseFilePath);
+                    await this.loadImages();
+                } catch (e) {
+                    console.error('Error upload :', e);
+                    alert('Upload error');
+                } finally {
+                    fileInput.disabled = false;
+                    fileInput.value = '';
+                }
+            });
+        }
     }
 
     async loadImages(url = null) {
