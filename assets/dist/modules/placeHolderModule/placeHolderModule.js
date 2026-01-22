@@ -1,29 +1,55 @@
+import Quill from 'quill';
+const icons = Quill.import('ui/icons');
+const defaultIcon = '<svg viewBox="0 0 18 18"><path class="ql-stroke" d="M5 3C4 3 3 4 3 5L3 7C3 8 2 9 2 9C2 9 3 10 3 11L3 13C3 14 4 15 5 15"></path><path class="ql-stroke" d="M13 3C14 3 15 4 15 5L15 7C15 8 16 9 16 9C16 9 15 10 15 11L15 13C15 14 14 15 13 15"></path><circle class="ql-fill" cx="7" cy="9" r="1"></circle><circle class="ql-fill" cx="11" cy="9" r="1"></circle></svg>';
+icons['placeholder'] = defaultIcon;
 export class PlaceholderModule {
+  quill;
+  options;
+  placeholders;
+  dropdown;
+  button;
+  startTag;
+  endTag;
   constructor(quill, options) {
     this.quill = quill;
     this.options = options;
     this.placeholders = options.placeholders || [];
+    this.startTag = options.startTag || '{{';
+    this.endTag = options.endTag || '}}';
+    if (options.icon) {
+      icons['placeholder'] = options.icon;
+    }
     const toolbar = quill.getModule('toolbar');
     if (toolbar) {
       this.addButton(toolbar);
     }
+    document.addEventListener('click', e => {
+      if (!this.button.contains(e.target) && !this.dropdown.contains(e.target)) {
+        this.dropdown.style.display = 'none';
+      }
+    });
   }
-
-  // Ajoute le bouton "placeholder" à la barre d'outils
   addButton(toolbar) {
-    const button = document.createElement('button');
-    button.innerHTML = 'Placeholders';
-    button.className = 'ql-placeholder';
-    button.title = 'Insérer un placeholder';
-    button.onclick = () => {
+    this.button = document.createElement('button');
+    this.button.type = 'button';
+    this.button.className = 'ql-placeholder';
+    this.button.setAttribute('aria-label', 'placeholder');
+    const iconSvg = icons['placeholder'];
+    if (iconSvg) {
+      this.button.innerHTML = iconSvg;
+    }
+    this.button.onclick = e => {
+      e.preventDefault();
+      e.stopPropagation();
       this.toggleDropdown();
     };
-    const container = toolbar.container.querySelector('.ql-formats');
-    if (container) {
-      container.appendChild(button);
+    let container = toolbar.container.querySelector('.ql-formats');
+    if (!container) {
+      container = document.createElement('span');
+      container.className = 'ql-formats';
+      toolbar.container.appendChild(container);
     }
-
-    // Créer le menu déroulant
+    container.appendChild(this.button);
     this.dropdown = document.createElement('div');
     this.dropdown.className = 'ql-placeholder-dropdown';
     this.dropdown.style.display = 'none';
@@ -31,26 +57,25 @@ export class PlaceholderModule {
       const item = document.createElement('div');
       item.className = 'ql-placeholder-item';
       item.innerHTML = ph;
-      item.onclick = () => {
+      item.onclick = e => {
+        e.preventDefault();
+        e.stopPropagation();
         this.insertPlaceholder(ph);
         this.toggleDropdown();
       };
       this.dropdown.appendChild(item);
     });
-    toolbar.container.appendChild(this.dropdown);
+    this.button.parentElement?.appendChild(this.dropdown);
   }
-
-  // Affiche ou cache le menu déroulant
   toggleDropdown() {
     this.dropdown.style.display = this.dropdown.style.display === 'none' ? 'block' : 'none';
   }
-
-  // Insère le placeholder dans l'éditeur
   insertPlaceholder(placeholder) {
     const range = this.quill.getSelection(true);
     if (range) {
-      this.quill.insertText(range.index, `{{${placeholder}}}`);
-      this.quill.setSelection(range.index + placeholder.length + 4, 0);
+      const text = `${this.startTag}${placeholder}${this.endTag}`;
+      this.quill.insertText(range.index, text);
+      this.quill.setSelection(range.index + text.length, 0);
     }
   }
 }
