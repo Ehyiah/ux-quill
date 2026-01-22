@@ -15,6 +15,8 @@ class GalleryModule implements ModuleInterface
     public const LIST_ENDPOINT_OPTION = 'listEndpoint';
     // endpoint to upload images from the gallery
     public const UPLOAD_ENDPOINT_OPTION = 'uploadEndpoint';
+    // endpoint to search images
+    public const SEARCH_ENDPOINT_OPTION = 'searchEndpoint';
     public const ICON_OPTION = 'icon';
 
     public const MESSAGE_LOADING_OPTION = 'messageLoadingOption';
@@ -22,6 +24,7 @@ class GalleryModule implements ModuleInterface
     public const MESSAGE_NO_IMAGE_OPTION = 'messageNoImageOption';
     public const MESSAGE_NEXT_PAGE_OPTION = 'messageNextPageOption';
     public const MESSAGE_PREV_PAGE_OPTION = 'messagePrevPageOption';
+    public const MESSAGE_SEARCH_PLACEHOLDER_OPTION = 'messageSearchPlaceholderOption';
 
     /**
      * @var array<string, string|bool>
@@ -50,6 +53,7 @@ class GalleryModule implements ModuleInterface
         return [
             self::UPLOAD_ENDPOINT_OPTION => '',
             self::LIST_ENDPOINT_OPTION => '',
+            self::SEARCH_ENDPOINT_OPTION => '',
             self::ICON_OPTION => '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
                     <rect x="3" y="4" width="18" height="16" rx="2" ry="2"
                           stroke="currentColor" stroke-width="2" fill="none"/>
@@ -63,6 +67,7 @@ class GalleryModule implements ModuleInterface
             self::MESSAGE_PREV_PAGE_OPTION => '< Previous page',
             self::MESSAGE_ERROR_OPTION => 'Error',
             self::MESSAGE_NO_IMAGE_OPTION => 'No image',
+            self::MESSAGE_SEARCH_PLACEHOLDER_OPTION => 'Search...',
         ];
     }
 }

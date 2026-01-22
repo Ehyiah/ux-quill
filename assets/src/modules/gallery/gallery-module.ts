@@ -5,6 +5,7 @@ import 'styles/gallery/gallery.css';
 type MediaGalleryOptions = {
     uploadEndpoint: string;
     listEndpoint: string;
+    searchEndpoint: string;
     icon: string;
     buttonTitle: string;
     uploadTitle: string;
@@ -13,6 +14,7 @@ type MediaGalleryOptions = {
     messagePrevPageOption: string;
     messageErrorOption: string;
     messageNoImageOption: string;
+    messageSearchPlaceholderOption: string;
 }
 
 export default class GalleryModule {
@@ -25,6 +27,7 @@ export default class GalleryModule {
         this.options = {
             uploadEndpoint: options.uploadEndpoint || '',
             listEndpoint: options.listEndpoint || '',
+            searchEndpoint: options.searchEndpoint || '',
             icon: options.icon,
             buttonTitle: options.buttonTitle || '',
             uploadTitle: options.uploadTitle || '',
@@ -33,6 +36,7 @@ export default class GalleryModule {
             messagePrevPageOption: options.messagePrevPageOption || '',
             messageErrorOption: options.messageErrorOption || '',
             messageNoImageOption: options.messageNoImageOption || '',
+            messageSearchPlaceholderOption: options.messageSearchPlaceholderOption || '',
         }
 
         if (!this.options.listEndpoint) {
@@ -79,6 +83,17 @@ export default class GalleryModule {
 
         const response = await fetch(endpoint);
         if (!response.ok) throw new Error(`Erreur while loading : ${response.statusText}`);
+        return response.json();
+    }
+
+    async search(query) {
+        if (!this.options.searchEndpoint) return this.list();
+
+        const url = new URL(this.options.searchEndpoint, window.location.origin);
+        url.searchParams.append('term', query);
+
+        const response = await fetch(url.toString());
+        if (!response.ok) throw new Error(`Erreur while searching : ${response.statusText}`);
         return response.json();
     }
 }

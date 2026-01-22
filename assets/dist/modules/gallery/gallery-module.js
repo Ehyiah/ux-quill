@@ -9,6 +9,7 @@ export default class GalleryModule {
     this.options = {
       uploadEndpoint: options.uploadEndpoint || '',
       listEndpoint: options.listEndpoint || '',
+      searchEndpoint: options.searchEndpoint || '',
       icon: options.icon,
       buttonTitle: options.buttonTitle || '',
       uploadTitle: options.uploadTitle || '',
@@ -16,7 +17,8 @@ export default class GalleryModule {
       messageNextPageOption: options.messageNextPageOption || '',
       messagePrevPageOption: options.messagePrevPageOption || '',
       messageErrorOption: options.messageErrorOption || '',
-      messageNoImageOption: options.messageNoImageOption || ''
+      messageNoImageOption: options.messageNoImageOption || '',
+      messageSearchPlaceholderOption: options.messageSearchPlaceholderOption || ''
     };
     if (!this.options.listEndpoint) {
       throw new Error('listEndpoint option is mandatory for GalleryModule');
@@ -56,6 +58,14 @@ export default class GalleryModule {
     const endpoint = url || this.options.listEndpoint;
     const response = await fetch(endpoint);
     if (!response.ok) throw new Error(`Erreur while loading : ${response.statusText}`);
+    return response.json();
+  }
+  async search(query) {
+    if (!this.options.searchEndpoint) return this.list();
+    const url = new URL(this.options.searchEndpoint, window.location.origin);
+    url.searchParams.append('term', query);
+    const response = await fetch(url.toString());
+    if (!response.ok) throw new Error(`Erreur while searching : ${response.statusText}`);
     return response.json();
   }
 }

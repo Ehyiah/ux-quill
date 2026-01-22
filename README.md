@@ -351,7 +351,7 @@ Example of how to use modules:
 |  **HtmlEditModule**  |      NO       | The HtmlEditModule allow to edit the raw html. see details on repository [site](https://github.com/benwinding/quill-html-edit-button)                                                                                                                                                                 | htmlEditButton  |    array     |                              https://github.com/benwinding/quill-html-edit-button                               |                                                              see ``Ehyiah\QuillJsBundle\DTO\Modules\htmlEditButton``                                                                   | There is currently a conflict with tableField. Don't use both of them at the same time as the table inserted via the htmlEdit module will not be displayed |
 | **ReadTimeModule**   |      NO       | The ReadTimeModule add an indication on how many minutes it will take to a person to read what your write inside the WYSIWYG editor                                                                                                                                                                   | readingTime  |    array     |                      ``wpm``, ``label``, ``suffix``, ``readTimeOk``, ``readTimeMedium``, ``target``                       |                                                             ['wpm' => '200', 'label' => 'Reading time: ', 'suffix' => ' min read', 'readTimeOk' => '2', 'readTimeMedium' => '5']                                                                    |
 |   **STTModule**      |      NO       | The Speech-to-Text module enables voice dictation using the Web Speech API. Allows users to dictate text directly into the editor with real-time audio visualization                                                                                                                                   |   speechToText  |    array     |    ``language``, ``continuous``, ``visualizer``, ``waveformColor``, ``histogramColor``, ``debug``, ``buttonTitleStart``, ``buttonTitleStop``, ``titleInactive``, ``titleStarting``, ``titleActive``    |                                                                    see ``Ehyiah\QuillJsBundle\DTO\Modules\STTModule``                                                                    |
-| **mediaGalleryModule** |      NO       | A media gallery to allow to pick images from a media gallery   [see more details](#media-gallery-module-details)                                                                                                                                                                                      | mediaGallery  |    array     |                                       `listEndpoint`, `uploadEndpoint`, `icon`                                       |                               see ``Ehyiah\QuillJsBundle\DTO\Modules\GalleryModule``                                                                                                   |
+| **GalleryModule** |      NO       | A media gallery to allow to pick images from a media gallery   [see more details](#media-gallery-module-details)                                                                                                                                                                                      | mediaGallery  |    array     |                                       `listEndpoint`, `uploadEndpoint`, `searchEndpoint`, `icon`                                       |                               see ``Ehyiah\QuillJsBundle\DTO\Modules\GalleryModule``                                                                                                   |
 
 #### ReadTimeModule details
 This module calculates the estimated reading time based on the content of the editor.
@@ -451,6 +451,11 @@ This module is using the built-in configurations upload :
 [configuration](#upload-mode-configuration-) and 
 [upload security](#upload-endpoint-security)
 
+- **searchEndpoint** : the endpoint to search images
+**If not url is provided**, the search bar will not be displayed
+The search term will be passed as a query parameter named `term`.
+The response format is the same as the list endpoint.
+
 - **icon** : the icon to use in the toolbar
 pass a svg icon like others icons customization.
 
@@ -463,15 +468,16 @@ namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/api/media/gallery', name: 'api_media_')]
 class GalleryController extends AbstractController
 {
     #[Route('/list', name: 'api_media_list')]
-    public function list(): JsonResponse
+    public function list(Request $request): JsonResponse
     {
-        $page = (int) ($_GET['page'] ?? 1);
+        $page = $request->get('page', 1);
         $perPage = 10;
         $total = 30;
 
@@ -495,6 +501,39 @@ class GalleryController extends AbstractController
             'links' => [
             'next' => $hasNext ? "$baseUrl?page=" . ($page + 1) : null,
             'prev' => $hasPrev ? "$baseUrl?page=" . ($page - 1) : null,
+            ],
+        ]);
+    }
+
+    #[Route('/search', name: 'api_media_search')]
+    public function search(Request $request): JsonResponse
+    {
+    // This is not actually making a research, but you will se that 5 pages are avaiable instead of 3
+        $term = $request->get('$term', 1);
+        $page = $request->get('page', 1);
+        $perPage = 10;
+        $total = 50;
+
+        $images = [];
+        for ($i = 0; $i < $perPage; $i++) {
+            $id = (($page - 1) * $perPage) + $i + 1;
+            if ($id > $total) break;
+            $images[] = [
+                'url' => sprintf('https://picsum.photos/id/%d/400/400', 10 + $id),
+                'thumbnail' => sprintf('https://picsum.photos/id/%d/200/200', 10 + $id),
+                'title' => "Image #$id",
+            ];
+        }
+
+        $baseUrl = '/api/media/gallery/search?term=' . $term;
+        $hasNext = ($page * $perPage) < $total;
+        $hasPrev = $page > 1;
+
+        return new JsonResponse([
+            'data' => $images,
+            'links' => [
+                'next' => $hasNext ? "$baseUrl&page=" . ($page + 1) : null,
+                'prev' => $hasPrev ? "$baseUrl&page=" . ($page - 1) : null,
             ],
         ]);
     }

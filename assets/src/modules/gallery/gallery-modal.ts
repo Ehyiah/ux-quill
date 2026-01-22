@@ -39,6 +39,12 @@ export default class GalleryModal {
                </label>`
             : '';
 
+        const searchInputHtml = this.module.options.searchEndpoint
+            ? `<div class="quill-media-search">
+                 <input type="text" class="search-input" placeholder="${this.module.options.messageSearchPlaceholderOption}" />
+               </div>`
+            : '';
+
         this.container.innerHTML = `
       <div class="quill-media-window">
         <div class="quill-media-header">
@@ -50,6 +56,7 @@ export default class GalleryModal {
             </svg>
           </button>
         </div>
+        ${searchInputHtml}
         <div class="quill-media-grid" id="media-grid">
           <p style="text-align:center;width:100%">${this.module.options.messageLoadingOption}</p>
         </div>
@@ -73,6 +80,22 @@ export default class GalleryModal {
         this.container.querySelector('.next-btn').addEventListener('click', () => {
             if (this.nextUrl) this.loadImages(this.nextUrl)
         })
+
+        if (this.module.options.searchEndpoint) {
+            const searchInput = this.container.querySelector('.search-input');
+            let timeout = null;
+            searchInput.addEventListener('input', (e) => {
+                const target = e.target as HTMLInputElement;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    if (target.value.trim() === '') {
+                        this.loadImages();
+                    } else {
+                        this.searchImages(target.value);
+                    }
+                }, 300);
+            });
+        }
 
         if (this.module.options.uploadEndpoint) {
             const fileInput = this.container.querySelector('.upload-btn input[type="file"]')
@@ -123,6 +146,27 @@ export default class GalleryModal {
         } catch (e) {
             console.error(e)
             grid.innerHTML = `<p style="color:red;text-align:center;">${this.module.options.messageErrorOption}</p>`
+        }
+    }
+
+    async searchImages(query) {
+        if (!this.container) return;
+
+        const grid = this.container.querySelector('#media-grid');
+        if (!grid) return;
+
+        grid.innerHTML = `<p style="text-align:center;width:100%">${this.module.options.messageLoadingOption}</p>`;
+
+        try {
+            const data = await this.module.search(query);
+            this.images = data.data || [];
+            this.nextUrl = data.links?.next || null;
+            this.prevUrl = data.links?.prev || null;
+            this.renderGrid();
+            this.updatePaginationButtons();
+        } catch (e) {
+            console.error(e);
+            grid.innerHTML = `<p style="color:red;text-align:center;">${this.module.options.messageErrorOption}</p>`;
         }
     }
 
