@@ -18,6 +18,9 @@ export default class GalleryModule {
       messageErrorOption: options.messageErrorOption || '',
       messageNoImageOption: options.messageNoImageOption || ''
     };
+    if (!this.options.listEndpoint) {
+      throw new Error('listEndpoint option is mandatory for GalleryModule');
+    }
     this.modal = new GalleryModal(this);
     this.addToolbarButton();
   }

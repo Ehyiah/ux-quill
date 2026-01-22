@@ -2,6 +2,8 @@
 
 namespace Ehyiah\QuillJsBundle\DTO\Modules;
 
+use InvalidArgumentException;
+
 class GalleryModule implements ModuleInterface
 {
     public const NAME = 'mediaGallery';
@@ -34,6 +36,10 @@ class GalleryModule implements ModuleInterface
         array $options = [],
     ) {
         $this->options = array_merge($this->getDefaultOptions(), $options);
+
+        if (empty($this->options[self::LIST_ENDPOINT_OPTION])) {
+            throw new InvalidArgumentException(sprintf('The option "%s" is mandatory for module "%s".', self::LIST_ENDPOINT_OPTION, self::NAME));
+        }
     }
 
     /**

@@ -427,7 +427,7 @@ public function buildForm(FormBuilderInterface $builder, array $options)
 ### Media gallery module details
 Here is the list of some options for the media gallery module (see full available options in PHP class): 
 
-- **listEndpoint** : the endpoint to get the list of images from
+- **listEndpoint** : the endpoint to get the list of images from. This option is mandatory
 The response from your endpoint must be like this : 
 ```json
 {
