@@ -6,3 +6,22 @@ services:
             - .:/var/www/symfony:cached
             - ./docker/php/php.ini:/usr/local/etc/php/php.ini:delegated
         tty: true
+
+    github-actions:
+        image: ghcr.io/catthehacker/ubuntu:act-latest
+        volumes:
+            - .:/workspace:cached
+            - /var/run/docker.sock:/var/run/docker.sock
+        working_dir: /workspace
+        entrypoint: []
+        command: tail -f /dev/null
+        tty: true
+        environment:
+            - ACT=true
+            - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+        deploy:
+            resources:
+                limits:
+                    memory: 4G
+                reservations:
+                    memory: 2G
