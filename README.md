@@ -425,7 +425,7 @@ public function buildForm(FormBuilderInterface $builder, array $options)
 }
 ```
 ### Media gallery module details
-Here is the list of options for the media gallery module : 
+Here is the list of some options for the media gallery module (see full available options in PHP class): 
 
 - **listEndpoint** : the endpoint to get the list of images from
 The response from your endpoint must be like this : 
@@ -452,6 +452,52 @@ This module is using the built-in configurations upload :
 
 - **icon** : the icon to use in the toolbar
 pass a svg icon like others icons customization.
+
+- example of a listing api endpoint for testing purpose
+```php
+<?php
+
+namespace App\Controller;
+
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Routing\Annotation\Route;
+
+#[Route('/api/media/gallery', name: 'api_media_')]
+class GalleryController extends AbstractController
+{
+    #[Route('/list', name: 'api_media_list')]
+    public function list(): JsonResponse
+    {
+        $page = (int) ($_GET['page'] ?? 1);
+        $perPage = 10;
+        $total = 30;
+
+        $images = [];
+        for ($i = 0; $i < $perPage; $i++) {
+            $id = (($page - 1) * $perPage) + $i + 1;
+            if ($id > $total) break;
+            $images[] = [
+                'url' => sprintf('https://picsum.photos/id/%d/400/400', 10 + $id),
+                'thumbnail' => sprintf('https://picsum.photos/id/%d/200/200', 10 + $id),
+                'title' => "Image #$id",
+            ];
+        }
+
+        $baseUrl = '/api/media/gallery/list';
+        $hasNext = ($page * $perPage) < $total;
+        $hasPrev = $page > 1;
+
+        return new JsonResponse([
+            'data' => $images,
+            'links' => [
+            'next' => $hasNext ? "$baseUrl?page=" . ($page + 1) : null,
+            'prev' => $hasPrev ? "$baseUrl?page=" . ($page - 1) : null,
+            ],
+        ]);
+    }
+}
+```
 
 ### Other modules that need custom JavaScript
 For other modules, you will need to extend Quill controller (see below) to use them as they required custom JavaScript as you cannot configure them in PHP.
