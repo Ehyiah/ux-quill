@@ -27,3 +27,6 @@ Quill.register('modules/readingTime', ReadingTime);
 
 import SpeechToText from './modules/speechToText.ts';
 Quill.register('modules/speechToText', SpeechToText);
+
+import GalleryModule from './modules/gallery/gallery-module.ts'
+Quill.register('modules/mediaGallery', GalleryModule.default || GalleryModule);

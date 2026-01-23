@@ -1,18 +1,5 @@
 import Quill from 'quill';
-
-type SpeechToTextOptions = {
-    language?: string;
-    continuous?: boolean;
-    visualizer?: boolean;
-    waveformColor?: string;
-    histogramColor?: string;
-    debug?: boolean;
-    buttonTitleStart?: string;
-    buttonTitleStop?: string;
-    titleInactive?: string;
-    titleStarting?: string;
-    titleActive?: string;
-};
+import type { SpeechToTextOptions } from '../types.d.ts';
 
 type MaybeRecognition = {
     lang: string;
@@ -187,9 +174,11 @@ export default class SpeechToText {
         }
 
         this.recognition = new SpeechRecognition();
-        this.recognition.lang = this.options.language;
-        this.recognition.continuous = this.options.continuous;
-        this.recognition.interimResults = true;
+        if (this.recognition) {
+            this.recognition.lang = this.options.language || 'en-EN';
+            this.recognition.continuous = this.options.continuous ?? false;
+            this.recognition.interimResults = true;
+        }
 
         this.bindRecognitionEvents();
         this.renderUI();
@@ -202,6 +191,8 @@ export default class SpeechToText {
             if (this.options.debug) {
                 console.log('[SpeechToText] Recognition service started (onstart event)');
             }
+
+            this.dispatch('stt:listening-start', {});
 
             if (this.options.visualizer) {
                 try {
@@ -236,6 +227,9 @@ export default class SpeechToText {
                 if (this.options.debug) {
                     console.log('[SpeechToText] Interim result:', interimText);
                 }
+
+                this.dispatch('stt:result', { text: interimText, isFinal: false });
+
                 if (this.labelEl) {
                     this.labelEl.textContent = `STT: ${this.options.titleActive} ${interimText}`;
                 }
@@ -245,6 +239,9 @@ export default class SpeechToText {
                 if (this.options.debug) {
                     console.log('[SpeechToText] segment final:', finalText);
                 }
+
+                this.dispatch('stt:result', { text: finalText, isFinal: true });
+
                 this.insertFinalTranscript(finalText);
                 if (this.labelEl) {
                     this.labelEl.textContent = `STT: ${this.options.titleActive}`;
@@ -253,7 +250,11 @@ export default class SpeechToText {
         };
 
         this.recognition.onerror = (event: any) => {
-            console.error('[SpeechToText] Voice recognition failed:', event?.error || event);
+            const error = event?.error || event;
+            console.error('[SpeechToText] Voice recognition failed:', error);
+
+            this.dispatch('stt:error', { error });
+
             this.updateUIState('inactive');
             this.stopVisualizer();
         };
@@ -262,6 +263,8 @@ export default class SpeechToText {
             if (this.options.debug) {
                 console.log('[SpeechToText] Recognition service ended (onend event)');
             }
+
+            this.dispatch('stt:listening-stop', {});
 
             if (this.options.continuous && this.currentSttState === 'listening') {
                 if (this.options.debug) {
@@ -286,12 +289,6 @@ export default class SpeechToText {
         };
     }
 
-    private insertTranscript(text: string) {
-        const sel = this.quill.getSelection(true);
-        const index = sel ? sel.index : this.quill.getLength();
-        this.quill.insertText(index, text, 'user');
-        this.quill.setSelection(index + text.length, 0, 'user');
-    }
 
     private insertFinalTranscript(text: string) {
         const baseIndex = this.dictationAnchorIndex ?? this.quill.getLength();
@@ -313,8 +310,8 @@ export default class SpeechToText {
 
         const bar = document.createElement('div');
         bar.className = 'ql-stt-bar';
-        bar.style.setProperty('--stt-accent', this.options.histogramColor);
-        bar.style.setProperty('--stt-accent-2', this.options.waveformColor);
+        bar.style.setProperty('--stt-accent', this.options.histogramColor || '#25D366');
+        bar.style.setProperty('--stt-accent-2', this.options.waveformColor || '#4285f4');
 
         const label = document.createElement('span');
         label.className = 'ql-stt-label';
@@ -588,5 +585,13 @@ export default class SpeechToText {
         } else {
             this.stopRecognitionService();
         }
+    }
+
+    private dispatch(name: string, detail: any) {
+        this.quill.container.dispatchEvent(new CustomEvent(`quill:${name}`, {
+            bubbles: true,
+            cancelable: true,
+            detail: detail
+        }));
     }
 }

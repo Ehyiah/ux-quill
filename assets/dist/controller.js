@@ -56,6 +56,7 @@ export default class extends Controller {
       'toolbar': this.toolbarOptionsValue
     };
     const mergedModules = mergeModules(this.modulesOptionsValue, enabledModules);
+    this.enrichGalleryModule(mergedModules);
     return {
       debug,
       modules: mergedModules,
@@ -64,6 +65,18 @@ export default class extends Controller {
       style,
       readOnly
     };
+  }
+  enrichGalleryModule(modules) {
+    if (modules['mediaGallery']) {
+      const galleryOptions = modules['mediaGallery'];
+      const uploadConfig = this.extraOptionsValue.upload_handler;
+      if (uploadConfig) {
+        galleryOptions.uploadEndpoint = galleryOptions.uploadEndpoint || uploadConfig.upload_endpoint;
+        galleryOptions.uploadStrategy = galleryOptions.uploadStrategy || uploadConfig.type;
+        galleryOptions.authConfig = galleryOptions.authConfig || uploadConfig.security;
+        galleryOptions.jsonResponseFilePath = galleryOptions.jsonResponseFilePath || uploadConfig.json_response_file_path;
+      }
+    }
   }
   setupQuillStyles(options) {
     if (options.style === 'inline') {

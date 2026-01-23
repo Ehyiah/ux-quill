@@ -87,6 +87,10 @@ export default class ReadingTime {
       this.setStyle('#c62828', '#ffebee');
     }
     this.targetElement.textContent = `${this.label}${minutes}${this.suffix}`;
+    this.dispatch('reading-time:update', {
+      minutes,
+      words
+    });
     if (this.toolbarContainer && !this.targetIsCustom) {
       const width = Math.ceil(this.targetElement.getBoundingClientRect().width);
       this.toolbarContainer.style.paddingRight = `${width + 12}px`; // 12px marge
@@ -104,5 +108,12 @@ export default class ReadingTime {
       this.targetElement.parentNode.removeChild(this.targetElement);
     }
     window.removeEventListener('resize', this.onWindowResize);
+  }
+  dispatch(name, detail) {
+    this.quill.container.dispatchEvent(new CustomEvent(`quill:${name}`, {
+      bubbles: true,
+      cancelable: true,
+      detail: detail
+    }));
   }
 }
