@@ -85,8 +85,8 @@ class QuillType extends AbstractType
                                     'custom_header' => null,
                                     'custom_header_value' => null,
                                 ]);
-                                $securityResolver->setAllowedTypes('type', ['string']);
-                                $securityResolver->setAllowedValues('type', ['basic', 'jwt']);
+                                $securityResolver->setAllowedTypes('type', ['string', 'null']);
+                                $securityResolver->setAllowedValues('type', ['basic', 'jwt', 'custom_header', null]);
                                 $securityResolver->setAllowedTypes('jwt_token', ['string', 'null']);
                                 $securityResolver->setAllowedTypes('username', ['string', 'null']);
                                 $securityResolver->setAllowedTypes('password', ['string', 'null']);
@@ -99,7 +99,6 @@ class QuillType extends AbstractType
                         $spoolResolver->setAllowedTypes('upload_endpoint', ['string', 'null']);
                         $spoolResolver->setAllowedTypes('json_response_file_path', ['string', 'null']);
                         $spoolResolver->setAllowedTypes('security', ['array', 'null']);
-                        $spoolResolver->setDefault('security', null);
                     })
                 ;
                 $extraResolver
