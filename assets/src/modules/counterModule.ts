@@ -1,13 +1,5 @@
 import Quill from 'quill';
-
-type CountOptions = {
-    words?: boolean;
-    words_label?: string;
-    words_container?: string;
-    characters?: boolean;
-    characters_label?: string;
-    characters_container?: string;
-}
+import type { CountOptions } from '../types.d.ts';
 
 export class Counter {
     quillContainer: HTMLElement;

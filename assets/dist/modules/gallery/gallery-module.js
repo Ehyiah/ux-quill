@@ -10,7 +10,7 @@ export default class GalleryModule {
       uploadEndpoint: options.uploadEndpoint || '',
       listEndpoint: options.listEndpoint || '',
       searchEndpoint: options.searchEndpoint || '',
-      icon: options.icon,
+      icon: options.icon || '',
       buttonTitle: options.buttonTitle || '',
       uploadTitle: options.uploadTitle || '',
       messageLoadingOption: options.messageLoadingOption || '',
@@ -36,8 +36,12 @@ export default class GalleryModule {
     const button = document.createElement('button');
     button.type = 'button';
     button.classList.add('ql-gallery');
-    button.innerHTML = this.options.icon;
-    button.title = this.options.buttonTitle;
+    if (this.options.icon != null) {
+      button.innerHTML = this.options.icon;
+    }
+    if (this.options.buttonTitle != null) {
+      button.title = this.options.buttonTitle;
+    }
     button.addEventListener('click', () => this.open());
     const group = document.createElement('span');
     group.classList.add('ql-formats');

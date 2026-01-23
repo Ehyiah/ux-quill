@@ -1,13 +1,5 @@
 import Quill from 'quill';
-
-export interface ReadingTimeOptions {
-    wpm?: number;
-    label?: string;
-    suffix?: string;
-    target?: string;
-    readTimeOk?: number;
-    readTimeMedium?: number;
-}
+import type { ReadingTimeOptions } from '../types.d.ts';
 
 export default class ReadingTime {
     private quill: Quill;

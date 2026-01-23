@@ -1,7 +1,7 @@
 import { Controller } from '@hotwired/stimulus';
 import Quill from 'quill';
 import * as Options from 'quill/core/quill';
-import { ExtraOptions, ModuleOptions } from './types.d.ts';
+import type { ExtraOptions, ModuleOptions } from './types.d.ts';
 import mergeModules from './modules.ts';
 import { ToolbarCustomizer } from './ui/toolbarCustomizer.ts';
 import { handleUploadResponse, uploadStrategies } from './upload-utils.ts';
@@ -20,7 +20,7 @@ interface DOMNode extends HTMLElement {
 const Image = Quill.import('formats/image');
 const oldFormats = Image.formats;
 
-Image.formats = function(domNode: DOMNode) {
+Image.formats = function (domNode: DOMNode) {
     const formats = oldFormats.call(this, domNode);
     if (domNode.hasAttribute('style')) {
         formats.style = domNode.getAttribute('style');
@@ -33,7 +33,7 @@ type ImageWithDOM = {
     format(name: string, value: string | boolean | null): void;
 };
 
-Image.prototype.format = function(this: ImageWithDOM, name: string, value: string | boolean | null) {
+Image.prototype.format = function (this: ImageWithDOM, name: string, value: string | boolean | null) {
     value ? this.domNode.setAttribute(name, String(value)) : this.domNode.removeAttribute(name);
 };
 

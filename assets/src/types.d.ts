@@ -23,9 +23,59 @@ export type UploadOptions = {
     security?: AuthConfig;
 }
 
+export type MediaGalleryOptions = {
+    listEndpoint: string;
+    uploadEndpoint?: string;
+    searchEndpoint?: string;
+    icon?: string;
+    buttonTitle?: string;
+    uploadTitle?: string;
+    messageLoadingOption?: string;
+    messageNextPageOption?: string;
+    messagePrevPageOption?: string;
+    messageErrorOption?: string;
+    messageNoImageOption?: string;
+    messageSearchPlaceholderOption?: string;
+    authConfig?: AuthConfig;
+    jsonResponseFilePath?: string;
+    uploadStrategy?: 'form' | 'json';
+}
+
+export interface ReadingTimeOptions {
+    wpm?: number;
+    label?: string;
+    suffix?: string;
+    target?: string;
+    readTimeOk?: number;
+    readTimeMedium?: number;
+}
+
+export type SpeechToTextOptions = {
+    language?: string;
+    continuous?: boolean;
+    visualizer?: boolean;
+    waveformColor?: string;
+    histogramColor?: string;
+    debug?: boolean;
+    buttonTitleStart?: string;
+    buttonTitleStop?: string;
+    titleInactive?: string;
+    titleStarting?: string;
+    titleActive?: string;
+};
+
+export type CountOptions = {
+    words?: boolean;
+    words_label?: string;
+    words_container?: string;
+    characters?: boolean;
+    characters_label?: string;
+    characters_container?: string;
+}
+
 export interface ModuleInterface {
     name: string;
-    options: any;
+    options: any | MediaGalleryOptions | ReadingTimeOptions | SpeechToTextOptions | CountOptions;
 }
 
 export type ModuleOptions = ModuleInterface[];

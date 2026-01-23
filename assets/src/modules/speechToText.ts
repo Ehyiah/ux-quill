@@ -1,18 +1,5 @@
 import Quill from 'quill';
-
-type SpeechToTextOptions = {
-    language?: string;
-    continuous?: boolean;
-    visualizer?: boolean;
-    waveformColor?: string;
-    histogramColor?: string;
-    debug?: boolean;
-    buttonTitleStart?: string;
-    buttonTitleStop?: string;
-    titleInactive?: string;
-    titleStarting?: string;
-    titleActive?: string;
-};
+import type { SpeechToTextOptions } from '../types.d.ts';
 
 type MaybeRecognition = {
     lang: string;
