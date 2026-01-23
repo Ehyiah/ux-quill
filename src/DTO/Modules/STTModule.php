@@ -7,8 +7,6 @@ final class STTModule implements ModuleInterface
     public const NAME = 'speechToText';
 
     public function __construct(
-        public string $name = self::NAME,
-
         /**
          * @var array<string, string|string[]|bool>
          */
@@ -79,6 +77,7 @@ final class STTModule implements ModuleInterface
              */
             'titleStarting' => 'Starting...',
         ],
+        public string $name = self::NAME,
     ) {
     }
 }

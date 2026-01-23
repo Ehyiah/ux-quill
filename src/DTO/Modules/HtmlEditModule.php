@@ -22,7 +22,6 @@ final class HtmlEditModule implements ModuleInterface
     public const SYNTAX_OPTION = 'syntax';
 
     public function __construct(
-        public string $name = self::NAME,
         /**
          * @var array<mixed>|int|string
          */
@@ -36,6 +35,7 @@ final class HtmlEditModule implements ModuleInterface
             self::OK_TEXT_OPTION => 'Save',
             self::CANCEL_TEXT_OPTION => 'Cancel',
         ],
+        public string $name = self::NAME,
     ) {
     }
 }

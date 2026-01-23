@@ -13,12 +13,12 @@ final class HistoryModule implements ModuleInterface
      * @param array<string, string> $options
      */
     public function __construct(
-        public string $name = self::NAME,
         public $options = [
             'delay' => '1000',
             'maxStack' => '100',
             'userOnly' => 'false',
         ],
+        public string $name = self::NAME,
     ) {
     }
 }

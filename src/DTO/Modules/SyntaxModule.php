@@ -13,8 +13,8 @@ class SyntaxModule implements ModuleInterface
      * @param string $options
      */
     public function __construct(
-        public string $name = self::NAME,
         public $options = 'true',
+        public string $name = self::NAME,
     ) {
     }
 }

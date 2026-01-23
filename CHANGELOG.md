@@ -1,3 +1,9 @@
+# 4.0.0 Break-changes
+When using modules, construct properties order has been inversed. 
+
+If you were not using named parameters, you had to give as the first argument the module name. Now you must pass the options as the first argument. so the name become optionnal and is passed by default.
+
+
 # 3.0.0 Break-changes
 
 ## PHP modifications

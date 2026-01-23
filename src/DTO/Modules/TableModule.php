@@ -26,7 +26,6 @@ final class TableModule implements ModuleInterface
     public const LANGUAGE_OPTION_TR_TR = 'tr_TR';
 
     public function __construct(
-        public string $name = self::NAME,
         /**
          * @var array<string, string|string[]>
          */
@@ -35,6 +34,7 @@ final class TableModule implements ModuleInterface
             self::LANGUAGE_TOOLBAR_TABLE_OPTION => 'true', // must be set to true to show the table toolbar options
             self::LANGUAGE_OPTION => self::LANGUAGE_OPTION_EN_US,
         ],
+        public string $name = self::NAME,
     ) {
     }
 }

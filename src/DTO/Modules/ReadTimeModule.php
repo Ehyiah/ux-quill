@@ -34,7 +34,6 @@ final class ReadTimeModule implements ModuleInterface
     public const CONTAINER_TARGET = 'target';
 
     public function __construct(
-        public string $name = self::NAME,
         /**
          * @var array<string, string|string[]>
          */
@@ -45,6 +44,7 @@ final class ReadTimeModule implements ModuleInterface
             self::READING_TIME_MINUTES_GREEN_OPTION => '5',
             self::READING_TIME_MINUTES_ORANGE_OPTION => '8',
         ],
+        public string $name = self::NAME,
     ) {
     }
 }

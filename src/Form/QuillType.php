@@ -15,6 +15,7 @@ use Ehyiah\QuillJsBundle\DTO\Modules\TableModule;
 use Ehyiah\QuillJsBundle\DTO\Options\DebugOption;
 use Ehyiah\QuillJsBundle\DTO\Options\StyleOption;
 use Ehyiah\QuillJsBundle\DTO\Options\ThemeOption;
+use Ehyiah\QuillJsBundle\DTO\Options\UploadHandlerOption;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormInterface;
@@ -73,7 +74,7 @@ class QuillType extends AbstractType
                 $extraResolver
                     ->setDefault('upload_handler', function (OptionsResolver $spoolResolver): void {
                         $spoolResolver->setDefaults([
-                            'type' => 'form',
+                            'type' => UploadHandlerOption::UPLOADER_TYPE_OPTION_FORM_DATA,
                             'upload_endpoint' => null,
                             'json_response_file_path' => null,
                             'security' => function (OptionsResolver $securityResolver) {
@@ -86,7 +87,7 @@ class QuillType extends AbstractType
                                     'custom_header_value' => null,
                                 ]);
                                 $securityResolver->setAllowedTypes('type', ['string']);
-                                $securityResolver->setAllowedValues('type', ['basic', 'jwt']);
+                                $securityResolver->setAllowedValues('type', [UploadHandlerOption::UPLOADER_SECURITY_BASIC, UploadHandlerOption::UPLOADER_SECURITY_JWT, UploadHandlerOption::UPLOADER_SECURITY_CUSTOM_HEADER]);
                                 $securityResolver->setAllowedTypes('jwt_token', ['string', 'null']);
                                 $securityResolver->setAllowedTypes('username', ['string', 'null']);
                                 $securityResolver->setAllowedTypes('password', ['string', 'null']);
@@ -95,7 +96,7 @@ class QuillType extends AbstractType
                             },
                         ]);
                         $spoolResolver->setAllowedTypes('type', ['string', 'null']);
-                        $spoolResolver->setAllowedValues('type', ['json', 'form', null]);
+                        $spoolResolver->setAllowedValues('type', [UploadHandlerOption::UPLOADER_TYPE_OPTION_JSON, UploadHandlerOption::UPLOADER_TYPE_OPTION_FORM_DATA, null]);
                         $spoolResolver->setAllowedTypes('upload_endpoint', ['string', 'null']);
                         $spoolResolver->setAllowedTypes('json_response_file_path', ['string', 'null']);
                         $spoolResolver->setAllowedTypes('security', ['array', 'null']);

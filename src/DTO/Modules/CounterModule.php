@@ -10,7 +10,6 @@ class CounterModule implements ModuleInterface
      * @param array<string, string|bool> $options
      */
     public function __construct(
-        public string $name = self::NAME,
         public $options = [
             'words' => true,
             'words_label' => 'Number of words : ',
@@ -19,6 +18,7 @@ class CounterModule implements ModuleInterface
             'characters_label' => 'Number of characters : ',
             'characters_container' => '',
         ],
+        public string $name = self::NAME,
     ) {
     }
 }
