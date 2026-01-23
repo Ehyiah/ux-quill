@@ -3,7 +3,7 @@ import GalleryModule from './gallery-module';
 
 export default class GalleryModal {
     private module: GalleryModule;
-    private container: HTMLDivElement|null;
+    private container: HTMLDivElement | null;
     private nextUrl: null;
     private prevUrl: null;
     private images: any[];
@@ -105,7 +105,8 @@ export default class GalleryModal {
 
                 fileInput.disabled = true;
                 try {
-                    const response = await uploadStrategies['form'](
+                    const strategy = this.module.options.uploadStrategy || 'form';
+                    const response = await uploadStrategies[strategy](
                         this.module.options.uploadEndpoint,
                         file,
                         this.module.options.authConfig

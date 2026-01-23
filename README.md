@@ -393,7 +393,6 @@ It displays the result in the toolbar by default, or in a specific element if ta
 | **titleActive**      | string  | Label text displayed in the STT bar during active listening                                                       | 'Listening...'     | Any string                                        |
 
 #### Example of STTModule usage:
-
 ```php
 use Ehyiah\QuillJsBundle\Form\QuillType;
 use Ehyiah\QuillJsBundle\DTO\Modules\STTModule;
@@ -424,6 +423,8 @@ public function buildForm(FormBuilderInterface $builder, array $options)
     ;
 }
 ```
+
+
 ### Media gallery module details
 Here is the list of some options for the media gallery module (see full available options in PHP class): 
 
@@ -445,19 +446,17 @@ The response from your endpoint must be like this :
 }
 ```
 
-- **uploadEndpoint** : the endpoint to upload an image
-**If not url is provided**, the button will not be displayed
-This module is using the built-in configurations upload :
-[configuration](#upload-mode-configuration-) and 
-[upload security](#upload-endpoint-security)
+- **searchEndpoint** : the endpoint to search images. If no url is provided, the search bar will not be displayed.
+  The search term will be passed as a query parameter named `term`.
+  The response format is the same as the list endpoint.
+- **icon** : the icon to use in the toolbar pass a svg icon like others icons customization.
 
-- **searchEndpoint** : the endpoint to search images
-**If not url is provided**, the search bar will not be displayed
-The search term will be passed as a query parameter named `term`.
-The response format is the same as the list endpoint.
+- **uploadEndpoint**, **uploadStrategy**, **authConfig**, **jsonResponseFilePath** : 
+By default, these options **automatically inherit** from the global `upload_handler` configuration defined in `quill_extra_options`.
+However, you can override them specifically for the gallery module if needed.
 
-- **icon** : the icon to use in the toolbar
-pass a svg icon like others icons customization.
+- **uploadEndpoint** : the endpoint to upload an image. If no url is provided (globally or locally), the upload button will not be displayed.
+- **uploadStrategy** : 'form' (default) or 'json'.
 
 
 - example of a listing api endpoint for testing purpose
@@ -508,8 +507,8 @@ class GalleryController extends AbstractController
     #[Route('/search', name: 'api_media_search')]
     public function search(Request $request): JsonResponse
     {
-    // This is not actually making a research, but you will se that 5 pages are avaiable instead of 3
-        $term = $request->get('$term', 1);
+    // This is not actually making a research, but you will see that 5 pages are available instead of 3
+        $term = $request->get('term', 1);
         $page = $request->get('page', 1);
         $perPage = 10;
         $total = 50;

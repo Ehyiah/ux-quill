@@ -1,3 +1,4 @@
+import { AuthConfig } from './../../upload-utils.ts';
 import GalleryModal from './gallery-modal.ts';
 import Quill from 'quill';
 import 'styles/gallery/gallery.css';
@@ -15,6 +16,9 @@ type MediaGalleryOptions = {
     messageErrorOption: string;
     messageNoImageOption: string;
     messageSearchPlaceholderOption: string;
+    authConfig?: AuthConfig;
+    jsonResponseFilePath?: string;
+    uploadStrategy?: 'form' | 'json';
 }
 
 export default class GalleryModule {
@@ -37,6 +41,9 @@ export default class GalleryModule {
             messageErrorOption: options.messageErrorOption || '',
             messageNoImageOption: options.messageNoImageOption || '',
             messageSearchPlaceholderOption: options.messageSearchPlaceholderOption || '',
+            authConfig: options.authConfig,
+            jsonResponseFilePath: options.jsonResponseFilePath,
+            uploadStrategy: options.uploadStrategy || 'form',
         }
 
         if (!this.options.listEndpoint) {

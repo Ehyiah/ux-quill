@@ -87,7 +87,8 @@ export default class GalleryModal {
         if (!file) return;
         fileInput.disabled = true;
         try {
-          const response = await uploadStrategies['form'](this.module.options.uploadEndpoint, file, this.module.options.authConfig);
+          const strategy = this.module.options.uploadStrategy || 'form';
+          const response = await uploadStrategies[strategy](this.module.options.uploadEndpoint, file, this.module.options.authConfig);
           await handleUploadResponse(response, this.module.options.jsonResponseFilePath);
           await this.loadImages();
         } catch (e) {

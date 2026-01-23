@@ -82,6 +82,8 @@ export default class extends Controller {
         };
         const mergedModules = mergeModules(this.modulesOptionsValue, enabledModules);
 
+        this.enrichGalleryModule(mergedModules);
+
         return {
             debug,
             modules: mergedModules,
@@ -90,6 +92,20 @@ export default class extends Controller {
             style,
             readOnly,
         };
+    }
+
+    private enrichGalleryModule(modules: any) {
+        if (modules['mediaGallery']) {
+            const galleryOptions = modules['mediaGallery'];
+            const uploadConfig = this.extraOptionsValue.upload_handler;
+
+            if (uploadConfig) {
+                galleryOptions.uploadEndpoint = galleryOptions.uploadEndpoint || uploadConfig.upload_endpoint;
+                galleryOptions.uploadStrategy = galleryOptions.uploadStrategy || uploadConfig.type;
+                galleryOptions.authConfig = galleryOptions.authConfig || uploadConfig.security;
+                galleryOptions.jsonResponseFilePath = galleryOptions.jsonResponseFilePath || uploadConfig.json_response_file_path;
+            }
+        }
     }
 
     private setupQuillStyles(options: Options) {
@@ -140,7 +156,7 @@ export default class extends Controller {
 
     private setupContentSync(quill: Quill) {
         // set initial content as a delta for better compatibility and allow table-module to work
-        const initialData = quill.clipboard.convert({html: this.inputTarget.value})
+        const initialData = quill.clipboard.convert({ html: this.inputTarget.value })
         this.dispatchEvent('hydrate:before', initialData);
         quill.updateContents(initialData);
         this.dispatchEvent('hydrate:after', quill);
@@ -156,8 +172,7 @@ export default class extends Controller {
         });
     }
 
-    private bubbles(inputContent: HTMLInputElement)
-    {
+    private bubbles(inputContent: HTMLInputElement) {
         inputContent.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
@@ -187,8 +202,7 @@ export default class extends Controller {
         }
     }
 
-    private dynamicModuleRegister(options: Options)
-    {
+    private dynamicModuleRegister(options: Options) {
         const isTablePresent = options.modules.toolbar
             .flat(Infinity)
             .some(item => typeof item === 'string' && item === 'table-better');

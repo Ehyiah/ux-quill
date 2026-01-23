@@ -18,7 +18,10 @@ export default class GalleryModule {
       messagePrevPageOption: options.messagePrevPageOption || '',
       messageErrorOption: options.messageErrorOption || '',
       messageNoImageOption: options.messageNoImageOption || '',
-      messageSearchPlaceholderOption: options.messageSearchPlaceholderOption || ''
+      messageSearchPlaceholderOption: options.messageSearchPlaceholderOption || '',
+      authConfig: options.authConfig,
+      jsonResponseFilePath: options.jsonResponseFilePath,
+      uploadStrategy: options.uploadStrategy || 'form'
     };
     if (!this.options.listEndpoint) {
       throw new Error('listEndpoint option is mandatory for GalleryModule');
