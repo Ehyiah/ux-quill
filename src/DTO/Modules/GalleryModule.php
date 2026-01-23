@@ -31,12 +31,12 @@ class GalleryModule implements ModuleInterface
     public const JSON_RESPONSE_FILE_PATH_OPTION = 'jsonResponseFilePath';
 
     /**
-     * @var array<string, string|bool>
+     * @var array<string, string|bool|null>
      */
     public array $options;
 
     /**
-     * @param array<string, string|bool> $options
+     * @param array<string, string|bool|null> $options
      */
     public function __construct(
         public string $name = self::NAME,
@@ -50,7 +50,7 @@ class GalleryModule implements ModuleInterface
     }
 
     /**
-     * @return array<string, string|bool>
+     * @return array<string, string|bool|null>
      */
     private function getDefaultOptions(): array
     {

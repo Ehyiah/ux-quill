@@ -1,30 +1,31 @@
-import {AuthConfig} from './upload-utils';
+import { AuthConfig } from './upload-utils.ts';
 
 export type ExtraOptions = {
     theme: string;
-    debug: string|null;
-    height: string|null;
-    placeholder: string|null;
-    upload_handler: uploadOptions;
-    style: string;
+    debug: 'error' | 'warn' | 'log' | 'info' | null;
+    height: string | null;
+    placeholder: string | null;
+    upload_handler: UploadOptions;
+    style: 'class' | 'inline';
     use_semantic_html: boolean;
-    custom_icons?: {[key: string]: string};
+    custom_icons?: { [key: string]: string };
     read_only: boolean;
+    assets?: {
+        styleSheets?: string[] | { [key: string]: string };
+        scripts?: string[] | { [key: string]: string };
+    };
 }
 
-export type uploadOptions = {
-    type: string;
-    upload_endpoint: null|string;
-    json_response_file_path: null|string;
-    security?: AuthConfig
+export type UploadOptions = {
+    type: 'form' | 'json';
+    upload_endpoint: null | string;
+    json_response_file_path: null | string;
+    security?: AuthConfig;
 }
 
-interface ModuleInterface {
+export interface ModuleInterface {
     name: string;
-    options: string|Array<any>;
+    options: any;
 }
 
-export type ModuleOptions = {
-    name: string;
-    options: Array<ModuleInterface>
-}
+export type ModuleOptions = ModuleInterface[];
