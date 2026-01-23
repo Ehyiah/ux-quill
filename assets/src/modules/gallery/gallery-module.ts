@@ -4,7 +4,7 @@ import Quill from 'quill';
 import 'styles/gallery/gallery.css';
 
 export default class GalleryModule {
-    private quill: Quill;
+    public quill: Quill;
     public options: MediaGalleryOptions;
     private modal: GalleryModal;
 

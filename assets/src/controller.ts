@@ -17,7 +17,7 @@ interface DOMNode extends HTMLElement {
     hasAttribute(name: string): boolean;
 }
 
-const Image = Quill.import('formats/image');
+const Image = Quill.import('formats/image') as any;
 const oldFormats = Image.formats;
 
 Image.formats = function (domNode: DOMNode) {

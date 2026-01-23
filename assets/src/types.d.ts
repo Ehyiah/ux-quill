@@ -1,4 +1,4 @@
-import { AuthConfig } from './upload-utils.ts';
+import { AuthConfig } from './upload-utils';
 
 export type ExtraOptions = {
     theme: string;

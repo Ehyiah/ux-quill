@@ -14,10 +14,16 @@ export default class GalleryModal {
   }
   async open() {
     this.renderModal();
+    this.dispatch('gallery:open', {
+      modal: this.container
+    });
     await this.loadImages();
   }
   close() {
     if (this.container) {
+      this.dispatch('gallery:close', {
+        modal: this.container
+      });
       this.container.remove();
       this.container = null;
     }
@@ -89,7 +95,11 @@ export default class GalleryModal {
         try {
           const strategy = this.module.options.uploadStrategy || 'form';
           const response = await uploadStrategies[strategy](this.module.options.uploadEndpoint, file, this.module.options.authConfig);
-          await handleUploadResponse(response, this.module.options.jsonResponseFilePath);
+          const res = await handleUploadResponse(response, this.module.options.jsonResponseFilePath);
+          this.dispatch('gallery:upload-success', {
+            response: res,
+            file
+          });
           await this.loadImages();
         } catch (e) {
           console.error('Error upload :', e);
@@ -156,6 +166,9 @@ export default class GalleryModal {
       image.classList.add('quill-media-item', 'fade-in');
       image.addEventListener('click', () => {
         this.module.insertImage(img.url);
+        this.dispatch('gallery:image-inserted', {
+          image: img
+        });
         this.close();
       });
       grid.appendChild(image);
@@ -166,5 +179,12 @@ export default class GalleryModal {
     const next = this.container.querySelector('.next-btn');
     prev.disabled = !this.prevUrl;
     next.disabled = !this.nextUrl;
+  }
+  dispatch(name, detail) {
+    this.module.quill.container.dispatchEvent(new CustomEvent(`quill:${name}`, {
+      bubbles: true,
+      cancelable: true,
+      detail: detail
+    }));
   }
 }

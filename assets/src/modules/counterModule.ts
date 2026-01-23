@@ -25,7 +25,7 @@ export class Counter {
     }
 
     private createContainer(containerId: string | undefined): HTMLDivElement {
-        let container: HTMLDivElement | null;
+        let container: HTMLDivElement | null = null;
         if (containerId) {
             try {
                 container = document.querySelector('#' + containerId);
@@ -49,7 +49,12 @@ export class Counter {
     private count(quill: Quill, container: HTMLDivElement, label: string, countFunction: (text: string) => number) {
         const updateCount = () => {
             const text = quill.getText();
-            container.innerText = label + countFunction(text);
+            const value = countFunction(text);
+            container.innerText = label + value;
+
+            // Dispatch event with specific name based on label/function
+            const type = countFunction === this.countWords ? 'words' : 'characters';
+            this.dispatch(`counter:${type}-update`, { value });
         };
 
         updateCount();
@@ -63,5 +68,13 @@ export class Counter {
 
     private countCharacters(text: string): number {
         return text.length;
+    }
+
+    private dispatch(name: string, detail: any) {
+        this.quillContainer.dispatchEvent(new CustomEvent(`quill:${name}`, {
+            bubbles: true,
+            cancelable: true,
+            detail: detail
+        }));
     }
 }
