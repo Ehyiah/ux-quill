@@ -18,3 +18,6 @@ import ReadingTime from "./modules/readtimeModule.js";
 Quill.register('modules/readingTime', ReadingTime);
 import SpeechToText from "./modules/speechToText.js";
 Quill.register('modules/speechToText', SpeechToText);
+import { PlaceholderModule } from "./modules/placeHolderModule/placeHolderModule.js";
+// import './modules/placeHolderModule/placeHolderModule.css';
+Quill.register('modules/placeholder', PlaceholderModule);

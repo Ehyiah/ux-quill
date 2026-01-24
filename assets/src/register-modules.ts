@@ -27,3 +27,7 @@ Quill.register('modules/readingTime', ReadingTime);
 
 import SpeechToText from './modules/speechToText.ts';
 Quill.register('modules/speechToText', SpeechToText);
+
+import {PlaceholderModule} from './modules/placeHolderModule/placeHolderModule.ts';
+// import './modules/placeHolderModule/placeHolderModule.css';
+Quill.register('modules/placeholder', PlaceholderModule);
