@@ -69,14 +69,14 @@ class QuillType extends AbstractType
             'error_bubbling' => true,
             'quill_options' => [['bold', 'italic']],
             'modules' => [],
-            'quill_extra_options' => function (OptionsResolver $extraResolver) {
+            'quill_extra_options' => static function (OptionsResolver $extraResolver) {
                 $extraResolver
-                    ->setDefault('upload_handler', function (OptionsResolver $spoolResolver): void {
+                    ->setDefault('upload_handler', static function (OptionsResolver $spoolResolver): void {
                         $spoolResolver->setDefaults([
                             'type' => 'form',
                             'upload_endpoint' => null,
                             'json_response_file_path' => null,
-                            'security' => function (OptionsResolver $securityResolver) {
+                            'security' => static function (OptionsResolver $securityResolver) {
                                 $securityResolver->setDefaults([
                                     'type' => null,
                                     'jwt_token' => null,
@@ -109,7 +109,7 @@ class QuillType extends AbstractType
                 $extraResolver
                     ->setDefault('height', '200px')
                     ->setAllowedTypes('height', ['string', 'null'])
-                    ->setAllowedValues('height', function (?string $value) {
+                    ->setAllowedValues('height', static function (?string $value) {
                         if (null === $value) {
                             return true;
                         }
@@ -157,7 +157,7 @@ class QuillType extends AbstractType
         $resolver->setAllowedTypes('quill_options', ['array']);
         $resolver->setAllowedTypes('quill_extra_options', ['array', 'callable']);
         $resolver->setAllowedTypes('modules', ['array']);
-        $resolver->setAllowedValues('modules', function (array $values) {
+        $resolver->setAllowedValues('modules', static function (array $values) {
             foreach ($values as $value) {
                 if (!$value instanceof ModuleInterface) {
                     return false;

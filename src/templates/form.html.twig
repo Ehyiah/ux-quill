@@ -24,17 +24,18 @@
          {{ data_set }}-extra-options-value="{{ attr['quill_extra_options'] }}"
          {{ data_set }}-modules-options-value="{{ attr['quill_modules_options'] }}"
     >
-        <div>
-            <input type="hidden"
-                    value="{{ value }}"
-                   {{ block('widget_attributes') }}
-                   {{ data_set }}-target="input"
-            >
-        </div>
 
         <div
             data-live-ignore {# necessary when using live component because otherwise quill instance is not re-attached after live component reload the DOM #}
         >
+            <div>
+                <input type="hidden"
+                       value="{{ value }}"
+                        {{ block('widget_attributes') }}
+                       {{ data_set }}-target="input"
+                >
+            </div>
+
             <div class="quill-editor"
                  {{ data_set }}-target="editorContainer"
             >
