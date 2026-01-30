@@ -21,3 +21,9 @@ Quill.register('modules/toggleFullscreen', QuillToggleFullscreenButton);
 
 import htmlEditButton from 'quill-html-edit-button';
 Quill.register('modules/htmlEditButton', htmlEditButton.default || htmlEditButton);
+
+import ReadingTime from './modules/readtimeModule.ts';
+Quill.register('modules/readingTime', ReadingTime);
+
+import SpeechToText from './modules/speechToText.ts';
+Quill.register('modules/speechToText', SpeechToText);
