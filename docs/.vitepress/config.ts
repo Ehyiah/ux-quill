@@ -37,7 +37,7 @@ export default defineConfig({
           },
           {
             text: 'Modules',
-            collapsed: true,
+            collapsed: false,
             items: [
               { text: 'PHP Configurable', link: '/guide/modules/index' },
               { text: 'ReadTimeModule', link: '/guide/modules/read-time' },

@@ -15,7 +15,6 @@ They allow you to add interactive features, modify event handling, or integrate 
 - You can add/customize quill modules in this option field.
 - You can create your own modules classes, they need to implement the ``ModuleInterface`` and add the name and options properties.
 - Some modules are automatically loaded when they are needed in fields.
-- For quill built-in modulesn you can also configure them directly in your PHP form based on quill official documentaion: https://quilljs.com/docs/modules
 
 Example of how to use modules:
 
