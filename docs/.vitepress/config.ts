@@ -37,11 +37,12 @@ export default defineConfig({
           },
           {
             text: 'Modules',
-            collapsed: false,
+            collapsed: true,
             items: [
-              { text: 'PHP Configurable', link: '/guide/modules/index' },
+              { text: 'Concept', link: '/guide/modules/index' },
               { text: 'ReadTimeModule', link: '/guide/modules/read-time' },
               { text: 'STTModule', link: '/guide/modules/stt' },
+              { text: 'FullScreenModule', link: '/guide/modules/fullscreen' },
               { text: 'Other Modules', link: '/guide/modules/others' }
             ]
           },
