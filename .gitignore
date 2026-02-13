@@ -11,3 +11,5 @@ assets/node_modules
 compose.override.yaml
 /.phpunit.cache/
 *.map
+/docs/node_modules/
+/docs/.vitepress/cache/
