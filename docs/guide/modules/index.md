@@ -1,5 +1,7 @@
 # Modules
 
+## Concept
+
 **Modules** are functional extensions that enhance the capabilities of the Quill editor beyond simple text formatting. 
 They allow you to add interactive features, modify event handling, or integrate external tools.
 
@@ -19,15 +21,31 @@ They allow you to add interactive features, modify event handling, or integrate 
 Example of how to use modules:
 
 ```php
-'modules' => [
-    new SyntaxModules(),
-    new TableModule(
-        'menus' => ['column', 'row', 'merge', 'table', 'cell', 'wrap', 'copy', 'delete'],
-        'toolbarTable' => 'true', // must be set to true to show the table toolbar options in TableModule
-        'language' => 'fr_FR',
-    ),
-],
+use Ehyiah\QuillJsBundle\Form\QuillType;
+use Ehyiah\QuillJsBundle\DTO\Modules\STTModule;
+
+public function buildForm(FormBuilderInterface $builder, array $options)
+{
+    $builder
+        ->add('content', QuillType::class, [
+            'quill_options' => [
+                //
+            ],
+            'modules' => [
+                new SyntaxModules(),
+                new TableModule(
+                    'menus' => ['column', 'row', 'merge', 'table', 'cell', 'wrap', 'copy', 'delete'],
+                    'toolbarTable' => 'true', // must be set to true to show the table toolbar options in TableModule
+                    'language' => 'fr_FR',
+                ),
+            ],
+            //
+        ])
+    ;
+}
 ```
+## Modules list
+See module details on the left menu
 
 |       modules        | auto-imported | description                                                                                                                                                                                                                                                                                           | name | options type | options | default options |
 |:--------------------:|:-------------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------| :---: | :---: | :---: | :---: |
