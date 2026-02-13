@@ -3,6 +3,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: "Symfony UX Quill",
   description: "Quill JS wysiwyg text editor for Symfony",
+  base: '/ux-quill/',
   lastUpdated: true,
   themeConfig: {
     search: {
