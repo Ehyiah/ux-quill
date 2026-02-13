@@ -3,7 +3,15 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: "Symfony UX Quill",
   description: "Quill JS wysiwyg text editor for Symfony",
+  lastUpdated: true,
   themeConfig: {
+    search: {
+      provider: 'local'
+    },
+    editLink: {
+      pattern: 'https://github.com/Ehyiah/ux-quill/edit/main/docs/:path',
+      text: 'Edit this page on GitHub'
+    },
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Guide', link: '/guide/installation' },
@@ -16,7 +24,7 @@ export default defineConfig({
         collapsed: false,
         items: [
           { text: 'Installation', link: '/guide/installation' },
-          { text: 'Basic Usage', link: '/guide/usage' },
+          { text: 'Usage', link: '/guide/usage' },
           {
             text: 'Configuration',
             collapsed: false,
@@ -28,7 +36,7 @@ export default defineConfig({
           },
           {
             text: 'Modules',
-            collapsed: false,
+            collapsed: true,
             items: [
               { text: 'PHP Configurable', link: '/guide/modules/index' },
               { text: 'ReadTimeModule', link: '/guide/modules/read-time' },
@@ -37,9 +45,9 @@ export default defineConfig({
             ]
           },
           { text: 'Advanced', link: '/guide/advanced' },
+          { text: 'EasyAdmin', link: '/guide/easyadmin' }
         ]
-      },
-      { text: 'EasyAdmin', link: '/guide/easyadmin' }
+      }
     ],
 
     socialLinks: [
