@@ -113,3 +113,6 @@ class GalleryController extends AbstractController
     }
 }
 ```
+## Good to know
+If you want to edit your image once uploaded, either add the ImageField in options. 
+Or add the ResizeModule in the modules options.
