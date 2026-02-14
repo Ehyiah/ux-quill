@@ -1,6 +1,4 @@
-# Advanced Usage
-
-## Extend Quill stimulus controller
+# Extend Quill stimulus controller
 
 If you need to extend the default behavior of the built-in controller, this is possible.
 For example, you need to modify module registration and/or add custom JavaScript to modify quill behavior.
@@ -9,7 +7,8 @@ Some modules like ``Keyboard`` and ``Clipboard`` need custom JavaScript to be wr
 The easiest way to do so is to create a custom stimulus controller to extend the default behavior.
 
 You can do this easily by attaching to various events to avoid being forced to rewrite the entire controller.
-### Example of an extended controller to add Keyboard features
+
+## Example of an extended controller to add Keyboard features
 
 1. Create a new Stimulus controller inside your project
 
