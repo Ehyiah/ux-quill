@@ -60,7 +60,15 @@ export default class extends Controller {
         }
     }
 
+    private quillInstance: Quill | null = null;
+
     connect() {
+        // Prevent re-initialization if Quill instance already exists
+        // This is important for LiveComponent compatibility
+        if (this.quillInstance) {
+            return;
+        }
+
         const options = this.buildQuillOptions();
         this.dynamicModuleRegister(options);
         this.setupQuillStyles(options);
@@ -72,6 +80,12 @@ export default class extends Controller {
         const unprocessedIcons = this.processIconReplacementFromQuillCore();
 
         this.initializeQuill(options, unprocessedIcons);
+    }
+
+    disconnect() {
+        if (this.quillInstance) {
+            this.quillInstance = null;
+        }
     }
 
     private buildQuillOptions(): Options {
@@ -147,6 +161,7 @@ export default class extends Controller {
 
     private initializeQuill(options: Options, unprocessedIcons): void {
         const quill = new Quill(this.editorContainerTarget, options);
+        this.quillInstance = quill;
         this.setupContentSync(quill);
 
         this.processUnprocessedIcons(unprocessedIcons);
@@ -172,7 +187,10 @@ export default class extends Controller {
         });
     }
 
-    private bubbles(inputContent: HTMLInputElement) {
+    private bubbles(inputContent: HTMLInputElement)
+    {
+        // Dispatch both 'input' and 'change' events for better compatibility with LiveComponent
+        inputContent.dispatchEvent(new Event('input', { bubbles: true }));
         inputContent.dispatchEvent(new Event('change', { bubbles: true }));
     }
 

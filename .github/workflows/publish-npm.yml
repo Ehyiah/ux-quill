@@ -47,7 +47,7 @@ jobs:
 
             - name: Build
               working-directory: ./assets
-              run: yarn run build --if-present
+              run: npm run build
 
             - name: Publish to npm (OIDC)
               working-directory: ./assets
