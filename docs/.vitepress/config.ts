@@ -46,7 +46,14 @@ export default defineConfig({
               { text: 'Other Modules', link: '/guide/modules/others' }
             ]
           },
-          { text: 'Advanced', link: '/guide/advanced' },
+          { text: 'Advanced',
+            collapsed: false,
+            items: [
+              { text: 'Index', link: '/guide/advanced/index' },
+              { text: 'Extend Controller', link: '/guide/advanced/extend-stimulus-controller' },
+              { text: 'Events', link: '/guide/advanced/events' },
+            ]
+          },
           { text: 'EasyAdmin', link: '/guide/easyadmin' }
         ]
       }
