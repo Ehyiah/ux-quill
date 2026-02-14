@@ -6,6 +6,8 @@ services:
             - .:/var/www/symfony:cached
             - ./docker/php/php.ini:/usr/local/etc/php/php.ini:delegated
         tty: true
+        ports:
+            - 5173:5173
 
     github-actions:
         image: ghcr.io/catthehacker/ubuntu:act-latest

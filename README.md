@@ -4,6 +4,7 @@
   <img src="./quill_logo.png" alt="Melody logo" width="400"/>
 </div>
 
+> **New Documentation**: [https://ehyiah.github.io/ux-quill/](https://ehyiah.github.io/ux-quill/)
 
 Symfony UX Bundle implementing the Quill JS Wysiwyg https://quilljs.com/
 
