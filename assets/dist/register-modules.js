@@ -18,3 +18,5 @@ import ReadingTime from "./modules/readtimeModule.js";
 Quill.register('modules/readingTime', ReadingTime);
 import SpeechToText from "./modules/speechToText.js";
 Quill.register('modules/speechToText', SpeechToText);
+import GalleryModule from "./modules/gallery/gallery-module.js";
+Quill.register('modules/mediaGallery', GalleryModule.default || GalleryModule);

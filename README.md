@@ -352,6 +352,7 @@ Example of how to use modules:
 |  **HtmlEditModule**  |      NO       | The HtmlEditModule allow to edit the raw html. see details on repository [site](https://github.com/benwinding/quill-html-edit-button)                                                                                                                                                                 | htmlEditButton  |    array     |                              https://github.com/benwinding/quill-html-edit-button                               |                                                              see ``Ehyiah\QuillJsBundle\DTO\Modules\htmlEditButton``                                                                   | There is currently a conflict with tableField. Don't use both of them at the same time as the table inserted via the htmlEdit module will not be displayed |
 | **ReadTimeModule**   |      NO       | The ReadTimeModule add an indication on how many minutes it will take to a person to read what your write inside the WYSIWYG editor                                                                                                                                                                   | readingTime  |    array     |                      ``wpm``, ``label``, ``suffix``, ``readTimeOk``, ``readTimeMedium``, ``target``                       |                                                             ['wpm' => '200', 'label' => 'Reading time: ', 'suffix' => ' min read', 'readTimeOk' => '2', 'readTimeMedium' => '5']                                                                    |
 |   **STTModule**      |      NO       | The Speech-to-Text module enables voice dictation using the Web Speech API. Allows users to dictate text directly into the editor with real-time audio visualization                                                                                                                                   |   speechToText  |    array     |    ``language``, ``continuous``, ``visualizer``, ``waveformColor``, ``histogramColor``, ``debug``, ``buttonTitleStart``, ``buttonTitleStop``, ``titleInactive``, ``titleStarting``, ``titleActive``    |                                                                    see ``Ehyiah\QuillJsBundle\DTO\Modules\STTModule``                                                                    |
+| **GalleryModule** |      NO       | A media gallery to allow to pick images from a media gallery   [see more details](#media-gallery-module-details)                                                                                                                                                                                      | mediaGallery  |    array     |                                       `listEndpoint`, `uploadEndpoint`, `searchEndpoint`, `icon`                                       |                               see ``Ehyiah\QuillJsBundle\DTO\Modules\GalleryModule``                                                                                                   |
 
 #### ReadTimeModule details
 This module calculates the estimated reading time based on the content of the editor.
@@ -393,7 +394,6 @@ It displays the result in the toolbar by default, or in a specific element if ta
 | **titleActive**      | string  | Label text displayed in the STT bar during active listening                                                       | 'Listening...'     | Any string                                        |
 
 #### Example of STTModule usage:
-
 ```php
 use Ehyiah\QuillJsBundle\Form\QuillType;
 use Ehyiah\QuillJsBundle\DTO\Modules\STTModule;
@@ -422,6 +422,121 @@ public function buildForm(FormBuilderInterface $builder, array $options)
             ],
         ])
     ;
+}
+```
+
+
+### Media gallery module details
+Here is the list of some options for the media gallery module (see full available options in PHP class): 
+
+- **listEndpoint** : the endpoint to get the list of images from. This option is mandatory
+The response from your endpoint must be like this : 
+```json
+{
+   "data": [
+      {
+         "url": "https://picsum.photos/id/11/400/400",
+         "thumbnail": "https://picsum.photos/id/11/200/200",
+         "title": "Image #1"
+      }
+   ],
+   "links": {
+      "next": "/api/media/list?page=2",
+      "prev": null
+   }
+}
+```
+
+- **searchEndpoint** : the endpoint to search images. If no url is provided, the search bar will not be displayed.
+  The search term will be passed as a query parameter named `term`.
+  The response format is the same as the list endpoint.
+- **icon** : the icon to use in the toolbar pass a svg icon like others icons customization.
+
+- **uploadEndpoint**, **uploadStrategy**, **authConfig**, **jsonResponseFilePath** : 
+By default, these options **automatically inherit** from the global `upload_handler` configuration defined in `quill_extra_options`.
+However, you can override them specifically for the gallery module if needed.
+
+- **uploadEndpoint** : the endpoint to upload an image. If no url is provided (globally or locally), the upload button will not be displayed.
+- **uploadStrategy** : 'form' (default) or 'json'.
+
+
+- example of a listing api endpoint for testing purpose
+```php
+<?php
+
+namespace App\Controller;
+
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
+
+#[Route('/api/media/gallery', name: 'api_media_')]
+class GalleryController extends AbstractController
+{
+    #[Route('/list', name: 'api_media_list')]
+    public function list(Request $request): JsonResponse
+    {
+        $page = $request->get('page', 1);
+        $perPage = 10;
+        $total = 30;
+
+        $images = [];
+        for ($i = 0; $i < $perPage; $i++) {
+            $id = (($page - 1) * $perPage) + $i + 1;
+            if ($id > $total) break;
+            $images[] = [
+                'url' => sprintf('https://picsum.photos/id/%d/400/400', 10 + $id),
+                'thumbnail' => sprintf('https://picsum.photos/id/%d/200/200', 10 + $id),
+                'title' => "Image #$id",
+            ];
+        }
+
+        $baseUrl = '/api/media/gallery/list';
+        $hasNext = ($page * $perPage) < $total;
+        $hasPrev = $page > 1;
+
+        return new JsonResponse([
+            'data' => $images,
+            'links' => [
+            'next' => $hasNext ? "$baseUrl?page=" . ($page + 1) : null,
+            'prev' => $hasPrev ? "$baseUrl?page=" . ($page - 1) : null,
+            ],
+        ]);
+    }
+
+    #[Route('/search', name: 'api_media_search')]
+    public function search(Request $request): JsonResponse
+    {
+    // This is not actually making a research, but you will see that 5 pages are available instead of 3
+        $term = $request->get('term', 1);
+        $page = $request->get('page', 1);
+        $perPage = 10;
+        $total = 50;
+
+        $images = [];
+        for ($i = 0; $i < $perPage; $i++) {
+            $id = (($page - 1) * $perPage) + $i + 1;
+            if ($id > $total) break;
+            $images[] = [
+                'url' => sprintf('https://picsum.photos/id/%d/400/400', 10 + $id),
+                'thumbnail' => sprintf('https://picsum.photos/id/%d/200/200', 10 + $id),
+                'title' => "Image #$id",
+            ];
+        }
+
+        $baseUrl = '/api/media/gallery/search?term=' . $term;
+        $hasNext = ($page * $perPage) < $total;
+        $hasPrev = $page > 1;
+
+        return new JsonResponse([
+            'data' => $images,
+            'links' => [
+                'next' => $hasNext ? "$baseUrl&page=" . ($page + 1) : null,
+                'prev' => $hasPrev ? "$baseUrl&page=" . ($page - 1) : null,
+            ],
+        ]);
+    }
 }
 ```
 
@@ -456,14 +571,26 @@ The easiest way to do so is to create a custom stimulus controller to extend the
 You can do this easily by attaching to various events to avoid being forced to rewrite the entire controller.
 
 ### Events
-some events are dispatched:
+Some events are dispatched by the controller or its modules. **All events are prefixed** with `quill:`.
+Since they all bubble, you can catch them on the element carrying the controller using `data-action`.
 
-|     event name     | description                                                                                                               |              payload              | usage exemple                                                                  |
-|:------------------:|:--------------------------------------------------------------------------------------------------------------------------|:---------------------------------:|--------------------------------------------------------------------------------|
-|    **options**     | Dispatched **after** editor options are created _(modules, toolbar, height ...)_ but **before** the editor is initialised | ``QuillOptionsStatic``  instance  | use it to custom quill options if needed, add new modules or edit options      |
-|    **connect**     | Dispatched **after** the editor is initialised with the options but before it has any content                             |    ``Quill`` editor  instance     |                                                                                |
-| **hydrate:before** | Dispatched **after** the initial data is fetched, but **before** it is sent in quill editor instance                      |     quill ``Delta`` instance      | use this if you need to edit initial data before passed to the editor instance |
-| **hydrate:after**  | Dispatched **after** the editor has been initialised **with** its data                                                    |    ``Quill`` editor  instance     |                                                                                |
+|          event name           | description                                                                                                               |               payload                |
+|:-----------------------------:|:--------------------------------------------------------------------------------------------------------------------------|:------------------------------------:|
+|          **options**          | Dispatched **after** editor options are created _(modules, toolbar, height ...)_ but **before** the editor is initialised |   ``QuillOptionsStatic``  instance   |
+|          **connect**          | Dispatched **after** the editor is initialised with the options but before it has any content                             |      ``Quill`` editor  instance      |
+|      **hydrate:before**       | Dispatched **after** the initial data is fetched, but **before** it is sent in quill editor instance                      |       quill ``Delta`` instance       |
+|       **hydrate:after**       | Dispatched **after** the editor has been initialised **with** its data                                                    |      ``Quill`` editor  instance      |
+|        **stt:result**         | Dispatched when speech recognition produces a result (interim or final)                                                   |  `{ text: string, isFinal: bool }`   |
+|    **stt:listening-start**    | Dispatched when speech recognition starts listening                                                                       |                 `{}`                 |
+|    **stt:listening-stop**     | Dispatched when speech recognition stops                                                                                  |                 `{}`                 |
+|        **stt:error**          | Dispatched when a speech recognition error occurs                                                                         |           `{ error: any }`           |
+|       **gallery:open**        | Dispatched when the media gallery modal is opened                                                                         |       `{ modal: HTMLElement }`       |
+|       **gallery:close**       | Dispatched when the media gallery modal is closed                                                                         |        `{ modal: HTMLElement }`      |
+|  **gallery:image-inserted**   | Dispatched when an image from the gallery is inserted into the editor                                                     |         `{ image: object }`          |
+|  **gallery:upload-success**   | Dispatched when an image is successfully uploaded through the gallery                                                     |   `{ response: any, file: File }`    |
+|   **counter:words-update**    | Dispatched when the word count is updated                                                                                 |         `{ value: number }`          |
+| **counter:characters-update** | Dispatched when the character count is updated                                                                            |         `{ value: number }`          |
+|    **reading-time:update**    | Dispatched when the estimated reading time is updated                                                                     | `{ minutes: number, words: number }` |
 
 
 ### Example of an extended controller to add Keyboard features

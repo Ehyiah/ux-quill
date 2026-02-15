@@ -1,7 +1,7 @@
 import { Controller } from '@hotwired/stimulus';
 import Quill from 'quill';
 import * as Options from 'quill/core/quill';
-import { ExtraOptions, ModuleOptions } from './types.d.ts';
+import type { ExtraOptions, ModuleOptions } from './types.d.ts';
 import mergeModules from './modules.ts';
 import { ToolbarCustomizer } from './ui/toolbarCustomizer.ts';
 import { handleUploadResponse, uploadStrategies } from './upload-utils.ts';
@@ -17,10 +17,10 @@ interface DOMNode extends HTMLElement {
     hasAttribute(name: string): boolean;
 }
 
-const Image = Quill.import('formats/image');
+const Image = Quill.import('formats/image') as any;
 const oldFormats = Image.formats;
 
-Image.formats = function(domNode: DOMNode) {
+Image.formats = function (domNode: DOMNode) {
     const formats = oldFormats.call(this, domNode);
     if (domNode.hasAttribute('style')) {
         formats.style = domNode.getAttribute('style');
@@ -33,7 +33,7 @@ type ImageWithDOM = {
     format(name: string, value: string | boolean | null): void;
 };
 
-Image.prototype.format = function(this: ImageWithDOM, name: string, value: string | boolean | null) {
+Image.prototype.format = function (this: ImageWithDOM, name: string, value: string | boolean | null) {
     value ? this.domNode.setAttribute(name, String(value)) : this.domNode.removeAttribute(name);
 };
 
@@ -96,6 +96,8 @@ export default class extends Controller {
         };
         const mergedModules = mergeModules(this.modulesOptionsValue, enabledModules);
 
+        this.enrichGalleryModule(mergedModules);
+
         return {
             debug,
             modules: mergedModules,
@@ -104,6 +106,20 @@ export default class extends Controller {
             style,
             readOnly,
         };
+    }
+
+    private enrichGalleryModule(modules: any) {
+        if (modules['mediaGallery']) {
+            const galleryOptions = modules['mediaGallery'];
+            const uploadConfig = this.extraOptionsValue.upload_handler;
+
+            if (uploadConfig) {
+                galleryOptions.uploadEndpoint = galleryOptions.uploadEndpoint || uploadConfig.upload_endpoint;
+                galleryOptions.uploadStrategy = galleryOptions.uploadStrategy || uploadConfig.type;
+                galleryOptions.authConfig = galleryOptions.authConfig || uploadConfig.security;
+                galleryOptions.jsonResponseFilePath = galleryOptions.jsonResponseFilePath || uploadConfig.json_response_file_path;
+            }
+        }
     }
 
     private setupQuillStyles(options: Options) {
@@ -155,7 +171,7 @@ export default class extends Controller {
 
     private setupContentSync(quill: Quill) {
         // set initial content as a delta for better compatibility and allow table-module to work
-        const initialData = quill.clipboard.convert({html: this.inputTarget.value})
+        const initialData = quill.clipboard.convert({ html: this.inputTarget.value })
         this.dispatchEvent('hydrate:before', initialData);
         quill.updateContents(initialData);
         this.dispatchEvent('hydrate:after', quill);
@@ -204,8 +220,7 @@ export default class extends Controller {
         }
     }
 
-    private dynamicModuleRegister(options: Options)
-    {
+    private dynamicModuleRegister(options: Options) {
         const isTablePresent = options.modules.toolbar
             .flat(Infinity)
             .some(item => typeof item === 'string' && item === 'table-better');
