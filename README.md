@@ -352,6 +352,7 @@ Example of how to use modules:
 |  **HtmlEditModule**  |      NO       | The HtmlEditModule allow to edit the raw html. see details on repository [site](https://github.com/benwinding/quill-html-edit-button)                                                                                                                                                                 | htmlEditButton  |    array     |                              https://github.com/benwinding/quill-html-edit-button                               |                                                              see ``Ehyiah\QuillJsBundle\DTO\Modules\htmlEditButton``                                                                   | There is currently a conflict with tableField. Don't use both of them at the same time as the table inserted via the htmlEdit module will not be displayed |
 | **ReadTimeModule**   |      NO       | The ReadTimeModule add an indication on how many minutes it will take to a person to read what your write inside the WYSIWYG editor                                                                                                                                                                   | readingTime  |    array     |                      ``wpm``, ``label``, ``suffix``, ``readTimeOk``, ``readTimeMedium``, ``target``                       |                                                             ['wpm' => '200', 'label' => 'Reading time: ', 'suffix' => ' min read', 'readTimeOk' => '2', 'readTimeMedium' => '5']                                                                    |
 |   **STTModule**      |      NO       | The Speech-to-Text module enables voice dictation using the Web Speech API. Allows users to dictate text directly into the editor with real-time audio visualization                                                                                                                                   |   speechToText  |    array     |    ``language``, ``continuous``, ``visualizer``, ``waveformColor``, ``histogramColor``, ``debug``, ``buttonTitleStart``, ``buttonTitleStop``, ``titleInactive``, ``titleStarting``, ``titleActive``    |                                                                    see ``Ehyiah\QuillJsBundle\DTO\Modules\STTModule``                                                                    |
+| **PlaceholderModule** |      NO       | Allows insertion of predefined placeholders (merge tags) into the editor. Displays a toolbar button with a dropdown of available placeholders that will be inserted with customizable tags (default: {{placeholder}})                                                                                 |  placeholder  |    array     |                         ``placeholders``, ``icon``, ``startTag``, ``endTag``                                    |                                    ['placeholders' => ['bab', 'tria'], 'icon' => null, 'startTag' => '{{', 'endTag' => '}}']                                                          |
 
 #### ReadTimeModule details
 This module calculates the estimated reading time based on the content of the editor.
@@ -423,6 +424,83 @@ public function buildForm(FormBuilderInterface $builder, array $options)
         ])
     ;
 }
+```
+
+### PlaceholderModule in detail
+
+The **PlaceholderModule** is particularly useful when you need to insert dynamic content placeholders (also known as merge tags or template variables) into your content. This is commonly used in email templates, document generators, or any scenario where content needs to be personalized with dynamic data.
+
+When activated, this module adds a button to the Quill toolbar. Clicking this button displays a dropdown menu with all available placeholders that users can insert into their content.
+
+#### How it works:
+1. A toolbar button is added to your Quill editor (with a customizable icon)
+2. Clicking the button opens a dropdown with your predefined placeholder list
+3. Selecting a placeholder inserts it at the cursor position with the configured tags
+4. The inserted text format is: `{startTag}{placeholder}{endTag}` (default: `{{placeholder}}`)
+
+#### Available options:
+
+**placeholders** (array, required)
+- An array of placeholder names that will be available in the dropdown
+- Example: `['firstName', 'lastName', 'email', 'companyName', 'invoiceNumber']`
+- These are the actual values that will be displayed in the dropdown and inserted between the tags
+
+**startTag** (string, optional, default: `'{{'`)
+- The opening delimiter for your placeholder
+- Example: `'[['`, `'{{'`, `'%'`, `'${'`
+- Can be any string you need for your templating system
+
+**endTag** (string, optional, default: `'}}'`)
+- The closing delimiter for your placeholder
+- Example: `']]'`, `'}}'`, `'%'`, `'}'`
+- Can be any string you need for your templating system
+
+**icon** (string|null, optional, default: null)
+- Custom SVG string to replace the default placeholder icon in the toolbar
+- If null, uses the default icon (curly braces with dots)
+- Must be a valid SVG markup string
+
+#### Usage example:
+```php
+use Ehyiah\QuillJsBundle\Form\QuillType;
+use Ehyiah\QuillJsBundle\DTO\Modules\PlaceholderModule;
+
+public function buildForm(FormBuilderInterface $builder, array $options)
+{
+    $builder
+        ->add('emailTemplate', QuillType::class, [
+            'modules' => [
+                new PlaceholderModule(
+                    options: [
+                        'placeholders' => [
+                            'firstName',
+                            'lastName',
+                            'email',
+                            'companyName',
+                            'invoiceNumber',
+                            'currentDate'
+                        ],
+                        'startTag' => '{{',
+                        'endTag' => '}}',
+                    ]
+                ),
+            ],
+            // other quill options...
+        ])
+    ;
+}
+```
+
+With this configuration, users can click the placeholder button and select "firstName" from the dropdown, which will insert `{{firstName}}` into the editor at the cursor position.
+
+You can then process these placeholders in your application by replacing them with actual values before displaying or sending the content:
+```php
+$content = $form->get('emailTemplate')->getData();
+$processedContent = str_replace(
+    ['{{firstName}}', '{{lastName}}', '{{email}}'],
+    [$user->getFirstName(), $user->getLastName(), $user->getEmail()],
+    $content
+);
 ```
 
 ### Other modules that need custom JavaScript
