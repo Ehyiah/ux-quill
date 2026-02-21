@@ -6,7 +6,6 @@ import { handleUploadResponse, uploadStrategies } from "./upload-utils.js";
 import "./register-modules.js";
 import QuillTableBetter from 'quill-table-better';
 import { Mention } from "./modules/mention.js";
-// Properly extend Image format
 const Image = Quill.import('formats/image');
 class CustomImage extends Image {
   static formats(domNode) {
@@ -30,8 +29,6 @@ class CustomImage extends Image {
   }
 }
 Quill.register(CustomImage, true);
-
-// Properly extend Link format
 const Link = Quill.import('formats/link');
 class CustomLink extends Link {
   static create(value) {
@@ -107,7 +104,11 @@ export default class extends Controller {
   }))();
   quillInstance = null;
   connect() {
-    if (this.quillInstance) return;
+    // Prevent re-initialization if Quill instance already exists
+    // This is important for LiveComponent compatibility
+    if (this.quillInstance) {
+      return;
+    }
     const options = this.buildQuillOptions();
     this.dynamicModuleRegister(options);
     this.setupQuillStyles(options);
@@ -174,6 +175,7 @@ export default class extends Controller {
     this.dispatchEvent('connect', quill);
   }
   setupContentSync(quill) {
+    // set initial content as a delta for better compatibility and allow table-module to work
     const initialData = quill.clipboard.convert({
       html: this.inputTarget.value
     });
@@ -188,6 +190,7 @@ export default class extends Controller {
     });
   }
   bubbles(inputContent) {
+    // Dispatch both 'input' and 'change' events for better compatibility with LiveComponent
     inputContent.dispatchEvent(new Event('input', {
       bubbles: true
     }));

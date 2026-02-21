@@ -34,6 +34,7 @@ Example of how to use modules:
 | **DividerModule** | YES | Add a horizontal separator (`<hr>`) support and toolbar button | divider | array | [] | [] |
 | **PageBreakModule** | YES | Add a page break support for print (`page-break-after: always`) | pageBreak | array | `label` | ['label' => 'Page Break'] |
 | **MentionModule** | NO | Add support for mentions (`@user`, `#tag`) with static or remote data. | mention | array | `trigger`, `data`, `remote_url`, `min_chars`, `max_results` | see documentation |
+| **AutosaveModule** | NO | Automatically saves content to `localStorage` to prevent data loss. | autosave | array | `interval`, `restore_type`, `key_suffix` | see documentation |
 | **MarkdownModule** | NO | Enable Markdown-like shortcuts during typing (e.g. `# ` for H1, `* ` for list) | markdown | array | [] | [] |
 | **DragAndDropModule** | YES | Enable internal drag and drop of elements like images and videos inside the editor. | dragAndDrop | array | [] | [] |
 | **ImageAttributesModule** | YES | Add support for `alt`, `title` and `caption` attributes on images. | imageAttributes | array | [] | [] |
@@ -202,6 +203,33 @@ Example to customize the mention color:
     background-color: #fce4ec;
     color: #c2185b;
 }
+```
+
+## AutosaveModule
+
+This module prevents data loss by automatically saving the editor content to the browser's `localStorage`.
+
+**Options:**
+- **interval**: Time in milliseconds between saves (debounce). Default: `2000` (2 seconds).
+- **restore_type**: How to restore data.
+    - `'manual'` (default): Show a notification bar allowing the user to choose to restore or ignore.
+    - `'auto'`: Automatically restore the content if the editor is empty.
+- **key_suffix**: Optional string to append to the storage key to avoid collisions.
+
+**Behavior:**
+- **Saving**: Content is saved automatically after the user stops typing for the specified interval.
+- **Restoration**: On page load, if a saved version is found and differs from the current content, the module acts according to `restore_type`.
+- **Cleanup**: The saved data is automatically cleared when the parent `<form>` is submitted.
+
+**Usage example:**
+
+```php
+'modules' => [
+    new AutosaveModule(options: [
+        'interval' => 3000,
+        'restore_type' => 'manual',
+    ]),
+],
 ```
 
 ## ImageAttributesModule

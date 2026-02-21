@@ -33,13 +33,14 @@ jest.mock('quill', () => {
     // Ajouter les méthodes statiques au mock
     mockQuill.register = jest.fn();
     mockQuill.import = jest.fn().mockImplementation((name) => {
-        if (name === 'formats/image') {
-            return {
-                formats: jest.fn().mockReturnValue({}),
-                prototype: {
-                    format: jest.fn()
-                }
-            };
+        if (name === 'formats/image' || name === 'formats/link') {
+            class MockFormat {
+                static formats = jest.fn().mockReturnValue({});
+                static create = jest.fn().mockReturnValue(document.createElement('div'));
+                format = jest.fn();
+                domNode = document.createElement('div');
+            }
+            return MockFormat;
         }
         if (name.includes('blots/')) {
             return class MockBlot {};

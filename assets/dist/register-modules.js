@@ -27,6 +27,8 @@ import { LinkAttributes } from "./modules/linkAttributes.js";
 Quill.register('modules/linkAttributes', LinkAttributes);
 import { Mention } from "./modules/mention.js";
 Quill.register('modules/mention', Mention);
+import { Autosave } from "./modules/autosave.js";
+Quill.register('modules/autosave', Autosave);
 const icons = Quill.import('ui/icons');
 if (icons) {
   icons['divider'] = '<svg viewBox="0 0 18 18"><line class="ql-stroke" x1="3" x2="15" y1="9" y2="9"></line></svg>';

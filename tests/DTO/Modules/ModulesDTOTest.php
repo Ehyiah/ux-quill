@@ -2,6 +2,7 @@
 
 namespace Ehyiah\QuillJsBundle\Tests\DTO\Modules;
 
+use Ehyiah\QuillJsBundle\DTO\Modules\AutosaveModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\DividerModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\ImageAttributesModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\LinkAttributesModule;
@@ -15,6 +16,18 @@ use PHPUnit\Framework\TestCase;
  */
 class ModulesDTOTest extends TestCase
 {
+    public function testAutosaveModule(): void
+    {
+        $module = new AutosaveModule();
+        $this->assertEquals('autosave', $module->name);
+        $this->assertEquals(2000, $module->options['interval']);
+        $this->assertEquals('manual', $module->options['restore_type']);
+
+        $module = new AutosaveModule(options: ['interval' => 5000, 'restore_type' => 'auto']);
+        $this->assertEquals(5000, $module->options['interval']);
+        $this->assertEquals('auto', $module->options['restore_type']);
+    }
+
     public function testDividerModule(): void
     {
         $module = new DividerModule();
