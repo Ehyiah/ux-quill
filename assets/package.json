@@ -26,6 +26,7 @@
             "quill2-emoji": "^0.1.2",
             "quill2-emoji/dist/style.css": "^0.1.2",
             "quill": "2.0.3",
+            "quill-delta": "^5.1.0",
             "quill/dist/quill.snow.css": "2.0.3",
             "quill/dist/quill.bubble.css": "2.0.3",
             "axios": "^1.4.0",
