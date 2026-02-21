@@ -23,6 +23,8 @@ import { Markdown } from "./modules/markdown.js";
 Quill.register('modules/markdown', Markdown);
 import { ImageAttributes } from "./modules/imageAttributes.js";
 Quill.register('modules/imageAttributes', ImageAttributes);
+import { LinkAttributes } from "./modules/linkAttributes.js";
+Quill.register('modules/linkAttributes', LinkAttributes);
 import { Mention } from "./modules/mention.js";
 Quill.register('modules/mention', Mention);
 const icons = Quill.import('ui/icons');

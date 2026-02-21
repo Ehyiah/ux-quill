@@ -36,7 +36,8 @@ Example of how to use modules:
 | **MentionModule** | NO | Add support for mentions (`@user`, `#tag`) with static or remote data. | mention | array | `trigger`, `data`, `remote_url`, `min_chars`, `max_results` | see documentation |
 | **MarkdownModule** | NO | Enable Markdown-like shortcuts during typing (e.g. `# ` for H1, `* ` for list) | markdown | array | [] | [] |
 | **DragAndDropModule** | YES | Enable internal drag and drop of elements like images and videos inside the editor. | dragAndDrop | array | [] | [] |
-| **ImageAttributesModule** | YES | Add support for `alt` and `title` attributes on images. | imageAttributes | array | [] | [] |
+| **ImageAttributesModule** | YES | Add support for `alt`, `title` and `caption` attributes on images. | imageAttributes | array | [] | [] |
+| **LinkAttributesModule** | YES | Add support for `target` and `rel` attributes on links. | linkAttributes | array | [] | [] |
 | **FullScreenModule** | NO | Add a FullScreen button to the toolbar [site](https://github.com/qvarts/quill-toggle-fullscreen-button) | toggleFullscreen | array | `buttonTitle`, `buttonHTML` check https://github.com/qvarts/quill-toggle-fullscreen-button?tab=readme-ov-file#api | see ``Ehyiah\QuillJsBundle\DTO\Modules\FullScreenModule`` |
 | **HtmlEditModule** | NO | The HtmlEditModule allow to edit the raw html. see details on repository [site](https://github.com/benwinding/quill-html-edit-button) | htmlEditButton | array | https://github.com/benwinding/quill-html-edit-button | see ``Ehyiah\QuillJsBundle\DTO\Modules\htmlEditButton`` | There is currently a conflict with tableField. Don't use both of them at the same time as the table inserted via the htmlEdit module will not be displayed |
 | **ReadTimeModule** | NO | The ReadTimeModule add an indication on how many minutes it will take to a person to read what your write inside the WYSIWYG editor | readingTime | array | ``wpm``, ``label``, ``suffix``, ``readTimeOk``, ``readTimeMedium``, ``target`` | ['wpm' => '200', 'label' => 'Reading time: ', 'suffix' => ' min read', 'readTimeOk' => '2', 'readTimeMedium' => '5'] |
@@ -213,7 +214,19 @@ This module is **automatically enabled** when using the `ImageField`. It allows 
 3. Click the icon to open a floating form where you can set the Alt text and Title.
 4. Changes are applied in real-time as you type.
 
-**Note:** This module ensures that `alt`, `title`, `width`, and `height` attributes are preserved when loading content or pasting images.
+**Note:** This module ensures that `alt`, `title`, `data-caption`, `width`, and `height` attributes are preserved when loading content or pasting images.
+
+## LinkAttributesModule
+
+This module is **automatically enabled** when using the `LinkField`. It allows users to edit advanced link attributes like `target="_blank"` and `rel="nofollow"` via a dedicated user interface.
+
+**How it works:**
+1. Click on any link in the editor.
+2. A "pencil" icon appears above the link.
+3. Click the icon to open a floating form where you can set the "Open in new tab" and "No follow" options.
+4. Changes are applied in real-time.
+
+**Note:** This module ensures that `target` and `rel` attributes are preserved when loading content or pasting links.
 
 ## STTModule
 

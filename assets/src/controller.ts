@@ -18,36 +18,87 @@ interface DOMNode extends HTMLElement {
 }
 
 const Image = Quill.import('formats/image');
-const oldFormats = Image.formats;
+class CustomImage extends Image {
+    static formats(domNode: HTMLElement) {
+        const formats = super.formats(domNode) || {};
+        if (domNode.hasAttribute('style')) formats.style = domNode.getAttribute('style');
+        if (domNode.hasAttribute('alt')) formats.alt = domNode.getAttribute('alt');
+        if (domNode.hasAttribute('title')) formats.title = domNode.getAttribute('title');
+        if (domNode.hasAttribute('data-caption')) formats.caption = domNode.getAttribute('data-caption');
+        if (domNode.hasAttribute('width')) formats.width = domNode.getAttribute('width');
+        if (domNode.hasAttribute('height')) formats.height = domNode.getAttribute('height');
+        return formats;
+    }
 
-Image.formats = function(domNode: DOMNode) {
-    const formats = oldFormats.call(this, domNode);
-    if (domNode.hasAttribute('style')) {
-        formats.style = domNode.getAttribute('style');
+    format(name: string, value: any) {
+        const customAttributes = ['style', 'alt', 'title', 'caption', 'width', 'height'];
+        if (customAttributes.includes(name)) {
+            const attributeName = name === 'caption' ? 'data-caption' : name;
+            value ? this.domNode.setAttribute(attributeName, String(value)) : this.domNode.removeAttribute(attributeName);
+        } else {
+            super.format(name, value);
+        }
     }
-    if (domNode.hasAttribute('alt')) {
-        formats.alt = domNode.getAttribute('alt');
-    }
-    if (domNode.hasAttribute('title')) {
-        formats.title = domNode.getAttribute('title');
-    }
-    if (domNode.hasAttribute('width')) {
-        formats.width = domNode.getAttribute('width');
-    }
-    if (domNode.hasAttribute('height')) {
-        formats.height = domNode.getAttribute('height');
-    }
-    return formats;
-};
+}
+Quill.register(CustomImage, true);
 
-type ImageWithDOM = {
-    domNode: DOMNode;
-    format(name: string, value: string | boolean | null): void;
-};
+const Link = Quill.import('formats/link');
+class CustomLink extends Link {
+    static create(value: any) {
+        if (typeof value === 'object' && value.url) {
+            const node = super.create(value.url);
+            if (value.target) node.setAttribute('target', value.target);
+            if (value.rel) node.setAttribute('rel', value.rel);
+            return node;
+        }
+        return super.create(value);
+    }
 
-Image.prototype.format = function(this: ImageWithDOM, name: string, value: string | boolean | null) {
-    value ? this.domNode.setAttribute(name, String(value)) : this.domNode.removeAttribute(name);
-};
+    static formats(domNode: HTMLElement) {
+        const href = domNode.getAttribute('href');
+        const target = domNode.getAttribute('target');
+        const rel = domNode.getAttribute('rel');
+
+        if (target || rel) {
+            return { url: href, target, rel };
+        }
+        return super.formats(domNode);
+    }
+
+    format(name: string, value: any) {
+        if (name === 'target') {
+            if (value) {
+                this.domNode.setAttribute('target', String(value));
+                if (value === '_blank') {
+                    const rel = this.domNode.getAttribute('rel') || '';
+                    if (!rel.includes('noopener')) {
+                        this.domNode.setAttribute('rel', (rel + ' noopener noreferrer').trim());
+                    }
+                }
+            } else {
+                this.domNode.removeAttribute('target');
+            }
+        } else if (name === 'rel') {
+            if (value) {
+                const currentRel = this.domNode.getAttribute('rel') || '';
+                const parts = currentRel.split(' ').filter(p => p && p !== 'nofollow');
+                if (value === 'nofollow') parts.push('nofollow');
+                this.domNode.setAttribute('rel', parts.join(' ').trim());
+            } else {
+                const currentRel = this.domNode.getAttribute('rel') || '';
+                const parts = currentRel.split(' ').filter(p => p && p !== 'nofollow');
+                parts.length > 0 ? this.domNode.setAttribute('rel', parts.join(' ')) : this.domNode.removeAttribute('rel');
+            }
+        } else {
+            super.format(name, value);
+        }
+    }
+
+    value() {
+        return this.domNode.getAttribute('href');
+    }
+}
+Quill.register(CustomLink, true);
 
 export default class extends Controller {
     declare readonly inputTarget: HTMLInputElement;

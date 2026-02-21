@@ -29,8 +29,6 @@ export class Mention {
     this.quill.on('selection-change', range => {
       if (!range) this.hideList();
     });
-
-    // Hide list on scroll (anywhere)
     window.addEventListener('scroll', () => this.hideList(), true);
   }
   async handleTextChange() {

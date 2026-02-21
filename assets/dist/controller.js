@@ -6,30 +6,89 @@ import { handleUploadResponse, uploadStrategies } from "./upload-utils.js";
 import "./register-modules.js";
 import QuillTableBetter from 'quill-table-better';
 import { Mention } from "./modules/mention.js";
+// Properly extend Image format
 const Image = Quill.import('formats/image');
-const oldFormats = Image.formats;
-Image.formats = function (domNode) {
-  const formats = oldFormats.call(this, domNode);
-  if (domNode.hasAttribute('style')) {
-    formats.style = domNode.getAttribute('style');
+class CustomImage extends Image {
+  static formats(domNode) {
+    const formats = super.formats(domNode) || {};
+    if (domNode.hasAttribute('style')) formats.style = domNode.getAttribute('style');
+    if (domNode.hasAttribute('alt')) formats.alt = domNode.getAttribute('alt');
+    if (domNode.hasAttribute('title')) formats.title = domNode.getAttribute('title');
+    if (domNode.hasAttribute('data-caption')) formats.caption = domNode.getAttribute('data-caption');
+    if (domNode.hasAttribute('width')) formats.width = domNode.getAttribute('width');
+    if (domNode.hasAttribute('height')) formats.height = domNode.getAttribute('height');
+    return formats;
   }
-  if (domNode.hasAttribute('alt')) {
-    formats.alt = domNode.getAttribute('alt');
+  format(name, value) {
+    const customAttributes = ['style', 'alt', 'title', 'caption', 'width', 'height'];
+    if (customAttributes.includes(name)) {
+      const attributeName = name === 'caption' ? 'data-caption' : name;
+      value ? this.domNode.setAttribute(attributeName, String(value)) : this.domNode.removeAttribute(attributeName);
+    } else {
+      super.format(name, value);
+    }
   }
-  if (domNode.hasAttribute('title')) {
-    formats.title = domNode.getAttribute('title');
+}
+Quill.register(CustomImage, true);
+
+// Properly extend Link format
+const Link = Quill.import('formats/link');
+class CustomLink extends Link {
+  static create(value) {
+    if (typeof value === 'object' && value.url) {
+      const node = super.create(value.url);
+      if (value.target) node.setAttribute('target', value.target);
+      if (value.rel) node.setAttribute('rel', value.rel);
+      return node;
+    }
+    return super.create(value);
   }
-  if (domNode.hasAttribute('width')) {
-    formats.width = domNode.getAttribute('width');
+  static formats(domNode) {
+    const href = domNode.getAttribute('href');
+    const target = domNode.getAttribute('target');
+    const rel = domNode.getAttribute('rel');
+    if (target || rel) {
+      return {
+        url: href,
+        target,
+        rel
+      };
+    }
+    return super.formats(domNode);
   }
-  if (domNode.hasAttribute('height')) {
-    formats.height = domNode.getAttribute('height');
+  format(name, value) {
+    if (name === 'target') {
+      if (value) {
+        this.domNode.setAttribute('target', String(value));
+        if (value === '_blank') {
+          const rel = this.domNode.getAttribute('rel') || '';
+          if (!rel.includes('noopener')) {
+            this.domNode.setAttribute('rel', (rel + ' noopener noreferrer').trim());
+          }
+        }
+      } else {
+        this.domNode.removeAttribute('target');
+      }
+    } else if (name === 'rel') {
+      if (value) {
+        const currentRel = this.domNode.getAttribute('rel') || '';
+        const parts = currentRel.split(' ').filter(p => p && p !== 'nofollow');
+        if (value === 'nofollow') parts.push('nofollow');
+        this.domNode.setAttribute('rel', parts.join(' ').trim());
+      } else {
+        const currentRel = this.domNode.getAttribute('rel') || '';
+        const parts = currentRel.split(' ').filter(p => p && p !== 'nofollow');
+        parts.length > 0 ? this.domNode.setAttribute('rel', parts.join(' ')) : this.domNode.removeAttribute('rel');
+      }
+    } else {
+      super.format(name, value);
+    }
   }
-  return formats;
-};
-Image.prototype.format = function (name, value) {
-  value ? this.domNode.setAttribute(name, String(value)) : this.domNode.removeAttribute(name);
-};
+  value() {
+    return this.domNode.getAttribute('href');
+  }
+}
+Quill.register(CustomLink, true);
 export default class extends Controller {
   static targets = ['input', 'editorContainer'];
   static values = (() => ({
@@ -48,11 +107,7 @@ export default class extends Controller {
   }))();
   quillInstance = null;
   connect() {
-    // Prevent re-initialization if Quill instance already exists
-    // This is important for LiveComponent compatibility
-    if (this.quillInstance) {
-      return;
-    }
+    if (this.quillInstance) return;
     const options = this.buildQuillOptions();
     this.dynamicModuleRegister(options);
     this.setupQuillStyles(options);
@@ -119,7 +174,6 @@ export default class extends Controller {
     this.dispatchEvent('connect', quill);
   }
   setupContentSync(quill) {
-    // set initial content as a delta for better compatibility and allow table-module to work
     const initialData = quill.clipboard.convert({
       html: this.inputTarget.value
     });
@@ -134,7 +188,6 @@ export default class extends Controller {
     });
   }
   bubbles(inputContent) {
-    // Dispatch both 'input' and 'change' events for better compatibility with LiveComponent
     inputContent.dispatchEvent(new Event('input', {
       bubbles: true
     }));
@@ -191,7 +244,6 @@ export default class extends Controller {
     if (isTablePresent) {
       Quill.register('modules/table-better', QuillTableBetter);
     }
-
     if (options.modules) {
       for (const moduleName in options.modules) {
         if (moduleName.startsWith('mention')) {

@@ -36,6 +36,9 @@ Quill.register('modules/markdown', Markdown);
 import {ImageAttributes} from './modules/imageAttributes.ts';
 Quill.register('modules/imageAttributes', ImageAttributes);
 
+import {LinkAttributes} from './modules/linkAttributes.ts';
+Quill.register('modules/linkAttributes', LinkAttributes);
+
 import {Mention} from './modules/mention.ts';
 Quill.register('modules/mention', Mention);
 

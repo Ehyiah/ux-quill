@@ -1,6 +1,4 @@
 import Quill from 'quill';
-
-// Try to import Embed, fallback to a basic blot if needed
 let Embed;
 try {
   Embed = Quill.import('blots/embed');

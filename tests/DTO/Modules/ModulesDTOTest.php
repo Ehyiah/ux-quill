@@ -4,6 +4,7 @@ namespace Ehyiah\QuillJsBundle\Tests\DTO\Modules;
 
 use Ehyiah\QuillJsBundle\DTO\Modules\DividerModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\ImageAttributesModule;
+use Ehyiah\QuillJsBundle\DTO\Modules\LinkAttributesModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\MarkdownModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\MentionModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\PageBreakModule;
@@ -42,6 +43,13 @@ class ModulesDTOTest extends TestCase
     {
         $module = new ImageAttributesModule();
         $this->assertEquals('imageAttributes', $module->name);
+        $this->assertEquals([], $module->options);
+    }
+
+    public function testLinkAttributesModule(): void
+    {
+        $module = new LinkAttributesModule();
+        $this->assertEquals('linkAttributes', $module->name);
         $this->assertEquals([], $module->options);
     }
 

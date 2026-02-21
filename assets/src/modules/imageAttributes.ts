@@ -64,6 +64,10 @@ export class ImageAttributes {
                     <label>Title</label>
                     <input type="text" class="ql-image-title-input" placeholder="Image title...">
                 </div>
+                <div class="ql-image-attribute-row">
+                    <label>Caption</label>
+                    <input type="text" class="ql-image-caption-input" placeholder="Image caption...">
+                </div>
                 <div class="ql-image-attribute-actions">
                     <button type="button" class="ql-image-attribute-save">OK</button>
                 </div>
@@ -73,6 +77,7 @@ export class ImageAttributes {
 
             const altInput = this.tooltip.querySelector('.ql-image-alt-input') as HTMLInputElement;
             const titleInput = this.tooltip.querySelector('.ql-image-title-input') as HTMLInputElement;
+            const captionInput = this.tooltip.querySelector('.ql-image-caption-input') as HTMLInputElement;
 
             altInput.addEventListener('input', () => {
                 if (this.currentImg) {
@@ -94,13 +99,26 @@ export class ImageAttributes {
                 }
             });
 
+            captionInput.addEventListener('input', () => {
+                if (this.currentImg) {
+                    const blot = Quill.find(this.currentImg);
+                    if (blot) {
+                        const index = this.quill.getIndex(blot);
+                        this.quill.formatText(index, 1, 'caption', captionInput.value || null, 'api');
+                    }
+                }
+            });
+
             this.quill.container.appendChild(this.tooltip);
         }
 
         const altInput = this.tooltip.querySelector('.ql-image-alt-input') as HTMLInputElement;
         const titleInput = this.tooltip.querySelector('.ql-image-title-input') as HTMLInputElement;
+        const captionInput = this.tooltip.querySelector('.ql-image-caption-input') as HTMLInputElement;
+        
         altInput.value = this.currentImg.getAttribute('alt') || '';
         titleInput.value = this.currentImg.getAttribute('title') || '';
+        captionInput.value = this.currentImg.getAttribute('data-caption') || '';
 
         this.positionElement(this.currentImg, this.tooltip, 'tooltip');
         this.tooltip.style.display = 'block';
