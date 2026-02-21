@@ -6,7 +6,6 @@ use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\CodeBlockField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\EmojiField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ImageField;
 use Ehyiah\QuillJsBundle\DTO\Modules\EmojiModule;
-use Ehyiah\QuillJsBundle\DTO\Modules\HtmlEditModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\ModuleInterface;
 use Ehyiah\QuillJsBundle\DTO\Modules\ResizeModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\SyntaxModule;
@@ -57,8 +56,7 @@ class QuillType extends AbstractType
         $view->vars['attr']['quill_extra_options'] = json_encode($extraOptions);
         $view->vars['attr']['quill_modules_options'] = json_encode($modules);
 
-        $assets = $this->getBuiltInAssets($fields, $modules, $extraOptions);
-        $view->vars['quill_assets'] = $assets;
+        $view->vars['quill_assets'] = $this->getCustomAssets($extraOptions['assets'] ?? []);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -242,39 +240,15 @@ class QuillType extends AbstractType
     }
 
     /**
-     * @param array<mixed> $fields
-     * @param array<mixed> $modules
-     * @param array<mixed> $extraOptions
-     *
-     * @return array<mixed>
-     */
-    private function getBuiltInAssets(array $fields, array $modules, array $extraOptions): array
-    {
-        $assets['styleSheets'] = [];
-        $assets['scripts'] = [];
-
-        if (isset($extraOptions['assets']) && count($extraOptions['assets']) > 0) {
-            $assets = $this->getCustomAssets($extraOptions['assets'], $assets);
-        }
-
-        return $assets;
-    }
-
-    /**
      * @param array<mixed> $customAssets
-     * @param array<mixed> $assets
      *
      * @return array<mixed>
      */
-    private function getCustomAssets(array $customAssets, array $assets): array
+    private function getCustomAssets(array $customAssets): array
     {
-        if (isset($customAssets['styleSheets'])) {
-            $assets['styleSheets'] = array_merge($assets['styleSheets'], $customAssets['styleSheets']);
-        }
-        if (isset($customAssets['scripts'])) {
-            $assets['scripts'] = array_merge($assets['scripts'], $customAssets['scripts']);
-        }
-
-        return $assets;
+        return [
+            'styleSheets' => $customAssets['styleSheets'] ?? [],
+            'scripts' => $customAssets['scripts'] ?? [],
+        ];
     }
 }
