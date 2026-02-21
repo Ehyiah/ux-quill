@@ -21,24 +21,28 @@ export class PasteSanitizer {
     }
 
     private init(): void {
-        const clipboard = this.quill.getModule('clipboard');
-        if (!clipboard) return;
+        this.quill.root.addEventListener('paste', this.handlePaste.bind(this));
+    }
 
-        // @ts-ignore
-        clipboard.addMatcher(Node.ELEMENT_NODE, (node: HTMLElement, delta: any) => {
-            // If plain text is requested, we strip everything except basic text
-            if (this.options.plain_text) {
-                const ops = delta.ops.map((op: any) => {
-                    if (typeof op.insert === 'string') {
-                        return { insert: op.insert };
-                    }
-                    return { insert: '' };
-                });
-                return new Delta(ops);
+    private handlePaste(event: ClipboardEvent): void {
+        if (!this.options.plain_text) {
+            return;
+        }
+
+        event.preventDefault(); // Prevent Quill's default paste handling
+
+        const clipboardData = event.clipboardData || (window as any).clipboardData;
+        const text = clipboardData.getData('text/plain');
+
+        if (text) {
+            const selection = this.quill.getSelection();
+            if (selection) {
+                // Insert plain text at the current cursor position
+                this.quill.clipboard.dangerouslyPasteHTML(selection.index, text);
+            } else {
+                // If no selection, insert at the end
+                this.quill.clipboard.dangerouslyPasteHTML(this.quill.getLength(), text);
             }
-            // If plain_text is false, let Quill handle it normally,
-            // or apply default cleaning if needed (but user requested to remove other options)
-            return delta;
-        });
+        }
     }
 }
