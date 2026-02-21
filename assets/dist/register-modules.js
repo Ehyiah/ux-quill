@@ -2,7 +2,6 @@ import Quill from 'quill';
 import ImageUploader from "./imageUploader.js";
 Quill.register('modules/imageUploader', ImageUploader);
 import * as Emoji from 'quill2-emoji';
-import 'quill2-emoji/dist/style.css';
 Quill.register('modules/emoji', Emoji);
 import QuillResizeImage from 'quill-resize-image';
 Quill.register('modules/resize', QuillResizeImage);
@@ -18,3 +17,11 @@ import ReadingTime from "./modules/readtimeModule.js";
 Quill.register('modules/readingTime', ReadingTime);
 import SpeechToText from "./modules/speechToText.js";
 Quill.register('modules/speechToText', SpeechToText);
+import * as hljsModule from 'highlight.js';
+const hljs = hljsModule.default || hljsModule;
+// @ts-ignore
+window.hljs = hljs;
+import * as katexModule from 'katex';
+const katex = katexModule.default || katexModule;
+// @ts-ignore
+window.katex = katex;
