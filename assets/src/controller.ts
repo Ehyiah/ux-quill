@@ -8,7 +8,6 @@ import { handleUploadResponse, uploadStrategies } from './upload-utils.ts';
 
 import './register-modules.ts';
 import QuillTableBetter from 'quill-table-better';
-import 'quill-table-better/dist/quill-table-better.css';
 
 interface DOMNode extends HTMLElement {
     getAttribute(name: string): string | null;
@@ -206,6 +205,24 @@ export default class extends Controller {
 
     private dynamicModuleRegister(options: Options)
     {
+        if (options.modules && options.modules.syntax) {
+            if (options.modules.syntax === true || options.modules.syntax === 'true') {
+                // @ts-ignore
+                options.modules.syntax = { hljs };
+            } else if (typeof options.modules.syntax === 'object') {
+                options.modules.syntax.hljs = hljs;
+            }
+        }
+
+        if (options.modules && options.modules.formula) {
+            if (options.modules.formula === true || options.modules.formula === 'true') {
+                // @ts-ignore
+                options.modules.formula = { katex };
+            } else if (typeof options.modules.formula === 'object') {
+                options.modules.formula.katex = katex;
+            }
+        }
+
         const isTablePresent = options.modules.toolbar
             .flat(Infinity)
             .some(item => typeof item === 'string' && item === 'table-better');

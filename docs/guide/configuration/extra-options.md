@@ -19,16 +19,18 @@ This section covers global configuration options for the editor instance, includ
 
 ## Assets
 
-You can inject custom CSS or JS (e.g. for Katex or Highlight.js).
+You can inject custom CSS or JS.
+
+**ATTENTION**, if you are using this bundle inside a project with turbo, you might encounter race condition loading, it is recommended to inject directly in your project.
 
 ```php
 'quill_extra_options' => [
    'assets' => [
        'styleSheets' => [
-           "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css",
+           "https://example.com/custom.css",
        ],
        'scripts' => [
-           "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js",
+           "https://example.com/custom.js",
        ]
    ],
 ]
