@@ -12,6 +12,18 @@ Image.formats = function (domNode) {
   if (domNode.hasAttribute('style')) {
     formats.style = domNode.getAttribute('style');
   }
+  if (domNode.hasAttribute('alt')) {
+    formats.alt = domNode.getAttribute('alt');
+  }
+  if (domNode.hasAttribute('title')) {
+    formats.title = domNode.getAttribute('title');
+  }
+  if (domNode.hasAttribute('width')) {
+    formats.width = domNode.getAttribute('width');
+  }
+  if (domNode.hasAttribute('height')) {
+    formats.height = domNode.getAttribute('height');
+  }
   return formats;
 };
 Image.prototype.format = function (name, value) {

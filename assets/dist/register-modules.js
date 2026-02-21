@@ -21,6 +21,8 @@ import { PageBreak } from "./modules/pageBreak.js";
 Quill.register('modules/pageBreak', PageBreak);
 import { Markdown } from "./modules/markdown.js";
 Quill.register('modules/markdown', Markdown);
+import { ImageAttributes } from "./modules/imageAttributes.js";
+Quill.register('modules/imageAttributes', ImageAttributes);
 const icons = Quill.import('ui/icons');
 if (icons) {
   icons['divider'] = '<svg viewBox="0 0 18 18"><line class="ql-stroke" x1="3" x2="15" y1="9" y2="9"></line></svg>';
