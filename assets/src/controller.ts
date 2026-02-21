@@ -8,6 +8,7 @@ import { handleUploadResponse, uploadStrategies } from './upload-utils.ts';
 
 import './register-modules.ts';
 import QuillTableBetter from 'quill-table-better';
+import {Mention} from './modules/mention.ts';
 
 interface DOMNode extends HTMLElement {
     getAttribute(name: string): string | null;
@@ -241,6 +242,14 @@ export default class extends Controller {
 
         if (isTablePresent) {
             Quill.register('modules/table-better', QuillTableBetter);
+        }
+
+        if (options.modules) {
+            for (const moduleName in options.modules) {
+                if (moduleName.startsWith('mention')) {
+                    Quill.register(`modules/${moduleName}`, Mention);
+                }
+            }
         }
     }
 }

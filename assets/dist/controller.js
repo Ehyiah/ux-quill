@@ -5,6 +5,7 @@ import { ToolbarCustomizer } from "./ui/toolbarCustomizer.js";
 import { handleUploadResponse, uploadStrategies } from "./upload-utils.js";
 import "./register-modules.js";
 import QuillTableBetter from 'quill-table-better';
+import { Mention } from "./modules/mention.js";
 const Image = Quill.import('formats/image');
 const oldFormats = Image.formats;
 Image.formats = function (domNode) {
@@ -189,6 +190,14 @@ export default class extends Controller {
     const isTablePresent = options.modules.toolbar.flat(Infinity).some(item => typeof item === 'string' && item === 'table-better');
     if (isTablePresent) {
       Quill.register('modules/table-better', QuillTableBetter);
+    }
+
+    if (options.modules) {
+      for (const moduleName in options.modules) {
+        if (moduleName.startsWith('mention')) {
+          Quill.register(`modules/${moduleName}`, Mention);
+        }
+      }
     }
   }
 }

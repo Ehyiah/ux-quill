@@ -41,6 +41,9 @@ jest.mock('quill', () => {
                 }
             };
         }
+        if (name.includes('blots/')) {
+            return class MockBlot {};
+        }
         if (name.startsWith('attributors/style/')) {
             return {};
         }

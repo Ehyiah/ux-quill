@@ -5,6 +5,7 @@ namespace Ehyiah\QuillJsBundle\Tests\DTO\Modules;
 use Ehyiah\QuillJsBundle\DTO\Modules\DividerModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\ImageAttributesModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\MarkdownModule;
+use Ehyiah\QuillJsBundle\DTO\Modules\MentionModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\PageBreakModule;
 use PHPUnit\Framework\TestCase;
 
@@ -42,5 +43,17 @@ class ModulesDTOTest extends TestCase
         $module = new ImageAttributesModule();
         $this->assertEquals('imageAttributes', $module->name);
         $this->assertEquals([], $module->options);
+    }
+
+    public function testMentionModule(): void
+    {
+        $module = new MentionModule();
+        $this->assertEquals('mention', $module->name);
+        $this->assertEquals('@', $module->options['trigger']);
+
+        $module = new MentionModule('mention-tags', ['trigger' => '#']);
+        $this->assertEquals('mention-tags', $module->name);
+        $this->assertEquals('#', $module->options['trigger']);
+        $this->assertEquals(10, $module->options['max_results']);
     }
 }
