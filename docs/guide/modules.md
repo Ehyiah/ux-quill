@@ -32,6 +32,7 @@ Example of how to use modules:
 | **CounterModule** | NO | Count of number and Words inside WYSIWYG (display below WYSIWYG instance by default or inside a custom html Element if you want : specify an ID in *_container with the '#') characters counter display 1 character by default because Quill is instantiated with a <p></p> that count as 1 character | counter | array | ``words``, ``words_label``, ``words_container``, ``characters``, ``characters_label``, ``characters_container`` | ['words' => true, 'words_label' => 'Number of words : ', 'words_container' => '', 'characters' => true, 'characters_label' => 'Number of characters : ', 'characters_container' => ''] |
 | **TableModule** | YES | The Table module is responsible for handling table options. see details on repository [site](https://github.com/attoae/quill-table-better) | table-better | array | https://github.com/attoae/quill-table-better | see ``Ehyiah\QuillJsBundle\DTO\Modules\TableModule`` |
 | **DividerModule** | YES | Add a horizontal separator (`<hr>`) support and toolbar button | divider | array | [] | [] |
+| **PageBreakModule** | YES | Add a page break support for print (`page-break-after: always`) | pageBreak | array | `label` | ['label' => 'Page Break'] |
 | **MarkdownModule** | NO | Enable Markdown-like shortcuts during typing (e.g. `# ` for H1, `* ` for list) | markdown | array | [] | [] |
 | **DragAndDropModule** | YES | Enable internal drag and drop of elements like images and videos inside the editor. | dragAndDrop | array | [] | [] |
 | **FullScreenModule** | NO | Add a FullScreen button to the toolbar [site](https://github.com/qvarts/quill-toggle-fullscreen-button) | toggleFullscreen | array | `buttonTitle`, `buttonHTML` check https://github.com/qvarts/quill-toggle-fullscreen-button?tab=readme-ov-file#api | see ``Ehyiah\QuillJsBundle\DTO\Modules\FullScreenModule`` |
@@ -78,6 +79,23 @@ This module enables Markdown shortcuts directly in the editor while typing. When
 ```php
 'modules' => [
     new MarkdownModule(),
+],
+```
+
+## PageBreakModule
+
+This module adds support for page breaks. It displays a visual indicator in the editor and applies a `page-break-after: always` rule when printing.
+
+**Options:**
+- **label**: The text displayed on the page break line (default: `'Page Break'`)
+
+**Usage example:**
+
+```php
+'modules' => [
+    new PageBreakModule([
+        'label' => 'Saut de page',
+    ]),
 ],
 ```
 

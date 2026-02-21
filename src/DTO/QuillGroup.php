@@ -24,6 +24,7 @@ use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\FormulaField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ImageField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ItalicField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\LinkField;
+use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\PageBreakField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\StrikeField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\TableField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\UnderlineField;
@@ -60,6 +61,7 @@ final class QuillGroup implements QuillGroupInterface
             new ColorField(),
             new IndentField(),
             new DividerField(),
+            new PageBreakField(),
         ];
 
         $orgaFields = [
