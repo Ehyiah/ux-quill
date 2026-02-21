@@ -31,6 +31,8 @@ Example of how to use modules:
 | **SmartLinksModule** | NO | automatic recognition of links (can be customized within options) | smartLinks | array | ``linkRegex`` | ['linkRegex' => '/https?:\/\/[^\s]+/'] |
 | **CounterModule** | NO | Count of number and Words inside WYSIWYG (display below WYSIWYG instance by default or inside a custom html Element if you want : specify an ID in *_container with the '#') characters counter display 1 character by default because Quill is instantiated with a <p></p> that count as 1 character | counter | array | ``words``, ``words_label``, ``words_container``, ``characters``, ``characters_label``, ``characters_container`` | ['words' => true, 'words_label' => 'Number of words : ', 'words_container' => '', 'characters' => true, 'characters_label' => 'Number of characters : ', 'characters_container' => ''] |
 | **TableModule** | YES | The Table module is responsible for handling table options. see details on repository [site](https://github.com/attoae/quill-table-better) | table-better | array | https://github.com/attoae/quill-table-better | see ``Ehyiah\QuillJsBundle\DTO\Modules\TableModule`` |
+| **DividerModule** | YES | Add a horizontal separator (`<hr>`) support and toolbar button | divider | array | [] | [] |
+| **MarkdownModule** | NO | Enable Markdown-like shortcuts during typing (e.g. `# ` for H1, `* ` for list) | markdown | array | [] | [] |
 | **DragAndDropModule** | YES | Enable internal drag and drop of elements like images and videos inside the editor. | dragAndDrop | array | [] | [] |
 | **FullScreenModule** | NO | Add a FullScreen button to the toolbar [site](https://github.com/qvarts/quill-toggle-fullscreen-button) | toggleFullscreen | array | `buttonTitle`, `buttonHTML` check https://github.com/qvarts/quill-toggle-fullscreen-button?tab=readme-ov-file#api | see ``Ehyiah\QuillJsBundle\DTO\Modules\FullScreenModule`` |
 | **HtmlEditModule** | NO | The HtmlEditModule allow to edit the raw html. see details on repository [site](https://github.com/benwinding/quill-html-edit-button) | htmlEditButton | array | https://github.com/benwinding/quill-html-edit-button | see ``Ehyiah\QuillJsBundle\DTO\Modules\htmlEditButton`` | There is currently a conflict with tableField. Don't use both of them at the same time as the table inserted via the htmlEdit module will not be displayed |
@@ -58,6 +60,24 @@ It displays the result in the toolbar by default, or in a specific element if ta
         'wpm' => '250',
         'target' => '#reading-time-display',
     ]),
+],
+```
+
+## MarkdownModule
+
+This module enables Markdown shortcuts directly in the editor while typing. When you type a specific sequence followed by a space or enter, it will automatically format the current line.
+
+**Available shortcuts:**
+- `# ` to `###### `: Creates headers (H1 to H6).
+- `* ` or `- `: Creates a bulleted list.
+- `1. `: Creates an ordered list.
+- `> `: Creates a blockquote.
+
+**Usage example:**
+
+```php
+'modules' => [
+    new MarkdownModule(),
 ],
 ```
 

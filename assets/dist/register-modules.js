@@ -15,6 +15,14 @@ import htmlEditButton from 'quill-html-edit-button';
 Quill.register('modules/htmlEditButton', htmlEditButton.default || htmlEditButton);
 import ReadingTime from "./modules/readtimeModule.js";
 Quill.register('modules/readingTime', ReadingTime);
+import { Divider } from "./modules/divider.js";
+Quill.register('modules/divider', Divider);
+import { Markdown } from "./modules/markdown.js";
+Quill.register('modules/markdown', Markdown);
+const icons = Quill.import('ui/icons');
+if (icons) {
+  icons['divider'] = '<svg viewBox="0 0 18 18"><line class="ql-stroke" x1="3" x2="15" y1="9" y2="9"></line></svg>';
+}
 import DragAndDrop from "./modules/dragAndDrop.js";
 Quill.register('modules/dragAndDrop', DragAndDrop);
 import SpeechToText from "./modules/speechToText.js";

@@ -64,6 +64,7 @@ Below is the list of available fields from QuillJS (https://v2.quilljs.com/docs/
 | :---: | :---: |
 | **EmojiField** | Add an emoji |
 | **TableField** | Add a table field |
+| **DividerField** | Add a horizontal separator |
 
 > [!TIP]
 > If you need to add a field that is not provided by this bundle, you can create your own. See [Custom Fields](/guide/advanced/custom-fields) for more details.
