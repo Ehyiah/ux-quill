@@ -25,8 +25,6 @@ import { ImageAttributes } from "./modules/imageAttributes.js";
 Quill.register('modules/imageAttributes', ImageAttributes);
 import { LinkAttributes } from "./modules/linkAttributes.js";
 Quill.register('modules/linkAttributes', LinkAttributes);
-import { Mention } from "./modules/mention.js";
-Quill.register('modules/mention', Mention);
 import { Autosave } from "./modules/autosave.js";
 Quill.register('modules/autosave', Autosave);
 const icons = Quill.import('ui/icons');

@@ -34,14 +34,10 @@ export class Autosave {
         this.showRestoreNotification(savedData);
       }
     }
-
-    // Save logic on change
     this.quill.on('text-change', () => {
       if (this.saveTimeout) clearTimeout(this.saveTimeout);
       this.saveTimeout = setTimeout(() => this.save(), this.options.interval);
     });
-
-    // Cleanup logic on form submit
     const form = this.quill.container.closest('form');
     if (form) {
       form.addEventListener('submit', () => this.clear());

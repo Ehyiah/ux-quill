@@ -39,9 +39,6 @@ Quill.register('modules/imageAttributes', ImageAttributes);
 import {LinkAttributes} from './modules/linkAttributes.ts';
 Quill.register('modules/linkAttributes', LinkAttributes);
 
-import {Mention} from './modules/mention.ts';
-Quill.register('modules/mention', Mention);
-
 import {Autosave} from './modules/autosave.ts';
 Quill.register('modules/autosave', Autosave);
 
