@@ -7,7 +7,7 @@ https://quilljs.com/docs/modules
 
 You can add/customize quill modules in this option field.
 You can create your own modules classes, they need to implement the ``ModuleInterface`` and add the name and options properties.
-Some modules are automatically loaded when they are needed in fields.
+Some modules are automatically loaded when they are needed in fields by implementing the `QuillFieldModuleInterface` (see [Custom Fields](/guide/advanced/custom-fields)).
 
 Example of how to use modules:
 

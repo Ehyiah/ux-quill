@@ -26,13 +26,10 @@ class QuillGroupTest extends TestCase
 
         $result = QuillGroup::build($boldInlineField, $italicInlineField, $colorBlockField, $headerBlockField);
 
-        $expectedResult = [
-            'bold',
-            'italic',
-            ['color' => ['green']],
-            ['header' => [1, 3]],
-        ];
-
-        $this->assertEquals($expectedResult, $result);
+        $this->assertCount(4, $result);
+        $this->assertInstanceOf(BoldField::class, $result[0]);
+        $this->assertInstanceOf(ItalicField::class, $result[1]);
+        $this->assertInstanceOf(ColorField::class, $result[2]);
+        $this->assertInstanceOf(HeaderGroupField::class, $result[3]);
     }
 }

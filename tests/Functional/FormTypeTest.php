@@ -2,6 +2,11 @@
 
 namespace Ehyiah\QuillJsBundle\Tests\Functional;
 
+use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\BoldField;
+use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\CodeBlockField;
+use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ImageField;
+use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ItalicField;
+use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\UnderlineField;
 use Ehyiah\QuillJsBundle\DTO\Modules\EmojiModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\ResizeModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\SyntaxModule;
@@ -56,9 +61,9 @@ final class FormTypeTest extends TestCase
     {
         $customOptions = [
             'quill_options' => [
-                ['bold', 'italic', 'underline'],
-                ['image'],
-                ['code-block'],
+                [new BoldField(), new ItalicField(), new UnderlineField()],
+                [new ImageField()],
+                [new CodeBlockField()],
             ],
             'quill_extra_options' => [
                 'theme' => ThemeOption::QUILL_THEME_SNOW,

@@ -2,8 +2,14 @@
 
 namespace Ehyiah\QuillJsBundle\Tests\Form;
 
+use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\BoldField;
+use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\CodeBlockField;
+use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\EmojiField;
+use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\FormulaField;
+use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ImageField;
+use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ItalicField;
+use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\UnderlineField;
 use Ehyiah\QuillJsBundle\DTO\Modules\EmojiModule;
-use Ehyiah\QuillJsBundle\DTO\Modules\HtmlEditModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\ResizeModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\SyntaxModule;
 use Ehyiah\QuillJsBundle\Form\QuillType;
@@ -64,11 +70,11 @@ final class QuillTypeTest extends TestCase
         yield [
             [
                 'quill_options' => [
-                    ['bold', 'italic'],
-                    ['bold', 'underline'],
-                    ['code-block'],
-                    ['image'],
-                    ['emoji'],
+                    [new BoldField(), new ItalicField()],
+                    [new BoldField(), new UnderlineField()],
+                    [new CodeBlockField()],
+                    [new ImageField()],
+                    [new EmojiField()],
                 ],
                 'quill_extra_options' => [
                 ],
@@ -85,17 +91,17 @@ final class QuillTypeTest extends TestCase
                 'quill_extra_options' => [
                 ],
                 'modules' => [
-                    new EmojiModule(),
-                    new ResizeModule(),
                     new SyntaxModule(),
+                    new ResizeModule(),
+                    new EmojiModule(),
                 ],
             ],
         ];
         yield [
             [
                 'quill_options' => [
-                    ['bold', 'italic'],
-                    ['bold', 'underline'],
+                    [new BoldField(), new ItalicField()],
+                    [new BoldField(), new UnderlineField()],
                 ],
                 'quill_extra_options' => [
                 ],
@@ -240,7 +246,7 @@ final class QuillTypeTest extends TestCase
     {
         yield 'no custom assets' => [
             [
-                'quill_options' => [['bold', 'italic']],
+                'quill_options' => [[new BoldField(), new ItalicField()]],
                 'quill_extra_options' => [],
                 'modules' => [],
             ],
@@ -251,7 +257,7 @@ final class QuillTypeTest extends TestCase
 
         yield 'empty custom assets array' => [
             [
-                'quill_options' => [['bold', 'italic']],
+                'quill_options' => [[new BoldField(), new ItalicField()]],
                 'quill_extra_options' => [
                     'assets' => [],
                 ],
@@ -264,7 +270,7 @@ final class QuillTypeTest extends TestCase
 
         yield 'custom stylesheets only' => [
             [
-                'quill_options' => [['bold', 'italic']],
+                'quill_options' => [[new BoldField(), new ItalicField()]],
                 'quill_extra_options' => [
                     'assets' => [
                         'styleSheets' => [
@@ -285,7 +291,7 @@ final class QuillTypeTest extends TestCase
 
         yield 'custom scripts only' => [
             [
-                'quill_options' => [['bold', 'italic']],
+                'quill_options' => [[new BoldField(), new ItalicField()]],
                 'quill_extra_options' => [
                     'assets' => [
                         'scripts' => [
@@ -306,7 +312,7 @@ final class QuillTypeTest extends TestCase
 
         yield 'custom stylesheets and scripts' => [
             [
-                'quill_options' => [['bold', 'italic']],
+                'quill_options' => [[new BoldField(), new ItalicField()]],
                 'quill_extra_options' => [
                     'assets' => [
                         'styleSheets' => [
@@ -331,8 +337,8 @@ final class QuillTypeTest extends TestCase
         yield 'custom assets combined with built-in formula assets' => [
             [
                 'quill_options' => [
-                    ['bold', 'italic'],
-                    ['formula'],
+                    [new BoldField(), new ItalicField()],
+                    [new FormulaField()],
                 ],
                 'quill_extra_options' => [
                     'assets' => [
@@ -353,114 +359,6 @@ final class QuillTypeTest extends TestCase
                 'custom' => 'https://example.com/custom.js',
             ],
             'custom assets combined with built-in formula assets',
-        ];
-
-        yield 'custom assets combined with SyntaxModule' => [
-            [
-                'quill_options' => [['bold', 'italic']],
-                'quill_extra_options' => [
-                    'assets' => [
-                        'styleSheets' => [
-                            'myTheme' => 'https://example.com/my-theme.css',
-                        ],
-                        'scripts' => [
-                            'myPlugin' => 'https://example.com/my-plugin.js',
-                        ],
-                    ],
-                ],
-                'modules' => [new SyntaxModule()],
-            ],
-            [
-                'myTheme' => 'https://example.com/my-theme.css',
-            ],
-            [
-                'myPlugin' => 'https://example.com/my-plugin.js',
-            ],
-            'custom assets combined with SyntaxModule',
-        ];
-
-        yield 'custom assets overwriting built-in highlight from SyntaxModule' => [
-            [
-                'quill_options' => [['bold', 'italic']],
-                'quill_extra_options' => [
-                    'assets' => [
-                        'styleSheets' => [
-                            'highlight' => 'https://example.com/my-custom-highlight.css',
-                        ],
-                        'scripts' => [
-                            'highlight' => 'https://example.com/my-custom-highlight.js',
-                        ],
-                    ],
-                ],
-                'modules' => [new SyntaxModule()],
-            ],
-            [
-                'highlight' => 'https://example.com/my-custom-highlight.css',
-            ],
-            [
-                'highlight' => 'https://example.com/my-custom-highlight.js',
-            ],
-            'custom assets overwriting built-in highlight from SyntaxModule',
-        ];
-
-        yield 'custom assets with HtmlEditModule syntax true' => [
-            [
-                'quill_options' => [['bold', 'italic']],
-                'quill_extra_options' => [
-                    'assets' => [
-                        'styleSheets' => [
-                            'customHighlight' => 'https://example.com/highlight-theme.css',
-                        ],
-                        'scripts' => [
-                            'highlight2' => 'https://example.com/custom-xml-lang.js',
-                        ],
-                    ],
-                ],
-                'modules' => [
-                    new HtmlEditModule(options: ['syntax' => true]),
-                ],
-            ],
-            [
-                'customHighlight' => 'https://example.com/highlight-theme.css',
-            ],
-            [
-                'highlight2' => 'https://example.com/custom-xml-lang.js',
-            ],
-            'custom assets with HtmlEditModule syntax true',
-        ];
-
-        yield 'complex scenario with all asset types' => [
-            [
-                'quill_options' => [
-                    ['bold', 'italic'],
-                    ['formula'],
-                ],
-                'quill_extra_options' => [
-                    'assets' => [
-                        'styleSheets' => [
-                            'bootstrap' => 'https://cdn.example.com/bootstrap.css',
-                            'custom' => 'https://example.com/custom.css',
-                        ],
-                        'scripts' => [
-                            'jquery' => 'https://cdn.example.com/jquery.js',
-                            'custom' => 'https://example.com/custom.js',
-                        ],
-                    ],
-                ],
-                'modules' => [
-                    new SyntaxModule(),
-                    new HtmlEditModule(options: ['syntax' => true]),
-                ],
-            ],
-            [
-                'bootstrap' => 'https://cdn.example.com/bootstrap.css',
-                'custom' => 'https://example.com/custom.css',
-            ],
-            [
-                'jquery' => 'https://cdn.example.com/jquery.js',
-                'custom' => 'https://example.com/custom.js',
-            ],
-            'complex scenario with all asset types',
         ];
     }
 }

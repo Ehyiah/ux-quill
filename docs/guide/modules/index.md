@@ -16,7 +16,9 @@ They allow you to add interactive features, modify event handling, or integrate 
 
 - You can add/customize quill modules in this option field.
 - You can create your own modules classes, they need to implement the ``ModuleInterface`` and add the name and options properties.
-- Some modules are automatically loaded when they are needed in fields.
+- Some modules are automatically loaded when they are needed in fields by implementing the `QuillFieldModuleInterface`.
+
+See [Custom Fields](/guide/advanced/custom-fields) for more details.
 
 Example of how to use modules:
 

@@ -2,15 +2,10 @@
 
 namespace Ehyiah\QuillJsBundle\Form;
 
-use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\CodeBlockField;
-use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\EmojiField;
-use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ImageField;
-use Ehyiah\QuillJsBundle\DTO\Modules\EmojiModule;
-use Ehyiah\QuillJsBundle\DTO\Modules\HtmlEditModule;
+use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillBlockFieldInterface;
+use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillFieldModuleInterface;
+use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillInlineFieldInterface;
 use Ehyiah\QuillJsBundle\DTO\Modules\ModuleInterface;
-use Ehyiah\QuillJsBundle\DTO\Modules\ResizeModule;
-use Ehyiah\QuillJsBundle\DTO\Modules\SyntaxModule;
-use Ehyiah\QuillJsBundle\DTO\Modules\TableModule;
 use Ehyiah\QuillJsBundle\DTO\Options\DebugOption;
 use Ehyiah\QuillJsBundle\DTO\Options\StyleOption;
 use Ehyiah\QuillJsBundle\DTO\Options\ThemeOption;
@@ -32,14 +27,25 @@ class QuillType extends AbstractType
 
     public function buildView(FormView $view, FormInterface $form, array $options): void
     {
-        $view->vars['attr']['quill_options'] = json_encode($options['quill_options']);
-
         $fields = $options['quill_options'];
         $modules = $options['modules'];
 
-        foreach ($this->getAutomaticModulesToConfigure() as $config) {
-            $this->addAutoModuleIfRequired($fields, $modules, $config['moduleName'], $config['fieldIdentifier'], $config['moduleClass']);
+        $finalFields = [];
+        foreach ($fields as $fieldOrGroup) {
+            if (is_array($fieldOrGroup)) {
+                $group = [];
+                foreach ($fieldOrGroup as $field) {
+                    $this->addAutoModule($field, $modules);
+                    $group = array_merge($group, $this->resolveFieldOption($field));
+                }
+                $finalFields[] = $group;
+            } else {
+                $this->addAutoModule($fieldOrGroup, $modules);
+                $finalFields = array_merge($finalFields, $this->resolveFieldOption($fieldOrGroup));
+            }
         }
+
+        $view->vars['attr']['quill_options'] = json_encode($finalFields);
 
         $extraOptions = $options['quill_extra_options'];
 
@@ -57,8 +63,7 @@ class QuillType extends AbstractType
         $view->vars['attr']['quill_extra_options'] = json_encode($extraOptions);
         $view->vars['attr']['quill_modules_options'] = json_encode($modules);
 
-        $assets = $this->getBuiltInAssets($fields, $modules, $extraOptions);
-        $view->vars['quill_assets'] = $assets;
+        $view->vars['quill_assets'] = $this->getCustomAssets($extraOptions['assets'] ?? []);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -178,103 +183,52 @@ class QuillType extends AbstractType
     }
 
     /**
-     * @return array<array<string, string>>
+     * @param array<ModuleInterface> $modules
      */
-    private function getAutomaticModulesToConfigure(): array
+    private function addAutoModule(mixed $field, array &$modules): void
     {
-        return [
-            [
-                'moduleName' => EmojiModule::NAME,
-                'fieldIdentifier' => (new EmojiField())->getOption(),
-                'moduleClass' => EmojiModule::class,
-            ],
-            [
-                'moduleName' => ResizeModule::NAME,
-                'fieldIdentifier' => (new ImageField())->getOption(),
-                'moduleClass' => ResizeModule::class,
-            ],
-            [
-                'moduleName' => SyntaxModule::NAME,
-                'fieldIdentifier' => (new CodeBlockField())->getOption(),
-                'moduleClass' => SyntaxModule::class,
-            ],
-            [
-                'moduleName' => TableModule::NAME,
-                'fieldIdentifier' => 'table-better',
-                'moduleClass' => TableModule::class,
-            ],
-        ];
-    }
+        if ($field instanceof QuillFieldModuleInterface) {
+            foreach ($field::importModules() as $moduleClass) {
+                if (in_array($moduleClass::NAME, array_column($modules, 'name'), true)) {
+                    continue;
+                }
 
-    /**
-     * Ajoute un module au tableau des modules s'il n'existe pas déjà et si un champ correspondant est présent
-     * permet une configuration par défaut des modules lorsque ceux-ci sont nécessaires
-     * Si le module a été mis par l'utilisateur, alors la version de l'utilisateur sera conservée
-     *
-     * @param array<mixed> $fields Tableau des champs à vérifier
-     * @param array<array<string, string>|object> $modules Tableau des modules à compléter
-     * @param string $moduleName Nom du module à vérifier
-     * @param string $fieldIdentifier Identifiant du champ à rechercher
-     * @param string $moduleClass Classe du module à instancier
-     */
-    private function addAutoModuleIfRequired(array $fields, array &$modules, string $moduleName, string $fieldIdentifier, string $moduleClass): void
-    {
-        if (in_array($moduleName, array_column($modules, 'name'), true)) {
-            return;
-        }
-
-        if (in_array($fieldIdentifier, $fields, true)) {
-            $modules[] = new $moduleClass();
-
-            return;
-        }
-
-        foreach ($fields as $field) {
-            if (is_array($field)
-                && (in_array($fieldIdentifier, $field, true)
-                 || isset($field[$fieldIdentifier])
-                 || array_key_exists($fieldIdentifier, $field))) {
                 $modules[] = new $moduleClass();
-
-                return;
             }
         }
     }
 
     /**
-     * @param array<mixed> $fields
-     * @param array<mixed> $modules
-     * @param array<mixed> $extraOptions
-     *
      * @return array<mixed>
      */
-    private function getBuiltInAssets(array $fields, array $modules, array $extraOptions): array
+    private function resolveFieldOption(mixed $field): array
     {
-        $assets['styleSheets'] = [];
-        $assets['scripts'] = [];
-
-        if (isset($extraOptions['assets']) && count($extraOptions['assets']) > 0) {
-            $assets = $this->getCustomAssets($extraOptions['assets'], $assets);
+        if ($field instanceof QuillInlineFieldInterface) {
+            return [$field->getOption()];
         }
 
-        return $assets;
+        if ($field instanceof QuillBlockFieldInterface) {
+            $options = [];
+            foreach ($field->getOption() as $key => $option) {
+                $options[][$key] = $option;
+            }
+
+            return $options;
+        }
+
+        return (array)$field;
     }
 
     /**
      * @param array<mixed> $customAssets
-     * @param array<mixed> $assets
      *
      * @return array<mixed>
      */
-    private function getCustomAssets(array $customAssets, array $assets): array
+    private function getCustomAssets(array $customAssets): array
     {
-        if (isset($customAssets['styleSheets'])) {
-            $assets['styleSheets'] = array_merge($assets['styleSheets'], $customAssets['styleSheets']);
-        }
-        if (isset($customAssets['scripts'])) {
-            $assets['scripts'] = array_merge($assets['scripts'], $customAssets['scripts']);
-        }
-
-        return $assets;
+        return [
+            'styleSheets' => $customAssets['styleSheets'] ?? [],
+            'scripts' => $customAssets['scripts'] ?? [],
+        ];
     }
 }
