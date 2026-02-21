@@ -42,6 +42,9 @@ Quill.register('modules/linkAttributes', LinkAttributes);
 import {Autosave} from './modules/autosave.ts';
 Quill.register('modules/autosave', Autosave);
 
+import {PasteSanitizer} from './modules/pasteSanitizer.ts';
+Quill.register('modules/pasteSanitizer', PasteSanitizer);
+
 const icons = Quill.import('ui/icons');
 if (icons) {
     icons['divider'] = '<svg viewBox="0 0 18 18"><line class="ql-stroke" x1="3" x2="15" y1="9" y2="9"></line></svg>';

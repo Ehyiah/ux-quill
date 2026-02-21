@@ -35,6 +35,7 @@ Example of how to use modules:
 | **PageBreakModule** | YES | Add a page break support for print (`page-break-after: always`) | pageBreak | array | `label` | ['label' => 'Page Break'] |
 | **MentionModule** | NO | Add support for mentions (`@user`, `#tag`) with static or remote data. | mention | array | `trigger`, `data`, `remote_url`, `min_chars`, `max_results` | see documentation |
 | **AutosaveModule** | NO | Automatically saves content to `localStorage` to prevent data loss. | autosave | array | `interval`, `restore_type`, `key_suffix` | see documentation |
+| **PasteSanitizerModule** | NO | Clean or strip HTML when pasting content from external sources. | pasteSanitizer | array | `plain_text`, `remove_styles`, `remove_classes` | see documentation |
 | **MarkdownModule** | NO | Enable Markdown-like shortcuts during typing (e.g. `# ` for H1, `* ` for list) | markdown | array | [] | [] |
 | **DragAndDropModule** | YES | Enable internal drag and drop of elements like images and videos inside the editor. | dragAndDrop | array | [] | [] |
 | **ImageAttributesModule** | YES | Add support for `alt`, `title` and `caption` attributes on images. | imageAttributes | array | [] | [] |
@@ -228,6 +229,23 @@ This module prevents data loss by automatically saving the editor content to the
     new AutosaveModule(options: [
         'interval' => 3000,
         'restore_type' => 'manual',
+    ]),
+],
+```
+
+## PasteSanitizerModule
+
+This module helps maintain a clean editor by forcing pasted content from external sources to plain text.
+
+**Options:**
+- **plain_text**: If `true`, all formatting is removed and only plain text is pasted. Default: `true`.
+
+**Usage example:**
+
+```php
+'modules' => [
+    new PasteSanitizerModule(options: [
+        'plain_text' => true,
     ]),
 ],
 ```

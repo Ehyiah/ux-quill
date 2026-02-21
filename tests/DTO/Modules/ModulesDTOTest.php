@@ -9,6 +9,7 @@ use Ehyiah\QuillJsBundle\DTO\Modules\LinkAttributesModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\MarkdownModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\MentionModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\PageBreakModule;
+use Ehyiah\QuillJsBundle\DTO\Modules\PasteSanitizerModule;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -16,6 +17,16 @@ use PHPUnit\Framework\TestCase;
  */
 class ModulesDTOTest extends TestCase
 {
+    public function testPasteSanitizerModule(): void
+    {
+        $module = new PasteSanitizerModule();
+        $this->assertEquals('pasteSanitizer', $module->name);
+        $this->assertTrue($module->options['plain_text']);
+
+        $module = new PasteSanitizerModule(options: ['plain_text' => false]);
+        $this->assertFalse($module->options['plain_text']);
+    }
+
     public function testAutosaveModule(): void
     {
         $module = new AutosaveModule();
