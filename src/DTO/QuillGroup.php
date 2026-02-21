@@ -34,27 +34,15 @@ use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillInlineFieldInterface;
 final class QuillGroup implements QuillGroupInterface
 {
     /**
-     * @return array<int<0, max>, array<string>|string>
+     * @return array<QuillBlockFieldInterface|QuillInlineFieldInterface>
      */
     public static function build(QuillBlockFieldInterface|QuillInlineFieldInterface ...$fields): array
     {
-        $array = [];
-        foreach ($fields as $field) {
-            if ($field instanceof QuillInlineFieldInterface) {
-                $array[] = $field->getOption();
-            }
-            if ($field instanceof QuillBlockFieldInterface) {
-                foreach ($field->getOption() as $key => $option) {
-                    $array[][$key] = $option;
-                }
-            }
-        }
-
-        return $array;
+        return $fields;
     }
 
     /**
-     * @return array<int<0, max>, array<string>|string>
+     * @return array<QuillBlockFieldInterface|QuillInlineFieldInterface>
      */
     public static function buildWithAllFields(): array
     {
@@ -95,8 +83,6 @@ final class QuillGroup implements QuillGroupInterface
             new TableField(),
         ];
 
-        $fields = array_merge($stylingFields, $orgaFields, $otherFields);
-
-        return self::build(...$fields);
+        return array_merge($stylingFields, $orgaFields, $otherFields);
     }
 }
