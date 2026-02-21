@@ -5,7 +5,7 @@ namespace Ehyiah\QuillJsBundle\DTO\Modules;
 /**
  * Module to enable internal drag and drop of elements (images, videos)
  */
-final class DragAndDropModule implements ModuleInterface
+final class ImageDragAndDropModule implements ModuleInterface
 {
     public const NAME = 'dragAndDrop';
 

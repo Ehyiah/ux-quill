@@ -15,6 +15,8 @@ import htmlEditButton from 'quill-html-edit-button';
 Quill.register('modules/htmlEditButton', htmlEditButton.default || htmlEditButton);
 import ReadingTime from "./modules/readtimeModule.js";
 Quill.register('modules/readingTime', ReadingTime);
+import DragAndDrop from "./modules/dragAndDrop.js";
+Quill.register('modules/dragAndDrop', DragAndDrop);
 import SpeechToText from "./modules/speechToText.js";
 Quill.register('modules/speechToText', SpeechToText);
 import * as hljsModule from 'highlight.js';
