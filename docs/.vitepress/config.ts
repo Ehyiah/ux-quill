@@ -43,6 +43,7 @@ export default defineConfig({
               { text: 'ReadTimeModule', link: '/guide/modules/read-time' },
               { text: 'STTModule', link: '/guide/modules/stt' },
               { text: 'FullScreenModule', link: '/guide/modules/fullscreen' },
+              { text: 'TemplatesModule', link: '/guide/modules/templates' },
               { text: 'Other Modules', link: '/guide/modules/others' }
             ]
           },

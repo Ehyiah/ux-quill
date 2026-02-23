@@ -25,6 +25,7 @@ use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ItalicField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\LinkField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\StrikeField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\TableField;
+use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\TemplateField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\UnderlineField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\VideoField;
 use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillBlockFieldInterface;
@@ -47,6 +48,7 @@ final class QuillGroup implements QuillGroupInterface
     public static function buildWithAllFields(): array
     {
         $stylingFields = [
+            new TemplateField(),
             new BoldField(),
             new ItalicField(),
             new UnderlineField(),
