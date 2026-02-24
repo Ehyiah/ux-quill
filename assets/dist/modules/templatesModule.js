@@ -19,43 +19,45 @@ function readIconFromToolbar(quill) {
   return null;
 }
 export class TemplatesModule {
-  dropdown = null;
   constructor(quill, options) {
-    // Defer setup so the toolbar buttons are guaranteed to exist,
-    // regardless of Quill module initialization order.
-    setTimeout(() => this.setup(quill, options), 0);
+    this.quill = quill;
+    this.options = options;
+    this.setup();
   }
-  setup(quill, options) {
-    const toolbar = quill.getModule('toolbar');
+  setup() {
+    const toolbar = this.quill.getModule('toolbar');
     if (!toolbar?.container) {
       return;
     }
-    const btn = toolbar.container.querySelector('.ql-template');
-    if (!btn) {
+    const buttons = toolbar.container.querySelectorAll('.ql-template');
+    if (buttons.length === 0) {
       return;
     }
-
-    // Prevent Quill's toolbar from toggling the 'template' format on click
     toolbar.addHandler('template', () => {});
-    const templates = this.normalizeOptions(options);
-    const icon = readIconFromToolbar(quill);
+    const templates = this.normalizeOptions(this.options);
+    const icon = readIconFromToolbar(this.quill);
+    buttons.forEach(btn => {
+      this.setupButton(btn, templates, icon, toolbar.container);
+    });
+  }
+  setupButton(btn, templates, icon, container) {
+    if (btn.dataset.templateInitialized) {
+      return;
+    }
+    btn.dataset.templateInitialized = 'true';
     btn.innerHTML = icon ?? DEFAULT_ICON;
     btn.setAttribute('title', 'Templates');
     if (!templates.length) {
       return;
     }
-    const wrapper = document.createElement('span');
-    wrapper.style.cssText = 'position:relative;display:inline-block;';
-    btn.parentElement.insertBefore(wrapper, btn);
-    wrapper.appendChild(btn);
     const dropdown = document.createElement('div');
-    this.dropdown = dropdown;
-    dropdown.style.cssText = ['display:none', 'position:absolute', 'top:100%', 'left:0', 'background:#fff', 'border:1px solid #ccc', 'border-radius:4px', 'box-shadow:0 2px 8px rgba(0,0,0,0.2)', 'z-index:9999', 'min-width:150px', 'padding:4px 0'].join(';');
-    wrapper.appendChild(dropdown);
+    dropdown.className = 'ql-template-dropdown';
+    dropdown.style.cssText = ['display:none', 'position:fixed', 'background:#fff', 'border:1px solid #ccc', 'border-radius:4px', 'box-shadow:0 2px 8px rgba(0,0,0,0.2)', 'z-index:9999', 'min-width:150px', 'padding:4px 0'].join(';');
+    document.body.appendChild(dropdown);
     templates.forEach(tpl => {
       const item = document.createElement('div');
       item.textContent = tpl.label;
-      item.style.cssText = 'padding:6px 12px;cursor:pointer;white-space:nowrap;font-size:14px;';
+      item.style.cssText = 'padding:6px 12px;cursor:pointer;white-space:nowrap;font-size:14px;color:#444;';
       item.addEventListener('mouseenter', () => {
         item.style.backgroundColor = '#f0f0f0';
       });
@@ -64,17 +66,38 @@ export class TemplatesModule {
       });
       item.addEventListener('mousedown', e => {
         e.preventDefault();
-        const range = quill.getSelection(true);
-        quill.clipboard.dangerouslyPasteHTML(range.index, tpl.content);
+        const range = this.quill.getSelection(true);
+        if (range) {
+          this.quill.clipboard.dangerouslyPasteHTML(range.index, tpl.content);
+        }
         dropdown.style.display = 'none';
       });
       dropdown.appendChild(item);
     });
-    btn.addEventListener('click', () => {
-      dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+    const toggleDropdown = () => {
+      if (dropdown.style.display === 'block') {
+        dropdown.style.display = 'none';
+      } else {
+        document.querySelectorAll('.ql-template-dropdown').forEach(el => el.style.display = 'none');
+        const rect = btn.getBoundingClientRect();
+        dropdown.style.top = `${rect.bottom + window.scrollY}px`;
+        dropdown.style.left = `${rect.left + window.scrollX}px`;
+        dropdown.style.display = 'block';
+      }
+    };
+    btn.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleDropdown();
+    });
+    window.addEventListener('scroll', () => {
+      dropdown.style.display = 'none';
+    }, true);
+    window.addEventListener('resize', () => {
+      dropdown.style.display = 'none';
     });
     document.addEventListener('mousedown', e => {
-      if (!wrapper.contains(e.target)) {
+      if (!btn.contains(e.target) && !dropdown.contains(e.target)) {
         dropdown.style.display = 'none';
       }
     });

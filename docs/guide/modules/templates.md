@@ -1,6 +1,7 @@
 # TemplatesModule
 
-This module adds a **Templates** button to the toolbar. When clicked, it shows a dropdown listing predefined HTML templates. Selecting a template inserts its content at the current cursor position in the editor.
+This module adds a **Templates** button to the toolbar. When clicked, it shows a dropdown listing predefined HTML templates. 
+Selecting a template inserts its content at the current cursor position in the editor.
 
 ## Requirements
 
@@ -15,21 +16,8 @@ Both `TemplateField` in `quill_options` and `TemplatesModule` in `modules` are r
 ],
 ```
 
-`TemplateField` declares the button in the toolbar. `TemplatesModule` configures the templates and powers the dropdown. Because `TemplateField` auto-imports `TemplatesModule`, you only need to add `TemplatesModule` explicitly when you want to pass custom templates.
-
-## Custom icon
-
-Pass an SVG string to `TemplateField` to replace the default toolbar button icon:
-
-```php
-new TemplateField(icon: '<svg viewBox="0 0 18 18">...</svg>')
-```
-
-If both `TemplateField` and an explicit `TemplatesModule` are present, the icon from `TemplateField` takes precedence over any icon set in `TemplatesModule`. The icon can also be set directly on `TemplatesModule`:
-
-```php
-new TemplatesModule(icon: '<svg viewBox="0 0 18 18">...</svg>')
-```
+`TemplateField` declares the button in the toolbar. `TemplatesModule` configures the templates and powers the dropdown. 
+Because `TemplateField` auto-imports `TemplatesModule`, you only need to add `TemplatesModule` explicitly when you want to pass custom templates.
 
 ## Default templates
 
