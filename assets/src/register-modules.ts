@@ -24,6 +24,9 @@ Quill.register('modules/htmlEditButton', htmlEditButton.default || htmlEditButto
 import ReadingTime from './modules/readtimeModule.ts';
 Quill.register('modules/readingTime', ReadingTime);
 
+import ImageSelection from './modules/imageSelection.ts';
+Quill.register('modules/imageSelection', ImageSelection);
+
 import DragAndDrop from './modules/dragAndDrop.ts';
 Quill.register('modules/dragAndDrop', DragAndDrop);
 

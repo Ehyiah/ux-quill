@@ -108,6 +108,30 @@ final class FormTypeTest extends TestCase
         $this->assertContains(ResizeModule::NAME, $moduleNames);
     }
 
+    public function testImageFieldIncludesSelectionModule(): void
+    {
+        $customOptions = [
+            'quill_options' => [
+                [new ImageField()],
+            ],
+        ];
+
+        $form = $this->formFactory->createBuilder()
+            ->add('content', QuillType::class, $customOptions)
+            ->getForm()
+        ;
+
+        $formView = $form->createView();
+        $contentView = $formView->children['content'];
+
+        $modulesOptions = json_decode($contentView->vars['attr']['quill_modules_options'], true);
+        $moduleNames = array_column($modulesOptions, 'name');
+
+        $this->assertContains(\Ehyiah\QuillJsBundle\DTO\Modules\ImageSelectionModule::NAME, $moduleNames);
+        $this->assertContains(ResizeModule::NAME, $moduleNames);
+        $this->assertContains(\Ehyiah\QuillJsBundle\DTO\Modules\ImageDragAndDropModule::NAME, $moduleNames);
+    }
+
     public function testFormSubmission(): void
     {
         $form = $this->formFactory->createBuilder()
