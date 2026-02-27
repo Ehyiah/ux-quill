@@ -51,6 +51,7 @@ export default defineConfig({
             collapsed: false,
             items: [
               { text: 'Index', link: '/guide/advanced/index' },
+              { text: 'Custom Fields', link: '/guide/advanced/custom-fields' },
               { text: 'Extend Controller', link: '/guide/advanced/extend-stimulus-controller' },
               { text: 'Events', link: '/guide/advanced/events' },
             ]

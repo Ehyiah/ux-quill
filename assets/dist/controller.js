@@ -5,7 +5,6 @@ import { ToolbarCustomizer } from "./ui/toolbarCustomizer.js";
 import { handleUploadResponse, uploadStrategies } from "./upload-utils.js";
 import "./register-modules.js";
 import QuillTableBetter from 'quill-table-better';
-import 'quill-table-better/dist/quill-table-better.css';
 const Image = Quill.import('formats/image');
 const oldFormats = Image.formats;
 Image.formats = function (domNode) {
@@ -34,7 +33,13 @@ export default class extends Controller {
       default: []
     }
   }))();
+  quillInstance = null;
   connect() {
+    // Prevent re-initialization if Quill instance already exists
+    // This is important for LiveComponent compatibility
+    if (this.quillInstance) {
+      return;
+    }
     const options = this.buildQuillOptions();
     this.dynamicModuleRegister(options);
     this.setupQuillStyles(options);
@@ -43,6 +48,11 @@ export default class extends Controller {
     this.dispatchEvent('options', options);
     const unprocessedIcons = this.processIconReplacementFromQuillCore();
     this.initializeQuill(options, unprocessedIcons);
+  }
+  disconnect() {
+    if (this.quillInstance) {
+      this.quillInstance = null;
+    }
   }
   buildQuillOptions() {
     const {
@@ -90,6 +100,7 @@ export default class extends Controller {
   }
   initializeQuill(options, unprocessedIcons) {
     const quill = new Quill(this.editorContainerTarget, options);
+    this.quillInstance = quill;
     this.setupContentSync(quill);
     this.processUnprocessedIcons(unprocessedIcons);
     this.dispatchEvent('connect', quill);
@@ -110,6 +121,10 @@ export default class extends Controller {
     });
   }
   bubbles(inputContent) {
+    // Dispatch both 'input' and 'change' events for better compatibility with LiveComponent
+    inputContent.dispatchEvent(new Event('input', {
+      bubbles: true
+    }));
     inputContent.dispatchEvent(new Event('change', {
       bubbles: true
     }));
@@ -139,6 +154,26 @@ export default class extends Controller {
     }
   }
   dynamicModuleRegister(options) {
+    if (options.modules && options.modules.syntax) {
+      if (options.modules.syntax === true || options.modules.syntax === 'true') {
+        // @ts-ignore
+        options.modules.syntax = {
+          hljs
+        };
+      } else if (typeof options.modules.syntax === 'object') {
+        options.modules.syntax.hljs = hljs;
+      }
+    }
+    if (options.modules && options.modules.formula) {
+      if (options.modules.formula === true || options.modules.formula === 'true') {
+        // @ts-ignore
+        options.modules.formula = {
+          katex
+        };
+      } else if (typeof options.modules.formula === 'object') {
+        options.modules.formula.katex = katex;
+      }
+    }
     const isTablePresent = options.modules.toolbar.flat(Infinity).some(item => typeof item === 'string' && item === 'table-better');
     if (isTablePresent) {
       Quill.register('modules/table-better', QuillTableBetter);

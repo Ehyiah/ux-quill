@@ -4,7 +4,6 @@ import ImageUploader from './imageUploader.ts'
 Quill.register('modules/imageUploader', ImageUploader);
 
 import * as Emoji from 'quill2-emoji';
-import 'quill2-emoji/dist/style.css';
 Quill.register('modules/emoji', Emoji);
 
 import QuillResizeImage from 'quill-resize-image';
@@ -25,8 +24,21 @@ Quill.register('modules/htmlEditButton', htmlEditButton.default || htmlEditButto
 import ReadingTime from './modules/readtimeModule.ts';
 Quill.register('modules/readingTime', ReadingTime);
 
+import DragAndDrop from './modules/dragAndDrop.ts';
+Quill.register('modules/dragAndDrop', DragAndDrop);
+
 import SpeechToText from './modules/speechToText.ts';
 Quill.register('modules/speechToText', SpeechToText);
+
+import * as hljsModule from 'highlight.js';
+const hljs = hljsModule.default || hljsModule;
+// @ts-ignore
+window.hljs = hljs;
+
+import * as katexModule from 'katex';
+const katex = katexModule.default || katexModule;
+// @ts-ignore
+window.katex = katex;
 
 import {PlaceholderModule} from './modules/placeHolderModule/placeHolderModule.ts';
 // import './modules/placeHolderModule/placeHolderModule.css';
