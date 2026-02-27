@@ -24,6 +24,18 @@ Image.formats = function(domNode: DOMNode) {
     if (domNode.hasAttribute('style')) {
         formats.style = domNode.getAttribute('style');
     }
+    if (domNode.hasAttribute('width')) {
+        formats.width = domNode.getAttribute('width');
+    }
+    if (domNode.hasAttribute('height')) {
+        formats.height = domNode.getAttribute('height');
+    }
+    if (domNode.hasAttribute('alt')) {
+        formats.alt = domNode.getAttribute('alt');
+    }
+    if (domNode.hasAttribute('data-caption')) {
+        formats.caption = domNode.getAttribute('data-caption');
+    }
     return formats;
 };
 
@@ -33,7 +45,23 @@ type ImageWithDOM = {
 };
 
 Image.prototype.format = function(this: ImageWithDOM, name: string, value: string | boolean | null) {
-    value ? this.domNode.setAttribute(name, String(value)) : this.domNode.removeAttribute(name);
+    if (['width', 'height', 'alt', 'style'].includes(name)) {
+        if (value) {
+            this.domNode.setAttribute(name, String(value));
+        } else {
+            this.domNode.removeAttribute(name);
+        }
+    } else if (name === 'caption') {
+        if (value) {
+            this.domNode.setAttribute('data-caption', String(value));
+        } else {
+            this.domNode.removeAttribute('data-caption');
+        }
+    } else {
+        const key = name;
+        const val = value;
+        val ? this.domNode.setAttribute(key, String(val)) : this.domNode.removeAttribute(key);
+    }
 };
 
 export default class extends Controller {

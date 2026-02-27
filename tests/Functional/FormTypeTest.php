@@ -8,7 +8,6 @@ use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ImageField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ItalicField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\UnderlineField;
 use Ehyiah\QuillJsBundle\DTO\Modules\EmojiModule;
-use Ehyiah\QuillJsBundle\DTO\Modules\ResizeModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\SyntaxModule;
 use Ehyiah\QuillJsBundle\DTO\Options\ThemeOption;
 use Ehyiah\QuillJsBundle\Form\QuillType;
@@ -104,8 +103,6 @@ final class FormTypeTest extends TestCase
         $moduleNames = array_column($modulesOptions, 'name');
         $this->assertContains(EmojiModule::NAME, $moduleNames);
         $this->assertContains(SyntaxModule::NAME, $moduleNames);
-
-        $this->assertContains(ResizeModule::NAME, $moduleNames);
     }
 
     public function testImageFieldIncludesSelectionModule(): void
@@ -128,7 +125,6 @@ final class FormTypeTest extends TestCase
         $moduleNames = array_column($modulesOptions, 'name');
 
         $this->assertContains(\Ehyiah\QuillJsBundle\DTO\Modules\ImageSelectionModule::NAME, $moduleNames);
-        $this->assertContains(ResizeModule::NAME, $moduleNames);
         $this->assertContains(\Ehyiah\QuillJsBundle\DTO\Modules\ImageDragAndDropModule::NAME, $moduleNames);
     }
 

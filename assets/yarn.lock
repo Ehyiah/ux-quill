@@ -5949,11 +5949,6 @@ quill-html-edit-button@^3.0.0:
   resolved "https://registry.yarnpkg.com/quill-html-edit-button/-/quill-html-edit-button-3.0.0.tgz#b632ae6a5d473ce42f1ad3223e91aff02fe13464"
   integrity sha512-ZUV3rYjEvXz+v/7f8N0Mkp2+0D8VGDj6yCYPfagSLmyshczeMawS7vZJzaJ18dJp35IfjiPnzqyVk3KCI8qN1w==
 
-quill-resize-image@^1.0.5:
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/quill-resize-image/-/quill-resize-image-1.0.5.tgz#072533bad859d38d21056fd5ac6600841a62c5fc"
-  integrity sha512-s6yinBoRXy9jsVXdK9J8WMfv4DUO6yE0uzzBWTjOu4JwcSqzlsgYivB5KCWoPAOrdxmV1mYpvvALCWa36r5Mnw==
-
 quill-table-better@^1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/quill-table-better/-/quill-table-better-1.2.1.tgz#25e2bfdefa18d7715d4f7692f2104c8b6146953e"

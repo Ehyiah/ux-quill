@@ -15,7 +15,7 @@ final class ImageSelectionModule implements ModuleInterface
     ) {
         $this->options = array_merge([
             'borderColor' => '#007bff',
-            'borderWidth' => '0px',
+            'borderWidth' => '4px',
             'buttonBeforeLabel' => '¶+',
             'buttonAfterLabel' => '+¶',
             'buttonBeforeTitle' => 'Insert a paragraph before',

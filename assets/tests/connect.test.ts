@@ -63,7 +63,6 @@ jest.mock('quill-table-better', () => ({
 }));
 
 jest.mock('quill2-emoji', () => ({}));
-jest.mock('quill-resize-image', () => ({}));
 jest.mock('../src/imageUploader.ts', () => ({}));
 jest.mock('../src/register-modules.ts', () => ({}));
 jest.mock('../src/upload-utils.ts', () => ({

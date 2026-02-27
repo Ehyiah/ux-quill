@@ -25,7 +25,7 @@ Example of how to use modules:
 | modules | auto-imported | description | name | options type | options | default options |
 | :---: | :---: | :--- | :---: | :---: | :---: | :---: |
 | **EmojiModule** | YES | required if emoji Field is activated | emoji-toolbar | string | NONE | ``'true'`` |
-| **ResizeModule** | YES | used in ImageField, https://www.npmjs.com/package/quill-resize-image | resize | array | [] | [] |
+| **ImageSelectionModule** | YES | Automatically active with ImageField. Adds a selection overlay with resize handles, alignment toolbar and paragraph insertion buttons. | imageSelection | array | ``borderColor``, ``borderWidth``, ``buttonBeforeLabel``, ``buttonAfterLabel``, ``buttonBeforeTitle``, ``buttonAfterTitle`` | ['borderColor' => '#007bff', 'borderWidth' => '4px', 'buttonBeforeLabel' => '¶+', 'buttonAfterLabel' => '+¶', 'buttonBeforeTitle' => 'Insert a paragraph before', 'buttonAfterTitle' => 'Insert a paragraph after'] |
 | **SyntaxModule** | YES | To use with CodeBlockField field, see official [description](https://quilljs.com/docs/modules/syntax) | syntax | string | NONE | ``'true'`` |
 | **HistoryModule** | NO | The History module is responsible for handling undo and redo for Quill. see details on official [site](https://quilljs.com/docs/modules/history) | history | array | ``delay``, ``maxStack``, ``userOnly`` | ['delay' => '1000', 'maxStack' => '100', 'userOnly' => 'false'] |
 | **SmartLinksModule** | NO | automatic recognition of links (can be customized within options) | smartLinks | array | ``linkRegex`` | ['linkRegex' => '/https?:\/\/[^\s]+/'] |
