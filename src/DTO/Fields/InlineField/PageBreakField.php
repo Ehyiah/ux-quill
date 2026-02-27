@@ -4,17 +4,17 @@ namespace Ehyiah\QuillJsBundle\DTO\Fields\InlineField;
 
 use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillFieldModuleInterface;
 use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillInlineFieldInterface;
-use Ehyiah\QuillJsBundle\DTO\Modules\LinkAttributesModule;
+use Ehyiah\QuillJsBundle\DTO\Modules\PageBreakModule;
 
-class LinkField implements QuillInlineFieldInterface, QuillFieldModuleInterface
+final class PageBreakField implements QuillInlineFieldInterface, QuillFieldModuleInterface
 {
     public function getOption(): string
     {
-        return 'link';
+        return 'pageBreak';
     }
 
     public static function importModules(): array
     {
-        return [LinkAttributesModule::class];
+        return [PageBreakModule::class];
     }
 }
