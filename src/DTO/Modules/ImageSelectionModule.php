@@ -7,7 +7,15 @@ final class ImageSelectionModule implements ModuleInterface
     public const NAME = 'imageSelection';
 
     /**
-     * @param array{borderColor?: string, borderWidth?: string, buttonBeforeLabel?: string, buttonAfterLabel?: string, buttonBeforeTitle?: string, buttonAfterTitle?: string} $options
+     * @param array{
+     *     borderColor?: string,
+     *     borderWidth?: string,
+     *     buttonBeforeLabel?: string,
+     *     buttonAfterLabel?: string,
+     *     buttonBeforeTitle?: string,
+     *     buttonAfterTitle?: string,
+     *     buttonAfterTitle?: array{left: string, leftBlock: string, center: string, right: string}
+     * } $options
      */
     public function __construct(
         public string $name = self::NAME,
@@ -20,6 +28,12 @@ final class ImageSelectionModule implements ModuleInterface
             'buttonAfterLabel' => '+¶',
             'buttonBeforeTitle' => 'Insert a paragraph before',
             'buttonAfterTitle' => 'Insert a paragraph after',
+            'alignLabels' => [
+                'left' => 'Left (wrapped)',
+                'leftBlock' => 'Left (no wrap)',
+                'center' => 'Align center',
+                'right' => 'Right (wrapped)',
+            ],
         ], $this->options);
     }
 }

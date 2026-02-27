@@ -271,7 +271,7 @@ export default class ImageSelection {
       name: 'left',
       icon: ICONS.alignLeft
     }, {
-      name: 'left-block',
+      name: 'leftBlock',
       icon: ICONS.alignLeftBlock
     }, {
       name: 'center',
@@ -424,7 +424,7 @@ export default class ImageSelection {
     if (!el) return false;
     const style = el.style;
     switch (name) {
-      case 'left-block':
+      case 'leftBlock':
         return style.display === 'block' && (style.float === 'none' || style.float === '') && (style.marginLeft === '0px' || style.marginLeft === '');
       case 'center':
         return style.display === 'block' && (style.marginLeft === 'auto' || style.margin === '10px auto' || style.margin === 'auto');
@@ -626,7 +626,7 @@ export default class ImageSelection {
     el.style.marginRight = '';
     el.style.marginTop = '';
     el.style.marginBottom = '';
-    if (align === 'left-block') {
+    if (align === 'leftBlock') {
       el.style.display = 'block';
       el.style.marginLeft = '0';
       el.style.marginRight = 'auto';
