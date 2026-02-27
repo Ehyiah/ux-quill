@@ -22,12 +22,16 @@ final class ImageSelectionModule implements ModuleInterface
      *     resetTitle?: string,
      *     linkTitle?: string,
      *     captionBackgroundColor?: string
-     * } $options
+     * }|bool $options
      */
     public function __construct(
         public string $name = self::NAME,
         public $options = [],
     ) {
+        if (!is_array($this->options)) {
+            return;
+        }
+
         $defaults = [
             'borderColor' => '#007bff',
             'borderWidth' => '4px',

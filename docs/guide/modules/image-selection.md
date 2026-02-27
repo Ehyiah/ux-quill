@@ -67,3 +67,19 @@ use Ehyiah\QuillJsBundle\DTO\Modules\ImageSelectionModule;
     ]),
 ],
 ```
+
+## Using Legacy ResizeModule
+
+If you prefer the old image resizing behavior, you can disable `ImageSelectionModule` and enable `ResizeModule` instead:
+
+```php
+use Ehyiah\QuillJsBundle\DTO\Modules\ImageSelectionModule;
+use Ehyiah\QuillJsBundle\DTO\Modules\ResizeModule;
+
+// ...
+
+'modules' => [
+    new ImageSelectionModule(['options' => false]), // Disable the new module
+    new ResizeModule(), // Enable the old one
+],
+```
