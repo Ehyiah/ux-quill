@@ -6,7 +6,7 @@ use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillFieldModuleInterface;
 use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillInlineFieldInterface;
 use Ehyiah\QuillJsBundle\DTO\Modules\TemplatesModule;
 
-final class TemplateField implements QuillInlineFieldInterface, QuillFieldModuleInterface
+final class TemplatesField implements QuillInlineFieldInterface, QuillFieldModuleInterface
 {
     public function getOption(): string
     {

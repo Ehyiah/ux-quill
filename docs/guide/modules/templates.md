@@ -5,19 +5,19 @@ Selecting a template inserts its content at the current cursor position in the e
 
 ## Requirements
 
-Both `TemplateField` in `quill_options` and `TemplatesModule` in `modules` are required:
+Both `TemplatesField` in `quill_options` and `TemplatesModule` in `modules` are required:
 
 ```php
 'quill_options' => [
-    [new TemplateField()],
+    [new TemplatesField()],
 ],
 'modules' => [
     new TemplatesModule(),
 ],
 ```
 
-`TemplateField` declares the button in the toolbar. `TemplatesModule` configures the templates and powers the dropdown. 
-Because `TemplateField` auto-imports `TemplatesModule`, you only need to add `TemplatesModule` explicitly when you want to pass custom templates.
+`TemplatesField` declares the button in the toolbar. `TemplatesModule` configures the templates and powers the dropdown. 
+Because `TemplatesField` auto-imports `TemplatesModule`, you only need to add `TemplatesModule` explicitly when you want to pass custom templates.
 
 ## Default templates
 
@@ -52,13 +52,13 @@ new TemplatesModule([
 ## Basic usage
 
 ```php
-use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\TemplateField;
+use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\TemplatesField;
 use Ehyiah\QuillJsBundle\DTO\Modules\TemplatesModule;
 use Ehyiah\QuillJsBundle\Form\QuillType;
 
 $builder->add('content', QuillType::class, [
     'quill_options' => [
-        [new BoldField(), new ItalicField(), new TemplateField()],
+        [new BoldField(), new ItalicField(), new TemplatesField()],
     ],
     'modules' => [
         new TemplatesModule([
@@ -76,7 +76,7 @@ Simply declare `TemplatesModule` without arguments:
 
 ```php
 'quill_options' => [
-    [new TemplateField()],
+    [new TemplatesField()],
 ],
 'modules' => [
     new TemplatesModule(),
@@ -85,7 +85,7 @@ Simply declare `TemplatesModule` without arguments:
 
 ## Behaviour
 
-- The **Templates** button is visible in the toolbar once `TemplateField` is added to `quill_options`.
+- The **Templates** button is visible in the toolbar once `TemplatesField` is added to `quill_options`.
 - Clicking the button opens a dropdown listing all configured templates.
 - Clicking a template item **inserts** its HTML content at the current cursor position without replacing existing content.
 - The dropdown closes automatically when clicking outside the editor or after a template is selected.

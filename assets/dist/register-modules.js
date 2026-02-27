@@ -23,7 +23,7 @@ import { TemplatesModule } from "./modules/templatesModule.js";
 Quill.register('modules/templates', TemplatesModule);
 
 // Register a no-op format so Quill (and quill-table-better) do not warn
-// "ignoring attaching to nonexistent format template" when TemplateField
+// "ignoring attaching to nonexistent format template" when TemplatesField
 // is present in quill_options (it produces a .ql-template toolbar button).
 const InlineBlot = Quill.import('blots/inline');
 class TemplateButtonBlot extends InlineBlot {}
