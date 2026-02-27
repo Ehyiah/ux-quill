@@ -1,18 +1,24 @@
 export default class ReadingTime {
-  quill;
-  wpm;
-  label;
-  suffix;
-  targetElement;
-  readTimeOk;
-  readTimeMedium;
-  toolbarContainer = null;
-  toolbarOriginalPaddingRight = null;
-  targetIsCustom = false;
   constructor(quill, options) {
     if (options === void 0) {
       options = {};
     }
+    this.quill = void 0;
+    this.wpm = void 0;
+    this.label = void 0;
+    this.suffix = void 0;
+    this.targetElement = void 0;
+    this.readTimeOk = void 0;
+    this.readTimeMedium = void 0;
+    this.toolbarContainer = null;
+    this.toolbarOriginalPaddingRight = null;
+    this.targetIsCustom = false;
+    this.onWindowResize = () => {
+      if (this.toolbarContainer && !this.targetIsCustom) {
+        const width = Math.ceil(this.targetElement.getBoundingClientRect().width);
+        this.toolbarContainer.style.paddingRight = width + 12 + "px";
+      }
+    };
     this.quill = quill;
     this.wpm = options.wpm || 200;
     this.label = options.label || '⏱ Reading time: ~ ';
@@ -22,32 +28,16 @@ export default class ReadingTime {
     if (options.target) {
       const el = document.querySelector(options.target);
       if (!el) {
-        throw new Error(`Cannot find target element: ${options.target}`);
+        throw new Error("Cannot find target element: " + options.target);
       }
       this.targetElement = el;
       this.targetIsCustom = true;
     } else {
       this.targetElement = document.createElement('div');
       this.targetElement.classList.add('ql-reading-time');
-      this.targetElement.style.cssText = `
-                font-size: 12px;
-                font-weight: 500;
-                padding: 4px 10px;
-                border-radius: 6px;
-                background: #f5f5f5;
-                color: #2e7d32;
-                font-family: sans-serif;
-                transition: background 0.3s ease, color 0.3s ease;
-                position: absolute;
-                right: 10px;
-                top: 50%;
-                transform: translateY(-50%);
-                pointer-events: none;
-                box-sizing: border-box;
-                min-width: 48px; /* minimum to stabilise width */
-            `;
+      this.targetElement.style.cssText = "\n                font-size: 12px;\n                font-weight: 500;\n                padding: 4px 10px;\n                border-radius: 6px;\n                background: #f5f5f5;\n                color: #2e7d32;\n                font-family: sans-serif;\n                transition: background 0.3s ease, color 0.3s ease;\n                position: absolute;\n                right: 10px;\n                top: 50%;\n                transform: translateY(-50%);\n                pointer-events: none;\n                box-sizing: border-box;\n                min-width: 48px; /* minimum to stabilise width */\n            ";
       const toolbar = this.quill.getModule('toolbar');
-      if (toolbar?.container) {
+      if (toolbar != null && toolbar.container) {
         const tb = toolbar.container;
         if (window.getComputedStyle(tb).position === 'static') {
           tb.style.position = 'relative';
@@ -56,9 +46,10 @@ export default class ReadingTime {
         this.toolbarContainer = tb;
         this.toolbarOriginalPaddingRight = window.getComputedStyle(tb).paddingRight || '';
       } else {
+        var _this$quill$container;
         const wrapper = document.createElement('div');
         wrapper.style.position = 'relative';
-        this.quill.container.parentNode?.insertBefore(wrapper, this.quill.container);
+        (_this$quill$container = this.quill.container.parentNode) == null || _this$quill$container.insertBefore(wrapper, this.quill.container);
         wrapper.appendChild(this.quill.container);
         wrapper.appendChild(this.targetElement);
         this.toolbarContainer = wrapper;
@@ -69,12 +60,6 @@ export default class ReadingTime {
     this.quill.on('text-change', () => this.updateReadingTime());
     window.addEventListener('resize', this.onWindowResize);
   }
-  onWindowResize = () => {
-    if (this.toolbarContainer && !this.targetIsCustom) {
-      const width = Math.ceil(this.targetElement.getBoundingClientRect().width);
-      this.toolbarContainer.style.paddingRight = `${width + 12}px`;
-    }
-  };
   updateReadingTime() {
     const text = this.quill.getText().trim();
     const words = text.length > 0 ? text.split(/\s+/).length : 0;
@@ -86,14 +71,14 @@ export default class ReadingTime {
     } else {
       this.setStyle('#c62828', '#ffebee');
     }
-    this.targetElement.textContent = `${this.label}${minutes}${this.suffix}`;
+    this.targetElement.textContent = "" + this.label + minutes + this.suffix;
     this.dispatch('reading-time:update', {
       minutes,
       words
     });
     if (this.toolbarContainer && !this.targetIsCustom) {
       const width = Math.ceil(this.targetElement.getBoundingClientRect().width);
-      this.toolbarContainer.style.paddingRight = `${width + 12}px`; // 12px marge
+      this.toolbarContainer.style.paddingRight = width + 12 + "px"; // 12px marge
     }
   }
   setStyle(color, background) {
@@ -110,7 +95,7 @@ export default class ReadingTime {
     window.removeEventListener('resize', this.onWindowResize);
   }
   dispatch(name, detail) {
-    this.quill.container.dispatchEvent(new CustomEvent(`quill:${name}`, {
+    this.quill.container.dispatchEvent(new CustomEvent("quill:" + name, {
       bubbles: true,
       cancelable: true,
       detail: detail

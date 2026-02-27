@@ -1,11 +1,11 @@
 import { uploadStrategies, handleUploadResponse } from "./../../upload-utils.js";
 export default class GalleryModal {
-  module;
-  container;
-  nextUrl;
-  prevUrl;
-  images;
   constructor(module) {
+    this.module = void 0;
+    this.container = void 0;
+    this.nextUrl = void 0;
+    this.prevUrl = void 0;
+    this.images = void 0;
     this.module = module;
     this.container = null;
     this.images = [];
@@ -31,35 +31,9 @@ export default class GalleryModal {
   renderModal() {
     this.container = document.createElement('div');
     this.container.classList.add('quill-media-modal');
-    const uploadButtonHtml = this.module.options.uploadEndpoint ? `<label class="upload-btn">
-                <input type="file" style="display:none" />
-                ${this.module.options.uploadTitle}
-               </label>` : '';
-    const searchInputHtml = this.module.options.searchEndpoint ? `<div class="quill-media-search">
-                 <input type="text" class="search-input" placeholder="${this.module.options.messageSearchPlaceholderOption}" />
-               </div>` : '';
-    this.container.innerHTML = `
-      <div class="quill-media-window">
-        <div class="quill-media-header">
-          <h3>Galerie de médias</h3>
-          <button class="close-btn" title="Fermer la galerie" aria-label="Fermer">
-            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-        </div>
-        ${searchInputHtml}
-        <div class="quill-media-grid" id="media-grid">
-          <p style="text-align:center;width:100%">${this.module.options.messageLoadingOption}</p>
-        </div>
-        <div class="quill-media-footer">
-          <button class="prev-btn" disabled>${this.module.options.messagePrevPageOption}</button>
-          ${uploadButtonHtml}
-          <button class="next-btn" disabled>${this.module.options.messageNextPageOption}</button>
-        </div>
-      </div>
-    `;
+    const uploadButtonHtml = this.module.options.uploadEndpoint ? "<label class=\"upload-btn\">\n                <input type=\"file\" style=\"display:none\" />\n                " + this.module.options.uploadTitle + "\n               </label>" : '';
+    const searchInputHtml = this.module.options.searchEndpoint ? "<div class=\"quill-media-search\">\n                 <input type=\"text\" class=\"search-input\" placeholder=\"" + this.module.options.messageSearchPlaceholderOption + "\" />\n               </div>" : '';
+    this.container.innerHTML = "\n      <div class=\"quill-media-window\">\n        <div class=\"quill-media-header\">\n          <h3>Galerie de m\xE9dias</h3>\n          <button class=\"close-btn\" title=\"Fermer la galerie\" aria-label=\"Fermer\">\n            <svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n              <line x1=\"18\" y1=\"6\" x2=\"6\" y2=\"18\"></line>\n              <line x1=\"6\" y1=\"6\" x2=\"18\" y2=\"18\"></line>\n            </svg>\n          </button>\n        </div>\n        " + searchInputHtml + "\n        <div class=\"quill-media-grid\" id=\"media-grid\">\n          <p style=\"text-align:center;width:100%\">" + this.module.options.messageLoadingOption + "</p>\n        </div>\n        <div class=\"quill-media-footer\">\n          <button class=\"prev-btn\" disabled>" + this.module.options.messagePrevPageOption + "</button>\n          " + uploadButtonHtml + "\n          <button class=\"next-btn\" disabled>" + this.module.options.messageNextPageOption + "</button>\n        </div>\n      </div>\n    ";
     document.body.appendChild(this.container);
     this.container.querySelector('.close-btn').addEventListener('click', () => this.close());
     this.container.addEventListener('click', e => {
@@ -122,41 +96,43 @@ export default class GalleryModal {
     if (!grid) {
       return;
     }
-    grid.innerHTML = `<p style="text-align:center;width:100%">${this.module.options.messageLoadingOption}</p>`;
+    grid.innerHTML = "<p style=\"text-align:center;width:100%\">" + this.module.options.messageLoadingOption + "</p>";
     try {
+      var _data$links, _data$links2;
       const data = await this.module.list(url);
       this.images = data.data || [];
-      this.nextUrl = data.links?.next || null;
-      this.prevUrl = data.links?.prev || null;
+      this.nextUrl = ((_data$links = data.links) == null ? void 0 : _data$links.next) || null;
+      this.prevUrl = ((_data$links2 = data.links) == null ? void 0 : _data$links2.prev) || null;
       this.renderGrid();
       this.updatePaginationButtons();
     } catch (e) {
       console.error(e);
-      grid.innerHTML = `<p style="color:red;text-align:center;">${this.module.options.messageErrorOption}</p>`;
+      grid.innerHTML = "<p style=\"color:red;text-align:center;\">" + this.module.options.messageErrorOption + "</p>";
     }
   }
   async searchImages(query) {
     if (!this.container) return;
     const grid = this.container.querySelector('#media-grid');
     if (!grid) return;
-    grid.innerHTML = `<p style="text-align:center;width:100%">${this.module.options.messageLoadingOption}</p>`;
+    grid.innerHTML = "<p style=\"text-align:center;width:100%\">" + this.module.options.messageLoadingOption + "</p>";
     try {
+      var _data$links3, _data$links4;
       const data = await this.module.search(query);
       this.images = data.data || [];
-      this.nextUrl = data.links?.next || null;
-      this.prevUrl = data.links?.prev || null;
+      this.nextUrl = ((_data$links3 = data.links) == null ? void 0 : _data$links3.next) || null;
+      this.prevUrl = ((_data$links4 = data.links) == null ? void 0 : _data$links4.prev) || null;
       this.renderGrid();
       this.updatePaginationButtons();
     } catch (e) {
       console.error(e);
-      grid.innerHTML = `<p style="color:red;text-align:center;">${this.module.options.messageErrorOption}</p>`;
+      grid.innerHTML = "<p style=\"color:red;text-align:center;\">" + this.module.options.messageErrorOption + "</p>";
     }
   }
   renderGrid() {
     const grid = this.container.querySelector('#media-grid');
     grid.innerHTML = '';
     if (this.images.length === 0) {
-      grid.innerHTML = `<p style="text-align:center;width:100%">${this.module.options.messageNoImageOption}</p>`;
+      grid.innerHTML = "<p style=\"text-align:center;width:100%\">" + this.module.options.messageNoImageOption + "</p>";
       return;
     }
     this.images.forEach(img => {
@@ -181,7 +157,7 @@ export default class GalleryModal {
     next.disabled = !this.nextUrl;
   }
   dispatch(name, detail) {
-    this.module.quill.container.dispatchEvent(new CustomEvent(`quill:${name}`, {
+    this.module.quill.container.dispatchEvent(new CustomEvent("quill:" + name, {
       bubbles: true,
       cancelable: true,
       detail: detail

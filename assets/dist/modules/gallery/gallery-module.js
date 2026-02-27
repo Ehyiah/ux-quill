@@ -1,10 +1,10 @@
 import GalleryModal from "./gallery-modal.js";
 import "../../styles/gallery/gallery.css";
 export default class GalleryModule {
-  quill;
-  options;
-  modal;
   constructor(quill, options) {
+    this.quill = void 0;
+    this.options = void 0;
+    this.modal = void 0;
     this.quill = quill;
     this.options = {
       uploadEndpoint: options.uploadEndpoint || '',
@@ -64,7 +64,7 @@ export default class GalleryModule {
     }
     const endpoint = url || this.options.listEndpoint;
     const response = await fetch(endpoint);
-    if (!response.ok) throw new Error(`Erreur while loading : ${response.statusText}`);
+    if (!response.ok) throw new Error("Erreur while loading : " + response.statusText);
     return response.json();
   }
   async search(query) {
@@ -72,7 +72,7 @@ export default class GalleryModule {
     const url = new URL(this.options.searchEndpoint, window.location.origin);
     url.searchParams.append('term', query);
     const response = await fetch(url.toString());
-    if (!response.ok) throw new Error(`Erreur while searching : ${response.statusText}`);
+    if (!response.ok) throw new Error("Erreur while searching : " + response.statusText);
     return response.json();
   }
 }

@@ -12,139 +12,58 @@ const ensureBaseStyles = () => {
   if (document.getElementById('ql-stt-styles')) return;
   const style = document.createElement('style');
   style.id = 'ql-stt-styles';
-  style.textContent = `
-.ql-stt-bar {
-  width: 100%;
-  min-height: 34px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 12px;
-  border-radius: 10px;
-  background: #ffffff;
-  border: 1px solid #e4e7ec;
-  box-shadow: 0 1px 2px rgba(16,24,40,0.04), 0 0 0 1px rgba(16,24,40,0.02) inset;
-  box-sizing: border-box;
-  user-select: none;
-}
-.ql-stt-bar[data-compact="true"] {
-  min-height: 28px;
-  padding: 4px 10px;
-  border-radius: 8px;
-}
-.ql-stt-mic {
-  width: 18px;
-  height: 18px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--stt-accent, #25D366);
-}
-.ql-stt-label {
-  font-size: 12px;
-  color: #667085;
-  min-width: 110px;
-  white-space: nowrap;
-}
-.ql-stt-bar.is-listening .ql-stt-label {
-  color: var(--stt-accent, #25D366);
-}
-.ql-stt-bars {
-  flex: 1 1 auto;
-  height: 16px;
-  display: flex;
-  align-items: flex-end;
-  gap: 2px;
-}
-.ql-stt-bar-col {
-  width: 4px;
-  height: 2px;
-  border-radius: 2px;
-  background: linear-gradient(180deg, var(--stt-accent, #25D366) 0%, var(--stt-accent-2, #4285f4) 100%);
-  transform-origin: 50% 100%;
-  opacity: .85;
-  transition: height 60ms linear, opacity 120ms ease;
-}
-.ql-stt-bar.is-listening .ql-stt-bar-col { opacity: 1; }
-
-.ql-stt-action {
-  width: 28px;
-  height: 28px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 9999px;
-  border: 1px solid #e4e7ec;
-  background: #fff;
-  color: #344054;
-  cursor: pointer;
-  padding: 0;
-  margin-right: 8px;
-  transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .2s ease;
-}
-.ql-stt-action svg { width: 16px; height: 16px; display: block; }
-.ql-stt-action:hover { background: #f9fafb; }
-.ql-stt-bar.is-listening .ql-stt-action {
-  background: var(--stt-accent, #25D366);
-  color: #fff;
-  border-color: var(--stt-accent, #25D366);
-}
-.ql-stt-action:focus { outline: none; box-shadow: 0 0 0 3px rgba(37,211,102,0.25); }
-`;
+  style.textContent = "\n.ql-stt-bar {\n  width: 100%;\n  min-height: 34px;\n  display: flex;\n  align-items: center;\n  gap: 10px;\n  padding: 6px 12px;\n  border-radius: 10px;\n  background: #ffffff;\n  border: 1px solid #e4e7ec;\n  box-shadow: 0 1px 2px rgba(16,24,40,0.04), 0 0 0 1px rgba(16,24,40,0.02) inset;\n  box-sizing: border-box;\n  user-select: none;\n}\n.ql-stt-bar[data-compact=\"true\"] {\n  min-height: 28px;\n  padding: 4px 10px;\n  border-radius: 8px;\n}\n.ql-stt-mic {\n  width: 18px;\n  height: 18px;\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  color: var(--stt-accent, #25D366);\n}\n.ql-stt-label {\n  font-size: 12px;\n  color: #667085;\n  min-width: 110px;\n  white-space: nowrap;\n}\n.ql-stt-bar.is-listening .ql-stt-label {\n  color: var(--stt-accent, #25D366);\n}\n.ql-stt-bars {\n  flex: 1 1 auto;\n  height: 16px;\n  display: flex;\n  align-items: flex-end;\n  gap: 2px;\n}\n.ql-stt-bar-col {\n  width: 4px;\n  height: 2px;\n  border-radius: 2px;\n  background: linear-gradient(180deg, var(--stt-accent, #25D366) 0%, var(--stt-accent-2, #4285f4) 100%);\n  transform-origin: 50% 100%;\n  opacity: .85;\n  transition: height 60ms linear, opacity 120ms ease;\n}\n.ql-stt-bar.is-listening .ql-stt-bar-col { opacity: 1; }\n\n.ql-stt-action {\n  width: 28px;\n  height: 28px;\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  border-radius: 9999px;\n  border: 1px solid #e4e7ec;\n  background: #fff;\n  color: #344054;\n  cursor: pointer;\n  padding: 0;\n  margin-right: 8px;\n  transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .2s ease;\n}\n.ql-stt-action svg { width: 16px; height: 16px; display: block; }\n.ql-stt-action:hover { background: #f9fafb; }\n.ql-stt-bar.is-listening .ql-stt-action {\n  background: var(--stt-accent, #25D366);\n  color: #fff;\n  border-color: var(--stt-accent, #25D366);\n}\n.ql-stt-action:focus { outline: none; box-shadow: 0 0 0 3px rgba(37,211,102,0.25); }\n";
   document.head.appendChild(style);
 };
 export default class SpeechToText {
-  quill;
-  options;
-  recognition = null;
-  currentSttState = 'inactive';
-  toolbarButton = null;
-  actionButton = null;
-
-  // Barre inférieure
-  bottomBar = null;
-  labelEl = null;
-  barsContainer = null;
-  barCols = [];
-
-  // Ancrage de dictée (append à un seul endroit)
-  dictationAnchorIndex = null;
-  appendedChars = 0;
-
-  // Audio
-  audioCtx = null;
-  analyser = null;
-  mediaStream = null;
-  animationId = null;
-
-  // Colors
-  inactiveColor;
-  startingColor;
-  listeningColor;
   constructor(quill, options) {
+    var _options$language, _options$continuous, _options$visualizer, _options$waveformColo, _options$histogramCol, _options$debug, _options$buttonTitleS, _options$buttonTitleS2, _options$titleInactiv, _options$titleStartin, _options$titleActive;
     if (options === void 0) {
       options = {};
     }
+    this.quill = void 0;
+    this.options = void 0;
+    this.recognition = null;
+    this.currentSttState = 'inactive';
+    this.toolbarButton = null;
+    this.actionButton = null;
+    // Barre inférieure
+    this.bottomBar = null;
+    this.labelEl = null;
+    this.barsContainer = null;
+    this.barCols = [];
+    // Ancrage de dictée (append à un seul endroit)
+    this.dictationAnchorIndex = null;
+    this.appendedChars = 0;
+    // Audio
+    this.audioCtx = null;
+    this.analyser = null;
+    this.mediaStream = null;
+    this.animationId = null;
+    // Colors
+    this.inactiveColor = void 0;
+    this.startingColor = void 0;
+    this.listeningColor = void 0;
     this.quill = quill;
     this.options = {
-      language: options.language ?? 'fr-FR',
-      continuous: options.continuous ?? false,
-      visualizer: options.visualizer ?? true,
-      waveformColor: options.waveformColor ?? '#4285f4',
-      histogramColor: options.histogramColor ?? '#25D366',
-      debug: options.debug ?? false,
-      buttonTitleStart: options.buttonTitleStart ?? 'Start listening',
-      buttonTitleStop: options.buttonTitleStop ?? 'Stop listening',
-      titleInactive: options.titleInactive ?? 'Inactive',
-      titleStarting: options.titleStarting ?? 'Starting...',
-      titleActive: options.titleActive ?? 'Listening...'
+      language: (_options$language = options.language) != null ? _options$language : 'fr-FR',
+      continuous: (_options$continuous = options.continuous) != null ? _options$continuous : false,
+      visualizer: (_options$visualizer = options.visualizer) != null ? _options$visualizer : true,
+      waveformColor: (_options$waveformColo = options.waveformColor) != null ? _options$waveformColo : '#4285f4',
+      histogramColor: (_options$histogramCol = options.histogramColor) != null ? _options$histogramCol : '#25D366',
+      debug: (_options$debug = options.debug) != null ? _options$debug : false,
+      buttonTitleStart: (_options$buttonTitleS = options.buttonTitleStart) != null ? _options$buttonTitleS : 'Start listening',
+      buttonTitleStop: (_options$buttonTitleS2 = options.buttonTitleStop) != null ? _options$buttonTitleS2 : 'Stop listening',
+      titleInactive: (_options$titleInactiv = options.titleInactive) != null ? _options$titleInactiv : 'Inactive',
+      titleStarting: (_options$titleStartin = options.titleStarting) != null ? _options$titleStartin : 'Starting...',
+      titleActive: (_options$titleActive = options.titleActive) != null ? _options$titleActive : 'Listening...'
     };
     this.inactiveColor = '#0000ff';
     this.startingColor = '#FF0000';
     this.listeningColor = this.options.histogramColor;
     if (this.options.debug) {
       console.log('debug activated, Speak to see what is recognized');
-      console.log(`Language used: ${this.options.language}`);
+      console.log("Language used: " + this.options.language);
     }
     const SpeechRecognition = getSpeechRecognitionCtor();
     if (!SpeechRecognition) {
@@ -154,8 +73,9 @@ export default class SpeechToText {
     }
     this.recognition = new SpeechRecognition();
     if (this.recognition) {
+      var _this$options$continu;
       this.recognition.lang = this.options.language || 'en-EN';
-      this.recognition.continuous = this.options.continuous ?? false;
+      this.recognition.continuous = (_this$options$continu = this.options.continuous) != null ? _this$options$continu : false;
       this.recognition.interimResults = true;
     }
     this.bindRecognitionEvents();
@@ -187,8 +107,9 @@ export default class SpeechToText {
       let finalText = '';
       let interimText = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
+        var _res$;
         const res = event.results[i];
-        const text = res[0]?.transcript || '';
+        const text = ((_res$ = res[0]) == null ? void 0 : _res$.transcript) || '';
         if (res.isFinal) {
           finalText += text + ' ';
         } else {
@@ -204,7 +125,7 @@ export default class SpeechToText {
           isFinal: false
         });
         if (this.labelEl) {
-          this.labelEl.textContent = `STT: ${this.options.titleActive} ${interimText}`;
+          this.labelEl.textContent = "STT: " + this.options.titleActive + " " + interimText;
         }
       }
       if (finalText) {
@@ -217,12 +138,12 @@ export default class SpeechToText {
         });
         this.insertFinalTranscript(finalText);
         if (this.labelEl) {
-          this.labelEl.textContent = `STT: ${this.options.titleActive}`;
+          this.labelEl.textContent = "STT: " + this.options.titleActive;
         }
       }
     };
     this.recognition.onerror = event => {
-      const error = event?.error || event;
+      const error = (event == null ? void 0 : event.error) || event;
       console.error('[SpeechToText] Voice recognition failed:', error);
       this.dispatch('stt:error', {
         error
@@ -240,12 +161,14 @@ export default class SpeechToText {
           console.log('[SpeechToText] Attempting to restart (continuous mode)');
         }
         try {
-          this.recognition?.start();
-        } catch {
+          var _this$recognition;
+          (_this$recognition = this.recognition) == null || _this$recognition.start();
+        } catch (_unused) {
           setTimeout(() => {
             try {
-              this.recognition?.start();
-            } catch {
+              var _this$recognition2;
+              (_this$recognition2 = this.recognition) == null || _this$recognition2.start();
+            } catch (_unused2) {
               this.updateUIState('inactive');
               this.stopVisualizer();
             }
@@ -258,7 +181,8 @@ export default class SpeechToText {
     };
   }
   insertFinalTranscript(text) {
-    const baseIndex = this.dictationAnchorIndex ?? this.quill.getLength();
+    var _this$dictationAnchor;
+    const baseIndex = (_this$dictationAnchor = this.dictationAnchorIndex) != null ? _this$dictationAnchor : this.quill.getLength();
     const insertIndex = baseIndex + this.appendedChars;
     this.quill.insertText(insertIndex, text, 'user');
     this.appendedChars += text.length;
@@ -291,10 +215,7 @@ export default class SpeechToText {
     const action = document.createElement('button');
     action.type = 'button';
     action.className = 'ql-stt-action';
-    action.innerHTML = `
-<svg viewBox="0 0 24 24" aria-hidden="true">
-  <path fill="currentColor" d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/>
-</svg>`.trim();
+    action.innerHTML = "\n<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\">\n  <path fill=\"currentColor\" d=\"M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z\"/>\n</svg>".trim();
     action.title = this.options.buttonTitleStart;
     action.setAttribute('aria-pressed', 'false');
     action.onclick = () => this.toggle();
@@ -316,7 +237,7 @@ export default class SpeechToText {
   }
   renderUnavailableUI() {
     const toolbar = this.quill.getModule('toolbar');
-    if (toolbar?.container) {
+    if (toolbar != null && toolbar.container) {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'ql-stt';
@@ -402,7 +323,7 @@ export default class SpeechToText {
           const idx = Math.min(bufferLength - 1, Math.floor(Math.pow(percent, 0.8) * bufferLength));
           const v = dataArray[idx] / 255;
           const height = Math.max(2, Math.floor(2 + v * 16));
-          this.barCols[i].style.height = `${height}px`;
+          this.barCols[i].style.height = height + "px";
         }
         this.animationId = requestAnimationFrame(draw);
       };
@@ -424,7 +345,7 @@ export default class SpeechToText {
         const phase = t * 0.12 + i * 0.45;
         const v = (Math.sin(phase) + 1) / 2;
         const height = Math.max(2, Math.floor(2 + v * 16));
-        this.barCols[i].style.height = `${height}px`;
+        this.barCols[i].style.height = height + "px";
       }
       t++;
       this.animationId = requestAnimationFrame(draw);
@@ -515,7 +436,7 @@ export default class SpeechToText {
     }
   }
   dispatch(name, detail) {
-    this.quill.container.dispatchEvent(new CustomEvent(`quill:${name}`, {
+    this.quill.container.dispatchEvent(new CustomEvent("quill:" + name, {
       bubbles: true,
       cancelable: true,
       detail: detail

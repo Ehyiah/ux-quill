@@ -1,21 +1,21 @@
+function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 import Quill from 'quill';
 import Delta from 'quill-delta';
 export default class DragAndDrop {
-  quill;
-  options;
-  handle;
-  currentTarget = null;
-  dragTarget = null;
   constructor(quill, options) {
     if (options === void 0) {
       options = {};
     }
+    this.quill = void 0;
+    this.options = void 0;
+    this.handle = void 0;
+    this.currentTarget = null;
+    this.dragTarget = null;
     this.quill = quill;
-    this.options = {
+    this.options = _extends({
       draggableSelector: 'img, .ql-video, .ql-embed-wrapper',
-      handleHTML: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 9 2 12 5 15"></polyline><polyline points="9 5 12 2 15 5"></polyline><polyline points="15 19 12 22 9 19"></polyline><polyline points="19 9 22 12 19 15"></polyline><line x1="2" y1="12" x2="22" y2="12"></line><line x1="12" y1="2" x2="12" y2="22"></line></svg>',
-      ...options
-    };
+      handleHTML: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 9 2 12 5 15"></polyline><polyline points="9 5 12 2 15 5"></polyline><polyline points="15 19 12 22 9 19"></polyline><polyline points="19 9 22 12 19 15"></polyline><line x1="2" y1="12" x2="22" y2="12"></line><line x1="12" y1="2" x2="12" y2="22"></line></svg>'
+    }, options);
 
     // Create the drag handle
     this.handle = document.createElement('div');
@@ -84,8 +84,8 @@ export default class DragAndDrop {
     const rect = target.getBoundingClientRect();
     const containerRect = this.quill.container.getBoundingClientRect();
     this.handle.style.display = 'flex';
-    this.handle.style.top = `${rect.top - containerRect.top + 5}px`;
-    this.handle.style.left = `${rect.left - containerRect.left + 5}px`;
+    this.handle.style.top = rect.top - containerRect.top + 5 + "px";
+    this.handle.style.left = rect.left - containerRect.left + 5 + "px";
   }
   hideHandle() {
     if (this.dragTarget) return;

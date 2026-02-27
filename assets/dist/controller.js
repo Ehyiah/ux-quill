@@ -17,23 +17,11 @@ Image.formats = function (domNode) {
 Image.prototype.format = function (name, value) {
   value ? this.domNode.setAttribute(name, String(value)) : this.domNode.removeAttribute(name);
 };
-export default class extends Controller {
-  static targets = ['input', 'editorContainer'];
-  static values = (() => ({
-    toolbarOptions: {
-      type: Array,
-      default: []
-    },
-    extraOptions: {
-      type: Object,
-      default: {}
-    },
-    modulesOptions: {
-      type: Array,
-      default: []
-    }
-  }))();
-  quillInstance = null;
+export default class _Class extends Controller {
+  constructor() {
+    super(...arguments);
+    this.quillInstance = null;
+  }
   connect() {
     // Prevent re-initialization if Quill instance already exists
     // This is important for LiveComponent compatibility
@@ -91,12 +79,12 @@ export default class extends Controller {
   setupQuillStyles(options) {
     if (options.style === 'inline') {
       const styleAttributes = ['align', 'background', 'color', 'direction', 'font', 'size'];
-      styleAttributes.forEach(attr => Quill.register(Quill.import(`attributors/style/${attr}`), true));
+      styleAttributes.forEach(attr => Quill.register(Quill.import("attributors/style/" + attr), true));
     }
   }
   setupUploadHandler(options) {
     const config = this.extraOptionsValue.upload_handler;
-    if (config?.upload_endpoint && uploadStrategies[config.type]) {
+    if (config != null && config.upload_endpoint && uploadStrategies[config.type]) {
       const uploadFunction = file => uploadStrategies[config.type](config.upload_endpoint, file, config.security).then(response => handleUploadResponse(response, config.json_response_file_path));
       Object.assign(options.modules, {
         imageUploader: {
@@ -127,7 +115,8 @@ export default class extends Controller {
     quill.updateContents(initialData);
     this.dispatchEvent('hydrate:after', quill);
     quill.on('text-change', () => {
-      const quillContent = this.extraOptionsValue?.use_semantic_html ? quill.getSemanticHTML() : quill.root.innerHTML;
+      var _this$extraOptionsVal;
+      const quillContent = (_this$extraOptionsVal = this.extraOptionsValue) != null && _this$extraOptionsVal.use_semantic_html ? quill.getSemanticHTML() : quill.root.innerHTML;
       const inputContent = this.inputTarget;
       inputContent.value = quillContent;
       this.bubbles(inputContent);
@@ -193,3 +182,18 @@ export default class extends Controller {
     }
   }
 }
+_Class.targets = ['input', 'editorContainer'];
+_Class.values = {
+  toolbarOptions: {
+    type: Array,
+    default: []
+  },
+  extraOptions: {
+    type: Object,
+    default: {}
+  },
+  modulesOptions: {
+    type: Array,
+    default: []
+  }
+};
