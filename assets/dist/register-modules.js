@@ -19,10 +19,6 @@ import DragAndDrop from "./modules/dragAndDrop.js";
 Quill.register('modules/dragAndDrop', DragAndDrop);
 import SpeechToText from "./modules/speechToText.js";
 Quill.register('modules/speechToText', SpeechToText);
-import { PlaceholderModule } from "./modules/placeHolderModule/placeHolderModule.js";
-// import './modules/placeHolderModule/placeHolderModule.css';
-Quill.register('modules/placeholder', PlaceholderModule);
-
 import * as hljsModule from 'highlight.js';
 const hljs = hljsModule.default || hljsModule;
 // @ts-ignore
@@ -31,3 +27,6 @@ import * as katexModule from 'katex';
 const katex = katexModule.default || katexModule;
 // @ts-ignore
 window.katex = katex;
+import { PlaceholderModule } from "./modules/placeHolderModule/placeHolderModule.js";
+import './styles/placeHolderModule/placeHolderModule.css';
+Quill.register('modules/placeholder', PlaceholderModule);

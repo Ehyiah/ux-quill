@@ -11,12 +11,15 @@ class PlaceholderModule implements ModuleInterface
      */
     public function __construct(
         public string $name = self::NAME,
-        public $options = [
+        public $options = [],
+    ) {
+        $defaults = [
             'placeholders' => [],
             'icon' => null,
             'startTag' => '{{',
             'endTag' => '}}',
-        ],
-    ) {
+        ];
+
+        $this->options = array_merge($defaults, $this->options);
     }
 }
