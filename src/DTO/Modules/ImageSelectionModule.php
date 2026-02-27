@@ -16,7 +16,12 @@ final class ImageSelectionModule implements ModuleInterface
      *     buttonAfterTitle?: string,
      *     alignLabels?: array{left: string, leftBlock: string, center: string, right: string},
      *     rotateLeftTitle?: string,
-     *     rotateRightTitle?: string
+     *     rotateRightTitle?: string,
+     *     flipHorizontalTitle?: string,
+     *     flipVerticalTitle?: string,
+     *     resetTitle?: string,
+     *     linkTitle?: string,
+     *     captionBackgroundColor?: string
      * } $options
      */
     public function __construct(
@@ -38,6 +43,11 @@ final class ImageSelectionModule implements ModuleInterface
             ],
             'rotateLeftTitle' => 'Rotate left',
             'rotateRightTitle' => 'Rotate right',
+            'flipHorizontalTitle' => 'Flip horizontal',
+            'flipVerticalTitle' => 'Flip vertical',
+            'resetTitle' => 'Reset image',
+            'linkTitle' => 'Edit link',
+            'captionBackgroundColor' => 'rgba(51, 51, 51, 0.6)',
         ];
 
         if (isset($this->options['alignLabels'])) {

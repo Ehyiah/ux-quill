@@ -10,10 +10,30 @@ class ImageFigure extends BlockEmbed {
     const src = typeof value === 'string' ? value : value.src;
     img.setAttribute('src', src);
     const figcaption = document.createElement('figcaption');
+
+    // Base critical styles for figure to ensure caption is below even without bundle CSS
+    node.style.display = 'flex';
+    node.style.flexDirection = 'column';
+    node.style.alignItems = 'center';
+
+    // Base styles for figcaption
+    figcaption.style.background = 'var(--ql-caption-bg-color, rgba(51, 51, 51, 0.6))';
+    figcaption.style.color = '#fff';
+    figcaption.style.fontSize = '11px';
+    figcaption.style.padding = '4px 8px';
+    figcaption.style.textAlign = 'center';
+    figcaption.style.width = '100%';
+    figcaption.style.boxSizing = 'border-box';
+    figcaption.style.lineHeight = 'normal';
+    figcaption.style.fontStyle = 'italic';
     if (typeof value === 'object') {
       if (value.alt) img.setAttribute('alt', value.alt);
       if (value.style) {
         node.setAttribute('style', value.style);
+        // Ensure critical layout styles are preserved if not in value.style
+        if (!node.style.display) node.style.display = 'flex';
+        node.style.flexDirection = 'column';
+        node.style.alignItems = 'center';
       }
       if (value.imgStyle) {
         img.setAttribute('style', value.imgStyle);
@@ -34,16 +54,30 @@ class ImageFigure extends BlockEmbed {
         figcaption.textContent = '';
         figcaption.style.display = 'none';
       }
+      if (value.link) {
+        const link = document.createElement('a');
+        link.setAttribute('href', value.link);
+        link.setAttribute('target', '_blank');
+        link.setAttribute('rel', 'noopener noreferrer');
+        link.style.display = 'flex';
+        link.style.width = '100%';
+        link.style.justifyContent = 'center';
+        link.appendChild(img);
+        node.appendChild(link);
+      } else {
+        node.appendChild(img);
+      }
     } else {
       figcaption.style.display = 'none';
+      node.appendChild(img);
     }
-    node.appendChild(img);
     node.appendChild(figcaption);
     return node;
   }
   static value(node) {
     const img = node.querySelector('img');
     const figcaption = node.querySelector('figcaption');
+    const link = node.querySelector('a');
     let caption = img?.getAttribute('data-caption') || figcaption?.textContent?.trim() || null;
     if (figcaption && figcaption.style.display === 'none') {
       caption = null;
@@ -55,13 +89,15 @@ class ImageFigure extends BlockEmbed {
       height: img?.style.height,
       style: node.getAttribute('style'),
       imgStyle: img?.getAttribute('style') || null,
-      caption: caption
+      caption: caption,
+      link: link?.getAttribute('href') || null
     };
   }
   static formats(node) {
     const img = node.querySelector('img');
     if (!img) return {};
     const figcaption = node.querySelector('figcaption');
+    const link = node.querySelector('a');
     let caption = img.getAttribute('data-caption') || figcaption?.textContent?.trim() || null;
     if (figcaption && figcaption.style.display === 'none') {
       caption = null;
@@ -72,7 +108,8 @@ class ImageFigure extends BlockEmbed {
       height: img.style.height,
       style: node.getAttribute('style'),
       imgStyle: img.getAttribute('style') || null,
-      caption: caption
+      caption: caption,
+      link: link?.getAttribute('href') || null
     };
   }
   format(name, value) {
@@ -89,6 +126,25 @@ class ImageFigure extends BlockEmbed {
         img.removeAttribute('data-caption');
         figcaption.textContent = '';
         figcaption.style.display = 'none';
+      }
+    } else if (name === 'link') {
+      const existingLink = this.domNode.querySelector('a');
+      if (value) {
+        if (existingLink) {
+          existingLink.setAttribute('href', value);
+        } else {
+          const link = document.createElement('a');
+          link.setAttribute('href', value);
+          link.setAttribute('target', '_blank');
+          link.setAttribute('rel', 'noopener noreferrer');
+          link.style.display = 'flex';
+          link.style.width = '100%';
+          link.style.justifyContent = 'center';
+          img.parentNode?.replaceChild(link, img);
+          link.appendChild(img);
+        }
+      } else if (existingLink) {
+        existingLink.parentNode?.replaceChild(img, existingLink);
       }
     } else if (name === 'alt') {
       if (value) img.setAttribute('alt', value);else img.removeAttribute('alt');

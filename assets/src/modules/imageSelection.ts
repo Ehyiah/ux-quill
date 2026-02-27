@@ -15,6 +15,11 @@ export interface ImageSelectionOptions {
     };
     rotateLeftTitle?: string;
     rotateRightTitle?: string;
+    flipHorizontalTitle?: string;
+    flipVerticalTitle?: string;
+    resetTitle?: string;
+    linkTitle?: string;
+    captionBackgroundColor?: string;
 }
 
 const ICONS = {
@@ -31,7 +36,11 @@ const ICONS = {
     cancel: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
     trash: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>',
     rotateLeft: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>',
-    rotateRight: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>'
+    rotateRight: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>',
+    flipHorizontal: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7l-5 5 5 5"></path><path d="M16 7l5 5-5 5"></path><line x1="12" y1="4" x2="12" y2="20"></line></svg>',
+    flipVertical: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8l5-5 5 5"></path><path d="M7 16l5 5 5-5"></path><line x1="4" y1="12" x2="20" y2="12"></line></svg>',
+    reset: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><polyline points="3 3 3 8 8 8"></polyline></svg>',
+    link: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>'
 };
 
 export default class ImageSelection {
@@ -60,6 +69,11 @@ export default class ImageSelection {
             buttonAfterTitle: 'Insert a paragraph after',
             rotateLeftTitle: 'Rotate left',
             rotateRightTitle: 'Rotate right',
+            flipHorizontalTitle: 'Flip horizontal',
+            flipVerticalTitle: 'Flip vertical',
+            resetTitle: 'Reset image',
+            linkTitle: 'Edit link',
+            captionBackgroundColor: 'rgba(51, 51, 51, 0.6)',
             ...options,
             alignLabels: {
                 left: 'Left (wrapped)',
@@ -92,6 +106,9 @@ export default class ImageSelection {
         const style = document.createElement('style');
         style.id = styleId;
         style.innerHTML = `
+            :root {
+                --ql-caption-bg-color: ${this.options.captionBackgroundColor};
+            }
             .ql-editor figure.ql-image-figure {
                 margin: 0;
                 display: flex;
@@ -123,6 +140,13 @@ export default class ImageSelection {
             .ql-editor figure.ql-image-figure img {
                 display: block;
                 transition: transform 0.2s;
+            }
+            .ql-editor figure.ql-image-figure a {
+                display: flex;
+                width: 100%;
+                justify-content: center;
+                text-decoration: none;
+                color: inherit;
             }
             .ql-image-overlay {
                 position: absolute;
@@ -348,6 +372,29 @@ export default class ImageSelection {
         btnRotateRight.onclick = (e) => { e.stopPropagation(); this.rotateImage('right'); };
         this.toolbar.appendChild(btnRotateRight);
 
+        // Flip
+        const btnFlipH = document.createElement('button');
+        btnFlipH.type = 'button';
+        btnFlipH.innerHTML = ICONS.flipHorizontal;
+        btnFlipH.title = this.options.flipHorizontalTitle;
+        btnFlipH.onclick = (e) => { e.stopPropagation(); this.flipImage('horizontal'); };
+        this.toolbar.appendChild(btnFlipH);
+
+        const btnFlipV = document.createElement('button');
+        btnFlipV.type = 'button';
+        btnFlipV.innerHTML = ICONS.flipVertical;
+        btnFlipV.title = this.options.flipVerticalTitle;
+        btnFlipV.onclick = (e) => { e.stopPropagation(); this.flipImage('vertical'); };
+        this.toolbar.appendChild(btnFlipV);
+
+        // Reset
+        const btnReset = document.createElement('button');
+        btnReset.type = 'button';
+        btnReset.innerHTML = ICONS.reset;
+        btnReset.title = this.options.resetTitle;
+        btnReset.onclick = (e) => { e.stopPropagation(); this.resetImage(); };
+        this.toolbar.appendChild(btnReset);
+
         this.addSeparator();
 
         // Caption
@@ -368,6 +415,16 @@ export default class ImageSelection {
         btnAlt.title = 'Edit Alt Text';
         btnAlt.onclick = (e) => { e.stopPropagation(); this.showAltInput(); };
         this.toolbar.appendChild(btnAlt);
+
+        // Link
+        const btnLink = document.createElement('button');
+        btnLink.type = 'button';
+        btnLink.innerHTML = ICONS.link;
+        btnLink.title = this.options.linkTitle;
+        btnLink.onclick = (e) => { e.stopPropagation(); this.showLinkInput(); };
+        // @ts-ignore
+        if (blot && blot.formats().link) btnLink.classList.add('active');
+        this.toolbar.appendChild(btnLink);
 
         this.addSeparator();
 
@@ -476,8 +533,28 @@ export default class ImageSelection {
         this.showGenericInput(currentCaption, 'Image caption', '200px', (val) => this.setCaption(val), () => this.setCaption(''));
     }
 
+    private showLinkInput() {
+        const blot = this.getBlot();
+        // @ts-ignore
+        const currentLink = (blot && blot.formats().link) || '';
+        this.showGenericInput(currentLink, 'https://...', '200px', (val) => this.setLink(val), () => this.setLink(''));
+    }
+
     private setAltText(alt: string) {
         this.saveFormat('alt', alt);
+    }
+
+    private setLink(link: string) {
+        const cleanLink = link.trim() || null;
+        this.saveFormat('link', cleanLink);
+        
+        if (this.toolbar) {
+            const btnLink = this.toolbar.querySelector(`button[title="${this.options.linkTitle}"]`);
+            if (btnLink) {
+                if (cleanLink) btnLink.classList.add('active');
+                else btnLink.classList.remove('active');
+            }
+        }
     }
 
     private setCaption(caption: string) {
@@ -786,6 +863,8 @@ export default class ImageSelection {
         if (!blot) return;
 
         el.style.display = 'flex';
+        el.style.flexDirection = 'column';
+        el.style.alignItems = 'center';
         el.style.float = '';
         el.style.margin = '';
         el.style.marginLeft = '';
@@ -857,28 +936,100 @@ export default class ImageSelection {
         el.style.transform = newTransform;
     }
 
-    private rotateImage(direction: 'left' | 'right') {
-        if (!this.selectedImage) return;
-        const img = this.selectedImage;
-        const figure = this.selectedFigure;
-
-        const currentAngle = this.getRotation(img);
-        const newAngle = currentAngle + (direction === 'right' ? 90 : -90);
-
-        const ratio = (img.naturalWidth && img.naturalHeight) ? (img.naturalWidth / img.naturalHeight) : 1;
-        const isCurrentlySideways = ((currentAngle % 180) + 180) % 180 === 90;
-
-        let baseWidthPx: number;
-        if (figure) {
-            baseWidthPx = isCurrentlySideways ? (figure.offsetWidth * ratio) : figure.offsetWidth;
-        } else {
-            baseWidthPx = img.offsetWidth;
+        private getTransformState(el: HTMLElement) {
+            const transform = el.style.transform || '';
+            const rotateMatch = transform.match(/rotate\(([^)]+)deg\)/);
+            const scaleXMatch = transform.match(/scaleX\(([^)]+)\)/);
+            const scaleYMatch = transform.match(/scaleY\(([^)]+)\)/);
+            
+            return {
+                rotate: rotateMatch ? parseInt(rotateMatch[1], 10) : 0,
+                scaleX: scaleXMatch ? parseInt(scaleXMatch[1], 10) : 1,
+                scaleY: scaleYMatch ? parseInt(scaleYMatch[1], 10) : 1
+            };
         }
-
-        this.setRotation(img, newAngle);
-        this.applyLayout(baseWidthPx + 'px', true);
-
-        this.saveImageStyles();
-        setTimeout(() => this.reposition(), 100);
-    }
-}
+    
+        private updateTransform(el: HTMLElement, rotate: number, scaleX: number, scaleY: number) {
+            el.style.transform = `rotate(${rotate}deg) scaleX(${scaleX}) scaleY(${scaleY})`.trim();
+        }
+    
+        private flipImage(direction: 'horizontal' | 'vertical') {
+            if (!this.selectedImage) return;
+            const img = this.selectedImage;
+            const state = this.getTransformState(img);
+            const isSideways = ((state.rotate % 180) + 180) % 180 === 90;
+    
+            if (direction === 'horizontal') {
+                // If sideways, horizontal flip on screen is vertical flip in local coordinates
+                if (isSideways) state.scaleY *= -1;
+                else state.scaleX *= -1;
+            } else {
+                if (isSideways) state.scaleX *= -1;
+                else state.scaleY *= -1;
+            }
+            
+            this.updateTransform(img, state.rotate, state.scaleX, state.scaleY);
+            this.saveImageStyles();
+            setTimeout(() => this.reposition(), 100);
+        }
+    
+        private resetImage() {
+            if (!this.selectedImage) return;
+            const img = this.selectedImage;
+            const figure = this.selectedFigure;
+    
+            img.style.transform = '';
+            img.style.width = '100%';
+            img.style.height = 'auto';
+            img.style.marginLeft = '';
+            img.style.marginRight = '';
+            img.style.marginTop = '';
+            img.style.marginBottom = '';
+            img.style.maxWidth = '';
+            img.style.maxHeight = '';
+    
+            if (img.parentElement?.tagName === 'A') {
+                const a = img.parentElement as HTMLElement;
+                a.style.marginLeft = '';
+                a.style.marginRight = '';
+                a.style.marginTop = '';
+                a.style.marginBottom = '';
+            }
+    
+            if (figure) {
+                figure.style.width = '';
+                figure.style.margin = '';
+                figure.style.display = 'flex';
+                figure.style.flexDirection = 'column';
+                figure.style.alignItems = 'center';
+            }
+    
+            this.saveImageStyles();
+            this.updateActiveButtons();
+            setTimeout(() => this.reposition(), 100);
+        }
+    
+        private rotateImage(direction: 'left' | 'right') {
+            if (!this.selectedImage) return;
+            const img = this.selectedImage;
+            const figure = this.selectedFigure;
+    
+            const state = this.getTransformState(img);
+            const newAngle = state.rotate + (direction === 'right' ? 90 : -90);
+    
+            const ratio = (img.naturalWidth && img.naturalHeight) ? (img.naturalWidth / img.naturalHeight) : 1;
+            const isCurrentlySideways = ((state.rotate % 180) + 180) % 180 === 90;
+            
+            let baseWidthPx: number;
+            if (figure) {
+                baseWidthPx = isCurrentlySideways ? (figure.offsetWidth * ratio) : figure.offsetWidth;
+            } else {
+                baseWidthPx = img.offsetWidth;
+            }
+    
+            this.updateTransform(img, newAngle, state.scaleX, state.scaleY);
+            this.applyLayout(baseWidthPx + 'px', true);
+    
+            this.saveImageStyles();
+            setTimeout(() => this.reposition(), 100);
+        }}
