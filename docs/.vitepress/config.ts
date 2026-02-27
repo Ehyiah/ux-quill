@@ -37,12 +37,13 @@ export default defineConfig({
           },
           {
             text: 'Modules',
-            collapsed: true,
+            collapsed: false,
             items: [
               { text: 'Concept', link: '/guide/modules/index' },
-              { text: 'ReadTimeModule', link: '/guide/modules/read-time' },
-              { text: 'STTModule', link: '/guide/modules/stt' },
-              { text: 'FullScreenModule', link: '/guide/modules/fullscreen' },
+              { text: 'Read Time', link: '/guide/modules/read-time' },
+              { text: 'Speach To Text', link: '/guide/modules/stt' },
+              { text: 'Full Screen', link: '/guide/modules/fullscreen' },
+              { text: 'Place Holder', link: '/guide/modules/placeholder' },
               { text: 'Other Modules', link: '/guide/modules/others' }
             ]
           },

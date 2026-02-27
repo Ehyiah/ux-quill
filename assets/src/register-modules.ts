@@ -39,3 +39,7 @@ import * as katexModule from 'katex';
 const katex = katexModule.default || katexModule;
 // @ts-ignore
 window.katex = katex;
+
+import {PlaceholderModule} from './modules/placeHolderModule/placeHolderModule.ts';
+// import './modules/placeHolderModule/placeHolderModule.css';
+Quill.register('modules/placeholder', PlaceholderModule);
