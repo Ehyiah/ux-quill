@@ -70,7 +70,7 @@ export default class ImageSelection {
                 line-height: 0;
             }
             .ql-editor figure.ql-image-figure figcaption {
-                background: rgba(51, 51, 51, 0.8);
+                background: rgba(51, 51, 51, 0.60);
                 color: white;
                 font-size: 11px;
                 padding: 4px 8px;

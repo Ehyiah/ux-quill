@@ -64,13 +64,13 @@ export default class ImageSelection {
         this.repositionHandler = this.reposition.bind(this);
 
         this.quill.root.addEventListener('click', this.handleClick.bind(this), true);
-        
+
         this.quill.on('text-change', () => {
             if (!this.isResizing) {
                 this.deselectImage();
             }
         });
-        
+
         this.quill.root.addEventListener('scroll', this.repositionHandler, true);
         window.addEventListener('resize', this.repositionHandler);
 
@@ -80,7 +80,7 @@ export default class ImageSelection {
     private injectStyles() {
         const styleId = 'ql-image-selection-styles';
         if (document.getElementById(styleId)) return;
-        
+
         const style = document.createElement('style');
         style.id = styleId;
         style.innerHTML = `
@@ -91,7 +91,7 @@ export default class ImageSelection {
                 line-height: 0;
             }
             .ql-editor figure.ql-image-figure figcaption {
-                background: rgba(51, 51, 51, 0.8);
+                background: rgba(51, 51, 51, 0.60);
                 color: white;
                 font-size: 11px;
                 padding: 4px 8px;
@@ -208,12 +208,12 @@ export default class ImageSelection {
         this.selectedImage = img;
         this.selectedImage.draggable = false;
         this.selectedImage.classList.add('ql-image-selected');
-        
+
         const figure = img.closest('figure');
         if (figure) {
             this.selectedFigure = figure as HTMLElement;
         }
-        
+
         this.showOverlay();
     }
 
@@ -312,7 +312,7 @@ export default class ImageSelection {
             btn.onclick = (e) => { e.stopPropagation(); this.alignImage(align.name); };
             this.toolbar!.appendChild(btn);
         });
-        
+
         this.updateActiveButtons();
 
         this.addSeparator();
@@ -349,31 +349,31 @@ export default class ImageSelection {
 
     private showGenericInput(currentValue: string, placeholder: string, width: string, onSave: (val: string) => void) {
         if (this.toolbar) this.toolbar.style.display = 'none';
-        
+
         this.inputBar = document.createElement('div');
         this.inputBar.className = 'ql-image-input-bar';
-        
+
         const input = document.createElement('input');
         input.type = 'text';
         input.value = currentValue;
         input.placeholder = placeholder;
         input.style.width = width;
-        
+
         const btnOk = document.createElement('button');
         btnOk.type = 'button';
         btnOk.innerHTML = ICONS.check;
-        btnOk.onclick = (e) => { 
-            e.stopPropagation(); 
-            onSave(input.value); 
-            this.hideInputBar(); 
+        btnOk.onclick = (e) => {
+            e.stopPropagation();
+            onSave(input.value);
+            this.hideInputBar();
         };
 
         const btnCancel = document.createElement('button');
         btnCancel.type = 'button';
         btnCancel.innerHTML = ICONS.cancel;
-        btnCancel.onclick = (e) => { 
-            e.stopPropagation(); 
-            this.hideInputBar(); 
+        btnCancel.onclick = (e) => {
+            e.stopPropagation();
+            this.hideInputBar();
         };
 
         input.onkeydown = (e) => {
@@ -389,7 +389,7 @@ export default class ImageSelection {
         this.inputBar.appendChild(btnOk);
         this.inputBar.appendChild(btnCancel);
         this.quill.container.appendChild(this.inputBar);
-        
+
         this.reposition();
         input.focus();
         input.select();
@@ -411,7 +411,7 @@ export default class ImageSelection {
         if (currentWidth.endsWith('px')) {
             currentWidth = currentWidth.replace('px', '');
         }
-        
+
         this.showGenericInput(currentWidth, 'e.g. 300 or 50%', '80px', (val) => this.setSize(val));
     }
 
@@ -453,16 +453,16 @@ export default class ImageSelection {
     private isCurrentAlign(name: string): boolean {
         const el = this.selectedFigure || this.selectedImage;
         if (!el) return false;
-        
+
         const style = el.style;
-        
+
         switch(name) {
-            case 'left-block': 
-                return style.display === 'block' && 
-                       (style.float === 'none' || style.float === '') && 
+            case 'left-block':
+                return style.display === 'block' &&
+                       (style.float === 'none' || style.float === '') &&
                        (style.marginLeft === '0px' || style.marginLeft === '');
-            case 'center': 
-                return style.display === 'block' && 
+            case 'center':
+                return style.display === 'block' &&
                        (style.marginLeft === 'auto' || style.margin === '10px auto' || style.margin === 'auto');
             case 'left': return style.float === 'left';
             case 'right': return style.float === 'right';
@@ -520,10 +520,10 @@ export default class ImageSelection {
             if (pos.right) handle.style.right = pos.right;
             handle.style.cursor = pos.cursor;
             handle.dataset.side = pos.side;
-            
+
             handle.addEventListener('mousedown', this.handleMouseDown.bind(this));
             handle.addEventListener('dragstart', (e) => e.preventDefault());
-            
+
             this.overlay!.appendChild(handle);
         });
     }
@@ -531,7 +531,7 @@ export default class ImageSelection {
     private handleMouseDown(e: MouseEvent) {
         e.preventDefault();
         e.stopPropagation();
-        
+
         this.isResizing = true;
         this.dragHandle = e.target as HTMLDivElement;
         this.dragSide = (this.dragHandle.dataset.side as 'left' | 'right') || 'right';
@@ -550,7 +550,7 @@ export default class ImageSelection {
 
         const deltaX = e.clientX - this.dragStartX;
         let newWidth = this.dragStartWidth;
-        
+
         if (this.dragSide === 'right') {
             newWidth += deltaX;
         } else {
@@ -573,7 +573,7 @@ export default class ImageSelection {
 
     private handleMouseUp = (e: MouseEvent) => {
         if (!this.isResizing) return;
-        
+
         e.preventDefault();
         e.stopPropagation();
 
@@ -581,7 +581,7 @@ export default class ImageSelection {
         this.dragHandle = null;
         window.removeEventListener('mousemove', this.handleMouseMove, true);
         window.removeEventListener('mouseup', this.handleMouseUp, true);
-        
+
         if (this.selectedImage) {
             this.saveImageStyles();
         }
@@ -622,7 +622,7 @@ export default class ImageSelection {
 
         const barWidth = activeBar.offsetWidth || 300;
         let barLeft = left + (imgRect.width / 2) - (barWidth / 2);
-        
+
         if (barLeft < 5) barLeft = 5;
         const maxLeft = containerRect.width - barWidth - 5;
         if (barLeft > maxLeft) barLeft = maxLeft;
@@ -633,7 +633,7 @@ export default class ImageSelection {
         let barTop = top - barHeight - 10;
 
         if (barTop < 0) {
-            barTop = 5; 
+            barTop = 5;
         }
 
         activeBar.style.top = `${barTop}px`;
