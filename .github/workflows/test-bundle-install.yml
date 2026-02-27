@@ -55,6 +55,12 @@ jobs:
               run: |
                   composer create-project symfony/skeleton:"^${{ matrix.symfony-version }}" test-project-${{ matrix.php-version }}-${{ matrix.symfony-version }}
                   cd test-project-${{ matrix.php-version }}-${{ matrix.symfony-version }}
+                  
+                  # Force reflection-docblock v5 on Symfony 6 to avoid property-info v6 incompatibility
+                  if [[ "${{ matrix.symfony-version }}" == "6.4" ]]; then
+                      composer require "phpdocumentor/reflection-docblock:^5.2" --no-update
+                  fi
+                  
                   composer require webapp symfony/asset-mapper
 
             - name: Installation du bundle QuillJs
