@@ -11,12 +11,18 @@ class ImageFigure extends BlockEmbed {
     img.setAttribute('src', src);
     const figcaption = document.createElement('figcaption');
 
-    // Base critical styles for figure to ensure caption is below even without bundle CSS
-    node.style.display = 'flex';
-    node.style.flexDirection = 'column';
-    node.style.alignItems = 'center';
+    // Base critical styles for figure using table layout for maximum stability with floats
+    node.style.display = 'table';
+    node.style.flexDirection = ''; // Reset flex
+    node.style.maxWidth = '100%';
+    node.style.boxSizing = 'border-box';
+    node.style.verticalAlign = 'top';
+    node.style.userSelect = 'none';
+    node.setAttribute('contenteditable', 'false');
 
     // Base styles for figcaption
+    figcaption.style.display = 'table-caption';
+    figcaption.style.captionSide = 'bottom';
     figcaption.style.background = 'var(--ql-caption-bg-color, rgba(51, 51, 51, 0.6))';
     figcaption.style.color = '#fff';
     figcaption.style.fontSize = '11px';
@@ -26,17 +32,20 @@ class ImageFigure extends BlockEmbed {
     figcaption.style.boxSizing = 'border-box';
     figcaption.style.lineHeight = 'normal';
     figcaption.style.fontStyle = 'italic';
+    img.style.display = 'block';
+    img.style.margin = '0 auto';
     if (typeof value === 'object') {
       if (value.alt) img.setAttribute('alt', value.alt);
       if (value.style) {
         node.setAttribute('style', value.style);
-        // Ensure critical layout styles are preserved if not in value.style
-        if (!node.style.display) node.style.display = 'flex';
-        node.style.flexDirection = 'column';
-        node.style.alignItems = 'center';
+        // Ensure critical layout styles
+        node.style.display = 'table';
+        node.style.verticalAlign = 'top';
       }
       if (value.imgStyle) {
         img.setAttribute('style', value.imgStyle);
+        if (!img.style.display) img.style.display = 'block';
+        if (!img.style.margin) img.style.margin = '0 auto';
       } else {
         if (value.height) img.style.height = value.height;
         if (value.width) {
@@ -48,7 +57,7 @@ class ImageFigure extends BlockEmbed {
         const cleanCaption = value.caption.trim();
         img.setAttribute('data-caption', cleanCaption);
         figcaption.textContent = cleanCaption;
-        figcaption.style.display = 'block';
+        figcaption.style.display = 'table-caption';
       } else {
         img.removeAttribute('data-caption');
         figcaption.textContent = '';
@@ -59,9 +68,8 @@ class ImageFigure extends BlockEmbed {
         link.setAttribute('href', value.link);
         link.setAttribute('target', '_blank');
         link.setAttribute('rel', 'noopener noreferrer');
-        link.style.display = 'flex';
+        link.style.display = 'block';
         link.style.width = '100%';
-        link.style.justifyContent = 'center';
         link.appendChild(img);
         node.appendChild(link);
       } else {
@@ -121,7 +129,7 @@ class ImageFigure extends BlockEmbed {
         const cleanCaption = value.trim();
         img.setAttribute('data-caption', cleanCaption);
         figcaption.textContent = cleanCaption;
-        figcaption.style.display = 'block';
+        figcaption.style.display = 'table-caption';
       } else {
         img.removeAttribute('data-caption');
         figcaption.textContent = '';
@@ -137,9 +145,8 @@ class ImageFigure extends BlockEmbed {
           link.setAttribute('href', value);
           link.setAttribute('target', '_blank');
           link.setAttribute('rel', 'noopener noreferrer');
-          link.style.display = 'flex';
+          link.style.display = 'block';
           link.style.width = '100%';
-          link.style.justifyContent = 'center';
           img.parentNode?.replaceChild(link, img);
           link.appendChild(img);
         }

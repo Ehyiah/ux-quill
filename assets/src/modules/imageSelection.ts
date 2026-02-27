@@ -794,6 +794,8 @@ export default class ImageSelection {
 
         if (!isSideways) {
             figure.style.width = width;
+            figure.style.display = 'table';
+            figure.style.verticalAlign = 'top';
             img.style.width = '100%';
             img.style.maxWidth = '';
             img.style.maxHeight = '';
@@ -817,6 +819,8 @@ export default class ImageSelection {
         }
 
         figure.style.width = visualWidth;
+        figure.style.display = 'table';
+        figure.style.verticalAlign = 'top';
         img.style.width = (ratio * 100) + '%';
         img.style.height = 'auto';
         img.style.maxWidth = 'none';
@@ -851,7 +855,7 @@ export default class ImageSelection {
         if (!this.selectedImage) return;
         if (size === '100%') {
             const el = this.selectedFigure || this.selectedImage;
-            el.style.display = 'flex';
+            el.style.display = 'table';
             el.style.margin = '10px auto';
         }
     }
@@ -862,9 +866,10 @@ export default class ImageSelection {
         const blot = this.getBlot();
         if (!blot) return;
 
-        el.style.display = 'flex';
-        el.style.flexDirection = 'column';
-        el.style.alignItems = 'center';
+        el.style.display = 'table';
+        el.style.verticalAlign = 'top';
+        el.style.maxWidth = '100%';
+        el.style.boxSizing = 'border-box';
         el.style.float = '';
         el.style.margin = '';
         el.style.marginLeft = '';
@@ -883,11 +888,9 @@ export default class ImageSelection {
             el.style.marginTop = '10px';
             el.style.marginBottom = '10px';
         } else if (align === 'left') {
-            el.style.display = 'inline-flex';
             el.style.float = 'left';
             el.style.margin = '0 10px 10px 0';
         } else if (align === 'right') {
-            el.style.display = 'inline-flex';
             el.style.float = 'right';
             el.style.margin = '0 0 10px 10px';
         }
@@ -999,9 +1002,8 @@ export default class ImageSelection {
             if (figure) {
                 figure.style.width = '';
                 figure.style.margin = '';
-                figure.style.display = 'flex';
-                figure.style.flexDirection = 'column';
-                figure.style.alignItems = 'center';
+                figure.style.display = 'table';
+                figure.style.verticalAlign = 'top';
             }
     
             this.saveImageStyles();
