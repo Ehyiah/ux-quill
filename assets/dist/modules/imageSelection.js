@@ -11,6 +11,7 @@ const ICONS = {
   sizeCustom: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11v6"></path><path d="M11 11v6"></path><path d="M15 11v6"></path><path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7"></path><path d="M21 7H3"></path></svg>',
   check: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
   cancel: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
+  trash: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>',
   rotateLeft: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>',
   rotateRight: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>'
 };
@@ -89,7 +90,11 @@ export default class ImageSelection {
                 pointer-events: none;
                 width: 100%;
             }
-            .ql-editor figure.ql-image-figure:has(img.ql-image-selected) figcaption {
+            .ql-editor figure.ql-image-figure figcaption[data-empty="true"],
+            .ql-editor figure.ql-image-figure figcaption:empty {
+                display: none !important;
+            }
+            .ql-editor figure.ql-image-figure:has(img.ql-image-selected) figcaption:not([data-empty="true"]):not(:empty) {
                 background: ${this.options.borderColor};
             }
             .ql-editor figure.ql-image-figure img {
@@ -363,7 +368,7 @@ export default class ImageSelection {
     };
     this.toolbar.appendChild(btnAfter);
   }
-  showGenericInput(currentValue, placeholder, width, onSave) {
+  showGenericInput(currentValue, placeholder, width, onSave, onClear) {
     if (this.toolbar) this.toolbar.style.display = 'none';
     this.inputBar = document.createElement('div');
     this.inputBar.className = 'ql-image-input-bar';
@@ -380,6 +385,23 @@ export default class ImageSelection {
       onSave(input.value);
       this.hideInputBar();
     };
+    if (onClear) {
+      const btnClear = document.createElement('button');
+      btnClear.type = 'button';
+      btnClear.innerHTML = ICONS.trash;
+      btnClear.title = 'Clear value';
+      btnClear.onclick = e => {
+        e.stopPropagation();
+        onClear();
+        this.hideInputBar();
+      };
+      this.inputBar.appendChild(input);
+      this.inputBar.appendChild(btnOk);
+      this.inputBar.appendChild(btnClear);
+    } else {
+      this.inputBar.appendChild(input);
+      this.inputBar.appendChild(btnOk);
+    }
     const btnCancel = document.createElement('button');
     btnCancel.type = 'button';
     btnCancel.innerHTML = ICONS.cancel;
@@ -395,8 +417,6 @@ export default class ImageSelection {
         this.hideInputBar();
       }
     };
-    this.inputBar.appendChild(input);
-    this.inputBar.appendChild(btnOk);
     this.inputBar.appendChild(btnCancel);
     this.quill.container.appendChild(this.inputBar);
     this.reposition();
@@ -428,21 +448,43 @@ export default class ImageSelection {
     const blot = this.getBlot();
     // @ts-ignore
     const currentCaption = blot && blot.formats().caption || '';
-    this.showGenericInput(currentCaption, 'Image caption', '200px', val => this.setCaption(val));
+    this.showGenericInput(currentCaption, 'Image caption', '200px', val => this.setCaption(val), () => this.setCaption(''));
   }
   setAltText(alt) {
     this.saveFormat('alt', alt);
   }
   setCaption(caption) {
-    this.saveFormat('caption', caption.trim() || null);
-    setTimeout(() => this.reposition(), 50);
+    const cleanCaption = caption.trim() || null;
+    this.saveFormat('caption', cleanCaption);
+
+    // Manual refresh of the button state
+    if (this.toolbar) {
+      const btnCaption = this.toolbar.querySelector('button[title="Edit Caption"]');
+      if (btnCaption) {
+        if (cleanCaption) {
+          btnCaption.classList.add('active');
+        } else {
+          btnCaption.classList.remove('active');
+        }
+      }
+    }
+
+    // Wait a bit for Quill to sync before repositioning
+    setTimeout(() => {
+      this.reposition();
+    }, 50);
   }
   saveFormat(name, value) {
     if (!this.selectedImage) return;
     const blot = this.getBlot();
     if (blot) {
       const index = this.quill.getIndex(blot);
-      this.quill.formatText(index, 1, name, value, 'user');
+      if (index >= 0) {
+        // Using an object is often more reliable for custom formats
+        this.quill.formatText(index, 1, {
+          [name]: value
+        }, 'user');
+      }
     }
   }
   getBlot() {

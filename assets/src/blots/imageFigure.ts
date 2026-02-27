@@ -14,6 +14,8 @@ class ImageFigure extends BlockEmbed {
         const src = typeof value === 'string' ? value : value.src;
         img.setAttribute('src', src);
 
+        const figcaption = document.createElement('figcaption');
+
         if (typeof value === 'object') {
             if (value.alt) img.setAttribute('alt', value.alt);
             if (value.style) {
@@ -28,15 +30,22 @@ class ImageFigure extends BlockEmbed {
                     img.style.width = '100%';
                 }
             }
-            if (value.caption) img.setAttribute('data-caption', value.caption);
+
+            if (value.caption && value.caption.trim()) {
+                const cleanCaption = value.caption.trim();
+                img.setAttribute('data-caption', cleanCaption);
+                figcaption.textContent = cleanCaption;
+                figcaption.style.display = 'block';
+            } else {
+                img.removeAttribute('data-caption');
+                figcaption.textContent = '';
+                figcaption.style.display = 'none';
+            }
+        } else {
+            figcaption.style.display = 'none';
         }
 
         node.appendChild(img);
-
-        const figcaption = document.createElement('figcaption');
-        if (typeof value === 'object' && value.caption) {
-            figcaption.textContent = value.caption;
-        }
         node.appendChild(figcaption);
 
         return node;
@@ -45,15 +54,20 @@ class ImageFigure extends BlockEmbed {
     static value(node: HTMLElement) {
         const img = node.querySelector('img');
         const figcaption = node.querySelector('figcaption');
+
+        let caption = img?.getAttribute('data-caption') || figcaption?.textContent?.trim() || null;
+        if (figcaption && figcaption.style.display === 'none') {
+            caption = null;
+        }
+
         return {
             src: img?.getAttribute('src'),
             alt: img?.getAttribute('alt'),
-            // Width is on the figure; fall back to img for backward compat
             width: node.style.width || img?.style.width || null,
             height: img?.style.height,
             style: node.getAttribute('style'),
             imgStyle: img?.getAttribute('style') || null,
-            caption: figcaption?.textContent || null
+            caption: caption
         };
     }
 
@@ -61,32 +75,39 @@ class ImageFigure extends BlockEmbed {
         const img = node.querySelector('img');
         if (!img) return {};
 
-        const figcaption = node.querySelector('figcaption');
+        const figcaption = node.querySelector('figcaption') as HTMLElement;
+
+        let caption = img.getAttribute('data-caption') || figcaption?.textContent?.trim() || null;
+        if (figcaption && figcaption.style.display === 'none') {
+            caption = null;
+        }
 
         return {
             alt: img.getAttribute('alt'),
-            // Width is on the figure; fall back to img for backward compat
             width: node.style.width || (img as HTMLElement).style.width || null,
             height: (img as HTMLElement).style.height,
             style: node.getAttribute('style'),
             imgStyle: img.getAttribute('style') || null,
-            caption: figcaption?.textContent || null
+            caption: caption
         };
     }
 
     format(name: string, value: any) {
         const img = this.domNode.querySelector('img');
-        const figcaption = this.domNode.querySelector('figcaption');
+        const figcaption = this.domNode.querySelector('figcaption') as HTMLElement;
 
         if (!img || !figcaption) return;
 
         if (name === 'caption') {
-            if (value) {
-                figcaption.textContent = value;
-                img.setAttribute('data-caption', value);
+            if (value && value.trim()) {
+                const cleanCaption = value.trim();
+                img.setAttribute('data-caption', cleanCaption);
+                figcaption.textContent = cleanCaption;
+                figcaption.style.display = 'block';
             } else {
-                figcaption.textContent = '';
                 img.removeAttribute('data-caption');
+                figcaption.textContent = '';
+                figcaption.style.display = 'none';
             }
         } else if (name === 'alt') {
             if (value) img.setAttribute('alt', value);
