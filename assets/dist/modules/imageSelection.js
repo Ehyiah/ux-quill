@@ -10,7 +10,9 @@ const ICONS = {
   paraAfter: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5V19M5 12H19"></path><path d="M11 21H21"></path></svg>',
   sizeCustom: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11v6"></path><path d="M11 11v6"></path><path d="M15 11v6"></path><path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7"></path><path d="M21 7H3"></path></svg>',
   check: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
-  cancel: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>'
+  cancel: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
+  rotateLeft: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>',
+  rotateRight: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>'
 };
 export default class ImageSelection {
   quill;
@@ -38,13 +40,16 @@ export default class ImageSelection {
       buttonAfterLabel: ICONS.paraAfter,
       buttonBeforeTitle: 'Insert a paragraph before',
       buttonAfterTitle: 'Insert a paragraph after',
+      rotateLeftTitle: 'Rotate left',
+      rotateRightTitle: 'Rotate right',
+      ...options,
       alignLabels: {
         left: 'Left (wrapped)',
         leftBlock: 'Left (no wrap)',
         center: 'Center',
-        right: 'Right (wrapped)'
-      },
-      ...options
+        right: 'Right (wrapped)',
+        ...(options.alignLabels || {})
+      }
     };
     this.repositionHandler = this.reposition.bind(this);
     this.quill.root.addEventListener('click', this.handleClick.bind(this), true);
@@ -65,7 +70,9 @@ export default class ImageSelection {
     style.innerHTML = `
             .ql-editor figure.ql-image-figure {
                 margin: 0;
-                display: block;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
                 position: relative;
                 line-height: 0;
             }
@@ -80,12 +87,14 @@ export default class ImageSelection {
                 box-sizing: border-box;
                 border-radius: 0 0 4px 4px;
                 pointer-events: none;
-            }
-            .ql-editor figure.ql-image-figure figcaption:empty {
-                display: none;
+                width: 100%;
             }
             .ql-editor figure.ql-image-figure:has(img.ql-image-selected) figcaption {
                 background: ${this.options.borderColor};
+            }
+            .ql-editor figure.ql-image-figure img {
+                display: block;
+                transition: transform 0.2s;
             }
             .ql-image-overlay {
                 position: absolute;
@@ -285,7 +294,7 @@ export default class ImageSelection {
       btn.type = 'button';
       btn.innerHTML = align.icon;
       // @ts-ignore
-      btn.title = this.options.alignLabels[align.name];
+      btn.title = this.options.alignLabels[align.name] || align.name;
       btn.dataset.align = align.name;
       btn.onclick = e => {
         e.stopPropagation();
@@ -294,6 +303,27 @@ export default class ImageSelection {
       this.toolbar.appendChild(btn);
     });
     this.updateActiveButtons();
+    this.addSeparator();
+
+    // Rotation
+    const btnRotateLeft = document.createElement('button');
+    btnRotateLeft.type = 'button';
+    btnRotateLeft.innerHTML = ICONS.rotateLeft;
+    btnRotateLeft.title = this.options.rotateLeftTitle;
+    btnRotateLeft.onclick = e => {
+      e.stopPropagation();
+      this.rotateImage('left');
+    };
+    this.toolbar.appendChild(btnRotateLeft);
+    const btnRotateRight = document.createElement('button');
+    btnRotateRight.type = 'button';
+    btnRotateRight.innerHTML = ICONS.rotateRight;
+    btnRotateRight.title = this.options.rotateRightTitle;
+    btnRotateRight.onclick = e => {
+      e.stopPropagation();
+      this.rotateImage('right');
+    };
+    this.toolbar.appendChild(btnRotateRight);
     this.addSeparator();
 
     // Caption
@@ -525,13 +555,7 @@ export default class ImageSelection {
     }
     newWidth = Math.round(newWidth);
     if (newWidth > 30) {
-      if (this.selectedFigure) {
-        this.selectedFigure.style.width = `${newWidth}px`;
-        this.selectedImage.style.width = '100%';
-      } else {
-        this.selectedImage.style.width = `${newWidth}px`;
-      }
-      this.selectedImage.style.height = 'auto';
+      this.applyLayout(newWidth + 'px', false);
       this.reposition();
     }
   };
@@ -553,12 +577,11 @@ export default class ImageSelection {
     if (blot) {
       const index = this.quill.getIndex(blot);
       const el = this.selectedFigure || this.selectedImage;
-      const style = el.getAttribute('style');
-      const width = el.style.width; // Use figure width, not image width (which is '100%')
-
+      const figureStyle = el.getAttribute('style');
+      const imgStyle = this.selectedImage.getAttribute('style') || null;
       this.quill.formatText(index, 1, {
-        style: style,
-        width: width
+        style: figureStyle,
+        imgStyle: imgStyle
       }, 'user');
     }
   }
@@ -587,21 +610,63 @@ export default class ImageSelection {
     }
     activeBar.style.top = `${barTop}px`;
   }
+  applyLayout(width, isBaseWidth) {
+    if (isBaseWidth === void 0) {
+      isBaseWidth = false;
+    }
+    if (!this.selectedImage) return;
+    const img = this.selectedImage;
+    const figure = this.selectedFigure;
+    const angle = this.getRotation(img);
+    const isSideways = (angle % 180 + 180) % 180 === 90;
+    if (!figure) {
+      img.style.width = width;
+      img.style.height = 'auto';
+      return;
+    }
+    const ratio = img.naturalWidth && img.naturalHeight ? img.naturalWidth / img.naturalHeight : 1;
+    if (!isSideways) {
+      figure.style.width = width;
+      img.style.width = '100%';
+      img.style.maxWidth = '';
+      img.style.maxHeight = '';
+      img.style.marginLeft = '';
+      img.style.marginRight = '';
+      img.style.marginTop = '';
+      img.style.marginBottom = '';
+      img.style.height = 'auto';
+      return;
+    }
+    let visualWidth;
+    if (isBaseWidth) {
+      if (width.endsWith('%')) {
+        visualWidth = parseFloat(width) / ratio + '%';
+      } else {
+        visualWidth = Math.round(parseFloat(width) / ratio) + 'px';
+      }
+    } else {
+      visualWidth = width;
+    }
+    figure.style.width = visualWidth;
+    img.style.width = ratio * 100 + '%';
+    img.style.height = 'auto';
+    img.style.maxWidth = 'none';
+    img.style.maxHeight = 'none';
+    const marginH = (1 - ratio) * 50 + '%';
+    const marginV = (ratio - 1) * 50 + '%';
+    img.style.marginLeft = marginH;
+    img.style.marginRight = marginH;
+    img.style.marginTop = marginV;
+    img.style.marginBottom = marginV;
+  }
   setSize(size) {
     if (!this.selectedImage || !size) return;
     let finalSize = size.trim();
     if (/^\d+$/.test(finalSize)) {
       finalSize += 'px';
     }
-    const el = this.selectedFigure || this.selectedImage;
-    el.style.width = finalSize;
-    if (this.selectedFigure) {
-      this.selectedImage.style.width = '100%';
-    } else {
-      this.selectedImage.style.width = finalSize;
-    }
+    this.applyLayout(finalSize, false);
     this.selectedSizeUpdate(finalSize);
-    this.selectedImage.style.height = 'auto';
     this.saveImageStyles();
     this.updateActiveButtons();
     setTimeout(() => this.reposition(), 100);
@@ -610,7 +675,7 @@ export default class ImageSelection {
     if (!this.selectedImage) return;
     if (size === '100%') {
       const el = this.selectedFigure || this.selectedImage;
-      el.style.display = 'block';
+      el.style.display = 'flex';
       el.style.margin = '10px auto';
     }
   }
@@ -619,7 +684,7 @@ export default class ImageSelection {
     if (!el) return;
     const blot = this.getBlot();
     if (!blot) return;
-    el.style.display = '';
+    el.style.display = 'flex';
     el.style.float = '';
     el.style.margin = '';
     el.style.marginLeft = '';
@@ -627,21 +692,21 @@ export default class ImageSelection {
     el.style.marginTop = '';
     el.style.marginBottom = '';
     if (align === 'leftBlock') {
-      el.style.display = 'block';
       el.style.marginLeft = '0';
       el.style.marginRight = 'auto';
       el.style.marginTop = '10px';
       el.style.marginBottom = '10px';
     } else if (align === 'center') {
-      el.style.display = 'block';
       el.style.marginLeft = 'auto';
       el.style.marginRight = 'auto';
       el.style.marginTop = '10px';
       el.style.marginBottom = '10px';
     } else if (align === 'left') {
+      el.style.display = 'inline-flex';
       el.style.float = 'left';
       el.style.margin = '0 10px 10px 0';
     } else if (align === 'right') {
+      el.style.display = 'inline-flex';
       el.style.float = 'right';
       el.style.margin = '0 0 10px 10px';
     }
@@ -668,5 +733,39 @@ export default class ImageSelection {
       this.quill.setSelection(index + 1, 0, 'user');
       this.deselectImage();
     }
+  }
+  getRotation(el) {
+    const transform = el.style.transform;
+    if (transform) {
+      const match = transform.match(/rotate\(([^)]+)\)/);
+      if (match && match[1]) {
+        return parseInt(match[1], 10);
+      }
+    }
+    return 0;
+  }
+  setRotation(el, angle) {
+    const otherTransforms = (el.style.transform || '').replace(/rotate\([^)]+\)/g, '').trim();
+    const newTransform = `rotate(${angle}deg) ${otherTransforms}`.trim();
+    el.style.transform = newTransform;
+  }
+  rotateImage(direction) {
+    if (!this.selectedImage) return;
+    const img = this.selectedImage;
+    const figure = this.selectedFigure;
+    const currentAngle = this.getRotation(img);
+    const newAngle = currentAngle + (direction === 'right' ? 90 : -90);
+    const ratio = img.naturalWidth && img.naturalHeight ? img.naturalWidth / img.naturalHeight : 1;
+    const isCurrentlySideways = (currentAngle % 180 + 180) % 180 === 90;
+    let baseWidthPx;
+    if (figure) {
+      baseWidthPx = isCurrentlySideways ? figure.offsetWidth * ratio : figure.offsetWidth;
+    } else {
+      baseWidthPx = img.offsetWidth;
+    }
+    this.setRotation(img, newAngle);
+    this.applyLayout(baseWidthPx + 'px', true);
+    this.saveImageStyles();
+    setTimeout(() => this.reposition(), 100);
   }
 }

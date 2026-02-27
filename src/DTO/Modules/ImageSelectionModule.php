@@ -14,14 +14,16 @@ final class ImageSelectionModule implements ModuleInterface
      *     buttonAfterLabel?: string,
      *     buttonBeforeTitle?: string,
      *     buttonAfterTitle?: string,
-     *     buttonAfterTitle?: array{left: string, leftBlock: string, center: string, right: string}
+     *     alignLabels?: array{left: string, leftBlock: string, center: string, right: string},
+     *     rotateLeftTitle?: string,
+     *     rotateRightTitle?: string
      * } $options
      */
     public function __construct(
         public string $name = self::NAME,
         public $options = [],
     ) {
-        $this->options = array_merge([
+        $defaults = [
             'borderColor' => '#007bff',
             'borderWidth' => '4px',
             'buttonBeforeLabel' => '¶+',
@@ -34,6 +36,14 @@ final class ImageSelectionModule implements ModuleInterface
                 'center' => 'Align center',
                 'right' => 'Right (wrapped)',
             ],
-        ], $this->options);
+            'rotateLeftTitle' => 'Rotate left',
+            'rotateRightTitle' => 'Rotate right',
+        ];
+
+        if (isset($this->options['alignLabels'])) {
+            $this->options['alignLabels'] = array_merge($defaults['alignLabels'], $this->options['alignLabels']);
+        }
+
+        $this->options = array_merge($defaults, $this->options);
     }
 }

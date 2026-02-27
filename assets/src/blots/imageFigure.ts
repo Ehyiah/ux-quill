@@ -10,33 +10,35 @@ class ImageFigure extends BlockEmbed {
     static create(value: any) {
         const node = super.create();
         const img = document.createElement('img');
-        
+
         const src = typeof value === 'string' ? value : value.src;
         img.setAttribute('src', src);
-        
+
         if (typeof value === 'object') {
             if (value.alt) img.setAttribute('alt', value.alt);
-            if (value.height) img.style.height = value.height;
             if (value.style) {
-                // Apply style to the figure (node)
                 node.setAttribute('style', value.style);
             }
-            if (value.width) {
-                // Width is stored on the figure so the figcaption matches the image size
-                if (!node.style.width) node.style.width = value.width;
-                img.style.width = '100%';
+            if (value.imgStyle) {
+                img.setAttribute('style', value.imgStyle);
+            } else {
+                if (value.height) img.style.height = value.height;
+                if (value.width) {
+                    if (!node.style.width) node.style.width = value.width;
+                    img.style.width = '100%';
+                }
             }
             if (value.caption) img.setAttribute('data-caption', value.caption);
         }
-        
+
         node.appendChild(img);
-        
+
         const figcaption = document.createElement('figcaption');
         if (typeof value === 'object' && value.caption) {
             figcaption.textContent = value.caption;
         }
         node.appendChild(figcaption);
-        
+
         return node;
     }
 
@@ -50,6 +52,7 @@ class ImageFigure extends BlockEmbed {
             width: node.style.width || img?.style.width || null,
             height: img?.style.height,
             style: node.getAttribute('style'),
+            imgStyle: img?.getAttribute('style') || null,
             caption: figcaption?.textContent || null
         };
     }
@@ -66,6 +69,7 @@ class ImageFigure extends BlockEmbed {
             width: node.style.width || (img as HTMLElement).style.width || null,
             height: (img as HTMLElement).style.height,
             style: node.getAttribute('style'),
+            imgStyle: img.getAttribute('style') || null,
             caption: figcaption?.textContent || null
         };
     }
@@ -73,7 +77,7 @@ class ImageFigure extends BlockEmbed {
     format(name: string, value: any) {
         const img = this.domNode.querySelector('img');
         const figcaption = this.domNode.querySelector('figcaption');
-        
+
         if (!img || !figcaption) return;
 
         if (name === 'caption') {
@@ -101,6 +105,13 @@ class ImageFigure extends BlockEmbed {
         } else if (name === 'style') {
             if (value) this.domNode.setAttribute('style', value);
             else this.domNode.removeAttribute('style');
+        } else if (name === 'imgStyle') {
+            if (value) {
+                img.setAttribute('style', value);
+            } else {
+                img.removeAttribute('style');
+                img.style.width = '100%';
+            }
         } else {
             super.format(name, value);
         }
