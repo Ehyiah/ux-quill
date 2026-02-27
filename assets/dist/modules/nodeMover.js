@@ -76,7 +76,6 @@ export default class NodeMover {
                 gap: 1px;
                 box-shadow: 0 2px 4px rgba(0,0,0,0.1);
                 pointer-events: auto;
-                left: -30px;
             }
             .ql-node-mover-toolbar button {
                 background: transparent;
@@ -239,7 +238,13 @@ export default class NodeMover {
     this.toolbar.style.display = 'flex';
     const top = minTop - containerRect.top;
     const rootRect = this.quill.root.getBoundingClientRect();
-    const left = rootRect.left - containerRect.left - 25;
+    const toolbarWidth = this.toolbar.offsetWidth || 26;
+    let left = rootRect.left - containerRect.left - toolbarWidth - 5;
+
+    // If not enough space on the left (less than toolbar width + some margin), move it inside
+    if (rootRect.left < toolbarWidth + 10) {
+      left = rootRect.left - containerRect.left + 5;
+    }
     this.toolbar.style.top = `${top}px`;
     this.toolbar.style.left = `${left}px`;
   }
