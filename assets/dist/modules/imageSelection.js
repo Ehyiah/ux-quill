@@ -4,8 +4,8 @@ const ICONS = {
   alignLeftBlock: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="10" height="8" rx="1"></rect><line x1="3" y1="16" x2="21" y2="16"></line><line x1="3" y1="20" x2="21" y2="20"></line></svg>',
   alignCenter: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="3" width="8" height="8" rx="1"></rect><line x1="3" y1="16" x2="21" y2="16"></line><line x1="3" y1="20" x2="21" y2="20"></line></svg>',
   alignRight: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="13" y="3" width="8" height="8" rx="1"></rect><line x1="3" y1="4" x2="9" y2="4"></line><line x1="3" y1="8" x2="9" y2="8"></line><line x1="3" y1="12" x2="9" y2="12"></line><line x1="3" y1="16" x2="21" y2="16"></line><line x1="3" y1="20" x2="21" y2="20"></line></svg>',
-  alt: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>',
-  caption: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><line x1="7" y1="8" x2="17" y2="8"></line><line x1="7" y1="12" x2="13" y2="12"></line></svg>',
+  alt: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="14" height="11" rx="1"></rect><path d="M1 9 l3-3 3.5 3.5 2-2 3 2.5"></path><line x1="17" y1="8" x2="23" y2="8"></line><line x1="20" y1="8" x2="20" y2="20"></line><line x1="17" y1="20" x2="23" y2="20"></line></svg>',
+  caption: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="13" rx="2"></rect><path d="M2 9 l4-4 4 4 3-3 7 5"></path><line x1="4" y1="19" x2="20" y2="19"></line><line x1="6" y1="22" x2="16" y2="22"></line></svg>',
   paraBefore: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5V19M5 12H19"></path><path d="M11 3H21"></path></svg>',
   paraAfter: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5V19M5 12H19"></path><path d="M11 21H21"></path></svg>',
   sizeCustom: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11v6"></path><path d="M11 11v6"></path><path d="M15 11v6"></path><path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7"></path><path d="M21 7H3"></path></svg>',
@@ -16,10 +16,10 @@ export default class ImageSelection {
   quill;
   options;
   selectedImage = null;
+  selectedFigure = null;
   overlay = null;
   toolbar = null;
   inputBar = null;
-  captionsMap = (() => new Map())();
   dragHandle = null;
   dragSide = 'right';
   dragStartX = 0;
@@ -52,14 +52,10 @@ export default class ImageSelection {
       if (!this.isResizing) {
         this.deselectImage();
       }
-      this.updateAllCaptions();
     });
     this.quill.root.addEventListener('scroll', this.repositionHandler, true);
     window.addEventListener('resize', this.repositionHandler);
     this.injectStyles();
-
-    // Initial render of captions
-    setTimeout(() => this.updateAllCaptions(), 100);
   }
   injectStyles() {
     const styleId = 'ql-image-selection-styles';
@@ -67,6 +63,30 @@ export default class ImageSelection {
     const style = document.createElement('style');
     style.id = styleId;
     style.innerHTML = `
+            .ql-editor figure.ql-image-figure {
+                margin: 0;
+                display: block;
+                position: relative;
+                line-height: 0;
+            }
+            .ql-editor figure.ql-image-figure figcaption {
+                background: rgba(51, 51, 51, 0.8);
+                color: white;
+                font-size: 11px;
+                padding: 4px 8px;
+                text-align: center;
+                font-style: italic;
+                line-height: normal;
+                box-sizing: border-box;
+                border-radius: 0 0 4px 4px;
+                pointer-events: none;
+            }
+            .ql-editor figure.ql-image-figure figcaption:empty {
+                display: none;
+            }
+            .ql-editor figure.ql-image-figure:has(img.ql-image-selected) figcaption {
+                background: ${this.options.borderColor};
+            }
             .ql-image-overlay {
                 position: absolute;
                 border: ${this.options.borderWidth} solid ${this.options.borderColor};
@@ -141,27 +161,6 @@ export default class ImageSelection {
                 margin: 4px 2px;
                 height: 16px;
             }
-            .ql-image-caption-display {
-                position: absolute;
-                background: rgba(51, 51, 51, 0.8);
-                color: white;
-                font-size: 11px;
-                padding: 3px 8px;
-                border-radius: 0 0 4px 4px;
-                z-index: 999;
-                text-align: center;
-                box-sizing: border-box;
-                pointer-events: none;
-                font-style: italic;
-                transition: background 0.2s;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-            .ql-image-caption-display.active {
-                background: ${this.options.borderColor};
-                z-index: 1001;
-            }
         `;
     document.head.appendChild(style);
   }
@@ -170,9 +169,9 @@ export default class ImageSelection {
     if (target instanceof HTMLImageElement && this.quill.root.contains(target)) {
       this.selectImage(target);
     } else if (this.toolbar && this.toolbar.contains(target)) {
-      // Clicked toolbar, do nothing
+      // Clicked toolbar
     } else if (this.inputBar && this.inputBar.contains(target)) {
-      // Clicked input bar, do nothing
+      // Clicked input bar
     } else if (this.overlay && this.overlay.contains(target)) {
       // Clicked handle or overlay
     } else {
@@ -184,18 +183,20 @@ export default class ImageSelection {
     this.deselectImage();
     this.selectedImage = img;
     this.selectedImage.draggable = false;
+    this.selectedImage.classList.add('ql-image-selected');
+    const figure = img.closest('figure');
+    if (figure) {
+      this.selectedFigure = figure;
+    }
     this.showOverlay();
-    this.updateAllCaptions();
   }
   deselectImage() {
     if (this.isResizing) return;
     if (this.selectedImage) {
       this.selectedImage.draggable = true;
-      const oldImg = this.selectedImage;
+      this.selectedImage.classList.remove('ql-image-selected');
       this.selectedImage = null;
-      // Update the caption style of the previously selected image
-      const caption = this.captionsMap.get(oldImg);
-      if (caption) caption.classList.remove('active');
+      this.selectedFigure = null;
     }
     this.hideOverlay();
   }
@@ -224,53 +225,6 @@ export default class ImageSelection {
     this.setupToolbar();
     this.setupHandles();
     this.reposition();
-  }
-  updateAllCaptions() {
-    const images = this.quill.root.querySelectorAll('img[data-caption]');
-    const currentImages = new Set();
-    images.forEach(img => {
-      const htmlImg = img;
-      currentImages.add(htmlImg);
-      const captionText = htmlImg.getAttribute('data-caption') || '';
-      let captionDiv = this.captionsMap.get(htmlImg);
-      if (!captionDiv) {
-        captionDiv = document.createElement('div');
-        captionDiv.className = 'ql-image-caption-display';
-        this.quill.container.appendChild(captionDiv);
-        this.captionsMap.set(htmlImg, captionDiv);
-      }
-      captionDiv.textContent = captionText;
-      if (this.selectedImage === htmlImg) {
-        captionDiv.classList.add('active');
-      } else {
-        captionDiv.classList.remove('active');
-      }
-      this.positionCaption(htmlImg, captionDiv);
-    });
-
-    // Cleanup deleted images
-    this.captionsMap.forEach((div, img) => {
-      if (!currentImages.has(img) || !this.quill.root.contains(img)) {
-        div.remove();
-        this.captionsMap.delete(img);
-      }
-    });
-  }
-  positionCaption(img, div) {
-    const imgRect = img.getBoundingClientRect();
-    const containerRect = this.quill.container.getBoundingClientRect();
-    const top = imgRect.top - containerRect.top;
-    const left = imgRect.left - containerRect.left;
-    div.style.top = `${top + imgRect.height}px`;
-    div.style.left = `${left}px`;
-    div.style.width = `${imgRect.width}px`;
-
-    // Hide if image is not visible in viewport or too small
-    if (imgRect.width < 20 || imgRect.height < 20) {
-      div.style.display = 'none';
-    } else {
-      div.style.display = 'block';
-    }
   }
   setupToolbar() {
     if (!this.toolbar) return;
@@ -351,7 +305,9 @@ export default class ImageSelection {
       e.stopPropagation();
       this.showCaptionInput();
     };
-    if (this.selectedImage?.hasAttribute('data-caption')) btnCaption.classList.add('active');
+    const blot = this.getBlot();
+    // @ts-ignore
+    if (blot && blot.formats().caption) btnCaption.classList.add('active');
     this.toolbar.appendChild(btnCaption);
 
     // Alt text
@@ -439,39 +395,34 @@ export default class ImageSelection {
     this.showGenericInput(currentAlt, 'Alt text', '150px', val => this.setAltText(val));
   }
   showCaptionInput() {
-    const currentCaption = this.selectedImage?.getAttribute('data-caption') || '';
+    const blot = this.getBlot();
+    // @ts-ignore
+    const currentCaption = blot && blot.formats().caption || '';
     this.showGenericInput(currentCaption, 'Image caption', '200px', val => this.setCaption(val));
   }
   setAltText(alt) {
-    if (!this.selectedImage) return;
-    this.selectedImage.setAttribute('alt', alt);
-    const blot = Quill.find(this.selectedImage);
-    // @ts-ignore
-    if (blot && blot.format) blot.format('alt', alt);
+    this.saveFormat('alt', alt);
   }
   setCaption(caption) {
+    this.saveFormat('caption', caption.trim() || null);
+    setTimeout(() => this.reposition(), 50);
+  }
+  saveFormat(name, value) {
     if (!this.selectedImage) return;
-    const blot = Quill.find(this.selectedImage);
-    if (caption.trim()) {
-      this.selectedImage.setAttribute('data-caption', caption);
-      // @ts-ignore
-      if (blot && blot.format) blot.format('caption', caption);
-    } else {
-      this.selectedImage.removeAttribute('data-caption');
-      // @ts-ignore
-      if (blot && blot.format) blot.format('caption', null);
+    const blot = this.getBlot();
+    if (blot) {
+      const index = this.quill.getIndex(blot);
+      this.quill.formatText(index, 1, name, value, 'user');
     }
-    this.updateAllCaptions();
-    this.toolbar?.querySelectorAll('button').forEach(btn => {
-      if (btn.title === 'Edit Caption') {
-        if (caption.trim()) btn.classList.add('active');else btn.classList.remove('active');
-      }
-    });
-    this.reposition();
+  }
+  getBlot() {
+    const el = this.selectedFigure || this.selectedImage;
+    return el ? Quill.find(el) : null;
   }
   isCurrentAlign(name) {
-    if (!this.selectedImage) return false;
-    const style = this.selectedImage.style;
+    const el = this.selectedFigure || this.selectedImage;
+    if (!el) return false;
+    const style = el.style;
     switch (name) {
       case 'left-block':
         return style.display === 'block' && (style.float === 'none' || style.float === '') && (style.marginLeft === '0px' || style.marginLeft === '');
@@ -500,7 +451,8 @@ export default class ImageSelection {
     // Sizes
     this.toolbar.querySelectorAll('button[data-size]').forEach(btn => {
       const size = btn.dataset.size;
-      if (size && this.selectedImage.style.width === size) {
+      const el = this.selectedFigure || this.selectedImage;
+      if (size && el.style.width === size) {
         btn.classList.add('active');
       } else {
         btn.classList.remove('active');
@@ -573,7 +525,12 @@ export default class ImageSelection {
     }
     newWidth = Math.round(newWidth);
     if (newWidth > 30) {
-      this.selectedImage.style.width = `${newWidth}px`;
+      if (this.selectedFigure) {
+        this.selectedFigure.style.width = `${newWidth}px`;
+        this.selectedImage.style.width = '100%';
+      } else {
+        this.selectedImage.style.width = `${newWidth}px`;
+      }
       this.selectedImage.style.height = 'auto';
       this.reposition();
     }
@@ -592,14 +549,20 @@ export default class ImageSelection {
   };
   saveImageStyles() {
     if (!this.selectedImage) return;
-    const blot = Quill.find(this.selectedImage);
-    if (blot && blot.format) {
-      blot.format('width', this.selectedImage.style.width);
-      blot.format('style', this.selectedImage.getAttribute('style'));
+    const blot = this.getBlot();
+    if (blot) {
+      const index = this.quill.getIndex(blot);
+      const el = this.selectedFigure || this.selectedImage;
+      const style = el.getAttribute('style');
+      const width = el.style.width; // Use figure width, not image width (which is '100%')
+
+      this.quill.formatText(index, 1, {
+        style: style,
+        width: width
+      }, 'user');
     }
   }
   reposition() {
-    this.updateAllCaptions();
     if (!this.selectedImage || !this.overlay) return;
     const imgRect = this.selectedImage.getBoundingClientRect();
     const containerRect = this.quill.container.getBoundingClientRect();
@@ -630,7 +593,13 @@ export default class ImageSelection {
     if (/^\d+$/.test(finalSize)) {
       finalSize += 'px';
     }
-    this.selectedImage.style.width = finalSize;
+    const el = this.selectedFigure || this.selectedImage;
+    el.style.width = finalSize;
+    if (this.selectedFigure) {
+      this.selectedImage.style.width = '100%';
+    } else {
+      this.selectedImage.style.width = finalSize;
+    }
     this.selectedSizeUpdate(finalSize);
     this.selectedImage.style.height = 'auto';
     this.saveImageStyles();
@@ -640,39 +609,41 @@ export default class ImageSelection {
   selectedSizeUpdate(size) {
     if (!this.selectedImage) return;
     if (size === '100%') {
-      this.selectedImage.style.display = 'block';
-      this.selectedImage.style.margin = '10px auto';
+      const el = this.selectedFigure || this.selectedImage;
+      el.style.display = 'block';
+      el.style.margin = '10px auto';
     }
   }
   alignImage(align) {
-    if (!this.selectedImage) return;
-    const blot = Quill.find(this.selectedImage);
+    const el = this.selectedFigure || this.selectedImage;
+    if (!el) return;
+    const blot = this.getBlot();
     if (!blot) return;
-    this.selectedImage.style.display = '';
-    this.selectedImage.style.float = '';
-    this.selectedImage.style.margin = '';
-    this.selectedImage.style.marginLeft = '';
-    this.selectedImage.style.marginRight = '';
-    this.selectedImage.style.marginTop = '';
-    this.selectedImage.style.marginBottom = '';
+    el.style.display = '';
+    el.style.float = '';
+    el.style.margin = '';
+    el.style.marginLeft = '';
+    el.style.marginRight = '';
+    el.style.marginTop = '';
+    el.style.marginBottom = '';
     if (align === 'left-block') {
-      this.selectedImage.style.display = 'block';
-      this.selectedImage.style.marginLeft = '0';
-      this.selectedImage.style.marginRight = 'auto';
-      this.selectedImage.style.marginTop = '10px';
-      this.selectedImage.style.marginBottom = '10px';
+      el.style.display = 'block';
+      el.style.marginLeft = '0';
+      el.style.marginRight = 'auto';
+      el.style.marginTop = '10px';
+      el.style.marginBottom = '10px';
     } else if (align === 'center') {
-      this.selectedImage.style.display = 'block';
-      this.selectedImage.style.marginLeft = 'auto';
-      this.selectedImage.style.marginRight = 'auto';
-      this.selectedImage.style.marginTop = '10px';
-      this.selectedImage.style.marginBottom = '10px';
+      el.style.display = 'block';
+      el.style.marginLeft = 'auto';
+      el.style.marginRight = 'auto';
+      el.style.marginTop = '10px';
+      el.style.marginBottom = '10px';
     } else if (align === 'left') {
-      this.selectedImage.style.float = 'left';
-      this.selectedImage.style.margin = '0 10px 10px 0';
+      el.style.float = 'left';
+      el.style.margin = '0 10px 10px 0';
     } else if (align === 'right') {
-      this.selectedImage.style.float = 'right';
-      this.selectedImage.style.margin = '0 0 10px 10px';
+      el.style.float = 'right';
+      el.style.margin = '0 0 10px 10px';
     }
     this.saveImageStyles();
     this.updateActiveButtons();
@@ -680,7 +651,7 @@ export default class ImageSelection {
   }
   insertParagraphBefore() {
     if (!this.selectedImage) return;
-    const blot = Quill.find(this.selectedImage);
+    const blot = this.getBlot();
     if (blot) {
       const index = this.quill.getIndex(blot);
       this.quill.insertText(index, '\n', 'user');
@@ -690,7 +661,7 @@ export default class ImageSelection {
   }
   insertParagraphAfter() {
     if (!this.selectedImage) return;
-    const blot = Quill.find(this.selectedImage);
+    const blot = this.getBlot();
     if (blot) {
       const index = this.quill.getIndex(blot) + 1;
       this.quill.insertText(index, '\n', 'user');

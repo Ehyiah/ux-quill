@@ -5,46 +5,10 @@ import { ToolbarCustomizer } from "./ui/toolbarCustomizer.js";
 import { handleUploadResponse, uploadStrategies } from "./upload-utils.js";
 import "./register-modules.js";
 import QuillTableBetter from 'quill-table-better';
-const Image = Quill.import('formats/image');
-const oldFormats = Image.formats;
-Image.formats = function (domNode) {
-  const formats = oldFormats.call(this, domNode);
-  if (domNode.hasAttribute('style')) {
-    formats.style = domNode.getAttribute('style');
-  }
-  if (domNode.hasAttribute('width')) {
-    formats.width = domNode.getAttribute('width');
-  }
-  if (domNode.hasAttribute('height')) {
-    formats.height = domNode.getAttribute('height');
-  }
-  if (domNode.hasAttribute('alt')) {
-    formats.alt = domNode.getAttribute('alt');
-  }
-  if (domNode.hasAttribute('data-caption')) {
-    formats.caption = domNode.getAttribute('data-caption');
-  }
-  return formats;
-};
-Image.prototype.format = function (name, value) {
-  if (['width', 'height', 'alt', 'style'].includes(name)) {
-    if (value) {
-      this.domNode.setAttribute(name, String(value));
-    } else {
-      this.domNode.removeAttribute(name);
-    }
-  } else if (name === 'caption') {
-    if (value) {
-      this.domNode.setAttribute('data-caption', String(value));
-    } else {
-      this.domNode.removeAttribute('data-caption');
-    }
-  } else {
-    const key = name;
-    const val = value;
-    val ? this.domNode.setAttribute(key, String(val)) : this.domNode.removeAttribute(key);
-  }
-};
+import ImageFigure from "./blots/imageFigure.js";
+
+// Register custom ImageFigure blot to override default image
+Quill.register(ImageFigure, true);
 export default class extends Controller {
   static targets = ['input', 'editorContainer'];
   static values = (() => ({

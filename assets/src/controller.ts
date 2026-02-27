@@ -8,61 +8,14 @@ import { handleUploadResponse, uploadStrategies } from './upload-utils.ts';
 
 import './register-modules.ts';
 import QuillTableBetter from 'quill-table-better';
+import ImageFigure from './blots/imageFigure.ts';
+
+// Register custom ImageFigure blot to override default image
+Quill.register(ImageFigure, true);
 
 interface DOMNode extends HTMLElement {
     getAttribute(name: string): string | null;
-    setAttribute(name: string, value: string): void;
-    removeAttribute(name: string): void;
-    hasAttribute(name: string): boolean;
 }
-
-const Image = Quill.import('formats/image');
-const oldFormats = Image.formats;
-
-Image.formats = function(domNode: DOMNode) {
-    const formats = oldFormats.call(this, domNode);
-    if (domNode.hasAttribute('style')) {
-        formats.style = domNode.getAttribute('style');
-    }
-    if (domNode.hasAttribute('width')) {
-        formats.width = domNode.getAttribute('width');
-    }
-    if (domNode.hasAttribute('height')) {
-        formats.height = domNode.getAttribute('height');
-    }
-    if (domNode.hasAttribute('alt')) {
-        formats.alt = domNode.getAttribute('alt');
-    }
-    if (domNode.hasAttribute('data-caption')) {
-        formats.caption = domNode.getAttribute('data-caption');
-    }
-    return formats;
-};
-
-type ImageWithDOM = {
-    domNode: DOMNode;
-    format(name: string, value: string | boolean | null): void;
-};
-
-Image.prototype.format = function(this: ImageWithDOM, name: string, value: string | boolean | null) {
-    if (['width', 'height', 'alt', 'style'].includes(name)) {
-        if (value) {
-            this.domNode.setAttribute(name, String(value));
-        } else {
-            this.domNode.removeAttribute(name);
-        }
-    } else if (name === 'caption') {
-        if (value) {
-            this.domNode.setAttribute('data-caption', String(value));
-        } else {
-            this.domNode.removeAttribute('data-caption');
-        }
-    } else {
-        const key = name;
-        const val = value;
-        val ? this.domNode.setAttribute(key, String(val)) : this.domNode.removeAttribute(key);
-    }
-};
 
 export default class extends Controller {
     declare readonly inputTarget: HTMLInputElement;
