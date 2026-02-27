@@ -1,0 +1,69 @@
+# ImageSelectionModule
+
+The `ImageSelectionModule` provides an interactive way to manage images within the editor. It adds a selection overlay with resize handles and a dedicated toolbar for quick actions.
+
+This module is **automatically enabled** when the `ImageField` is used.
+
+## Features
+
+- **Resize Handles**: Drag corners to resize images proportionally.
+- **Quick Alignment**: Buttons for left (wrapped), left (block), center, and right alignments.
+- **Preset Sizes**: Quickly set width to 25%, 50%, 75%, or 100%.
+- **Custom Size**: Input exact width in pixels or percentage.
+- **Paragraph Insertion**: Buttons to quickly insert an empty paragraph before or after the image.
+- **Image Transformation**: Rotate (90° steps) and flip (horizontal/vertical) images.
+- **Metadata Editing**:
+    - **Captions**: Add and edit image captions (requires `ImageFigure` blot).
+    - **Alt Text**: Edit the alternative text for accessibility.
+    - **Links**: Wrap images in a link.
+- **Reset**: Restore the image to its original state.
+
+## Options
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `borderColor` | `string` | `'#007bff'` | Color of the selection border and handles. |
+| `borderWidth` | `string` | `'4px'` | Width of the selection border. |
+| `buttonBeforeLabel` | `string` | `'¶+'` | Label for the "insert paragraph before" button. |
+| `buttonAfterLabel` | `string` | `'+¶'` | Label for the "insert paragraph after" button. |
+| `buttonBeforeTitle` | `string` | `'Insert a paragraph before'` | Tooltip for the "before" button. |
+| `buttonAfterTitle` | `string` | `'Insert a paragraph after'` | Tooltip for the "after" button. |
+| `alignLabels` | `array` | See below | Custom labels for alignment tooltips. |
+| `rotateLeftTitle` | `string` | `'Rotate left'` | Tooltip for the rotate left button. |
+| `rotateRightTitle` | `string` | `'Rotate right'` | Tooltip for the rotate right button. |
+| `flipHorizontalTitle` | `string` | `'Flip horizontal'` | Tooltip for the flip horizontal button. |
+| `flipVerticalTitle` | `string` | `'Flip vertical'` | Tooltip for the flip vertical button. |
+| `resetTitle` | `string` | `'Reset image'` | Tooltip for the reset button. |
+| `linkTitle` | `string` | `'Edit link'` | Tooltip for the link button. |
+| `captionBackgroundColor` | `string` | `'rgba(51, 51, 51, 0.6)'` | Background color of the caption overlay. |
+
+### alignLabels default values
+
+```php
+'alignLabels' => [
+    'left' => 'Left (wrapped)',
+    'leftBlock' => 'Left (no wrap)',
+    'center' => 'Align center',
+    'right' => 'Right (wrapped)',
+]
+```
+
+## Usage example
+
+Although it's usually auto-imported, you can manually configure it with custom options:
+
+```php
+use Ehyiah\QuillJsBundle\DTO\Modules\ImageSelectionModule;
+
+// ...
+
+'modules' => [
+    new ImageSelectionModule([
+        'borderColor' => '#ff0000',
+        'buttonBeforeLabel' => 'Insert Before',
+        'alignLabels' => [
+            'center' => 'Centrer l'image',
+        ],
+    ]),
+],
+```
