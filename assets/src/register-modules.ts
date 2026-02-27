@@ -30,6 +30,19 @@ Quill.register('modules/dragAndDrop', DragAndDrop);
 import SpeechToText from './modules/speechToText.ts';
 Quill.register('modules/speechToText', SpeechToText);
 
+import { TemplatesModule } from './modules/templatesModule.ts';
+Quill.register('modules/templates', TemplatesModule);
+
+// Register a no-op format so Quill (and quill-table-better) do not warn
+// "ignoring attaching to nonexistent format template" when TemplatesField
+// is present in quill_options (it produces a .ql-template toolbar button).
+const InlineBlot = Quill.import('blots/inline') as any;
+class TemplateButtonBlot extends InlineBlot {}
+TemplateButtonBlot.blotName = 'template';
+TemplateButtonBlot.tagName = 'span';
+TemplateButtonBlot.className = 'ql-tpl-compat';
+Quill.register(TemplateButtonBlot);
+
 import * as hljsModule from 'highlight.js';
 const hljs = hljsModule.default || hljsModule;
 // @ts-ignore
