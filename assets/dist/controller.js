@@ -5,18 +5,10 @@ import { ToolbarCustomizer } from "./ui/toolbarCustomizer.js";
 import { handleUploadResponse, uploadStrategies } from "./upload-utils.js";
 import "./register-modules.js";
 import QuillTableBetter from 'quill-table-better';
-const Image = Quill.import('formats/image');
-const oldFormats = Image.formats;
-Image.formats = function (domNode) {
-  const formats = oldFormats.call(this, domNode);
-  if (domNode.hasAttribute('style')) {
-    formats.style = domNode.getAttribute('style');
-  }
-  return formats;
-};
-Image.prototype.format = function (name, value) {
-  value ? this.domNode.setAttribute(name, String(value)) : this.domNode.removeAttribute(name);
-};
+import ImageFigure from "./blots/imageFigure.js";
+
+// Register custom ImageFigure blot to override default image
+Quill.register(ImageFigure, true);
 export default class extends Controller {
   static targets = ['input', 'editorContainer'];
   static values = (() => ({

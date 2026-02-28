@@ -8,7 +8,6 @@ use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ImageField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ItalicField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\UnderlineField;
 use Ehyiah\QuillJsBundle\DTO\Modules\EmojiModule;
-use Ehyiah\QuillJsBundle\DTO\Modules\ResizeModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\SyntaxModule;
 use Ehyiah\QuillJsBundle\DTO\Options\ThemeOption;
 use Ehyiah\QuillJsBundle\Form\QuillType;
@@ -104,8 +103,28 @@ final class FormTypeTest extends TestCase
         $moduleNames = array_column($modulesOptions, 'name');
         $this->assertContains(EmojiModule::NAME, $moduleNames);
         $this->assertContains(SyntaxModule::NAME, $moduleNames);
+    }
 
-        $this->assertContains(ResizeModule::NAME, $moduleNames);
+    public function testImageFieldIncludesSelectionModule(): void
+    {
+        $customOptions = [
+            'quill_options' => [
+                [new ImageField()],
+            ],
+        ];
+
+        $form = $this->formFactory->createBuilder()
+            ->add('content', QuillType::class, $customOptions)
+            ->getForm()
+        ;
+
+        $formView = $form->createView();
+        $contentView = $formView->children['content'];
+
+        $modulesOptions = json_decode($contentView->vars['attr']['quill_modules_options'], true);
+        $moduleNames = array_column($modulesOptions, 'name');
+
+        $this->assertContains(\Ehyiah\QuillJsBundle\DTO\Modules\ImageSelectionModule::NAME, $moduleNames);
     }
 
     public function testFormSubmission(): void

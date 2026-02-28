@@ -8,33 +8,14 @@ import { handleUploadResponse, uploadStrategies } from './upload-utils.ts';
 
 import './register-modules.ts';
 import QuillTableBetter from 'quill-table-better';
+import ImageFigure from './blots/imageFigure.ts';
+
+// Register custom ImageFigure blot to override default image
+Quill.register(ImageFigure, true);
 
 interface DOMNode extends HTMLElement {
     getAttribute(name: string): string | null;
-    setAttribute(name: string, value: string): void;
-    removeAttribute(name: string): void;
-    hasAttribute(name: string): boolean;
 }
-
-const Image = Quill.import('formats/image');
-const oldFormats = Image.formats;
-
-Image.formats = function(domNode: DOMNode) {
-    const formats = oldFormats.call(this, domNode);
-    if (domNode.hasAttribute('style')) {
-        formats.style = domNode.getAttribute('style');
-    }
-    return formats;
-};
-
-type ImageWithDOM = {
-    domNode: DOMNode;
-    format(name: string, value: string | boolean | null): void;
-};
-
-Image.prototype.format = function(this: ImageWithDOM, name: string, value: string | boolean | null) {
-    value ? this.domNode.setAttribute(name, String(value)) : this.domNode.removeAttribute(name);
-};
 
 export default class extends Controller {
     declare readonly inputTarget: HTMLInputElement;
