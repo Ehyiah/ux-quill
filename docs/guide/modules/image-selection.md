@@ -4,6 +4,8 @@ The `ImageSelectionModule` provides an interactive way to manage images within t
 
 This module is **automatically enabled** when the `ImageField` is used.
 
+<img src="/modules/images/image-selection.png" alt="image selection">
+
 ## Features
 
 - **Resize Handles**: Drag corners to resize images proportionally.
@@ -97,6 +99,9 @@ use Ehyiah\QuillJsBundle\DTO\Modules\ImageSelectionModule;
 ## Using Legacy ResizeModule
 
 If you prefer the old image resizing behavior, you can disable `ImageSelectionModule` and enable `ResizeModule` instead:
+
+
+<img src="/modules/images/image-selection-legacy.png" alt="image selection legacy">
 
 ```php
 use Ehyiah\QuillJsBundle\DTO\Modules\ImageSelectionModule;
