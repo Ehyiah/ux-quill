@@ -1,14 +1,14 @@
-import type { MediaGalleryOptions } from './../../types.d.ts';
+import type { ImageGalleryOptions } from './../../types.d.ts';
 import GalleryModal from './gallery-modal.ts';
 import Quill from 'quill';
 import 'styles/gallery/gallery.css';
 
-export default class GalleryModule {
+export default class ImageGalleryModule {
     public quill: Quill;
-    public options: MediaGalleryOptions;
+    public options: ImageGalleryOptions;
     private modal: GalleryModal;
 
-    constructor(quill: Quill, options: MediaGalleryOptions) {
+    constructor(quill: Quill, options: ImageGalleryOptions) {
         this.quill = quill
         this.options = {
             uploadEndpoint: options.uploadEndpoint || '',
@@ -31,7 +31,7 @@ export default class GalleryModule {
         }
 
         if (!this.options.listEndpoint) {
-            throw new Error('listEndpoint option is mandatory for GalleryModule');
+            throw new Error('listEndpoint option is mandatory for ImageGalleryModule');
         }
 
         this.modal = new GalleryModal(this);
@@ -42,23 +42,16 @@ export default class GalleryModule {
         const toolbar = this.quill.getModule('toolbar');
         if (!toolbar || !toolbar.container) return;
 
-        if (toolbar.container.querySelector('.ql-mediaGallery')) return;
-
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.classList.add('ql-mediaGallery');
-        if (this.options.icon != null) {
-            button.innerHTML = this.options.icon;
+        const button = toolbar.container.querySelector('button.ql-imageGallery');
+        if (button) {
+            if (this.options.icon != null && button.innerHTML === '') {
+                button.innerHTML = this.options.icon;
+            }
+            if (this.options.buttonTitle != null) {
+                button.title = this.options.buttonTitle;
+            }
+            button.addEventListener('click', () => this.open());
         }
-        if (this.options.buttonTitle != null) {
-            button.title = this.options.buttonTitle;
-        }
-        button.addEventListener('click', () => this.open());
-
-        const group = document.createElement('span');
-        group.classList.add('ql-formats');
-        group.appendChild(button);
-        toolbar.container.appendChild(group);
     }
 
     open() {

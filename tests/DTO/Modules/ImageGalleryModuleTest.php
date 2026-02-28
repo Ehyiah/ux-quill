@@ -2,22 +2,22 @@
 
 namespace Ehyiah\QuillJsBundle\Tests\DTO\Modules;
 
-use Ehyiah\QuillJsBundle\DTO\Modules\GalleryModule;
+use Ehyiah\QuillJsBundle\DTO\Modules\ImageGalleryModule;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @coversNothing
  */
-class GalleryModuleTest extends TestCase
+class ImageGalleryModuleTest extends TestCase
 {
     public function testDefaultOptions(): void
     {
-        $module = new GalleryModule(options: [
+        $module = new ImageGalleryModule(options: [
             'listEndpoint' => '/api/images',
         ]);
 
-        $this->assertEquals('mediaGallery', $module->name);
+        $this->assertEquals('imageGallery', $module->name);
         $this->assertEquals('/api/images', $module->options['listEndpoint']);
         $this->assertEquals('', $module->options['uploadEndpoint']);
         $this->assertEquals('Open the media gallery', $module->options['buttonTitle']);
@@ -28,14 +28,14 @@ class GalleryModuleTest extends TestCase
     public function testMissingListEndpointThrowsException(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('The option "listEndpoint" is mandatory for module "mediaGallery".');
+        $this->expectExceptionMessage('The option "listEndpoint" is mandatory for module "imageGallery".');
 
-        new GalleryModule();
+        new ImageGalleryModule();
     }
 
     public function testCustomOptions(): void
     {
-        $module = new GalleryModule(options: [
+        $module = new ImageGalleryModule(options: [
             'listEndpoint' => '/api/images',
             'uploadEndpoint' => '/api/upload',
             'buttonTitle' => 'Custom Title',
@@ -48,5 +48,15 @@ class GalleryModuleTest extends TestCase
         $this->assertEquals('Custom Title', $module->options['buttonTitle']);
         $this->assertEquals('json', $module->options['uploadStrategy']);
         $this->assertEquals('data.link', $module->options['jsonResponseFilePath']);
+    }
+
+    public function testNullUploadEndpoint(): void
+    {
+        $module = new ImageGalleryModule(options: [
+            'listEndpoint' => '/api/images',
+            'uploadEndpoint' => null,
+        ]);
+
+        $this->assertNull($module->options['uploadEndpoint']);
     }
 }

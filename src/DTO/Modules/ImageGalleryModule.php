@@ -4,9 +4,9 @@ namespace Ehyiah\QuillJsBundle\DTO\Modules;
 
 use InvalidArgumentException;
 
-class GalleryModule implements ModuleInterface
+class ImageGalleryModule implements ModuleInterface
 {
-    public const NAME = 'mediaGallery';
+    public const NAME = 'imageGallery';
 
     public const BUTTON_TITLE_OPTION = 'buttonTitle';
     public const BUTTON_UPLOAD_OPTION = 'uploadTitle';
@@ -33,30 +33,31 @@ class GalleryModule implements ModuleInterface
     public const JSON_RESPONSE_FILE_PATH_OPTION = 'jsonResponseFilePath';
 
     /**
-     * @var array<string, string|bool|null>
-     */
-    public array $options;
-
-    /**
-     * @param array<string, string|bool|null> $options
+     * @param array{
+     *     uploadEndpoint?: string|null,
+     *     listEndpoint?: string,
+     *     searchEndpoint?: string,
+     *     uploadStrategy?: string,
+     *     authConfig?: array<string, mixed>|null,
+     *     jsonResponseFilePath?: string,
+     *     icon?: string,
+     *     buttonTitle?: string,
+     *     uploadTitle?: string,
+     *     messageLoadingOption?: string,
+     *     messageNextPageOption?: string,
+     *     messagePrevPageOption?: string,
+     *     messageErrorOption?: string,
+     *     messageNoImageOption?: string,
+     *     messageSearchPlaceholderOption?: string,
+     *     messageTitleOption?: string,
+     *     messageCloseOption?: string,
+     * } $options
      */
     public function __construct(
         public string $name = self::NAME,
-        array $options = [],
+        public $options = [],
     ) {
-        $this->options = array_merge($this->getDefaultOptions(), $options);
-
-        if (empty($this->options[self::LIST_ENDPOINT_OPTION])) {
-            throw new InvalidArgumentException(sprintf('The option "%s" is mandatory for module "%s".', self::LIST_ENDPOINT_OPTION, self::NAME));
-        }
-    }
-
-    /**
-     * @return array<string, string|bool|null>
-     */
-    private function getDefaultOptions(): array
-    {
-        return [
+        $this->options = array_merge([
             self::UPLOAD_ENDPOINT_OPTION => '',
             self::LIST_ENDPOINT_OPTION => '',
             self::SEARCH_ENDPOINT_OPTION => '',
@@ -79,6 +80,10 @@ class GalleryModule implements ModuleInterface
             self::MESSAGE_SEARCH_PLACEHOLDER_OPTION => 'Search...',
             self::MESSAGE_TITLE_OPTION => 'Media gallery',
             self::MESSAGE_CLOSE_OPTION => 'Close',
-        ];
+        ], $this->options);
+
+        if (empty($this->options[self::LIST_ENDPOINT_OPTION])) {
+            throw new InvalidArgumentException(sprintf('The option "%s" is mandatory for module "%s".', self::LIST_ENDPOINT_OPTION, self::NAME));
+        }
     }
 }

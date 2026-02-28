@@ -23,7 +23,7 @@ export type UploadOptions = {
     security?: AuthConfig;
 }
 
-export type MediaGalleryOptions = {
+export type ImageGalleryOptions = {
     listEndpoint: string;
     uploadEndpoint?: string;
     searchEndpoint?: string;
@@ -77,7 +77,7 @@ export type CountOptions = {
 
 export interface ModuleInterface {
     name: string;
-    options: any | MediaGalleryOptions | ReadingTimeOptions | SpeechToTextOptions | CountOptions;
+    options: any | ImageGalleryOptions | ReadingTimeOptions | SpeechToTextOptions | CountOptions;
 }
 
 export type ModuleOptions = ModuleInterface[];

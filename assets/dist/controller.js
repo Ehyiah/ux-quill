@@ -46,7 +46,7 @@ export default class _Class extends Controller {
       'toolbar': this.toolbarOptionsValue
     };
     const mergedModules = mergeModules(this.modulesOptionsValue, enabledModules);
-    this.enrichGalleryModule(mergedModules);
+    this.enrichImageGalleryModule(mergedModules);
     return {
       debug,
       modules: mergedModules,
@@ -56,9 +56,9 @@ export default class _Class extends Controller {
       readOnly
     };
   }
-  enrichGalleryModule(modules) {
-    if (modules['mediaGallery']) {
-      const galleryOptions = modules['mediaGallery'];
+  enrichImageGalleryModule(modules) {
+    if (modules['imageGallery']) {
+      const galleryOptions = modules['imageGallery'];
       const uploadConfig = this.extraOptionsValue.upload_handler;
       if (uploadConfig) {
         galleryOptions.uploadEndpoint = galleryOptions.uploadEndpoint || uploadConfig.upload_endpoint;

@@ -1,7 +1,12 @@
-# Media gallery module details
+# Image gallery module details
+
+::: danger Mandatory Configuration
+Activating the **ImageGalleryField** in your `quill_options` is not enough. You **must** also configure the **ImageGalleryModule** in your `modules` list with at least the `listEndpoint` option, otherwise the gallery will not be able to fetch or display any images.
+:::
 
 ## Configuration
-Here is the list of some options for the media gallery module (see full available options in PHP class):
+Here is the list of some options for the image gallery module (see full available options in PHP class):
+
 
 - **listEndpoint** : the endpoint to get the list of images from. This option is mandatory
   The response from your endpoint must be like this :
@@ -21,7 +26,7 @@ Here is the list of some options for the media gallery module (see full availabl
 }
 ```
 
-- **searchEndpoint** : the endpoint to search images. If no url is provided, the search bar will not be displayed.
+- **searchEndpoint** : the endpoint to search images. **If no url is provided, the search bar will not be displayed**.
   The search term will be passed as a query parameter named `term`.
   The response format is the same as the list endpoint.
 - **icon** : the icon to use in the toolbar pass a svg icon like others icons customization.
@@ -32,6 +37,29 @@ Here is the list of some options for the media gallery module (see full availabl
 
 - **uploadEndpoint** : the endpoint to upload an image. If no url is provided (globally or locally), the upload button will not be displayed.
 - **uploadStrategy** : 'form' (default) or 'json'.
+
+
+## Example of usage
+
+```php
+use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ImageGalleryField;
+use Ehyiah\QuillJsBundle\DTO\Modules\ImageGalleryModule;
+use Ehyiah\QuillJsBundle\Form\QuillType;
+
+$builder->add('content', QuillType::class, [
+    'quill_options' => [
+        ['bold', 'italic'],
+        [new ImageGalleryField()], // Position the button in the toolbar
+    ],
+    'modules' => [
+        new ImageGalleryModule(options: [
+            'listEndpoint' => '/api/media/list',
+            'searchEndpoint' => '/api/media/search', // Optional: search bar will appear
+            'buttonTitle' => 'Open my awesome gallery',
+        ]),
+    ],
+]);
+```
 
 
 ## example of a listing api endpoint for testing purpose
@@ -114,5 +142,5 @@ class GalleryController extends AbstractController
 }
 ```
 ## Good to know
-If you want to edit your image once uploaded, either add the ImageField in options. 
+If you want to edit your image once uploaded, either add the ImageField in options.
 Or add the ResizeModule in the modules options.

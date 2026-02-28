@@ -1,14 +1,14 @@
 import { uploadStrategies, handleUploadResponse } from './../../upload-utils.ts';
-import GalleryModule from './gallery-module';
+import ImageGalleryModule from './gallery-module';
 
 export default class GalleryModal {
-    private module: GalleryModule;
+    private module: ImageGalleryModule;
     private container: HTMLDivElement | null;
     private nextUrl: null;
     private prevUrl: null;
     private images: any[];
 
-    constructor(module: GalleryModule) {
+    constructor(module: ImageGalleryModule) {
         this.module = module
         this.container = null
         this.images = []

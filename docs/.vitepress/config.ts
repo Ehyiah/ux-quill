@@ -37,15 +37,15 @@ export default defineConfig({
           },
           {
             text: 'Modules',
-            collapsed: true,
+            collapsed: false,
             items: [
               { text: 'Concept', link: '/guide/modules/index' },
+              { text: 'ImageSelectionModule', link: '/guide/modules/image-selection' },
+              { text: 'Image Gallery', link: '/guide/modules/image-gallery' },
               { text: 'ReadTimeModule', link: '/guide/modules/read-time' },
               { text: 'STTModule', link: '/guide/modules/stt' },
-              { text: 'ImageSelectionModule', link: '/guide/modules/image-selection' },
               { text: 'NodeMoverModule', link: '/guide/modules/node-mover' },
               { text: 'FullScreenModule', link: '/guide/modules/fullscreen' },
-              { text: 'Gallery', link: '/guide/modules/gallery' },
               { text: 'Other Modules', link: '/guide/modules/others' }
             ]
           },

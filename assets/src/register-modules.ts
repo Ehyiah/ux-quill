@@ -43,5 +43,5 @@ const katex = katexModule.default || katexModule;
 // @ts-ignore
 window.katex = katex;
 
-import GalleryModule from './modules/gallery/gallery-module.ts'
-Quill.register('modules/mediaGallery', GalleryModule.default || GalleryModule);
+import ImageGalleryModule from './modules/gallery/gallery-module.ts'
+Quill.register('modules/imageGallery', ImageGalleryModule.default || ImageGalleryModule);

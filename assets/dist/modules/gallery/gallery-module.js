@@ -1,6 +1,6 @@
 import GalleryModal from "./gallery-modal.js";
 import "../../styles/gallery/gallery.css";
-export default class GalleryModule {
+export default class ImageGalleryModule {
   constructor(quill, options) {
     this.quill = void 0;
     this.options = void 0;
@@ -26,7 +26,7 @@ export default class GalleryModule {
       uploadStrategy: options.uploadStrategy || 'form'
     };
     if (!this.options.listEndpoint) {
-      throw new Error('listEndpoint option is mandatory for GalleryModule');
+      throw new Error('listEndpoint option is mandatory for ImageGalleryModule');
     }
     this.modal = new GalleryModal(this);
     this.addToolbarButton();
@@ -34,21 +34,16 @@ export default class GalleryModule {
   addToolbarButton() {
     const toolbar = this.quill.getModule('toolbar');
     if (!toolbar || !toolbar.container) return;
-    if (toolbar.container.querySelector('.ql-mediaGallery')) return;
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.classList.add('ql-mediaGallery');
-    if (this.options.icon != null) {
-      button.innerHTML = this.options.icon;
+    const button = toolbar.container.querySelector('button.ql-imageGallery');
+    if (button) {
+      if (this.options.icon != null && button.innerHTML === '') {
+        button.innerHTML = this.options.icon;
+      }
+      if (this.options.buttonTitle != null) {
+        button.title = this.options.buttonTitle;
+      }
+      button.addEventListener('click', () => this.open());
     }
-    if (this.options.buttonTitle != null) {
-      button.title = this.options.buttonTitle;
-    }
-    button.addEventListener('click', () => this.open());
-    const group = document.createElement('span');
-    group.classList.add('ql-formats');
-    group.appendChild(button);
-    toolbar.container.appendChild(group);
   }
   open() {
     this.modal.open();

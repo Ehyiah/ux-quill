@@ -76,7 +76,7 @@ export default class extends Controller {
         };
         const mergedModules = mergeModules(this.modulesOptionsValue, enabledModules);
 
-        this.enrichGalleryModule(mergedModules);
+        this.enrichImageGalleryModule(mergedModules);
 
         return {
             debug,
@@ -88,9 +88,9 @@ export default class extends Controller {
         };
     }
 
-    private enrichGalleryModule(modules: any) {
-        if (modules['mediaGallery']) {
-            const galleryOptions = modules['mediaGallery'];
+    private enrichImageGalleryModule(modules: any) {
+        if (modules['imageGallery']) {
+            const galleryOptions = modules['imageGallery'];
             const uploadConfig = this.extraOptionsValue.upload_handler;
 
             if (uploadConfig) {
