@@ -36,7 +36,7 @@ $builder->add('content', QuillType::class, [
 | Option | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
 | `active` | `bool` | `true` | Set to `false` to disable the module entirely (since it is enabled by default). |
-| `borderColor` | `string` | `#007bff` | The color of the selection outline. |
+| `borderColor` | `string` | `#007bff` | The color of the selection outline. (null by default) |
 | `dropIndicatorColor` | `string` | `#ff0000` | The color of the horizontal line indicating where the content will be dropped. |
 
 ## User Experience

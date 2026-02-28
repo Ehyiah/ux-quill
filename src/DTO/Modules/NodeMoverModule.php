@@ -12,7 +12,7 @@ final class NodeMoverModule implements ModuleInterface
     /**
      * @param array{
      *     active?: bool,
-     *     borderColor?: string,
+     *     borderColor?: string|null,
      *     dropIndicatorColor?: string,
      * } $options
      */
@@ -22,7 +22,7 @@ final class NodeMoverModule implements ModuleInterface
     ) {
         $this->options = array_merge([
             'active' => true,
-            'borderColor' => '#007bff',
+            'borderColor' => null,
             'dropIndicatorColor' => '#ff0000',
         ], $this->options);
     }
