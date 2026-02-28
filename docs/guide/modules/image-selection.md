@@ -18,7 +18,9 @@ This module is **automatically enabled** when the `ImageField` is used.
     - **Captions**: Add and edit image captions (requires `ImageFigure` blot).
     - **Alt Text**: Edit the alternative text for accessibility.
     - **Links**: Wrap images in a link.
+    - **Link Target**: Toggle `target="_blank"` for image links.
 - **Reset**: Restore the image to its original state.
+- **Delete**: Quickly remove the image and its figure from the editor.
 
 ## Options
 
@@ -38,6 +40,7 @@ This module is **automatically enabled** when the `ImageField` is used.
 | `resetTitle` | `string` | `'Reset image'` | Tooltip for the reset button. |
 | `deleteTitle` | `string` | `'Delete image'` | Tooltip for the delete button. |
 | `linkTitle` | `string` | `'Edit link'` | Tooltip for the link button. |
+| `linkTargetTitle` | `string` | `'Open in new tab'` | Tooltip for the link target toggle. |
 | `captionBackgroundColor` | `string` | `'rgba(51, 51, 51, 0.6)'` | Background color of the caption overlay. |
 | `sectionLabels` | `array` | See below | Small labels displayed above toolbar sections. To disable, pass an empty array `[]`. |
 
@@ -61,18 +64,6 @@ This module is **automatically enabled** when the `ImageField` is used.
     'image' => 'Image',
     'meta' => 'Content',
     'insert' => 'Insert',
-]
-```
-
-### sectionLabels default values
-
-```php
-'sectionLabels' => [
-    'size' => 'Taille',
-    'align' => 'Alignement',
-    'image' => 'Image',
-    'meta' => 'Contenu',
-    'insert' => 'Insertion',
 ]
 ```
 

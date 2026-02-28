@@ -75,8 +75,12 @@ class ImageFigure extends BlockEmbed {
             if (value.link) {
                 const link = document.createElement('a');
                 link.setAttribute('href', value.link);
-                link.setAttribute('target', '_blank');
-                link.setAttribute('rel', 'noopener noreferrer');
+                if (value.linkTarget) {
+                    link.setAttribute('target', value.linkTarget);
+                    if (value.linkTarget === '_blank') {
+                        link.setAttribute('rel', 'noopener noreferrer');
+                    }
+                }
                 link.style.display = 'block';
                 link.style.width = '100%';
                 link.appendChild(img);
@@ -112,7 +116,8 @@ class ImageFigure extends BlockEmbed {
             style: node.getAttribute('style'),
             imgStyle: img?.getAttribute('style') || null,
             caption: caption,
-            link: link?.getAttribute('href') || null
+            link: link?.getAttribute('href') || null,
+            linkTarget: link?.getAttribute('target') || null
         };
     }
 
@@ -135,7 +140,8 @@ class ImageFigure extends BlockEmbed {
             style: node.getAttribute('style'),
             imgStyle: img.getAttribute('style') || null,
             caption: caption,
-            link: link?.getAttribute('href') || null
+            link: link?.getAttribute('href') || null,
+            linkTarget: link?.getAttribute('target') || null
         };
     }
 
@@ -164,8 +170,6 @@ class ImageFigure extends BlockEmbed {
                 } else {
                     const link = document.createElement('a');
                     link.setAttribute('href', value);
-                    link.setAttribute('target', '_blank');
-                    link.setAttribute('rel', 'noopener noreferrer');
                     link.style.display = 'block';
                     link.style.width = '100%';
                     img.parentNode?.replaceChild(link, img);
@@ -173,6 +177,21 @@ class ImageFigure extends BlockEmbed {
                 }
             } else if (existingLink) {
                 existingLink.parentNode?.replaceChild(img, existingLink);
+            }
+        } else if (name === 'linkTarget') {
+            const link = this.domNode.querySelector('a');
+            if (link) {
+                if (value) {
+                    link.setAttribute('target', value);
+                    if (value === '_blank') {
+                        link.setAttribute('rel', 'noopener noreferrer');
+                    } else {
+                        link.removeAttribute('rel');
+                    }
+                } else {
+                    link.removeAttribute('target');
+                    link.removeAttribute('rel');
+                }
             }
         } else if (name === 'alt') {
             if (value) img.setAttribute('alt', value);

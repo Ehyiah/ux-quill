@@ -19,6 +19,7 @@ export interface ImageSelectionOptions {
     flipVerticalTitle?: string;
     resetTitle?: string;
     linkTitle?: string;
+    linkTargetTitle?: string;
     deleteTitle?: string;
     captionBackgroundColor?: string;
     sectionLabels?: {
@@ -48,7 +49,8 @@ const ICONS = {
     flipHorizontal: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7l-5 5 5 5"></path><path d="M16 7l5 5-5 5"></path><line x1="12" y1="4" x2="12" y2="20"></line></svg>',
     flipVertical: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8l5-5 5 5"></path><path d="M7 16l5 5 5-5"></path><line x1="4" y1="12" x2="20" y2="12"></line></svg>',
     reset: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><polyline points="3 3 3 8 8 8"></polyline></svg>',
-    link: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>'
+    link: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>',
+    externalLink: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>'
 };
 
 export default class ImageSelection {
@@ -81,6 +83,7 @@ export default class ImageSelection {
             flipVerticalTitle: 'Flip vertical',
             resetTitle: 'Reset image',
             linkTitle: 'Edit link',
+            linkTargetTitle: 'Open in new tab',
             deleteTitle: 'Delete image',
             captionBackgroundColor: 'rgba(51, 51, 51, 0.6)',
             ...options,
@@ -239,7 +242,7 @@ export default class ImageSelection {
                 background: #444;
                 color: white;
             }
-            .ql-image-toolbar button.active {
+            .ql-image-toolbar button.active, .ql-image-input-bar button.active {
                 background: ${this.options.borderColor} !important;
                 color: white !important;
             }
@@ -268,6 +271,7 @@ export default class ImageSelection {
     private handleClick(e: MouseEvent) {
         const target = e.target as HTMLElement;
         if (target instanceof HTMLImageElement && this.quill.root.contains(target)) {
+            e.preventDefault();
             this.selectImage(target);
         } else if (this.toolbar && this.toolbar.contains(target)) {
             // Clicked toolbar
@@ -493,7 +497,14 @@ export default class ImageSelection {
         });
     }
 
-    private showGenericInput(currentValue: string, placeholder: string, width: string, onSave: (val: string) => void, onClear?: () => void) {
+    private showGenericInput(
+        currentValue: string,
+        placeholder: string,
+        width: string,
+        onSave: (val: string) => void,
+        onClear?: () => void,
+        extraButtons?: HTMLElement[]
+    ) {
         if (this.toolbar) this.toolbar.style.display = 'none';
 
         this.inputBar = document.createElement('div');
@@ -505,6 +516,12 @@ export default class ImageSelection {
         input.placeholder = placeholder;
         input.style.width = width;
 
+        this.inputBar.appendChild(input);
+
+        if (extraButtons) {
+            extraButtons.forEach(btn => this.inputBar!.appendChild(btn));
+        }
+
         const btnOk = document.createElement('button');
         btnOk.type = 'button';
         btnOk.innerHTML = ICONS.check;
@@ -513,6 +530,7 @@ export default class ImageSelection {
             onSave(input.value);
             this.hideInputBar();
         };
+        this.inputBar.appendChild(btnOk);
 
         if (onClear) {
             const btnClear = document.createElement('button');
@@ -524,12 +542,7 @@ export default class ImageSelection {
                 onClear();
                 this.hideInputBar();
             };
-            this.inputBar.appendChild(input);
-            this.inputBar.appendChild(btnOk);
             this.inputBar.appendChild(btnClear);
-        } else {
-            this.inputBar.appendChild(input);
-            this.inputBar.appendChild(btnOk);
         }
 
         const btnCancel = document.createElement('button');
@@ -589,61 +602,89 @@ export default class ImageSelection {
         this.showGenericInput(currentCaption, 'Image caption', '200px', (val) => this.setCaption(val), () => this.setCaption(''));
     }
 
-    private showLinkInput() {
-        const blot = this.getBlot();
-        // @ts-ignore
-        const currentLink = (blot && blot.formats().link) || '';
-        this.showGenericInput(currentLink, 'https://...', '200px', (val) => this.setLink(val), () => this.setLink(''));
-    }
-
-    private setAltText(alt: string) {
-        this.saveFormat('alt', alt);
-    }
-
-    private setLink(link: string) {
-        const cleanLink = link.trim() || null;
-        this.saveFormat('link', cleanLink);
-
-        if (this.toolbar) {
-            const btnLink = this.toolbar.querySelector(`button[title="${this.options.linkTitle}"]`);
-            if (btnLink) {
-                if (cleanLink) btnLink.classList.add('active');
-                else btnLink.classList.remove('active');
-            }
+        private showLinkInput() {
+            const blot = this.getBlot();
+            // @ts-ignore
+            const currentLink = (blot && blot.formats().link) || '';
+            // @ts-ignore
+            const currentTarget = (blot && blot.formats().linkTarget) || '';
+    
+            const btnTarget = document.createElement('button');
+            btnTarget.type = 'button';
+            btnTarget.innerHTML = ICONS.externalLink;
+            btnTarget.title = this.options.linkTargetTitle!;
+            if (currentTarget === '_blank') btnTarget.classList.add('active');
+    
+            btnTarget.onclick = (e) => {
+                e.stopPropagation();
+                btnTarget.classList.toggle('active');
+            };
+    
+            this.showGenericInput(
+                currentLink,
+                'https://...',
+                '200px',
+                (val) => this.setLink(val, btnTarget.classList.contains('active') ? '_blank' : null),
+                () => this.setLink('', null),
+                [btnTarget]
+            );
         }
-    }
-
-    private setCaption(caption: string) {
-        const cleanCaption = caption.trim() || null;
-        this.saveFormat('caption', cleanCaption);
-
-        // Manual refresh of the button state
-        if (this.toolbar) {
-            const btnCaption = this.toolbar.querySelector('button[title="Edit Caption"]');
-            if (btnCaption) {
-                if (cleanCaption) {
-                    btnCaption.classList.add('active');
-                } else {
-                    btnCaption.classList.remove('active');
+    
+        private setAltText(alt: string) {
+            this.saveFormat('alt', alt);
+        }
+    
+            private setLink(link: string, target: string | null) {
+                const cleanLink = link.trim() || null;
+                this.saveFormats({
+                    link: cleanLink,
+                    linkTarget: cleanLink ? target : null
+                });
+                
+                if (this.toolbar) {
+                    const btnLink = this.toolbar.querySelector(`button[title="${this.options.linkTitle}"]`);
+                    if (btnLink) {
+                        if (cleanLink) btnLink.classList.add('active');
+                        else btnLink.classList.remove('active');
+                    }
                 }
             }
-        }
-
-        setTimeout(() => {
-            this.reposition();
-        }, 50);
-    }
-
-    private saveFormat(name: string, value: any) {
-        if (!this.selectedImage) return;
-        const blot = this.getBlot();
-        if (blot) {
-            const index = this.quill.getIndex(blot);
-            if (index >= 0) {
-                this.quill.formatText(index, 1, { [name]: value }, 'user');
+        
+            private setCaption(caption: string) {
+                const cleanCaption = caption.trim() || null;
+                this.saveFormat('caption', cleanCaption);
+        
+                // Manual refresh of the button state
+                if (this.toolbar) {
+                    const btnCaption = this.toolbar.querySelector('button[title="Edit Caption"]');
+                    if (btnCaption) {
+                        if (cleanCaption) {
+                            btnCaption.classList.add('active');
+                        } else {
+                            btnCaption.classList.remove('active');
+                        }
+                    }
+                }
+        
+                setTimeout(() => {
+                    this.reposition();
+                }, 50);
             }
-        }
-    }
+        
+            private saveFormats(formats: {[key: string]: any}) {
+                if (!this.selectedImage) return;
+                const blot = this.getBlot();
+                if (blot) {
+                    const index = this.quill.getIndex(blot);
+                    if (index >= 0) {
+                        this.quill.formatText(index, 1, formats, 'user');
+                    }
+                }
+            }
+        
+            private saveFormat(name: string, value: any) {
+                this.saveFormats({ [name]: value });
+            }
 
     private getBlot(): any {
         const el = this.selectedFigure || this.selectedImage;

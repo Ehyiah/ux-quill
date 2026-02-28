@@ -21,6 +21,7 @@ final class ImageSelectionModule implements ModuleInterface
      *     flipVerticalTitle?: string,
      *     resetTitle?: string,
      *     linkTitle?: string,
+     *     linkTargetTitle?: string,
      *     deleteTitle?: string,
      *     captionBackgroundColor?: string,
      *     sectionLabels?: array{
@@ -59,6 +60,7 @@ final class ImageSelectionModule implements ModuleInterface
             'flipVerticalTitle' => 'Flip vertical',
             'resetTitle' => 'Reset image',
             'linkTitle' => 'Edit link',
+            'linkTargetTitle' => 'Open in new tab',
             'deleteTitle' => 'Delete image',
             'captionBackgroundColor' => 'rgba(51, 51, 51, 0.6)',
             'sectionLabels' => [
