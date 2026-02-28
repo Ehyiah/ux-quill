@@ -1,3 +1,4 @@
+function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 import Quill from 'quill';
 const ICONS = {
   alignLeft: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="1"></rect><line x1="15" y1="4" x2="21" y2="4"></line><line x1="15" y1="8" x2="21" y2="8"></line><line x1="15" y1="12" x2="21" y2="12"></line><line x1="3" y1="16" x2="21" y2="16"></line><line x1="3" y1="20" x2="21" y2="20"></line></svg>',
@@ -21,25 +22,54 @@ const ICONS = {
   externalLink: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>'
 };
 export default class ImageSelection {
-  quill;
-  options;
-  selectedImage = null;
-  selectedFigure = null;
-  overlay = null;
-  toolbar = null;
-  inputBar = null;
-  dragHandle = null;
-  dragSide = 'right';
-  dragStartX = 0;
-  dragStartWidth = 0;
-  repositionHandler;
-  isResizing = false;
   constructor(quill, options) {
     if (options === void 0) {
       options = {};
     }
+    this.quill = void 0;
+    this.options = void 0;
+    this.selectedImage = null;
+    this.selectedFigure = null;
+    this.overlay = null;
+    this.toolbar = null;
+    this.inputBar = null;
+    this.dragHandle = null;
+    this.dragSide = 'right';
+    this.dragStartX = 0;
+    this.dragStartWidth = 0;
+    this.repositionHandler = void 0;
+    this.isResizing = false;
+    this.handleMouseMove = e => {
+      if (!this.selectedImage || !this.dragHandle) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const deltaX = e.clientX - this.dragStartX;
+      let newWidth = this.dragStartWidth;
+      if (this.dragSide === 'right') {
+        newWidth += deltaX;
+      } else {
+        newWidth -= deltaX;
+      }
+      newWidth = Math.round(newWidth);
+      if (newWidth > 30) {
+        this.applyLayout(newWidth + 'px', false);
+        this.reposition();
+      }
+    };
+    this.handleMouseUp = e => {
+      if (!this.isResizing) return;
+      e.preventDefault();
+      e.stopPropagation();
+      this.isResizing = false;
+      this.dragHandle = null;
+      window.removeEventListener('mousemove', this.handleMouseMove, true);
+      window.removeEventListener('mouseup', this.handleMouseUp, true);
+      if (this.selectedImage) {
+        this.saveImageStyles();
+      }
+    };
     this.quill = quill;
-    this.options = {
+    this.options = _extends({
       borderColor: '#007bff',
       borderWidth: '4px',
       buttonBeforeLabel: ICONS.paraBefore,
@@ -54,16 +84,15 @@ export default class ImageSelection {
       linkTitle: 'Edit link',
       linkTargetTitle: 'Open in new tab',
       deleteTitle: 'Delete image',
-      captionBackgroundColor: 'rgba(51, 51, 51, 0.6)',
-      ...options,
-      alignLabels: {
+      captionBackgroundColor: 'rgba(51, 51, 51, 0.6)'
+    }, options, {
+      alignLabels: _extends({
         left: 'Left (wrapped)',
         leftBlock: 'Left (no wrap)',
         center: 'Center',
-        right: 'Right (wrapped)',
-        ...(options.alignLabels || {})
-      }
-    };
+        right: 'Right (wrapped)'
+      }, options.alignLabels || {})
+    });
     if (this.options.sectionLabels === undefined) {
       this.options.sectionLabels = {
         size: 'Size',
@@ -89,143 +118,7 @@ export default class ImageSelection {
     if (document.getElementById(styleId)) return;
     const style = document.createElement('style');
     style.id = styleId;
-    style.innerHTML = `
-            :root {
-                --ql-caption-bg-color: ${this.options.captionBackgroundColor};
-            }
-            .ql-editor figure.ql-image-figure {
-                margin: 0;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                position: relative;
-                line-height: 0;
-            }
-            .ql-editor figure.ql-image-figure figcaption {
-                background: rgba(51, 51, 51, 0.60);
-                color: white;
-                font-size: 11px;
-                padding: 4px 8px;
-                text-align: center;
-                font-style: italic;
-                line-height: normal;
-                box-sizing: border-box;
-                border-radius: 0 0 4px 4px;
-                pointer-events: none;
-                width: 100%;
-            }
-            .ql-editor figure.ql-image-figure figcaption[data-empty="true"],
-            .ql-editor figure.ql-image-figure figcaption:empty {
-                display: none !important;
-            }
-            .ql-editor figure.ql-image-figure:has(img.ql-image-selected) figcaption:not([data-empty="true"]):not(:empty) {
-                background: ${this.options.borderColor};
-            }
-            .ql-editor figure.ql-image-figure img {
-                display: block;
-                transition: transform 0.2s;
-            }
-            .ql-editor figure.ql-image-figure a {
-                display: flex;
-                width: 100%;
-                justify-content: center;
-                text-decoration: none;
-                color: inherit;
-            }
-            .ql-image-overlay {
-                position: absolute;
-                border: ${this.options.borderWidth} solid ${this.options.borderColor};
-                box-sizing: border-box;
-                pointer-events: none;
-                z-index: 1000;
-                user-select: none;
-                -webkit-user-select: none;
-            }
-            .ql-image-handle {
-                position: absolute;
-                width: 14px;
-                height: 14px;
-                background: ${this.options.borderColor};
-                border: 1px solid white;
-                pointer-events: auto;
-                cursor: nwse-resize;
-                z-index: 1001;
-                box-sizing: border-box;
-            }
-            .ql-image-toolbar, .ql-image-input-bar {
-                position: absolute;
-                background: #333;
-                border-radius: 4px;
-                padding: 4px;
-                display: flex;
-                gap: 4px;
-                z-index: 1002;
-                pointer-events: auto;
-                user-select: none;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-                align-items: flex-end;
-            }
-            .ql-image-toolbar-section {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 4px;
-            }
-            .ql-image-toolbar-section-label {
-                font-size: 12px;
-                color: #aaa;
-                text-transform: uppercase;
-                font-weight: bold;
-                pointer-events: none;
-                user-select: none;
-            }
-            .ql-image-toolbar-section-buttons {
-                display: flex;
-                gap: 4px;
-                align-items: center;
-            }
-            .ql-image-toolbar button, .ql-image-input-bar button {
-                background: transparent;
-                border: none;
-                color: #ddd;
-                padding: 6px;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border-radius: 3px;
-                transition: background 0.2s, color 0.2s;
-                min-width: 28px;
-                font-weight: bold;
-                font-size: 11px;
-            }
-            .ql-image-toolbar button:hover, .ql-image-input-bar button:hover {
-                background: #444;
-                color: white;
-            }
-            .ql-image-toolbar button.active, .ql-image-input-bar button.active {
-                background: ${this.options.borderColor} !important;
-                color: white !important;
-            }
-            .ql-image-input-bar input {
-                background: #444;
-                border: 1px solid #555;
-                color: white;
-                border-radius: 3px;
-                padding: 4px 8px;
-                font-size: 12px;
-                outline: none;
-            }
-            .ql-image-input-bar input:focus {
-                border-color: ${this.options.borderColor};
-            }
-            .ql-image-toolbar .ql-toolbar-separator {
-                width: 1px;
-                background: #444;
-                margin: 4px 2px;
-                height: 16px;
-            }
-        `;
+    style.innerHTML = "\n            :root {\n                --ql-caption-bg-color: " + this.options.captionBackgroundColor + ";\n            }\n            .ql-editor figure.ql-image-figure {\n                margin: 0;\n                display: flex;\n                flex-direction: column;\n                align-items: center;\n                position: relative;\n                line-height: 0;\n            }\n            .ql-editor figure.ql-image-figure figcaption {\n                background: rgba(51, 51, 51, 0.60);\n                color: white;\n                font-size: 11px;\n                padding: 4px 8px;\n                text-align: center;\n                font-style: italic;\n                line-height: normal;\n                box-sizing: border-box;\n                border-radius: 0 0 4px 4px;\n                pointer-events: none;\n                width: 100%;\n            }\n            .ql-editor figure.ql-image-figure figcaption[data-empty=\"true\"],\n            .ql-editor figure.ql-image-figure figcaption:empty {\n                display: none !important;\n            }\n            .ql-editor figure.ql-image-figure:has(img.ql-image-selected) figcaption:not([data-empty=\"true\"]):not(:empty) {\n                background: " + this.options.borderColor + ";\n            }\n            .ql-editor figure.ql-image-figure img {\n                display: block;\n                transition: transform 0.2s;\n            }\n            .ql-editor figure.ql-image-figure a {\n                display: flex;\n                width: 100%;\n                justify-content: center;\n                text-decoration: none;\n                color: inherit;\n            }\n            .ql-image-overlay {\n                position: absolute;\n                border: " + this.options.borderWidth + " solid " + this.options.borderColor + ";\n                box-sizing: border-box;\n                pointer-events: none;\n                z-index: 1000;\n                user-select: none;\n                -webkit-user-select: none;\n            }\n            .ql-image-handle {\n                position: absolute;\n                width: 14px;\n                height: 14px;\n                background: " + this.options.borderColor + ";\n                border: 1px solid white;\n                pointer-events: auto;\n                cursor: nwse-resize;\n                z-index: 1001;\n                box-sizing: border-box;\n            }\n            .ql-image-toolbar, .ql-image-input-bar {\n                position: absolute;\n                background: #333;\n                border-radius: 4px;\n                padding: 4px;\n                display: flex;\n                gap: 4px;\n                z-index: 1002;\n                pointer-events: auto;\n                user-select: none;\n                box-shadow: 0 2px 8px rgba(0,0,0,0.4);\n                align-items: flex-end;\n            }\n            .ql-image-toolbar-section {\n                display: flex;\n                flex-direction: column;\n                align-items: center;\n                gap: 4px;\n            }\n            .ql-image-toolbar-section-label {\n                font-size: 12px;\n                color: #aaa;\n                text-transform: uppercase;\n                font-weight: bold;\n                pointer-events: none;\n                user-select: none;\n            }\n            .ql-image-toolbar-section-buttons {\n                display: flex;\n                gap: 4px;\n                align-items: center;\n            }\n            .ql-image-toolbar button, .ql-image-input-bar button {\n                background: transparent;\n                border: none;\n                color: #ddd;\n                padding: 6px;\n                cursor: pointer;\n                display: flex;\n                align-items: center;\n                justify-content: center;\n                border-radius: 3px;\n                transition: background 0.2s, color 0.2s;\n                min-width: 28px;\n                font-weight: bold;\n                font-size: 11px;\n            }\n            .ql-image-toolbar button:hover, .ql-image-input-bar button:hover {\n                background: #444;\n                color: white;\n            }\n            .ql-image-toolbar button.active, .ql-image-input-bar button.active {\n                background: " + this.options.borderColor + " !important;\n                color: white !important;\n            }\n            .ql-image-input-bar input {\n                background: #444;\n                border: 1px solid #555;\n                color: white;\n                border-radius: 3px;\n                padding: 4px 8px;\n                font-size: 12px;\n                outline: none;\n            }\n            .ql-image-input-bar input:focus {\n                border-color: " + this.options.borderColor + ";\n            }\n            .ql-image-toolbar .ql-toolbar-separator {\n                width: 1px;\n                background: #444;\n                margin: 4px 2px;\n                height: 16px;\n            }\n        ";
     document.head.appendChild(style);
   }
   handleClick(e) {
@@ -294,10 +187,11 @@ export default class ImageSelection {
     this.reposition();
   }
   setupToolbar() {
+    var _this$options$section, _this$options$section2, _this$options$section3, _this$options$section4, _this$options$section5, _this$options$section6;
     if (!this.toolbar) return;
 
     // Paragraph Before
-    this.addSection(this.options.sectionLabels?.insert, container => {
+    this.addSection((_this$options$section = this.options.sectionLabels) == null ? void 0 : _this$options$section.insert, container => {
       const btnBefore = document.createElement('button');
       btnBefore.type = 'button';
       btnBefore.innerHTML = this.options.buttonBeforeLabel;
@@ -311,13 +205,13 @@ export default class ImageSelection {
     this.addSeparator();
 
     // Sizes
-    this.addSection(this.options.sectionLabels?.size, container => {
+    this.addSection((_this$options$section2 = this.options.sectionLabels) == null ? void 0 : _this$options$section2.size, container => {
       const sizes = ['25%', '50%', '75%', '100%'];
       sizes.forEach(size => {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.innerHTML = size;
-        btn.title = `Set width to ${size}`;
+        btn.title = "Set width to " + size;
         btn.dataset.size = size;
         btn.onclick = e => {
           e.stopPropagation();
@@ -338,7 +232,7 @@ export default class ImageSelection {
     this.addSeparator();
 
     // Alignments
-    this.addSection(this.options.sectionLabels?.align, container => {
+    this.addSection((_this$options$section3 = this.options.sectionLabels) == null ? void 0 : _this$options$section3.align, container => {
       const alignments = [{
         name: 'left',
         icon: ICONS.alignLeft
@@ -370,7 +264,7 @@ export default class ImageSelection {
     this.addSeparator();
 
     // Rotation / Flip / Reset
-    this.addSection(this.options.sectionLabels?.image, container => {
+    this.addSection((_this$options$section4 = this.options.sectionLabels) == null ? void 0 : _this$options$section4.image, container => {
       const btnRotateLeft = document.createElement('button');
       btnRotateLeft.type = 'button';
       btnRotateLeft.innerHTML = ICONS.rotateLeft;
@@ -430,7 +324,7 @@ export default class ImageSelection {
     this.addSeparator();
 
     // Caption / Alt / Link
-    this.addSection(this.options.sectionLabels?.meta, container => {
+    this.addSection((_this$options$section5 = this.options.sectionLabels) == null ? void 0 : _this$options$section5.meta, container => {
       const btnCaption = document.createElement('button');
       btnCaption.type = 'button';
       btnCaption.innerHTML = ICONS.caption;
@@ -467,7 +361,7 @@ export default class ImageSelection {
     this.addSeparator();
 
     // Paragraph After
-    this.addSection(this.options.sectionLabels?.insert, container => {
+    this.addSection((_this$options$section6 = this.options.sectionLabels) == null ? void 0 : _this$options$section6.insert, container => {
       const btnAfter = document.createElement('button');
       btnAfter.type = 'button';
       btnAfter.innerHTML = this.options.buttonAfterLabel;
@@ -545,14 +439,16 @@ export default class ImageSelection {
     }
   }
   showSizeInput() {
-    let currentWidth = this.selectedImage?.style.width || Math.round(this.selectedImage?.getBoundingClientRect().width || 0) + 'px';
+    var _this$selectedImage, _this$selectedImage2;
+    let currentWidth = ((_this$selectedImage = this.selectedImage) == null ? void 0 : _this$selectedImage.style.width) || Math.round(((_this$selectedImage2 = this.selectedImage) == null ? void 0 : _this$selectedImage2.getBoundingClientRect().width) || 0) + 'px';
     if (currentWidth.endsWith('px')) {
       currentWidth = currentWidth.replace('px', '');
     }
     this.showGenericInput(currentWidth, 'e.g. 300 or 50%', '80px', val => this.setSize(val));
   }
   showAltInput() {
-    const currentAlt = this.selectedImage?.getAttribute('alt') || '';
+    var _this$selectedImage3;
+    const currentAlt = ((_this$selectedImage3 = this.selectedImage) == null ? void 0 : _this$selectedImage3.getAttribute('alt')) || '';
     this.showGenericInput(currentAlt, 'Alt text', '150px', val => this.setAltText(val));
   }
   showCaptionInput() {
@@ -588,7 +484,7 @@ export default class ImageSelection {
       linkTarget: cleanLink ? target : null
     });
     if (this.toolbar) {
-      const btnLink = this.toolbar.querySelector(`button[title="${this.options.linkTitle}"]`);
+      const btnLink = this.toolbar.querySelector("button[title=\"" + this.options.linkTitle + "\"]");
       if (btnLink) {
         if (cleanLink) btnLink.classList.add('active');else btnLink.classList.remove('active');
       }
@@ -740,35 +636,6 @@ export default class ImageSelection {
     window.addEventListener('mousemove', this.handleMouseMove, true);
     window.addEventListener('mouseup', this.handleMouseUp, true);
   }
-  handleMouseMove = e => {
-    if (!this.selectedImage || !this.dragHandle) return;
-    e.preventDefault();
-    e.stopPropagation();
-    const deltaX = e.clientX - this.dragStartX;
-    let newWidth = this.dragStartWidth;
-    if (this.dragSide === 'right') {
-      newWidth += deltaX;
-    } else {
-      newWidth -= deltaX;
-    }
-    newWidth = Math.round(newWidth);
-    if (newWidth > 30) {
-      this.applyLayout(newWidth + 'px', false);
-      this.reposition();
-    }
-  };
-  handleMouseUp = e => {
-    if (!this.isResizing) return;
-    e.preventDefault();
-    e.stopPropagation();
-    this.isResizing = false;
-    this.dragHandle = null;
-    window.removeEventListener('mousemove', this.handleMouseMove, true);
-    window.removeEventListener('mouseup', this.handleMouseUp, true);
-    if (this.selectedImage) {
-      this.saveImageStyles();
-    }
-  };
   saveImageStyles() {
     if (!this.selectedImage) return;
     const blot = this.getBlot();
@@ -789,10 +656,10 @@ export default class ImageSelection {
     const containerRect = this.quill.container.getBoundingClientRect();
     const top = imgRect.top - containerRect.top;
     const left = imgRect.left - containerRect.left;
-    this.overlay.style.top = `${top}px`;
-    this.overlay.style.left = `${left}px`;
-    this.overlay.style.width = `${imgRect.width}px`;
-    this.overlay.style.height = `${imgRect.height}px`;
+    this.overlay.style.top = top + "px";
+    this.overlay.style.left = left + "px";
+    this.overlay.style.width = imgRect.width + "px";
+    this.overlay.style.height = imgRect.height + "px";
     const activeBar = this.inputBar && this.inputBar.parentNode ? this.inputBar : this.toolbar;
     if (!activeBar) return;
     const barWidth = activeBar.offsetWidth || 300;
@@ -800,13 +667,13 @@ export default class ImageSelection {
     if (barLeft < 5) barLeft = 5;
     const maxLeft = containerRect.width - barWidth - 5;
     if (barLeft > maxLeft) barLeft = maxLeft;
-    activeBar.style.left = `${barLeft}px`;
+    activeBar.style.left = barLeft + "px";
     const barHeight = activeBar.offsetHeight || 40;
     let barTop = top - barHeight - 10;
     if (barTop < 0) {
       barTop = 5;
     }
-    activeBar.style.top = `${barTop}px`;
+    activeBar.style.top = barTop + "px";
   }
   applyLayout(width, isBaseWidth) {
     if (isBaseWidth === void 0) {
@@ -949,7 +816,7 @@ export default class ImageSelection {
   }
   setRotation(el, angle) {
     const otherTransforms = (el.style.transform || '').replace(/rotate\([^)]+\)/g, '').trim();
-    const newTransform = `rotate(${angle}deg) ${otherTransforms}`.trim();
+    const newTransform = ("rotate(" + angle + "deg) " + otherTransforms).trim();
     el.style.transform = newTransform;
   }
   getTransformState(el) {
@@ -964,7 +831,7 @@ export default class ImageSelection {
     };
   }
   updateTransform(el, rotate, scaleX, scaleY) {
-    el.style.transform = `rotate(${rotate}deg) scaleX(${scaleX}) scaleY(${scaleY})`.trim();
+    el.style.transform = ("rotate(" + rotate + "deg) scaleX(" + scaleX + ") scaleY(" + scaleY + ")").trim();
   }
   flipImage(direction) {
     if (!this.selectedImage) return;
@@ -982,6 +849,7 @@ export default class ImageSelection {
     setTimeout(() => this.reposition(), 100);
   }
   resetImage() {
+    var _img$parentElement;
     if (!this.selectedImage) return;
     const img = this.selectedImage;
     const figure = this.selectedFigure;
@@ -994,7 +862,7 @@ export default class ImageSelection {
     img.style.marginBottom = '';
     img.style.maxWidth = '';
     img.style.maxHeight = '';
-    if (img.parentElement?.tagName === 'A') {
+    if (((_img$parentElement = img.parentElement) == null ? void 0 : _img$parentElement.tagName) === 'A') {
       const a = img.parentElement;
       a.style.marginLeft = '';
       a.style.marginRight = '';

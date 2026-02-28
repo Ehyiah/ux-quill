@@ -42,3 +42,6 @@ import * as katexModule from 'katex';
 const katex = katexModule.default || katexModule;
 // @ts-ignore
 window.katex = katex;
+
+import ImageGalleryModule from './modules/gallery/gallery-module.ts'
+Quill.register('modules/imageGallery', ImageGalleryModule.default || ImageGalleryModule);

@@ -1,7 +1,7 @@
 import { Controller } from '@hotwired/stimulus';
 import Quill from 'quill';
 import * as Options from 'quill/core/quill';
-import { ExtraOptions, ModuleOptions } from './types.d.ts';
+import type { ExtraOptions, ModuleOptions } from './types.d.ts';
 import mergeModules from './modules.ts';
 import { ToolbarCustomizer } from './ui/toolbarCustomizer.ts';
 import { handleUploadResponse, uploadStrategies } from './upload-utils.ts';
@@ -76,6 +76,8 @@ export default class extends Controller {
         };
         const mergedModules = mergeModules(this.modulesOptionsValue, enabledModules);
 
+        this.enrichImageGalleryModule(mergedModules);
+
         return {
             debug,
             modules: mergedModules,
@@ -84,6 +86,28 @@ export default class extends Controller {
             style,
             readOnly,
         };
+    }
+
+    private enrichImageGalleryModule(modules: any) {
+        if (modules['imageGallery']) {
+            const galleryOptions = modules['imageGallery'];
+            const uploadConfig = this.extraOptionsValue.upload_handler;
+
+            if (uploadConfig) {
+                if (galleryOptions.uploadEndpoint === undefined) {
+                    galleryOptions.uploadEndpoint = uploadConfig.upload_endpoint;
+                }
+                if (galleryOptions.uploadStrategy === undefined) {
+                    galleryOptions.uploadStrategy = uploadConfig.type;
+                }
+                if (galleryOptions.authConfig === undefined) {
+                    galleryOptions.authConfig = uploadConfig.security;
+                }
+                if (galleryOptions.jsonResponseFilePath === undefined) {
+                    galleryOptions.jsonResponseFilePath = uploadConfig.json_response_file_path;
+                }
+            }
+        }
     }
 
     private setupQuillStyles(options: Options) {
@@ -135,7 +159,7 @@ export default class extends Controller {
 
     private setupContentSync(quill: Quill) {
         // set initial content as a delta for better compatibility and allow table-module to work
-        const initialData = quill.clipboard.convert({html: this.inputTarget.value})
+        const initialData = quill.clipboard.convert({ html: this.inputTarget.value })
         this.dispatchEvent('hydrate:before', initialData);
         quill.updateContents(initialData);
         this.dispatchEvent('hydrate:after', quill);

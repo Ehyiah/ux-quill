@@ -29,3 +29,5 @@ import * as katexModule from 'katex';
 const katex = katexModule.default || katexModule;
 // @ts-ignore
 window.katex = katex;
+import ImageGalleryModule from "./modules/gallery/gallery-module.js";
+Quill.register('modules/imageGallery', ImageGalleryModule.default || ImageGalleryModule);

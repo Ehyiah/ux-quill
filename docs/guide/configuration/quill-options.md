@@ -64,9 +64,13 @@ Below is the list of available fields from QuillJS (https://v2.quilljs.com/docs/
 | :---: | :---: |
 | **EmojiField** | Add an emoji |
 | **TableField** | Add a table field |
+| **ImageGalleryField** | Add an image gallery button |
 
 > [!TIP]
 > If you need to add a field that is not provided by this bundle, you can create your own. See [Custom Fields](/guide/advanced/custom-fields) for more details.
+
+> [!IMPORTANT]
+> `QuillGroup::buildWithAllFields()` includes all built-in fields **except** `ImageGalleryField`, as the latter requires mandatory configuration in the `ImageGalleryModule`.
 
 ## Exemple
 ```php
@@ -75,6 +79,7 @@ use Ehyiah\QuillJsBundle\DTO\QuillGroup;
 use Ehyiah\QuillJsBundle\DTO\Fields\BoldField;
 use Ehyiah\QuillJsBundle\DTO\Fields\ItalicField;
 use Ehyiah\QuillJsBundle\DTO\Fields\HeaderField;
+use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ImageGalleryField;
 
 public function buildForm(FormBuilderInterface $builder, array $options)
 {
@@ -89,7 +94,11 @@ public function buildForm(FormBuilderInterface $builder, array $options)
                     new HeaderField(HeaderField::HEADER_OPTION_1),
                     new HeaderField(HeaderField::HEADER_OPTION_2),
                 ),
+                QuillGroup::build(
+                    new ImageGalleryField(),
+                ),
                 // Or add all built-in available fields at once
+                // Note: ImageGalleryField is NOT included in buildWithAllFields()
                 QuillGroup::buildWithAllFields()
             ]
         ])
