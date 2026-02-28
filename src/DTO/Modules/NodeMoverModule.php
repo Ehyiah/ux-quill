@@ -14,6 +14,7 @@ final class NodeMoverModule implements ModuleInterface
      *     active?: bool,
      *     borderColor?: string|null,
      *     dropIndicatorColor?: string,
+     *     duplicate?: bool,
      * } $options
      */
     public function __construct(
@@ -24,6 +25,7 @@ final class NodeMoverModule implements ModuleInterface
             'active' => true,
             'borderColor' => null,
             'dropIndicatorColor' => '#ff0000',
+            'duplicate' => true,
         ], $this->options);
     }
 }

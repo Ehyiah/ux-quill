@@ -10,6 +10,7 @@ Unlike standard modules that only handle specific elements, this module provides
 - **Gutter Interface**: A discreet toolbar appears in the editor gutter when content is selected.
 - **Precise Controls**: Move blocks up or down one by one using dedicated buttons.
 - **Smart Drag & Drop**: Drag your selection to a new location with a live drop indicator showing exactly where it will land.
+- **Quick Selection Duplication**: A duplicate icon to instantly clone the selected blocks.
 - **No-Merge Logic**: Ensures that dropping a block between others never accidentally merges or breaks your HTML structure.
 - **Quick Delete**: A trash icon to instantly remove the selected blocks.
 
@@ -38,6 +39,7 @@ $builder->add('content', QuillType::class, [
 | `active` | `bool` | `true` | Set to `false` to disable the module entirely (since it is enabled by default). |
 | `borderColor` | `string` | `#007bff` | The color of the selection outline. (null by default) |
 | `dropIndicatorColor` | `string` | `#ff0000` | The color of the horizontal line indicating where the content will be dropped. |
+| `duplicate` | `bool` | `true` | Set to `false` to disable the duplicate button in the toolbar. |
 
 ## User Experience
 

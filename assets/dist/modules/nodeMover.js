@@ -4,6 +4,7 @@ const ICONS = {
   move: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg>',
   up: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>',
   down: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>',
+  duplicate: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>',
   delete: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>'
 };
 export default class NodeMover {
@@ -17,6 +18,7 @@ export default class NodeMover {
   selectionRange = null;
   dragTarget = null;
   hideTimeout = null;
+  lastMouseEvent = null;
   constructor(quill, options) {
     if (options === void 0) {
       options = {};
@@ -26,6 +28,7 @@ export default class NodeMover {
       borderColor: '#007bff',
       dropIndicatorColor: '#ff0000',
       // Red as default
+      duplicate: true,
       ...options
     };
     this.container = quill.container;
@@ -33,8 +36,14 @@ export default class NodeMover {
     this.createToolbar();
     this.createOverlay();
     this.createDropIndicator();
-    this.quill.root.addEventListener('mousedown', e => this.handleSelection(e));
-    this.quill.root.addEventListener('keyup', () => this.handleSelection());
+    this.quill.root.addEventListener('mousedown', e => {
+      this.lastMouseEvent = e;
+      this.handleSelection(e);
+    });
+    this.quill.root.addEventListener('keyup', () => {
+      this.lastMouseEvent = null;
+      this.handleSelection();
+    });
     this.container.addEventListener('mouseleave', () => {
       this.hideTimeout = setTimeout(() => this.hideToolbar(), 300);
     });
@@ -60,15 +69,16 @@ export default class NodeMover {
     this.quill.root.addEventListener('dragover', this.handleDragOver.bind(this));
     this.quill.root.addEventListener('drop', this.handleDrop.bind(this));
     this.quill.on('selection-change', range => {
-      if (!range) {
-        // If selection is lost, we still wait a bit to see if it was a click on a non-editable element
+      if (range) {
+        this.lastMouseEvent = null;
+        this.handleSelection();
+      } else {
+        // If range is lost, we check if we still have a valid mouse event target (like an image)
         setTimeout(() => {
-          if (!this.quill.getSelection() && this.currentBlocks.length === 0) {
+          if (!this.quill.getSelection() && !this.lastMouseEvent) {
             this.hideToolbar();
           }
-        }, 200);
-      } else {
-        this.handleSelection();
+        }, 100);
       }
     });
     this.quill.on('text-change', (delta, oldDelta, source) => {
@@ -164,6 +174,10 @@ export default class NodeMover {
     this.toolbar.appendChild(btnUp);
     this.toolbar.appendChild(handle);
     this.toolbar.appendChild(btnDown);
+    if (this.options.duplicate) {
+      const btnDuplicate = this.createButton(ICONS.duplicate, 'Duplicate', () => this.duplicateNodes());
+      this.toolbar.appendChild(btnDuplicate);
+    }
     this.toolbar.appendChild(btnDel);
     this.container.appendChild(this.toolbar);
   }
@@ -189,37 +203,59 @@ export default class NodeMover {
     return btn;
   }
   handleSelection(event) {
+    // Debounce slightly to allow Quill to update its selection
     setTimeout(() => {
       const range = this.quill.getSelection();
       let blocks = [];
-      if (range) {
+      let selectionFound = false;
+      if (range && range.length > 0) {
+        // Multi-line selection or text selection
         this.selectionRange = {
           index: range.index,
           length: range.length
         };
-        const lines = this.quill.getLines(range.index, range.length || 1);
-
-        // Filter out empty lines if it's just a cursor
+        const lines = this.quill.getLines(range.index, range.length);
         blocks = lines.map(line => line.domNode);
-        if (range.length === 0) {
-          const [line] = this.quill.getLine(range.index);
-          if (line && line.length() <= 1 && line.domNode.textContent === '') {
-            this.hideToolbar();
-            return;
+        selectionFound = true;
+      } else {
+        // Single point (cursor) or clicked element (embeds/images)
+        const target = event?.target || this.lastMouseEvent?.target;
+        if (target && this.quill.root.contains(target)) {
+          const block = this.findBlock(target);
+          if (block) {
+            const blot = Quill.find(block);
+            if (blot) {
+              // @ts-ignore
+              this.selectionRange = {
+                index: this.quill.getIndex(blot),
+                length: blot.length()
+              };
+              blocks = [block];
+              selectionFound = true;
+            }
           }
         }
-      } else if (event && event.target && this.quill.root.contains(event.target)) {
-        const target = event.target;
-        const block = this.findBlock(target);
-        if (block) {
-          const blot = Quill.find(block);
-          if (blot) {
-            this.selectionRange = {
-              index: this.quill.getIndex(blot),
-              length: blot.length()
-            };
-            blocks = [block];
+
+        // If still no blocks but we have a cursor range, fallback to that line
+        if (!selectionFound && range) {
+          this.selectionRange = {
+            index: range.index,
+            length: range.length
+          };
+          const [line] = this.quill.getLine(range.index);
+          if (line) {
+            blocks = [line.domNode];
+            selectionFound = true;
           }
+        }
+      }
+
+      // Filter out empty lines if it's just a cursor in an empty paragraph
+      if (blocks.length === 1 && range && range.length === 0) {
+        const [line] = this.quill.getLine(range.index);
+        if (line && line.length() <= 1 && line.domNode.textContent === '') {
+          this.hideToolbar();
+          return;
         }
       }
       if (blocks.length > 0) {
@@ -330,6 +366,20 @@ export default class NodeMover {
         this.quill.setSelection(nextIndex + nextLength - totalLength, totalLength);
       }
     }
+  }
+  duplicateNodes() {
+    if (!this.selectionRange || this.currentBlocks.length === 0) return;
+    const range = this.selectionRange;
+    const lines = this.quill.getLines(range.index, range.length || 1);
+    if (lines.length === 0) return;
+    const firstBlot = lines[0];
+    const lastBlot = lines[lines.length - 1];
+    const startIndex = this.quill.getIndex(firstBlot);
+    const endIndex = this.quill.getIndex(lastBlot) + lastBlot.length();
+    const totalLength = endIndex - startIndex;
+    const contents = this.quill.getContents(startIndex, totalLength);
+    this.quill.updateContents(new Delta().retain(endIndex).concat(contents), 'user');
+    this.quill.setSelection(endIndex, totalLength, 'user');
   }
   deleteNodes() {
     if (!this.selectionRange) return;
