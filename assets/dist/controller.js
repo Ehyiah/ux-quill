@@ -61,10 +61,18 @@ export default class _Class extends Controller {
       const galleryOptions = modules['imageGallery'];
       const uploadConfig = this.extraOptionsValue.upload_handler;
       if (uploadConfig) {
-        galleryOptions.uploadEndpoint = galleryOptions.uploadEndpoint || uploadConfig.upload_endpoint;
-        galleryOptions.uploadStrategy = galleryOptions.uploadStrategy || uploadConfig.type;
-        galleryOptions.authConfig = galleryOptions.authConfig || uploadConfig.security;
-        galleryOptions.jsonResponseFilePath = galleryOptions.jsonResponseFilePath || uploadConfig.json_response_file_path;
+        if (galleryOptions.uploadEndpoint === undefined) {
+          galleryOptions.uploadEndpoint = uploadConfig.upload_endpoint;
+        }
+        if (galleryOptions.uploadStrategy === undefined) {
+          galleryOptions.uploadStrategy = uploadConfig.type;
+        }
+        if (galleryOptions.authConfig === undefined) {
+          galleryOptions.authConfig = uploadConfig.security;
+        }
+        if (galleryOptions.jsonResponseFilePath === undefined) {
+          galleryOptions.jsonResponseFilePath = uploadConfig.json_response_file_path;
+        }
       }
     }
   }

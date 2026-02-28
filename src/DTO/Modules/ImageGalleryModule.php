@@ -58,12 +58,8 @@ class ImageGalleryModule implements ModuleInterface
         public $options = [],
     ) {
         $this->options = array_merge([
-            self::UPLOAD_ENDPOINT_OPTION => '',
             self::LIST_ENDPOINT_OPTION => '',
             self::SEARCH_ENDPOINT_OPTION => '',
-            self::UPLOAD_STRATEGY_OPTION => '',
-            self::AUTH_CONFIG_OPTION => null,
-            self::JSON_RESPONSE_FILE_PATH_OPTION => '',
             self::ICON_OPTION => '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
                     <rect x="3" y="4" width="18" height="16" rx="2" ry="2"
                           stroke="currentColor" stroke-width="2" fill="none"/>

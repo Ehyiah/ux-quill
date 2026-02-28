@@ -19,7 +19,7 @@ class ImageGalleryModuleTest extends TestCase
 
         $this->assertEquals('imageGallery', $module->name);
         $this->assertEquals('/api/images', $module->options['listEndpoint']);
-        $this->assertEquals('', $module->options['uploadEndpoint']);
+        $this->assertArrayNotHasKey('uploadEndpoint', $module->options);
         $this->assertEquals('Open the media gallery', $module->options['buttonTitle']);
         $this->assertEquals('Media gallery', $module->options['messageTitleOption']);
         $this->assertEquals('Close', $module->options['messageCloseOption']);
