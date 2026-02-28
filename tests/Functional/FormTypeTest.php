@@ -125,7 +125,6 @@ final class FormTypeTest extends TestCase
         $moduleNames = array_column($modulesOptions, 'name');
 
         $this->assertContains(\Ehyiah\QuillJsBundle\DTO\Modules\ImageSelectionModule::NAME, $moduleNames);
-        $this->assertContains(\Ehyiah\QuillJsBundle\DTO\Modules\ImageDragAndDropModule::NAME, $moduleNames);
     }
 
     public function testFormSubmission(): void

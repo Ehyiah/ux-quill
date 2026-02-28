@@ -231,7 +231,10 @@ export default class ImageSelection {
   handleClick(e) {
     const target = e.target;
     if (target instanceof HTMLImageElement && this.quill.root.contains(target)) {
-      e.preventDefault();
+      const link = target.closest('a');
+      if (link && this.quill.root.contains(link)) {
+        e.preventDefault();
+      }
       this.selectImage(target);
     } else if (this.toolbar && this.toolbar.contains(target)) {
       // Clicked toolbar
@@ -247,7 +250,6 @@ export default class ImageSelection {
     if (this.selectedImage === img) return;
     this.deselectImage();
     this.selectedImage = img;
-    this.selectedImage.draggable = false;
     this.selectedImage.classList.add('ql-image-selected');
     const figure = img.closest('figure');
     if (figure) {
@@ -258,7 +260,6 @@ export default class ImageSelection {
   deselectImage() {
     if (this.isResizing) return;
     if (this.selectedImage) {
-      this.selectedImage.draggable = true;
       this.selectedImage.classList.remove('ql-image-selected');
       this.selectedImage = null;
       this.selectedFigure = null;

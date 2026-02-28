@@ -27,9 +27,6 @@ Quill.register('modules/readingTime', ReadingTime);
 import ImageSelection from './modules/imageSelection.ts';
 Quill.register('modules/imageSelection', ImageSelection);
 
-import DragAndDrop from './modules/dragAndDrop.ts';
-Quill.register('modules/dragAndDrop', DragAndDrop);
-
 import SpeechToText from './modules/speechToText.ts';
 Quill.register('modules/speechToText', SpeechToText);
 

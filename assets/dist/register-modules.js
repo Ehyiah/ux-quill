@@ -17,8 +17,6 @@ import ReadingTime from "./modules/readtimeModule.js";
 Quill.register('modules/readingTime', ReadingTime);
 import ImageSelection from "./modules/imageSelection.js";
 Quill.register('modules/imageSelection', ImageSelection);
-import DragAndDrop from "./modules/dragAndDrop.js";
-Quill.register('modules/dragAndDrop', DragAndDrop);
 import SpeechToText from "./modules/speechToText.js";
 Quill.register('modules/speechToText', SpeechToText);
 import * as hljsModule from 'highlight.js';
