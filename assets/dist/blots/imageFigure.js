@@ -1,9 +1,6 @@
 import Quill from 'quill';
 const BlockEmbed = Quill.import('blots/block/embed');
 class ImageFigure extends BlockEmbed {
-  static blotName = 'image';
-  static tagName = 'figure';
-  static className = 'ql-image-figure';
   static create(value) {
     const node = super.create();
     const img = document.createElement('img');
@@ -87,31 +84,33 @@ class ImageFigure extends BlockEmbed {
     return node;
   }
   static value(node) {
+    var _figcaption$textConte;
     const img = node.querySelector('img');
     const figcaption = node.querySelector('figcaption');
     const link = node.querySelector('a');
-    let caption = img?.getAttribute('data-caption') || figcaption?.textContent?.trim() || null;
+    let caption = (img == null ? void 0 : img.getAttribute('data-caption')) || (figcaption == null || (_figcaption$textConte = figcaption.textContent) == null ? void 0 : _figcaption$textConte.trim()) || null;
     if (figcaption && figcaption.style.display === 'none') {
       caption = null;
     }
     return {
-      src: img?.getAttribute('src'),
-      alt: img?.getAttribute('alt'),
-      width: node.style.width || img?.style.width || null,
-      height: img?.style.height,
+      src: img == null ? void 0 : img.getAttribute('src'),
+      alt: img == null ? void 0 : img.getAttribute('alt'),
+      width: node.style.width || (img == null ? void 0 : img.style.width) || null,
+      height: img == null ? void 0 : img.style.height,
       style: node.getAttribute('style'),
-      imgStyle: img?.getAttribute('style') || null,
+      imgStyle: (img == null ? void 0 : img.getAttribute('style')) || null,
       caption: caption,
-      link: link?.getAttribute('href') || null,
-      linkTarget: link?.getAttribute('target') || null
+      link: (link == null ? void 0 : link.getAttribute('href')) || null,
+      linkTarget: (link == null ? void 0 : link.getAttribute('target')) || null
     };
   }
   static formats(node) {
+    var _figcaption$textConte2;
     const img = node.querySelector('img');
     if (!img) return {};
     const figcaption = node.querySelector('figcaption');
     const link = node.querySelector('a');
-    let caption = img.getAttribute('data-caption') || figcaption?.textContent?.trim() || null;
+    let caption = img.getAttribute('data-caption') || (figcaption == null || (_figcaption$textConte2 = figcaption.textContent) == null ? void 0 : _figcaption$textConte2.trim()) || null;
     if (figcaption && figcaption.style.display === 'none') {
       caption = null;
     }
@@ -122,8 +121,8 @@ class ImageFigure extends BlockEmbed {
       style: node.getAttribute('style'),
       imgStyle: img.getAttribute('style') || null,
       caption: caption,
-      link: link?.getAttribute('href') || null,
-      linkTarget: link?.getAttribute('target') || null
+      link: (link == null ? void 0 : link.getAttribute('href')) || null,
+      linkTarget: (link == null ? void 0 : link.getAttribute('target')) || null
     };
   }
   format(name, value) {
@@ -147,15 +146,17 @@ class ImageFigure extends BlockEmbed {
         if (existingLink) {
           existingLink.setAttribute('href', value);
         } else {
+          var _img$parentNode;
           const link = document.createElement('a');
           link.setAttribute('href', value);
           link.style.display = 'block';
           link.style.width = '100%';
-          img.parentNode?.replaceChild(link, img);
+          (_img$parentNode = img.parentNode) == null || _img$parentNode.replaceChild(link, img);
           link.appendChild(img);
         }
       } else if (existingLink) {
-        existingLink.parentNode?.replaceChild(img, existingLink);
+        var _existingLink$parentN;
+        (_existingLink$parentN = existingLink.parentNode) == null || _existingLink$parentN.replaceChild(img, existingLink);
       }
     } else if (name === 'linkTarget') {
       const link = this.domNode.querySelector('a');
@@ -198,4 +199,7 @@ class ImageFigure extends BlockEmbed {
     }
   }
 }
+ImageFigure.blotName = 'image';
+ImageFigure.tagName = 'figure';
+ImageFigure.className = 'ql-image-figure';
 export default ImageFigure;
