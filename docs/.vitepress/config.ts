@@ -42,6 +42,8 @@ export default defineConfig({
               { text: 'Concept', link: '/guide/modules/index' },
               { text: 'ReadTimeModule', link: '/guide/modules/read-time' },
               { text: 'STTModule', link: '/guide/modules/stt' },
+              { text: 'ImageSelectionModule', link: '/guide/modules/image-selection' },
+              { text: 'NodeMoverModule', link: '/guide/modules/node-mover' },
               { text: 'FullScreenModule', link: '/guide/modules/fullscreen' },
               { text: 'Gallery', link: '/guide/modules/gallery' },
               { text: 'Other Modules', link: '/guide/modules/others' }

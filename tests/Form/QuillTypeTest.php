@@ -10,8 +10,8 @@ use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ImageField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ItalicField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\UnderlineField;
 use Ehyiah\QuillJsBundle\DTO\Modules\EmojiModule;
-use Ehyiah\QuillJsBundle\DTO\Modules\ImageDragAndDropModule;
-use Ehyiah\QuillJsBundle\DTO\Modules\ResizeModule;
+use Ehyiah\QuillJsBundle\DTO\Modules\ImageSelectionModule;
+use Ehyiah\QuillJsBundle\DTO\Modules\NodeMoverModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\SyntaxModule;
 use Ehyiah\QuillJsBundle\Form\QuillType;
 use Generator;
@@ -93,9 +93,9 @@ final class QuillTypeTest extends TestCase
                 ],
                 'modules' => [
                     new SyntaxModule(),
-                    new ResizeModule(),
-                    new ImageDragAndDropModule(),
+                    new ImageSelectionModule(),
                     new EmojiModule(),
+                    new NodeMoverModule(),
                 ],
             ],
         ];
@@ -117,6 +117,7 @@ final class QuillTypeTest extends TestCase
                 'quill_extra_options' => [
                 ],
                 'modules' => [
+                    new NodeMoverModule(),
                 ],
             ],
         ];

@@ -27,6 +27,14 @@ const mockQuillInstance = {
 
 // Les mocks doivent être définis avant l'import du module à tester
 jest.mock('quill', () => {
+    // Mock de base pour les Blots
+    class MockBlot {
+        static create() { return document.createElement('div'); }
+        static value() { return {}; }
+        static formats() { return {}; }
+        format() {}
+    }
+
     // Mock Quill en tant que fonction constructeur avec des méthodes statiques
     const mockQuill = jest.fn().mockImplementation(() => mockQuillInstance);
 
@@ -34,12 +42,13 @@ jest.mock('quill', () => {
     mockQuill.register = jest.fn();
     mockQuill.import = jest.fn().mockImplementation((name) => {
         if (name === 'formats/image') {
-            return {
-                formats: jest.fn().mockReturnValue({}),
-                prototype: {
-                    format: jest.fn()
-                }
-            };
+            return MockBlot;
+        }
+        if (name === 'blots/block/embed') {
+            return MockBlot;
+        }
+        if (name === 'blots/block') {
+            return MockBlot;
         }
         if (name.startsWith('attributors/style/')) {
             return {};
@@ -63,7 +72,6 @@ jest.mock('quill-table-better', () => ({
 }));
 
 jest.mock('quill2-emoji', () => ({}));
-jest.mock('quill-resize-image', () => ({}));
 jest.mock('../src/imageUploader.ts', () => ({}));
 jest.mock('../src/register-modules.ts', () => ({}));
 jest.mock('../src/upload-utils.ts', () => ({

@@ -24,8 +24,11 @@ Quill.register('modules/htmlEditButton', htmlEditButton.default || htmlEditButto
 import ReadingTime from './modules/readtimeModule.ts';
 Quill.register('modules/readingTime', ReadingTime);
 
-import DragAndDrop from './modules/dragAndDrop.ts';
-Quill.register('modules/dragAndDrop', DragAndDrop);
+import ImageSelection from './modules/imageSelection.ts';
+Quill.register('modules/imageSelection', ImageSelection);
+
+import NodeMover from './modules/nodeMover.ts';
+Quill.register('modules/nodeMover', NodeMover);
 
 import SpeechToText from './modules/speechToText.ts';
 Quill.register('modules/speechToText', SpeechToText);

@@ -5,6 +5,27 @@ import { ToolbarCustomizer } from "./ui/toolbarCustomizer.js";
 import { handleUploadResponse, uploadStrategies } from "./upload-utils.js";
 import "./register-modules.js";
 import QuillTableBetter from 'quill-table-better';
+import ImageFigure from "./blots/imageFigure.js";
+
+// Register custom ImageFigure blot to override default image
+Quill.register(ImageFigure, true);
+export default class extends Controller {
+  static targets = ['input', 'editorContainer'];
+  static values = (() => ({
+    toolbarOptions: {
+      type: Array,
+      default: []
+    },
+    extraOptions: {
+      type: Object,
+      default: {}
+    },
+    modulesOptions: {
+      type: Array,
+      default: []
+    }
+  }))();
+  quillInstance = null;
 const Image = Quill.import('formats/image');
 const oldFormats = Image.formats;
 Image.formats = function (domNode) {
