@@ -2,14 +2,14 @@
 
 ## Concept
 
-**Modules** are functional extensions that enhance the capabilities of the Quill editor beyond simple text formatting. 
+**Modules** are functional extensions that enhance the capabilities of the Quill editor beyond simple text formatting.
 They allow you to add interactive features, modify event handling, or integrate external tools.
 
 - **Goal**: To provide business logic or complex functionality (e.g., resizing images, counting words, voice dictation, managing undo history).
-- **How it works**: A module is loaded when the editor starts. It can interact with the Quill API, listen to events (keystrokes, selection changes), 
+- **How it works**: A module is loaded when the editor starts. It can interact with the Quill API, listen to events (keystrokes, selection changes),
 - manipulate the editor's DOM, or add interface elements.
 
-> **Note**: This bundle provides several **custom modules** that do not exist natively in QuillJS 
+> **Note**: This bundle provides several **custom modules** that do not exist natively in QuillJS
 > (like `ReadTimeModule`, `STTModule`, `FullScreenModule`, etc.), offering advanced features out of the box.
 
 ---
@@ -63,3 +63,4 @@ See module details on the left menu
 |    **HtmlEditModule**    |      NO       | The HtmlEditModule allow to edit the raw html. see details on repository [site](https://github.com/benwinding/quill-html-edit-button)                                                                                                                                                                 | htmlEditButton | array | https://github.com/benwinding/quill-html-edit-button | see ``Ehyiah\QuillJsBundle\DTO\Modules\htmlEditButton`` | There is currently a conflict with tableField. Don't use both of them at the same time as the table inserted via the htmlEdit module will not be displayed |
 |    **ReadTimeModule**    |      NO       | The ReadTimeModule add an indication on how many minutes it will take to a person to read what your write inside the WYSIWYG editor                                                                                                                                                                   | readingTime | array | ``wpm``, ``label``, ``suffix``, ``readTimeOk``, ``readTimeMedium``, ``target`` | ['wpm' => '200', 'label' => 'Reading time: ', 'suffix' => ' min read', 'readTimeOk' => '2', 'readTimeMedium' => '5'] |
 |      **STTModule**       |      NO       | The Speech-to-Text module enables voice dictation using the Web Speech API. Allows users to dictate text directly into the editor with real-time audio visualization                                                                                                                                  | speechToText | array | ``language``, ``continuous``, ``visualizer``, ``waveformColor``, ``histogramColor``, ``debug``, ``buttonTitleStart``, ``buttonTitleStop``, ``titleInactive``, ``titleStarting``, ``titleActive`` | see ``Ehyiah\QuillJsBundle\DTO\Modules\STTModule`` |
+|    **NodeMoverModule**   |      YES      | Enable moving any block element (text, images, videos) with a toolbar and drag handle.                                                                                                                                                                                                                   | nodeMover | array | [see details](./node-mover.md) | [] |
