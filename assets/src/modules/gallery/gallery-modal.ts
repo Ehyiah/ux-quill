@@ -53,8 +53,8 @@ export default class GalleryModal {
         this.container.innerHTML = `
       <div class="quill-media-window">
         <div class="quill-media-header">
-          <h3>Galerie de médias</h3>
-          <button class="close-btn" title="Fermer la galerie" aria-label="Fermer">
+          <h3>${this.module.options.messageTitleOption}</h3>
+          <button class="close-btn" title="${this.module.options.messageCloseOption}" aria-label="${this.module.options.messageCloseOption}">
             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>

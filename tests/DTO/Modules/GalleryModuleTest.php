@@ -21,6 +21,8 @@ class GalleryModuleTest extends TestCase
         $this->assertEquals('/api/images', $module->options['listEndpoint']);
         $this->assertEquals('', $module->options['uploadEndpoint']);
         $this->assertEquals('Open the media gallery', $module->options['buttonTitle']);
+        $this->assertEquals('Media gallery', $module->options['messageTitleOption']);
+        $this->assertEquals('Close', $module->options['messageCloseOption']);
     }
 
     public function testMissingListEndpointThrowsException(): void

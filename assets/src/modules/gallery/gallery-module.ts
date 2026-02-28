@@ -23,6 +23,8 @@ export default class GalleryModule {
             messageErrorOption: options.messageErrorOption || '',
             messageNoImageOption: options.messageNoImageOption || '',
             messageSearchPlaceholderOption: options.messageSearchPlaceholderOption || '',
+            messageTitleOption: options.messageTitleOption || '',
+            messageCloseOption: options.messageCloseOption || '',
             authConfig: options.authConfig,
             jsonResponseFilePath: options.jsonResponseFilePath,
             uploadStrategy: options.uploadStrategy || 'form',
@@ -40,11 +42,11 @@ export default class GalleryModule {
         const toolbar = this.quill.getModule('toolbar');
         if (!toolbar || !toolbar.container) return;
 
-        if (toolbar.container.querySelector('.ql-gallery')) return;
+        if (toolbar.container.querySelector('.ql-mediaGallery')) return;
 
         const button = document.createElement('button');
         button.type = 'button';
-        button.classList.add('ql-gallery');
+        button.classList.add('ql-mediaGallery');
         if (this.options.icon != null) {
             button.innerHTML = this.options.icon;
         }
@@ -75,7 +77,7 @@ export default class GalleryModule {
         const endpoint = url || this.options.listEndpoint;
 
         const response = await fetch(endpoint);
-        if (!response.ok) throw new Error(`Erreur while loading : ${response.statusText}`);
+        if (!response.ok) throw new Error(`Error while loading : ${response.statusText}`);
         return response.json();
     }
 
@@ -86,7 +88,7 @@ export default class GalleryModule {
         url.searchParams.append('term', query);
 
         const response = await fetch(url.toString());
-        if (!response.ok) throw new Error(`Erreur while searching : ${response.statusText}`);
+        if (!response.ok) throw new Error(`Error while searching : ${response.statusText}`);
         return response.json();
     }
 }

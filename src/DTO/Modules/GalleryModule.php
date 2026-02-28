@@ -18,6 +18,8 @@ class GalleryModule implements ModuleInterface
     public const MESSAGE_NEXT_PAGE_OPTION = 'messageNextPageOption';
     public const MESSAGE_PREV_PAGE_OPTION = 'messagePrevPageOption';
     public const MESSAGE_SEARCH_PLACEHOLDER_OPTION = 'messageSearchPlaceholderOption';
+    public const MESSAGE_TITLE_OPTION = 'messageTitleOption';
+    public const MESSAGE_CLOSE_OPTION = 'messageCloseOption';
 
     // endpoint to list images
     public const LIST_ENDPOINT_OPTION = 'listEndpoint';
@@ -66,7 +68,7 @@ class GalleryModule implements ModuleInterface
                           stroke="currentColor" stroke-width="2" fill="none"/>
                     <circle cx="8" cy="9" r="2" fill="currentColor"/>
                     <path d="M21 15l-5-5L5 21" stroke="currentColor" stroke-width="2" fill="none"/>
-                /svg>',
+                </svg>',
             self::BUTTON_TITLE_OPTION => 'Open the media gallery',
             self::BUTTON_UPLOAD_OPTION => '⬆️ Upload',
             self::MESSAGE_LOADING_OPTION => 'Loading...',
@@ -75,6 +77,8 @@ class GalleryModule implements ModuleInterface
             self::MESSAGE_ERROR_OPTION => 'Error',
             self::MESSAGE_NO_IMAGE_OPTION => 'No image',
             self::MESSAGE_SEARCH_PLACEHOLDER_OPTION => 'Search...',
+            self::MESSAGE_TITLE_OPTION => 'Media gallery',
+            self::MESSAGE_CLOSE_OPTION => 'Close',
         ];
     }
 }

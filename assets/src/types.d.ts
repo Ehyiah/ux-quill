@@ -36,6 +36,8 @@ export type MediaGalleryOptions = {
     messageErrorOption?: string;
     messageNoImageOption?: string;
     messageSearchPlaceholderOption?: string;
+    messageTitleOption?: string;
+    messageCloseOption?: string;
     authConfig?: AuthConfig;
     jsonResponseFilePath?: string;
     uploadStrategy?: 'form' | 'json';
