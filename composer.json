@@ -16,6 +16,11 @@
         "easyadmin wysiwyg"
     ],
     "license": "MIT",
+    "homepage": "https://github.com/Ehyiah/ux-quill",
+    "support": {
+        "issues": "https://github.com/Ehyiah/ux-quill/issues",
+        "source": "https://github.com/Ehyiah/ux-quill"
+    },
     "minimum-stability": "stable",
     "prefer-stable": true,
     "authors": [

@@ -3,6 +3,10 @@
     "description": "Symfony bundle to use Quill JS text editor",
     "version": "3.0.0",
     "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Ehyiah/ux-quill"
+    },
     "main": "dist/controller.js",
     "symfony": {
         "controllers": {
