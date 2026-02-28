@@ -51,6 +51,7 @@ export default class ImageSelection {
       flipVerticalTitle: 'Flip vertical',
       resetTitle: 'Reset image',
       linkTitle: 'Edit link',
+      deleteTitle: 'Delete image',
       captionBackgroundColor: 'rgba(51, 51, 51, 0.6)',
       ...options,
       alignLabels: {
@@ -284,6 +285,7 @@ export default class ImageSelection {
     this.toolbar.className = 'ql-image-toolbar';
     this.quill.container.appendChild(this.toolbar);
     this.setupToolbar();
+    this.updateActiveButtons();
     this.setupHandles();
     this.reposition();
   }
@@ -410,6 +412,16 @@ export default class ImageSelection {
         this.resetImage();
       };
       container.appendChild(btnReset);
+      const btnDelete = document.createElement('button');
+      btnDelete.type = 'button';
+      btnDelete.innerHTML = ICONS.trash;
+      btnDelete.title = this.options.deleteTitle;
+      btnDelete.style.color = '#ff4d4d'; // Slight red to indicate danger
+      btnDelete.onclick = e => {
+        e.stopPropagation();
+        this.deleteImage();
+      };
+      container.appendChild(btnDelete);
     });
     this.addSeparator();
 
@@ -605,9 +617,9 @@ export default class ImageSelection {
     const style = el.style;
     switch (name) {
       case 'leftBlock':
-        return style.display === 'block' && (style.float === 'none' || style.float === '') && (style.marginLeft === '0px' || style.marginLeft === '');
+        return (style.display === 'block' || style.display === 'table') && (style.float === 'none' || style.float === '') && (style.marginLeft === '0px' || style.marginLeft === '');
       case 'center':
-        return style.display === 'block' && (style.marginLeft === 'auto' || style.margin === '10px auto' || style.margin === 'auto');
+        return (style.display === 'block' || style.display === 'table') && (style.marginLeft === 'auto' || style.margin === '10px auto' || style.margin === 'auto');
       case 'left':
         return style.float === 'left';
       case 'right':
@@ -977,6 +989,15 @@ export default class ImageSelection {
     this.saveImageStyles();
     this.updateActiveButtons();
     setTimeout(() => this.reposition(), 100);
+  }
+  deleteImage() {
+    if (!this.selectedImage) return;
+    const blot = this.getBlot();
+    if (blot) {
+      const index = this.quill.getIndex(blot);
+      this.deselectImage();
+      this.quill.deleteText(index, 1, 'user');
+    }
   }
   rotateImage(direction) {
     if (!this.selectedImage) return;

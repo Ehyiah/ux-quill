@@ -21,6 +21,7 @@ final class ImageSelectionModule implements ModuleInterface
      *     flipVerticalTitle?: string,
      *     resetTitle?: string,
      *     linkTitle?: string,
+     *     deleteTitle?: string,
      *     captionBackgroundColor?: string,
      *     sectionLabels?: array{
      *         size?: string,
@@ -58,6 +59,7 @@ final class ImageSelectionModule implements ModuleInterface
             'flipVerticalTitle' => 'Flip vertical',
             'resetTitle' => 'Reset image',
             'linkTitle' => 'Edit link',
+            'deleteTitle' => 'Delete image',
             'captionBackgroundColor' => 'rgba(51, 51, 51, 0.6)',
             'sectionLabels' => [
                 'size' => 'Size',
@@ -69,10 +71,12 @@ final class ImageSelectionModule implements ModuleInterface
         ];
 
         if (array_key_exists('sectionLabels', $this->options)) {
-            if (null === $this->options['sectionLabels'] || (is_array($this->options['sectionLabels']) && empty($this->options['sectionLabels']))) {
+            $sectionLabels = $this->options['sectionLabels'];
+            if (null === $sectionLabels || ([] === $sectionLabels)) {
+                $this->options['sectionLabels'] = [];
                 $defaults['sectionLabels'] = [];
-            } else {
-                $this->options['sectionLabels'] = array_merge($defaults['sectionLabels'], $this->options['sectionLabels']);
+            } elseif (is_array($sectionLabels)) {
+                $this->options['sectionLabels'] = array_merge($defaults['sectionLabels'], $sectionLabels);
             }
         }
 

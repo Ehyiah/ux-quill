@@ -34,6 +34,7 @@ This module is **automatically enabled** when the `ImageField` is used.
 | `flipHorizontalTitle` | `string` | `'Flip horizontal'` | Tooltip for the flip horizontal button. |
 | `flipVerticalTitle` | `string` | `'Flip vertical'` | Tooltip for the flip vertical button. |
 | `resetTitle` | `string` | `'Reset image'` | Tooltip for the reset button. |
+| `deleteTitle` | `string` | `'Delete image'` | Tooltip for the delete button. |
 | `linkTitle` | `string` | `'Edit link'` | Tooltip for the link button. |
 | `captionBackgroundColor` | `string` | `'rgba(51, 51, 51, 0.6)'` | Background color of the caption overlay. |
 | `sectionLabels` | `array` | See below | Small labels displayed above toolbar sections. To disable, pass an empty array `[]`. |
