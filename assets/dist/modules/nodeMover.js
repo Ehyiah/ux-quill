@@ -16,6 +16,7 @@ export default class NodeMover {
   currentBlocks = [];
   selectionRange = null;
   dragTarget = null;
+  hideTimeout = null;
   constructor(quill, options) {
     if (options === void 0) {
       options = {};
@@ -23,6 +24,8 @@ export default class NodeMover {
     this.quill = quill;
     this.options = {
       borderColor: '#007bff',
+      dropIndicatorColor: '#ff0000',
+      // Red as default
       ...options
     };
     this.container = quill.container;
@@ -30,21 +33,40 @@ export default class NodeMover {
     this.createToolbar();
     this.createOverlay();
     this.createDropIndicator();
-    this.quill.root.addEventListener('mousedown', () => this.handleSelection());
+    this.quill.root.addEventListener('mousedown', e => this.handleSelection(e));
     this.quill.root.addEventListener('keyup', () => this.handleSelection());
-    this.container.addEventListener('mouseleave', e => {
-      const relatedTarget = e.relatedTarget;
-      if (!this.toolbar || !this.toolbar.contains(relatedTarget)) {
-        this.hideToolbar();
+    this.container.addEventListener('mouseleave', () => {
+      this.hideTimeout = setTimeout(() => this.hideToolbar(), 300);
+    });
+    this.container.addEventListener('mouseenter', () => {
+      if (this.hideTimeout) {
+        clearTimeout(this.hideTimeout);
+        this.hideTimeout = null;
       }
     });
+    if (this.toolbar) {
+      this.toolbar.addEventListener('mouseenter', () => {
+        if (this.hideTimeout) {
+          clearTimeout(this.hideTimeout);
+          this.hideTimeout = null;
+        }
+      });
+      this.toolbar.addEventListener('mouseleave', () => {
+        this.hideTimeout = setTimeout(() => this.hideToolbar(), 300);
+      });
+    }
 
     // Drop events on the editor
     this.quill.root.addEventListener('dragover', this.handleDragOver.bind(this));
     this.quill.root.addEventListener('drop', this.handleDrop.bind(this));
     this.quill.on('selection-change', range => {
       if (!range) {
-        this.hideToolbar();
+        // If selection is lost, we still wait a bit to see if it was a click on a non-editable element
+        setTimeout(() => {
+          if (!this.quill.getSelection() && this.currentBlocks.length === 0) {
+            this.hideToolbar();
+          }
+        }, 200);
       } else {
         this.handleSelection();
       }
@@ -111,11 +133,14 @@ export default class NodeMover {
                 position: absolute;
                 display: none;
                 height: 4px;
-                background: ${this.options.borderColor};
+                background: ${this.options.dropIndicatorColor};
                 pointer-events: none;
                 z-index: 1001;
                 border-radius: 2px;
                 transition: top 0.05s ease;
+            }
+            .ql-node-mover-dragging {
+                opacity: 0.5 !important;
             }
         `;
     document.head.appendChild(style);
@@ -163,26 +188,38 @@ export default class NodeMover {
     };
     return btn;
   }
-  handleSelection() {
+  handleSelection(event) {
     setTimeout(() => {
       const range = this.quill.getSelection();
-      if (!range) {
-        this.hideToolbar();
-        return;
-      }
-      this.selectionRange = {
-        index: range.index,
-        length: range.length
-      };
-      const lines = this.quill.getLines(range.index, range.length || 1);
+      let blocks = [];
+      if (range) {
+        this.selectionRange = {
+          index: range.index,
+          length: range.length
+        };
+        const lines = this.quill.getLines(range.index, range.length || 1);
 
-      // Filter out empty lines if it's just a cursor
-      let blocks = lines.map(line => line.domNode);
-      if (range.length === 0) {
-        const [line] = this.quill.getLine(range.index);
-        if (line && line.length() <= 1 && line.domNode.textContent === '') {
-          this.hideToolbar();
-          return;
+        // Filter out empty lines if it's just a cursor
+        blocks = lines.map(line => line.domNode);
+        if (range.length === 0) {
+          const [line] = this.quill.getLine(range.index);
+          if (line && line.length() <= 1 && line.domNode.textContent === '') {
+            this.hideToolbar();
+            return;
+          }
+        }
+      } else if (event && event.target && this.quill.root.contains(event.target)) {
+        const target = event.target;
+        const block = this.findBlock(target);
+        if (block) {
+          const blot = Quill.find(block);
+          if (blot) {
+            this.selectionRange = {
+              index: this.quill.getIndex(blot),
+              length: blot.length()
+            };
+            blocks = [block];
+          }
         }
       }
       if (blocks.length > 0) {
@@ -190,7 +227,7 @@ export default class NodeMover {
       } else {
         this.hideToolbar();
       }
-    }, 10);
+    }, 50);
   }
   findBlock(el) {
     let current = el;
@@ -241,7 +278,7 @@ export default class NodeMover {
     const toolbarWidth = this.toolbar.offsetWidth || 26;
     let left = rootRect.left - containerRect.left - toolbarWidth - 5;
 
-    // If not enough space on the left (less than toolbar width + some margin), move it inside
+    // If it would be off-screen (viewport left), move it inside
     if (rootRect.left < toolbarWidth + 10) {
       left = rootRect.left - containerRect.left + 5;
     }
@@ -374,10 +411,10 @@ export default class NodeMover {
       e.dataTransfer.effectAllowed = 'move';
       e.dataTransfer.setData('text/plain', 'quill-drag-element');
     }
-    this.currentBlocks.forEach(b => b.style.opacity = '0.5');
+    this.currentBlocks.forEach(b => b.classList.add('ql-node-mover-dragging'));
   }
   handleDragEnd() {
-    this.currentBlocks.forEach(b => b.style.opacity = '');
+    this.currentBlocks.forEach(b => b.classList.remove('ql-node-mover-dragging'));
     if (this.dropIndicator) this.dropIndicator.style.display = 'none';
     this.dragTarget = null;
     this.hideToolbar();

@@ -6,6 +6,7 @@ use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillBlockFieldInterface;
 use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillFieldModuleInterface;
 use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillInlineFieldInterface;
 use Ehyiah\QuillJsBundle\DTO\Modules\ModuleInterface;
+use Ehyiah\QuillJsBundle\DTO\Modules\NodeMoverModule;
 use Ehyiah\QuillJsBundle\DTO\Options\DebugOption;
 use Ehyiah\QuillJsBundle\DTO\Options\StyleOption;
 use Ehyiah\QuillJsBundle\DTO\Options\ThemeOption;
@@ -59,6 +60,20 @@ class QuillType extends AbstractType
         if (isset($extraOptions['placeholder']) && $extraOptions['placeholder'] instanceof TranslatableInterface) {
             $extraOptions['placeholder'] = $extraOptions['placeholder']->trans($this->translator);
         }
+
+        $nodeMoverFound = false;
+        foreach ($modules as $i => $module) {
+            if ($module instanceof NodeMoverModule) {
+                $nodeMoverFound = true;
+                if (isset($module->options['active']) && false === $module->options['active']) {
+                    unset($modules[$i]);
+                }
+            }
+        }
+        if (!$nodeMoverFound) {
+            $modules[] = new NodeMoverModule();
+        }
+        $modules = array_values($modules);
 
         $view->vars['attr']['quill_extra_options'] = json_encode($extraOptions);
         $view->vars['attr']['quill_modules_options'] = json_encode($modules);

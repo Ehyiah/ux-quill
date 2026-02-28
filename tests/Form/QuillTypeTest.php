@@ -94,8 +94,8 @@ final class QuillTypeTest extends TestCase
                 'modules' => [
                     new SyntaxModule(),
                     new ImageSelectionModule(),
-                    new NodeMoverModule(),
                     new EmojiModule(),
+                    new NodeMoverModule(),
                 ],
             ],
         ];
@@ -117,6 +117,7 @@ final class QuillTypeTest extends TestCase
                 'quill_extra_options' => [
                 ],
                 'modules' => [
+                    new NodeMoverModule(),
                 ],
             ],
         ];
