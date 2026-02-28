@@ -61,6 +61,15 @@ export default class ImageSelection {
         ...(options.alignLabels || {})
       }
     };
+    if (this.options.sectionLabels === undefined) {
+      this.options.sectionLabels = {
+        size: 'Size',
+        align: 'Align',
+        image: 'Image',
+        meta: 'Content',
+        insert: 'Insert'
+      };
+    }
     this.repositionHandler = this.reposition.bind(this);
     this.quill.root.addEventListener('click', this.handleClick.bind(this), true);
     this.quill.on('text-change', () => {
@@ -151,6 +160,25 @@ export default class ImageSelection {
                 pointer-events: auto;
                 user-select: none;
                 box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+                align-items: flex-end;
+            }
+            .ql-image-toolbar-section {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 4px;
+            }
+            .ql-image-toolbar-section-label {
+                font-size: 12px;
+                color: #aaa;
+                text-transform: uppercase;
+                font-weight: bold;
+                pointer-events: none;
+                user-select: none;
+            }
+            .ql-image-toolbar-section-buttons {
+                display: flex;
+                gap: 4px;
                 align-items: center;
             }
             .ql-image-toolbar button, .ql-image-input-bar button {
@@ -263,173 +291,177 @@ export default class ImageSelection {
     if (!this.toolbar) return;
 
     // Paragraph Before
-    const btnBefore = document.createElement('button');
-    btnBefore.type = 'button';
-    btnBefore.innerHTML = this.options.buttonBeforeLabel;
-    btnBefore.title = this.options.buttonBeforeTitle;
-    btnBefore.onclick = e => {
-      e.stopPropagation();
-      this.insertParagraphBefore();
-    };
-    this.toolbar.appendChild(btnBefore);
+    this.addSection(this.options.sectionLabels?.insert, container => {
+      const btnBefore = document.createElement('button');
+      btnBefore.type = 'button';
+      btnBefore.innerHTML = this.options.buttonBeforeLabel;
+      btnBefore.title = this.options.buttonBeforeTitle;
+      btnBefore.onclick = e => {
+        e.stopPropagation();
+        this.insertParagraphBefore();
+      };
+      container.appendChild(btnBefore);
+    });
     this.addSeparator();
 
     // Sizes
-    const sizes = ['25%', '50%', '75%', '100%'];
-    sizes.forEach(size => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.innerHTML = size;
-      btn.title = `Set width to ${size}`;
-      btn.dataset.size = size;
-      btn.onclick = e => {
+    this.addSection(this.options.sectionLabels?.size, container => {
+      const sizes = ['25%', '50%', '75%', '100%'];
+      sizes.forEach(size => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.innerHTML = size;
+        btn.title = `Set width to ${size}`;
+        btn.dataset.size = size;
+        btn.onclick = e => {
+          e.stopPropagation();
+          this.setSize(size);
+        };
+        container.appendChild(btn);
+      });
+      const btnCustomSize = document.createElement('button');
+      btnCustomSize.type = 'button';
+      btnCustomSize.innerHTML = ICONS.sizeCustom;
+      btnCustomSize.title = 'Set custom width';
+      btnCustomSize.onclick = e => {
         e.stopPropagation();
-        this.setSize(size);
+        this.showSizeInput();
       };
-      this.toolbar.appendChild(btn);
+      container.appendChild(btnCustomSize);
     });
-    const btnCustomSize = document.createElement('button');
-    btnCustomSize.type = 'button';
-    btnCustomSize.innerHTML = ICONS.sizeCustom;
-    btnCustomSize.title = 'Set custom width';
-    btnCustomSize.onclick = e => {
-      e.stopPropagation();
-      this.showSizeInput();
-    };
-    this.toolbar.appendChild(btnCustomSize);
     this.addSeparator();
 
     // Alignments
-    const alignments = [{
-      name: 'left',
-      icon: ICONS.alignLeft
-    }, {
-      name: 'leftBlock',
-      icon: ICONS.alignLeftBlock
-    }, {
-      name: 'center',
-      icon: ICONS.alignCenter
-    }, {
-      name: 'right',
-      icon: ICONS.alignRight
-    }];
-    alignments.forEach(align => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.innerHTML = align.icon;
-      // @ts-ignore
-      btn.title = this.options.alignLabels[align.name] || align.name;
-      btn.dataset.align = align.name;
-      btn.onclick = e => {
-        e.stopPropagation();
-        this.alignImage(align.name);
-      };
-      this.toolbar.appendChild(btn);
+    this.addSection(this.options.sectionLabels?.align, container => {
+      const alignments = [{
+        name: 'left',
+        icon: ICONS.alignLeft
+      }, {
+        name: 'leftBlock',
+        icon: ICONS.alignLeftBlock
+      }, {
+        name: 'center',
+        icon: ICONS.alignCenter
+      }, {
+        name: 'right',
+        icon: ICONS.alignRight
+      }];
+      alignments.forEach(align => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.innerHTML = align.icon;
+        // @ts-ignore
+        btn.title = this.options.alignLabels[align.name] || align.name;
+        btn.dataset.align = align.name;
+        btn.onclick = e => {
+          e.stopPropagation();
+          this.alignImage(align.name);
+        };
+        container.appendChild(btn);
+      });
     });
     this.updateActiveButtons();
     this.addSeparator();
 
-    // Rotation
-    const btnRotateLeft = document.createElement('button');
-    btnRotateLeft.type = 'button';
-    btnRotateLeft.innerHTML = ICONS.rotateLeft;
-    btnRotateLeft.title = this.options.rotateLeftTitle;
-    btnRotateLeft.onclick = e => {
-      e.stopPropagation();
-      this.rotateImage('left');
-    };
-    this.toolbar.appendChild(btnRotateLeft);
-    const btnRotateRight = document.createElement('button');
-    btnRotateRight.type = 'button';
-    btnRotateRight.innerHTML = ICONS.rotateRight;
-    btnRotateRight.title = this.options.rotateRightTitle;
-    btnRotateRight.onclick = e => {
-      e.stopPropagation();
-      this.rotateImage('right');
-    };
-    this.toolbar.appendChild(btnRotateRight);
-
-    // Flip
-    const btnFlipH = document.createElement('button');
-    btnFlipH.type = 'button';
-    btnFlipH.innerHTML = ICONS.flipHorizontal;
-    btnFlipH.title = this.options.flipHorizontalTitle;
-    btnFlipH.onclick = e => {
-      e.stopPropagation();
-      this.flipImage('horizontal');
-    };
-    this.toolbar.appendChild(btnFlipH);
-    const btnFlipV = document.createElement('button');
-    btnFlipV.type = 'button';
-    btnFlipV.innerHTML = ICONS.flipVertical;
-    btnFlipV.title = this.options.flipVerticalTitle;
-    btnFlipV.onclick = e => {
-      e.stopPropagation();
-      this.flipImage('vertical');
-    };
-    this.toolbar.appendChild(btnFlipV);
-
-    // Reset
-    const btnReset = document.createElement('button');
-    btnReset.type = 'button';
-    btnReset.innerHTML = ICONS.reset;
-    btnReset.title = this.options.resetTitle;
-    btnReset.onclick = e => {
-      e.stopPropagation();
-      this.resetImage();
-    };
-    this.toolbar.appendChild(btnReset);
+    // Rotation / Flip / Reset
+    this.addSection(this.options.sectionLabels?.image, container => {
+      const btnRotateLeft = document.createElement('button');
+      btnRotateLeft.type = 'button';
+      btnRotateLeft.innerHTML = ICONS.rotateLeft;
+      btnRotateLeft.title = this.options.rotateLeftTitle;
+      btnRotateLeft.onclick = e => {
+        e.stopPropagation();
+        this.rotateImage('left');
+      };
+      container.appendChild(btnRotateLeft);
+      const btnRotateRight = document.createElement('button');
+      btnRotateRight.type = 'button';
+      btnRotateRight.innerHTML = ICONS.rotateRight;
+      btnRotateRight.title = this.options.rotateRightTitle;
+      btnRotateRight.onclick = e => {
+        e.stopPropagation();
+        this.rotateImage('right');
+      };
+      container.appendChild(btnRotateRight);
+      const btnFlipH = document.createElement('button');
+      btnFlipH.type = 'button';
+      btnFlipH.innerHTML = ICONS.flipHorizontal;
+      btnFlipH.title = this.options.flipHorizontalTitle;
+      btnFlipH.onclick = e => {
+        e.stopPropagation();
+        this.flipImage('horizontal');
+      };
+      container.appendChild(btnFlipH);
+      const btnFlipV = document.createElement('button');
+      btnFlipV.type = 'button';
+      btnFlipV.innerHTML = ICONS.flipVertical;
+      btnFlipV.title = this.options.flipVerticalTitle;
+      btnFlipV.onclick = e => {
+        e.stopPropagation();
+        this.flipImage('vertical');
+      };
+      container.appendChild(btnFlipV);
+      const btnReset = document.createElement('button');
+      btnReset.type = 'button';
+      btnReset.innerHTML = ICONS.reset;
+      btnReset.title = this.options.resetTitle;
+      btnReset.onclick = e => {
+        e.stopPropagation();
+        this.resetImage();
+      };
+      container.appendChild(btnReset);
+    });
     this.addSeparator();
 
-    // Caption
-    const btnCaption = document.createElement('button');
-    btnCaption.type = 'button';
-    btnCaption.innerHTML = ICONS.caption;
-    btnCaption.title = 'Edit Caption';
-    btnCaption.onclick = e => {
-      e.stopPropagation();
-      this.showCaptionInput();
-    };
-    const blot = this.getBlot();
-    // @ts-ignore
-    if (blot && blot.formats().caption) btnCaption.classList.add('active');
-    this.toolbar.appendChild(btnCaption);
-
-    // Alt text
-    const btnAlt = document.createElement('button');
-    btnAlt.type = 'button';
-    btnAlt.innerHTML = ICONS.alt;
-    btnAlt.title = 'Edit Alt Text';
-    btnAlt.onclick = e => {
-      e.stopPropagation();
-      this.showAltInput();
-    };
-    this.toolbar.appendChild(btnAlt);
-
-    // Link
-    const btnLink = document.createElement('button');
-    btnLink.type = 'button';
-    btnLink.innerHTML = ICONS.link;
-    btnLink.title = this.options.linkTitle;
-    btnLink.onclick = e => {
-      e.stopPropagation();
-      this.showLinkInput();
-    };
-    // @ts-ignore
-    if (blot && blot.formats().link) btnLink.classList.add('active');
-    this.toolbar.appendChild(btnLink);
+    // Caption / Alt / Link
+    this.addSection(this.options.sectionLabels?.meta, container => {
+      const btnCaption = document.createElement('button');
+      btnCaption.type = 'button';
+      btnCaption.innerHTML = ICONS.caption;
+      btnCaption.title = 'Edit Caption';
+      btnCaption.onclick = e => {
+        e.stopPropagation();
+        this.showCaptionInput();
+      };
+      const blot = this.getBlot();
+      // @ts-ignore
+      if (blot && blot.formats().caption) btnCaption.classList.add('active');
+      container.appendChild(btnCaption);
+      const btnAlt = document.createElement('button');
+      btnAlt.type = 'button';
+      btnAlt.innerHTML = ICONS.alt;
+      btnAlt.title = 'Edit Alt Text';
+      btnAlt.onclick = e => {
+        e.stopPropagation();
+        this.showAltInput();
+      };
+      container.appendChild(btnAlt);
+      const btnLink = document.createElement('button');
+      btnLink.type = 'button';
+      btnLink.innerHTML = ICONS.link;
+      btnLink.title = this.options.linkTitle;
+      btnLink.onclick = e => {
+        e.stopPropagation();
+        this.showLinkInput();
+      };
+      // @ts-ignore
+      if (blot && blot.formats().link) btnLink.classList.add('active');
+      container.appendChild(btnLink);
+    });
     this.addSeparator();
 
     // Paragraph After
-    const btnAfter = document.createElement('button');
-    btnAfter.type = 'button';
-    btnAfter.innerHTML = this.options.buttonAfterLabel;
-    btnAfter.title = this.options.buttonAfterTitle;
-    btnAfter.onclick = e => {
-      e.stopPropagation();
-      this.insertParagraphAfter();
-    };
-    this.toolbar.appendChild(btnAfter);
+    this.addSection(this.options.sectionLabels?.insert, container => {
+      const btnAfter = document.createElement('button');
+      btnAfter.type = 'button';
+      btnAfter.innerHTML = this.options.buttonAfterLabel;
+      btnAfter.title = this.options.buttonAfterTitle;
+      btnAfter.onclick = e => {
+        e.stopPropagation();
+        this.insertParagraphAfter();
+      };
+      container.appendChild(btnAfter);
+    });
   }
   showGenericInput(currentValue, placeholder, width, onSave, onClear) {
     if (this.toolbar) this.toolbar.style.display = 'none';
@@ -606,6 +638,21 @@ export default class ImageSelection {
         btn.classList.remove('active');
       }
     });
+  }
+  addSection(label, callback) {
+    const section = document.createElement('div');
+    section.className = 'ql-image-toolbar-section';
+    if (label) {
+      const labelEl = document.createElement('div');
+      labelEl.className = 'ql-image-toolbar-section-label';
+      labelEl.innerText = label;
+      section.appendChild(labelEl);
+    }
+    const buttons = document.createElement('div');
+    buttons.className = 'ql-image-toolbar-section-buttons';
+    callback(buttons);
+    section.appendChild(buttons);
+    this.toolbar.appendChild(section);
   }
   addSeparator() {
     const sep = document.createElement('div');

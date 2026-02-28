@@ -36,6 +36,7 @@ This module is **automatically enabled** when the `ImageField` is used.
 | `resetTitle` | `string` | `'Reset image'` | Tooltip for the reset button. |
 | `linkTitle` | `string` | `'Edit link'` | Tooltip for the link button. |
 | `captionBackgroundColor` | `string` | `'rgba(51, 51, 51, 0.6)'` | Background color of the caption overlay. |
+| `sectionLabels` | `array` | See below | Small labels displayed above toolbar sections. To disable, pass an empty array `[]`. |
 
 ### alignLabels default values
 
@@ -45,6 +46,30 @@ This module is **automatically enabled** when the `ImageField` is used.
     'leftBlock' => 'Left (no wrap)',
     'center' => 'Align center',
     'right' => 'Right (wrapped)',
+]
+```
+
+### sectionLabels default values
+
+```php
+'sectionLabels' => [
+    'size' => 'Size',
+    'align' => 'Align',
+    'image' => 'Image',
+    'meta' => 'Content',
+    'insert' => 'Insert',
+]
+```
+
+### sectionLabels default values
+
+```php
+'sectionLabels' => [
+    'size' => 'Taille',
+    'align' => 'Alignement',
+    'image' => 'Image',
+    'meta' => 'Contenu',
+    'insert' => 'Insertion',
 ]
 ```
 
