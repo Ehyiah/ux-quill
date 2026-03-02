@@ -80,7 +80,7 @@ final class QuillGroup implements QuillGroupInterface
             new VideoField(),
             new EmojiField(),
             new CleanField(),
-            new TableField(),
+//            new TableField(),
         ];
 
         return array_merge($stylingFields, $orgaFields, $otherFields);

@@ -29,3 +29,5 @@ import * as katexModule from 'katex';
 const katex = katexModule.default || katexModule;
 // @ts-ignore
 window.katex = katex;
+import AdvancedTable from "./modules/advancedTable/index.js";
+Quill.register('modules/advanced-table', AdvancedTable);

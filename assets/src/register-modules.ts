@@ -42,3 +42,6 @@ import * as katexModule from 'katex';
 const katex = katexModule.default || katexModule;
 // @ts-ignore
 window.katex = katex;
+
+import AdvancedTable from './modules/advancedTable/index.ts';
+Quill.register('modules/advanced-table', AdvancedTable);
