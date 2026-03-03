@@ -2,104 +2,106 @@ import Quill from 'quill';
 
 const Module = Quill.import('core/module');
 const Icons = Quill.import('ui/icons');
+const Parchment = Quill.import('parchment');
 
-// Helper to register table header blots
+/**
+ * Register Style Attributors
+ */
+const TableBackground = new (Parchment as any).StyleAttributor('table-bg', 'background-color', { scope: (Parchment as any).Scope.BLOCK });
+const TableFontWeight = new (Parchment as any).StyleAttributor('table-weight', 'font-weight', { scope: (Parchment as any).Scope.BLOCK });
+const TableTextAlign = new (Parchment as any).StyleAttributor('table-align', 'text-align', { scope: (Parchment as any).Scope.BLOCK });
+const TableWidth = new (Parchment as any).StyleAttributor('table-width', 'width', { scope: (Parchment as any).Scope.BLOCK });
+const TableHeight = new (Parchment as any).StyleAttributor('table-height', 'height', { scope: (Parchment as any).Scope.BLOCK });
+
+Quill.register(TableBackground, true);
+Quill.register(TableFontWeight, true);
+Quill.register(TableTextAlign, true);
+Quill.register(TableWidth, true);
+Quill.register(TableHeight, true);
+
+/**
+ * Register semantic table header blots
+ */
 const registerTableBlots = (quillInstance?: any) => {
     try {
-        // In Quill 2.0 native table module:
-        // cell blotName is 'table'
-        // row blotName is 'table-row'
-        
-        // We find the classes from the scroll registry if possible, or try to import
-        const scroll = quillInstance?.scroll || (Quill as any).root?.['__quill']?.scroll;
-        const registry = scroll?.registry || (Quill as any).registry;
-        
-        const TableCell = registry?.query('table') || Quill.import('formats/table');
-        const TableRow = registry?.query('table-row') || Quill.import('formats/table-row');
+        const registry = quillInstance?.scroll?.registry || (Quill as any).registry;
+        if (!registry) return;
 
-        if (TableCell && !registry?.query('table-th')) {
+        const TableCell = registry.query('table');
+        const TableRow = registry.query('table-row');
+
+        if (TableCell && !registry.query('table-th')) {
             class TableHeader extends (TableCell as any) {
                 static blotName = 'table-th';
                 static tagName = 'TH';
+                static formats(domNode: HTMLElement) { return domNode.getAttribute('data-row'); }
+                formats() {
+                    const rowId = (this.constructor as any).formats(this.domNode);
+                    return { ...super.formats(), 'table': rowId, 'table-th': true };
+                }
+                format(name: string, value: any) {
+                    if (name === 'table-th') return;
+                    if (name === 'table') {
+                        if (value) this.domNode.setAttribute('data-row', value);
+                    } else {
+                        super.format(name, value);
+                    }
+                }
             }
-            Quill.register(TableHeader, true);
-
+            TableHeader.requiredContainer = TableRow;
             if (TableRow && TableRow.allowedChildren && !TableRow.allowedChildren.includes(TableHeader)) {
                 TableRow.allowedChildren.push(TableHeader);
-                Quill.register(TableRow, true);
             }
+            Quill.register(TableHeader, true);
         }
     } catch (e) {
-        // Silent fail for top-level load, will retry in constructor
+        console.warn('AdvancedTable: Failed to register blots', e);
     }
 };
 
-// Initial attempt
 registerTableBlots();
 
 // Global Icon
 Icons['advanced-table'] = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg>`;
 
 const CSS = `
-.ql-editor table { border-collapse: collapse; table-layout: fixed; width: 100%; margin: 30px 0; border: 1px solid #bbb; }
-.ql-editor td, .ql-editor th { border: 1px solid #bbb !important; padding: 10px !important; min-width: 40px; height: 35px; word-break: break-all; position: relative; }
-.ql-editor th { background-color: #f1f3f5 !important; font-weight: bold !important; text-align: center !important; }
-
+.ql-editor table { border-collapse: collapse; width: 100%; margin: 30px 0; border: 1px solid #bbb; table-layout: fixed; }
+.ql-editor td, .ql-editor th { border: 1px solid #bbb !important; padding: 10px !important; min-width: 40px; height: 35px; word-break: break-all; position: relative; box-sizing: border-box; }
+.ql-editor th { background-color: #f1f3f5; font-weight: bold; text-align: center; }
 .ql-table-ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100; }
-.ql-table-control-btn {
-    position: absolute; width: 22px; height: 22px; background-color: #007bff; border-radius: 50%;
-    display: none; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto;
-    color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 102; transform: translate(-50%, -50%);
-    transition: transform 0.1s, background-color 0.2s; border: 2px solid #fff;
-}
-.ql-table-control-btn:hover { background-color: #0056b3; transform: translate(-50%, -50%) scale(1.2); }
-.ql-table-control-btn svg { width: 12px; height: 12px; pointer-events: none; stroke-width: 4px; }
-
-.ql-table-grid-container {
-    position: fixed; background: white; border: 1px solid #ccc; box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-    border-radius: 8px; padding: 12px; z-index: 10001; display: none; flex-direction: column; gap: 8px; font-family: sans-serif;
-}
+.ql-table-resizer { position: absolute; z-index: 1000; pointer-events: auto; }
+.ql-table-resizer.col { cursor: col-resize; width: 12px; }
+.ql-table-resizer.row { cursor: row-resize; height: 12px; }
+.ql-table-resizer:hover { background-color: rgba(0, 123, 255, 0.4); }
+.ql-table-grid-container { position: fixed; background: white; border: 1px solid #ccc; box-shadow: 0 4px 15px rgba(0,0,0,0.15); border-radius: 8px; padding: 12px; z-index: 10001; display: none; flex-direction: column; gap: 8px; font-family: sans-serif; }
 .ql-table-grid-info { font-size: 13px; color: #333; text-align: center; font-weight: bold; }
 .ql-table-grid { display: grid; grid-template-columns: repeat(10, 20px); gap: 4px; }
 .ql-table-grid-cell { width: 20px; height: 20px; border: 1px solid #ddd; border-radius: 2px; cursor: pointer; }
 .ql-table-grid-cell.active { background-color: rgba(0, 123, 255, 0.4); border-color: #007bff; }
-
-.ql-table-context-menu {
-    position: fixed; background: white; border: 1px solid #ccc; box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-    border-radius: 8px; padding: 6px 0; z-index: 10000; display: none; min-width: 220px; font-family: sans-serif;
-}
+.ql-table-context-menu { position: fixed; background: white; border: 1px solid #ccc; box-shadow: 0 4px 15px rgba(0,0,0,0.15); border-radius: 8px; padding: 6px 0; z-index: 10000; display: none; min-width: 220px; font-family: sans-serif; }
 .ql-table-context-menu-item { padding: 10px 16px; cursor: pointer; font-size: 13px; color: #333; display: flex; align-items: center; gap: 12px; }
 .ql-table-context-menu-item:hover { background-color: #f0f7ff; color: #007bff; }
 .ql-table-context-menu-separator { height: 1px; background-color: #eee; margin: 6px 0; }
 `;
 
 const ICONS_INNER = {
-    plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>',
-    header: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M4 18V6M20 18V6"></path></svg>',
-    trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>'
+    header: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M4 18V6M20 18V6"></path></svg>'
 };
 
 class AdvancedTable extends Module {
     static moduleName = 'advanced-table';
-
-    private isBusy = false;
     private gridContainer: HTMLDivElement;
     private gridInfo: HTMLDivElement;
     private gridCells: HTMLDivElement[] = [];
     private overlay: HTMLDivElement | null = null;
-    private colBtn: HTMLDivElement | null = null;
-    private rowBtn: HTMLDivElement | null = null;
     private hoveredCell: HTMLElement | null = null;
-    private hideTimeout: any = null;
     private contextMenu: HTMLDivElement | null = null;
+    private dragging: any = null;
 
     constructor(quill, options) {
         super(quill, options);
         this.quill = quill;
-
-        // Final attempt to register blots now that we have a quill instance
         registerTableBlots(this.quill);
-
         this.injectStyles();
         this.init();
     }
@@ -116,27 +118,16 @@ class AdvancedTable extends Module {
         this.overlay = document.createElement('div');
         this.overlay.classList.add('ql-table-ui');
         this.quill.container.appendChild(this.overlay);
-
-        this.rowBtn = this.createButton('ql-table-add-row', "Ajouter une ligne au-dessus", () => this.executeAction('insertRowAbove'));
-        this.colBtn = this.createButton('ql-table-add-col', "Ajouter une colonne à droite", () => this.executeAction('insertColumnRight'));
-        
-        this.overlay.appendChild(this.colBtn);
-        this.overlay.appendChild(this.rowBtn);
-
         this.quill.root.addEventListener('mousemove', (e) => this.handleMouseMove(e));
-        this.quill.root.addEventListener('mouseleave', () => this.startHideTimeout());
-        
+        document.addEventListener('mousemove', (e) => this.handleDragging(e));
+        document.addEventListener('mouseup', () => this.stopDragging());
         this.initContextMenu();
         this.initGridSelector();
-
         setTimeout(() => {
             const toolbar = this.quill.getModule('toolbar');
             if (toolbar) {
                 const button = toolbar.container.querySelector('.ql-advanced-table');
-                if (button) button.addEventListener('click', (e) => {
-                    e.preventDefault(); e.stopPropagation();
-                    this.showGridSelector(button);
-                });
+                if (button) button.addEventListener('click', (e) => { e.preventDefault(); this.showGridSelector(button); });
             }
         }, 500);
     }
@@ -148,34 +139,24 @@ class AdvancedTable extends Module {
         this.gridInfo.classList.add('ql-table-grid-info');
         this.gridInfo.textContent = 'Sélectionner la taille';
         this.gridContainer.appendChild(this.gridInfo);
-
         const grid = document.createElement('div');
         grid.classList.add('ql-table-grid');
         for (let r = 1; r <= 10; r++) {
             for (let c = 1; c <= 10; c++) {
                 const cell = document.createElement('div');
                 cell.classList.add('ql-table-grid-cell');
-                cell.addEventListener('mouseenter', () => {
+                cell.onmouseenter = () => {
                     this.gridInfo.textContent = `${r} x ${c}`;
-                    this.gridCells.forEach((gc, idx) => {
-                        const gr = Math.floor(idx / 10) + 1;
-                        const gcol = (idx % 10) + 1;
-                        gc.classList.toggle('active', gr <= r && gcol <= c);
-                    });
-                });
-                cell.addEventListener('click', () => {
-                    this.executeAction('insertTable', [r, c]);
-                    this.gridContainer.style.display = 'none';
-                });
+                    this.gridCells.forEach((gc, idx) => gc.classList.toggle('active', Math.floor(idx / 10) < r && (idx % 10) < c));
+                };
+                cell.onclick = () => { this.executeAction('insertTable', [r, c]); this.gridContainer.style.display = 'none'; };
                 grid.appendChild(cell);
                 this.gridCells.push(cell);
             }
         }
         this.gridContainer.appendChild(grid);
         document.body.appendChild(this.gridContainer);
-        document.addEventListener('mousedown', (e) => {
-            if (!this.gridContainer.contains(e.target as Node)) this.gridContainer.style.display = 'none';
-        });
+        document.addEventListener('mousedown', (e) => { if (!this.gridContainer.contains(e.target as Node)) this.gridContainer.style.display = 'none'; });
     }
 
     showGridSelector(button: HTMLElement) {
@@ -185,190 +166,220 @@ class AdvancedTable extends Module {
         this.gridContainer.style.display = 'flex';
     }
 
-    createButton(className, title, onClick) {
-        const btn = document.createElement('div');
-        btn.classList.add('ql-table-control-btn', className);
-        btn.innerHTML = ICONS_INNER.plus;
-        btn.title = title;
-        btn.addEventListener('click', (e) => {
-            e.preventDefault(); e.stopPropagation();
-            if (this.isBusy) return;
-            this.isBusy = true;
-            onClick();
-            setTimeout(() => { this.isBusy = false; }, 500);
-        });
-        btn.addEventListener('mouseenter', () => this.clearHideTimeout());
-        btn.addEventListener('mouseleave', () => this.startHideTimeout());
-        return btn;
-    }
-
     executeAction(method, args = []) {
         this.quill.focus();
         const tableModule = this.quill.getModule('table') || this.quill.getModule('table-better');
         if (!tableModule) return;
 
         if (this.hoveredCell && method !== 'insertTable') {
-            const blot = Quill.find(this.hoveredCell);
-            if (blot) this.quill.setSelection(blot.offset(this.quill.scroll), 0, 'silent');
+            let refCell = this.hoveredCell;
+            if (refCell.tagName === 'TH') {
+                const substitute = this.findSubstituteCell(refCell, method);
+                if (substitute) refCell = substitute;
+            }
+            const blot = Quill.find(refCell);
+            if (blot) {
+                const index = blot.offset(this.quill.scroll);
+                this.quill.setSelection(index, 0, 'silent');
+            }
         }
 
-        if (method === 'toggleHeaderRow') {
-            this.toggleHeaderRow();
-        } else if (method === 'toggleHeaderColumn') {
-            this.toggleHeaderColumn();
-        } else if (typeof tableModule[method] === 'function') {
+        if (method === 'toggleHeaderRow') this.toggleHeaderRow();
+        else if (method === 'toggleHeaderColumn') this.toggleHeaderColumn();
+        else if (typeof tableModule[method] === 'function') {
+            const headerState = method.startsWith('insert') ? this.captureHeaderState() : null;
             tableModule[method](...args);
-        } else if (tableModule) {
-            // Fallbacks for native module names
-            if (method === 'insertRowAbove' && tableModule.insertRowAbove) tableModule.insertRowAbove();
-            else if (method === 'insertRowBelow' && tableModule.insertRowBelow) tableModule.insertRowBelow();
-            else if (method === 'insertColumnLeft' && tableModule.insertColumnLeft) tableModule.insertColumnLeft();
-            else if (method === 'insertColumnRight' && tableModule.insertColumnRight) tableModule.insertColumnRight();
-            else if (method === 'deleteRow' && tableModule.deleteRow) tableModule.deleteRow();
-            else if (method === 'deleteColumn' && tableModule.deleteColumn) tableModule.deleteColumn();
-            else if (method === 'deleteTable' && tableModule.deleteTable) tableModule.deleteTable();
+            if (method.startsWith('insert')) {
+                setTimeout(() => this.fixHeadersAfterAction(headerState), 100);
+            }
         }
+        this.quill.update();
+    }
+
+    private findSubstituteCell(th: HTMLElement, method: string): HTMLElement | null {
+        const table = th.closest('table') as HTMLTableElement;
+        if (!table) return null;
+        const row = th.closest('tr') as HTMLTableRowElement;
+        const colIdx = (th as HTMLTableCellElement).cellIndex;
+        const rowIdx = Array.from(table.rows).indexOf(row);
+
+        const isRowOp = method.includes('Row');
+
+        if (isRowOp) {
+            // Pour une opération sur les lignes : besoin d'être dans la bonne ligne.
+            // Chercher un TD dans la même ligne (cas header colonne).
+            const tdInRow = Array.from(row.cells).find(c => c.tagName === 'TD') as HTMLElement | undefined;
+            if (tdInRow) return tdInRow;
+            // Toute la ligne est TH (header row) : utiliser la ligne adjacente.
+            const adjRowIdx = method.includes('Below') ? rowIdx + 1 : rowIdx - 1;
+            const adjRow = table.rows[adjRowIdx];
+            if (adjRow) {
+                const tdAdj = Array.from(adjRow.cells).find(c => c.tagName === 'TD') as HTMLElement | undefined;
+                if (tdAdj) return tdAdj;
+            }
+        } else {
+            // Pour une opération sur les colonnes : besoin d'être dans la bonne colonne.
+            // Chercher un TD dans la même colonne (cas header ligne).
+            for (let r = 0; r < table.rows.length; r++) {
+                if (r === rowIdx) continue;
+                const cell = table.rows[r].cells[colIdx];
+                if (cell?.tagName === 'TD') return cell as HTMLElement;
+            }
+        }
+
+        // Dernier recours : n'importe quel TD du tableau.
+        return table.querySelector('td') as HTMLElement | null;
+    }
+
+    private captureHeaderState(): { hasHeaderRow: boolean; hasHeaderCol: boolean } | null {
+        const table = this.quill.root.querySelector('table');
+        if (!table) return null;
+        const rows = Array.from(table.rows);
+        if (!rows.length) return null;
+        return {
+            hasHeaderRow: Array.from(rows[0].cells).every(c => c.tagName === 'TH'),
+            hasHeaderCol: rows.every(r => r.cells[0]?.tagName === 'TH'),
+        };
+    }
+
+    private fixHeadersAfterAction(state?: { hasHeaderRow: boolean; hasHeaderCol: boolean } | null) {
+        const table = this.quill.root.querySelector('table');
+        if (!table) return;
+        const rows = Array.from(table.rows);
+        if (!rows.length) return;
+
+        const isRowHeader = state?.hasHeaderRow ?? Array.from(rows[0].cells).every(c => c.tagName === 'TH');
+        const isColHeader = state?.hasHeaderCol ?? rows.every(r => r.cells[0]?.tagName === 'TH');
+
+        if (!isRowHeader && !isColHeader) return;
+
+        rows.forEach((row, rIdx) => {
+            Array.from(row.cells).forEach((cell, cIdx) => {
+                const shouldBeHeader = (isRowHeader && rIdx === 0) || (isColHeader && cIdx === 0);
+                if (shouldBeHeader) this.setSemanticCell(cell as HTMLElement, true);
+            });
+        });
+        this.reconnectAndSync();
     }
 
     toggleHeaderRow() {
-        if (!this.hoveredCell || this.isBusy) return;
-        this.isBusy = true;
-        
+        if (!this.hoveredCell) return;
         const row = this.hoveredCell.closest('tr');
-        if (!row) { this.isBusy = false; return; }
-
-        const isToHeader = row.querySelector('td') !== null;
-        Array.from(row.children).forEach(cell => {
-            this.setSemanticCell(cell as HTMLElement, isToHeader);
-        });
-        
-        this.quill.update();
-        this.quill.scroll.optimize();
-        setTimeout(() => { this.isBusy = false; }, 300);
+        if (!row) return;
+        const toHeader = row.querySelector('td') !== null;
+        Array.from(row.children).forEach(cell => this.setSemanticCell(cell as HTMLElement, toHeader));
+        this.reconnectAndSync();
     }
 
     toggleHeaderColumn() {
-        if (!this.hoveredCell || this.isBusy) return;
-        this.isBusy = true;
-        
-        const cell = this.hoveredCell;
-        const colIndex = (cell as any).cellIndex;
-        const table = cell.closest('table');
-        if (!table || colIndex === undefined) { this.isBusy = false; return; }
-
-        // Determine if we are turning ON or OFF by looking at the current cell
-        const isToHeader = cell.tagName !== 'TH';
-        
+        if (!this.hoveredCell) return;
+        const table = this.hoveredCell.closest('table');
+        if (!table) return;
+        const colIdx = (this.hoveredCell as HTMLTableCellElement).cellIndex;
+        const toHeader = this.hoveredCell.tagName !== 'TH';
         Array.from(table.rows).forEach(row => {
-            if (row.cells[colIndex]) {
-                this.setSemanticCell(row.cells[colIndex] as HTMLElement, isToHeader);
-            }
+            if (row.cells[colIdx]) this.setSemanticCell(row.cells[colIdx], toHeader);
         });
-        
-        this.quill.update();
+        this.reconnectAndSync();
+    }
+
+    private reconnectAndSync() {
+        this.quill.scroll.build();
         this.quill.scroll.optimize();
-        setTimeout(() => { this.isBusy = false; }, 300);
+        this.quill.update('user');
+        if ((this.quill as any).emitter) (this.quill as any).emitter.emit('text-change', null, null, 'user');
     }
 
     private setSemanticCell(cell: HTMLElement, toHeader: boolean) {
         if ((toHeader && cell.tagName === 'TH') || (!toHeader && cell.tagName === 'TD')) return;
-
-        const blot = Quill.find(cell) as any;
+        const blot = Quill.find(cell);
         if (!blot) return;
+        const rowId = cell.getAttribute('data-row');
+        if (!rowId) return;
 
-        // In Quill 2.0 native table, 'table' is the blotName for TD
-        const targetName = toHeader ? 'table-th' : 'table';
-
-        try {
-            const formats = blot.formats();
-            const cellValue = formats['table'] || formats['table-th'] || formats || {};
-
-            const newBlot = blot.replaceWith(targetName, cellValue);
-            if (!newBlot) return;
-            
-            const newNode = newBlot.domNode as HTMLElement;
-
-            if (toHeader) {
-                newNode.style.backgroundColor = '#f1f3f5';
-                newNode.style.fontWeight = 'bold';
-                newNode.style.textAlign = 'center';
-            } else {
-                newNode.style.backgroundColor = '';
-                newNode.style.fontWeight = '';
-                newNode.style.textAlign = '';
-            }
-        } catch (e) {
-            console.error('AdvancedTable: Failed to replace semantic cell', e);
-            // DOM Fallback preserving attributes (data-row etc)
-            const newNode = document.createElement(toHeader ? 'TH' : 'TD');
-            if (toHeader) {
-                newNode.style.backgroundColor = '#f1f3f5';
-                newNode.style.fontWeight = 'bold';
-            }
-            Array.from(cell.attributes).forEach(attr => newNode.setAttribute(attr.name, attr.value));
-            while(cell.firstChild) newNode.appendChild(cell.firstChild);
-            cell.parentNode?.replaceChild(newNode, cell);
-        }
+        // Use Quill's internal replaceWith to maintain the tree structure
+        (blot as any).replaceWith(toHeader ? 'table-th' : 'table', rowId);
     }
 
     handleMouseMove(e) {
+        if (this.dragging) return;
         const cell = e.target.closest('td, th');
         if (cell) {
-            this.clearHideTimeout();
             this.hoveredCell = cell;
-            this.updateUIPosition(cell);
-            this.showButtons();
-        } else if (!e.target.closest('.ql-table-control-btn')) {
-            this.startHideTimeout();
+            this.updateResizers(cell, e);
+        } else {
+            this.clearResizers();
         }
     }
 
-    startHideTimeout() {
-        this.clearHideTimeout();
-        this.hideTimeout = setTimeout(() => this.hideButtons(), 800);
-    }
-
-    clearHideTimeout() {
-        if (this.hideTimeout) { clearTimeout(this.hideTimeout); this.hideTimeout = null; }
-    }
-
-    showButtons() {
-        if (this.colBtn) this.colBtn.style.display = 'flex';
-        if (this.rowBtn) this.rowBtn.style.display = 'flex';
-    }
-
-    hideButtons() {
-        if (this.colBtn) this.colBtn.style.display = 'none';
-        if (this.rowBtn) this.rowBtn.style.display = 'none';
-    }
-
-    updateUIPosition(cell) {
-        const cellRect = cell.getBoundingClientRect();
+    private updateResizers(cell: HTMLElement, e: MouseEvent) {
+        if (!this.overlay) return;
+        const rect = cell.getBoundingClientRect();
         const containerRect = this.quill.container.getBoundingClientRect();
-        const cellTop = cellRect.top - containerRect.top;
-        const cellLeft = cellRect.left - containerRect.left;
-        const cellRight = cellRect.right - containerRect.left;
+        const threshold = 12;
+        const isRight = Math.abs(e.clientX - rect.right) < threshold;
+        const isBottom = Math.abs(e.clientY - rect.bottom) < threshold;
 
-        if (this.rowBtn) {
-            this.rowBtn.style.top = `${cellTop}px`;
-            this.rowBtn.style.left = `${cellLeft + (cellRect.width / 2)}px`;
+        if (isRight || isBottom) {
+            this.clearResizers();
+            if (isRight) this.createResizer('col', cell, { top: rect.top - containerRect.top, left: rect.right - containerRect.left - 6, height: rect.height });
+            if (isBottom) this.createResizer('row', cell, { top: rect.bottom - containerRect.top - 6, left: rect.left - containerRect.left, width: rect.width });
         }
+    }
 
-        if (this.colBtn) {
-            this.colBtn.style.top = `${cellTop + (cellRect.height / 2)}px`;
-            this.colBtn.style.left = `${cellRight}px`;
-        }
+    private createResizer(type, cell, style) {
+        const resizer = document.createElement('div');
+        resizer.classList.add('ql-table-resizer', type);
+        Object.assign(resizer.style, { top: `${style.top}px`, left: `${style.left}px`, width: style.width ? `${style.width}px` : '12px', height: style.height ? `${style.height}px` : '12px' });
+        resizer.onmousedown = (e) => this.startDragging(e, type, cell);
+        this.overlay?.appendChild(resizer);
+    }
+
+    private clearResizers() { this.overlay?.querySelectorAll('.ql-table-resizer').forEach(r => r.remove()); }
+
+    private startDragging(e, type, cell) {
+        e.preventDefault(); e.stopPropagation();
+        const table = cell.closest('table');
+        if (!table) return;
+        let targetCells: HTMLElement[] = [];
+        if (type === 'col') {
+            const idx = (cell as HTMLTableCellElement).cellIndex;
+            targetCells = Array.from(table.rows).map(row => row.cells[idx]).filter(c => !!c) as HTMLElement[];
+        } else targetCells = Array.from(cell.parentElement.children) as HTMLElement[];
+        
+        this.dragging = { type, startSize: type === 'col' ? cell.offsetWidth : cell.offsetHeight, startPos: type === 'col' ? e.clientX : e.clientY, targetCells };
+        document.body.style.cursor = type === 'col' ? 'col-resize' : 'row-resize';
+    }
+
+    private handleDragging(e) {
+        if (!this.dragging) return;
+        const delta = (this.dragging.type === 'col' ? e.clientX : e.clientY) - this.dragging.startPos;
+        const newSize = Math.max(30, this.dragging.startSize + delta);
+        this.dragging.targetCells.forEach(cell => { if (this.dragging.type === 'col') cell.style.width = `${newSize}px`; else cell.style.height = `${newSize}px`; });
+    }
+
+    private stopDragging() {
+        if (!this.dragging) return;
+        const { type, targetCells } = this.dragging;
+        const formatName = type === 'col' ? 'table-width' : 'table-height';
+
+        targetCells.forEach(cell => {
+            const blot = Quill.find(cell);
+            if (!blot) return;
+            const val = type === 'col' ? cell.style.width : cell.style.height;
+            const index = (blot as any).offset(this.quill.scroll);
+            this.quill.formatLine(index, 1, formatName, val, 'user');
+        });
+
+        this.dragging = null;
+        document.body.style.cursor = '';
     }
 
     initContextMenu() {
         this.contextMenu = document.createElement('div');
         this.contextMenu.classList.add('ql-table-context-menu');
         document.body.appendChild(this.contextMenu);
-        document.addEventListener('mousedown', (e) => {
-            if (this.gridContainer && !this.gridContainer.contains(e.target as Node) && this.contextMenu && !this.contextMenu.contains(e.target as Node)) {
-                this.contextMenu.style.display = 'none';
-            }
-        });
+        document.addEventListener('mousedown', (e) => { if (!this.contextMenu?.contains(e.target as Node)) this.contextMenu!.style.display = 'none'; });
         this.quill.root.addEventListener('contextmenu', (e) => {
             const cell = (e.target as HTMLElement).closest('td, th');
             if (!cell) return;
@@ -377,42 +388,36 @@ class AdvancedTable extends Module {
         });
     }
 
-    showContextMenu(x, y, cell: HTMLElement) {
+    showContextMenu(x, y, cell) {
         this.hoveredCell = cell;
-        if (!this.contextMenu) return;
-        this.contextMenu.innerHTML = '';
-        const actions = [
-            { text: 'Passer la ligne en header', icon: ICONS_INNER.header, action: () => this.executeAction('toggleHeaderRow') },
-            { text: 'Passer la colonne en header', icon: ICONS_INNER.header, action: () => this.executeAction('toggleHeaderColumn') },
+        this.contextMenu!.innerHTML = '';
+        [
+            { text: 'Header Ligne', icon: ICONS_INNER.header, action: () => this.executeAction('toggleHeaderRow') },
+            { text: 'Header Colonne', icon: ICONS_INNER.header, action: () => this.executeAction('toggleHeaderColumn') },
             { separator: true },
             { text: 'Insérer ligne au-dessus', action: () => this.executeAction('insertRowAbove') },
             { text: 'Insérer ligne en-dessous', action: () => this.executeAction('insertRowBelow') },
             { text: 'Insérer colonne à gauche', action: () => this.executeAction('insertColumnLeft') },
             { text: 'Insérer colonne à droite', action: () => this.executeAction('insertColumnRight') },
             { separator: true },
+            { text: 'Supprimer ligne', action: () => this.executeAction('deleteRow') },
+            { text: 'Supprimer colonne', action: () => this.executeAction('deleteColumn') },
+            { separator: true },
             { text: 'Supprimer le tableau', action: () => this.executeAction('deleteTable') }
-        ];
-
-        actions.forEach(item => {
-            if (item.separator) {
+        ].forEach(item => {
+            if ((item as any).separator) {
                 const sep = document.createElement('div');
                 sep.classList.add('ql-table-context-menu-separator');
-                if (this.contextMenu) this.contextMenu.appendChild(sep);
+                this.contextMenu!.appendChild(sep);
             } else {
-                const menuItem = document.createElement('div');
-                menuItem.classList.add('ql-table-context-menu-item');
-                menuItem.innerHTML = `<span class="ql-table-icon" style="width:16px;height:16px;display:flex;opacity:0.7;">${(item as any).icon || ''}</span> <span>${(item as any).text}</span>`;
-                menuItem.addEventListener('click', () => {
-                    (item as any).action();
-                    if (this.contextMenu) this.contextMenu.style.display = 'none';
-                });
-                if (this.contextMenu) this.contextMenu.appendChild(menuItem);
+                const div = document.createElement('div');
+                div.classList.add('ql-table-context-menu-item');
+                div.innerHTML = `<span style="width:16px;display:flex;opacity:0.7;">${(item as any).icon || ''}</span><span>${(item as any).text}</span>`;
+                div.onclick = () => { (item as any).action(); this.contextMenu!.style.display = 'none'; };
+                this.contextMenu!.appendChild(div);
             }
         });
-
-        this.contextMenu.style.top = `${y}px`;
-        this.contextMenu.style.left = `${x}px`;
-        this.contextMenu.style.display = 'block';
+        Object.assign(this.contextMenu!.style, { top: `${y}px`, left: `${x}px`, display: 'block' });
     }
 }
 
