@@ -2,6 +2,37 @@ import Quill from 'quill';
 const Module = Quill.import('core/module');
 const Icons = Quill.import('ui/icons');
 
+// Helper to register table header blots
+const registerTableBlots = quillInstance => {
+  try {
+    // In Quill 2.0 native table module:
+    // cell blotName is 'table'
+    // row blotName is 'table-row'
+
+    // We find the classes from the scroll registry if possible, or try to import
+    const scroll = quillInstance?.scroll || Quill.root?.['__quill']?.scroll;
+    const registry = scroll?.registry || Quill.registry;
+    const TableCell = registry?.query('table') || Quill.import('formats/table');
+    const TableRow = registry?.query('table-row') || Quill.import('formats/table-row');
+    if (TableCell && !registry?.query('table-th')) {
+      class TableHeader extends TableCell {
+        static blotName = 'table-th';
+        static tagName = 'TH';
+      }
+      Quill.register(TableHeader, true);
+      if (TableRow && TableRow.allowedChildren && !TableRow.allowedChildren.includes(TableHeader)) {
+        TableRow.allowedChildren.push(TableHeader);
+        Quill.register(TableRow, true);
+      }
+    }
+  } catch (e) {
+    // Silent fail for top-level load, will retry in constructor
+  }
+};
+
+// Initial attempt
+registerTableBlots();
+
 // Global Icon
 Icons['advanced-table'] = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg>`;
 const CSS = `
@@ -56,6 +87,9 @@ class AdvancedTable extends Module {
   constructor(quill, options) {
     super(quill, options);
     this.quill = quill;
+
+    // Final attempt to register blots now that we have a quill instance
+    registerTableBlots(this.quill);
     this.injectStyles();
     this.init();
   }
@@ -185,6 +219,7 @@ class AdvancedTable extends Module {
       this.setSemanticCell(cell, isToHeader);
     });
     this.quill.update();
+    this.quill.scroll.optimize();
     setTimeout(() => {
       this.isBusy = false;
     }, 300);
@@ -199,6 +234,8 @@ class AdvancedTable extends Module {
       this.isBusy = false;
       return;
     }
+
+    // Determine if we are turning ON or OFF by looking at the current cell
     const isToHeader = cell.tagName !== 'TH';
     Array.from(table.rows).forEach(row => {
       if (row.cells[colIndex]) {
@@ -206,34 +243,44 @@ class AdvancedTable extends Module {
       }
     });
     this.quill.update();
+    this.quill.scroll.optimize();
     setTimeout(() => {
       this.isBusy = false;
     }, 300);
   }
   setSemanticCell(cell, toHeader) {
     if (toHeader && cell.tagName === 'TH' || !toHeader && cell.tagName === 'TD') return;
-    try {
-      const newNode = document.createElement(toHeader ? 'TH' : 'TD');
+    const blot = Quill.find(cell);
+    if (!blot) return;
 
-      // Basic styles for TH
+    // In Quill 2.0 native table, 'table' is the blotName for TD
+    const targetName = toHeader ? 'table-th' : 'table';
+    try {
+      const formats = blot.formats();
+      const cellValue = formats['table'] || formats['table-th'] || formats || {};
+      const newBlot = blot.replaceWith(targetName, cellValue);
+      if (!newBlot) return;
+      const newNode = newBlot.domNode;
       if (toHeader) {
         newNode.style.backgroundColor = '#f1f3f5';
         newNode.style.fontWeight = 'bold';
         newNode.style.textAlign = 'center';
+      } else {
+        newNode.style.backgroundColor = '';
+        newNode.style.fontWeight = '';
+        newNode.style.textAlign = '';
       }
-
-      // Copy all attributes from old cell
-      Array.from(cell.attributes).forEach(attr => {
-        newNode.setAttribute(attr.name, attr.value);
-      });
-
-      // Move contents
-      while (cell.firstChild) newNode.appendChild(cell.firstChild);
-
-      // Replace in DOM
-      cell.parentNode?.replaceChild(newNode, cell);
     } catch (e) {
-      console.error('AdvancedTable: Failed to toggle cell tag', e);
+      console.error('AdvancedTable: Failed to replace semantic cell', e);
+      // DOM Fallback preserving attributes (data-row etc)
+      const newNode = document.createElement(toHeader ? 'TH' : 'TD');
+      if (toHeader) {
+        newNode.style.backgroundColor = '#f1f3f5';
+        newNode.style.fontWeight = 'bold';
+      }
+      Array.from(cell.attributes).forEach(attr => newNode.setAttribute(attr.name, attr.value));
+      while (cell.firstChild) newNode.appendChild(cell.firstChild);
+      cell.parentNode?.replaceChild(newNode, cell);
     }
   }
   handleMouseMove(e) {
