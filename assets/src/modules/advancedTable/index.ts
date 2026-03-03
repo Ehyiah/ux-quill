@@ -47,19 +47,21 @@ const ICONS_INNER = {
 
 class AdvancedTable extends Module {
     static moduleName = 'advanced-table';
+
     private isBusy = false;
     private gridContainer: HTMLDivElement;
     private gridInfo: HTMLDivElement;
     private gridCells: HTMLDivElement[] = [];
+    private overlay: HTMLDivElement | null = null;
+    private colBtn: HTMLDivElement | null = null;
+    private rowBtn: HTMLDivElement | null = null;
+    private hoveredCell: HTMLElement | null = null;
+    private hideTimeout: any = null;
+    private contextMenu: HTMLDivElement | null = null;
 
     constructor(quill, options) {
         super(quill, options);
         this.quill = quill;
-        this.overlay = null;
-        this.colBtn = null;
-        this.rowBtn = null;
-        this.hoveredCell = null;
-        this.hideTimeout = null;
 
         this.injectStyles();
         this.init();
@@ -175,10 +177,15 @@ class AdvancedTable extends Module {
 
         if (method === 'toggleHeaderRow') {
             this.toggleHeaderRow();
+        } else if (method === 'toggleHeaderColumn') {
+            this.toggleHeaderColumn();
         } else if (typeof tableModule[method] === 'function') {
             tableModule[method](...args);
         } else if (tableModule) {
+            // Fallbacks for native module names
             if (method === 'insertRowAbove' && tableModule.insertRowAbove) tableModule.insertRowAbove();
+            else if (method === 'insertRowBelow' && tableModule.insertRowBelow) tableModule.insertRowBelow();
+            else if (method === 'insertColumnLeft' && tableModule.insertColumnLeft) tableModule.insertColumnLeft();
             else if (method === 'insertColumnRight' && tableModule.insertColumnRight) tableModule.insertColumnRight();
             else if (method === 'deleteRow' && tableModule.deleteRow) tableModule.deleteRow();
             else if (method === 'deleteColumn' && tableModule.deleteColumn) tableModule.deleteColumn();
@@ -193,7 +200,7 @@ class AdvancedTable extends Module {
         const row = this.hoveredCell.closest('tr');
         if (!row) { this.isBusy = false; return; }
 
-        const isToHeader = row.children[0]?.tagName !== 'TH';
+        const isToHeader = row.querySelector('td') !== null;
         Array.from(row.children).forEach(cell => {
             this.setSemanticCell(cell as HTMLElement, isToHeader);
         });
@@ -202,48 +209,52 @@ class AdvancedTable extends Module {
         setTimeout(() => { this.isBusy = false; }, 300);
     }
 
+    toggleHeaderColumn() {
+        if (!this.hoveredCell || this.isBusy) return;
+        this.isBusy = true;
+        
+        const cell = this.hoveredCell;
+        const colIndex = (cell as any).cellIndex;
+        const table = cell.closest('table');
+        if (!table || colIndex === undefined) { this.isBusy = false; return; }
+
+        const isToHeader = cell.tagName !== 'TH';
+        
+        Array.from(table.rows).forEach(row => {
+            if (row.cells[colIndex]) {
+                this.setSemanticCell(row.cells[colIndex] as HTMLElement, isToHeader);
+            }
+        });
+        
+        this.quill.update();
+        setTimeout(() => { this.isBusy = false; }, 300);
+    }
+
     private setSemanticCell(cell: HTMLElement, toHeader: boolean) {
-        const blot = Quill.find(cell) as any;
-        if (!blot) return;
-
-        const rowBlot = blot.parent;
-        if (!rowBlot) return;
-
-        // Auto-detect correct target blot name from allowed children of the row
-        const allowed = rowBlot.constructor.allowedChildren || [];
-        const targetBlot = allowed.find((c: any) => 
-            toHeader ? (c.tagName === 'TH' || c.blotName.includes('header') || c.blotName.includes('-th')) 
-                     : (c.tagName === 'TD' || c.blotName.includes('cell') || c.blotName.includes('-td'))
-        );
-
-        const targetName = targetBlot ? targetBlot.blotName : (toHeader ? 'table-header' : 'table-cell');
+        if ((toHeader && cell.tagName === 'TH') || (!toHeader && cell.tagName === 'TD')) return;
 
         try {
-            // Apply visual styles inline for safety and persistence
-            if (toHeader) {
-                cell.style.backgroundColor = '#f1f3f5';
-                cell.style.fontWeight = 'bold';
-                cell.style.textAlign = 'center';
-            } else {
-                cell.style.backgroundColor = '';
-                cell.style.fontWeight = '';
-                cell.style.textAlign = '';
-            }
-
-            // Semantic switch using Quill registry
-            const currentName = (blot.constructor as any).blotName;
-            const formats = blot.formats();
-            const value = formats[currentName] || {};
-            blot.replaceWith(targetName, value);
-        } catch (e) {
-            // Fallback manual DOM change (very safe against crashes)
             const newNode = document.createElement(toHeader ? 'TH' : 'TD');
+            
+            // Basic styles for TH
             if (toHeader) {
                 newNode.style.backgroundColor = '#f1f3f5';
                 newNode.style.fontWeight = 'bold';
+                newNode.style.textAlign = 'center';
             }
+
+            // Copy all attributes from old cell
+            Array.from(cell.attributes).forEach(attr => {
+                newNode.setAttribute(attr.name, attr.value);
+            });
+
+            // Move contents
             while(cell.firstChild) newNode.appendChild(cell.firstChild);
+            
+            // Replace in DOM
             cell.parentNode?.replaceChild(newNode, cell);
+        } catch (e) {
+            console.error('AdvancedTable: Failed to toggle cell tag', e);
         }
     }
 
@@ -285,13 +296,15 @@ class AdvancedTable extends Module {
         const cellLeft = cellRect.left - containerRect.left;
         const cellRight = cellRect.right - containerRect.left;
 
-        // TOP adds ROW Above
-        this.rowBtn.style.top = `${cellTop}px`;
-        this.rowBtn.style.left = `${cellLeft + (cellRect.width / 2)}px`;
+        if (this.rowBtn) {
+            this.rowBtn.style.top = `${cellTop}px`;
+            this.rowBtn.style.left = `${cellLeft + (cellRect.width / 2)}px`;
+        }
 
-        // RIGHT adds COLUMN Right
-        this.colBtn.style.top = `${cellTop + (cellRect.height / 2)}px`;
-        this.colBtn.style.left = `${cellRight}px`;
+        if (this.colBtn) {
+            this.colBtn.style.top = `${cellTop + (cellRect.height / 2)}px`;
+            this.colBtn.style.left = `${cellRight}px`;
+        }
     }
 
     initContextMenu() {
@@ -299,7 +312,7 @@ class AdvancedTable extends Module {
         this.contextMenu.classList.add('ql-table-context-menu');
         document.body.appendChild(this.contextMenu);
         document.addEventListener('mousedown', (e) => {
-            if (!this.gridContainer.contains(e.target as Node) && !this.contextMenu.contains(e.target as Node)) {
+            if (this.gridContainer && !this.gridContainer.contains(e.target as Node) && this.contextMenu && !this.contextMenu.contains(e.target as Node)) {
                 this.contextMenu.style.display = 'none';
             }
         });
@@ -307,41 +320,40 @@ class AdvancedTable extends Module {
             const cell = (e.target as HTMLElement).closest('td, th');
             if (!cell) return;
             e.preventDefault();
-            this.showContextMenu(e.clientX, e.clientY, cell);
+            this.showContextMenu(e.clientX, e.clientY, cell as HTMLElement);
         });
     }
 
-    showContextMenu(x, y, cell) {
+    showContextMenu(x, y, cell: HTMLElement) {
         this.hoveredCell = cell;
+        if (!this.contextMenu) return;
         this.contextMenu.innerHTML = '';
         const actions = [
-            { text: 'Basculer en Header', icon: ICONS_INNER.header, action: () => this.executeAction('toggleHeaderRow') },
+            { text: 'Passer la ligne en header', icon: ICONS_INNER.header, action: () => this.executeAction('toggleHeaderRow') },
+            { text: 'Passer la colonne en header', icon: ICONS_INNER.header, action: () => this.executeAction('toggleHeaderColumn') },
             { separator: true },
             { text: 'Insérer ligne au-dessus', action: () => this.executeAction('insertRowAbove') },
-            { text: 'Insérer ligne en-dessous', action: () => this.executeAction('insertRowBelow') || (this.quill.getModule('table') as any).insertRowBelow() },
-            { text: 'Insérer colonne à gauche', action: () => this.executeAction('insertColumnLeft') || (this.quill.getModule('table') as any).insertColumnLeft() },
+            { text: 'Insérer ligne en-dessous', action: () => this.executeAction('insertRowBelow') },
+            { text: 'Insérer colonne à gauche', action: () => this.executeAction('insertColumnLeft') },
             { text: 'Insérer colonne à droite', action: () => this.executeAction('insertColumnRight') },
             { separator: true },
-            { text: 'Fusionner cellules', action: () => this.executeAction('mergeCells') },
-            { text: 'Scinder cellule', action: () => this.executeAction('splitCell') },
-            { separator: true },
-            { text: 'Supprimer le tableau', action: () => (this.quill.getModule('table') as any).deleteTable() }
+            { text: 'Supprimer le tableau', action: () => this.executeAction('deleteTable') }
         ];
 
         actions.forEach(item => {
             if (item.separator) {
                 const sep = document.createElement('div');
                 sep.classList.add('ql-table-context-menu-separator');
-                this.contextMenu.appendChild(sep);
+                if (this.contextMenu) this.contextMenu.appendChild(sep);
             } else {
                 const menuItem = document.createElement('div');
                 menuItem.classList.add('ql-table-context-menu-item');
-                menuItem.innerHTML = `<span class="ql-table-icon" style="width:16px;height:16px;display:flex;opacity:0.7;">${item.icon || ''}</span> <span>${item.text}</span>`;
+                menuItem.innerHTML = `<span class="ql-table-icon" style="width:16px;height:16px;display:flex;opacity:0.7;">${(item as any).icon || ''}</span> <span>${(item as any).text}</span>`;
                 menuItem.addEventListener('click', () => {
-                    item.action();
-                    this.contextMenu.style.display = 'none';
+                    (item as any).action();
+                    if (this.contextMenu) this.contextMenu.style.display = 'none';
                 });
-                this.contextMenu.appendChild(menuItem);
+                if (this.contextMenu) this.contextMenu.appendChild(menuItem);
             }
         });
 

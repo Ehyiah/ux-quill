@@ -13,6 +13,7 @@ use Ehyiah\QuillJsBundle\DTO\Fields\BlockField\IndentField;
 use Ehyiah\QuillJsBundle\DTO\Fields\BlockField\ListField;
 use Ehyiah\QuillJsBundle\DTO\Fields\BlockField\ScriptField;
 use Ehyiah\QuillJsBundle\DTO\Fields\BlockField\SizeField;
+use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\AdvancedTableField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\BlockQuoteField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\BoldField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\CleanField;
@@ -80,6 +81,7 @@ final class QuillGroup implements QuillGroupInterface
             new VideoField(),
             new EmojiField(),
             new CleanField(),
+            new AdvancedTableField(),
 //            new TableField(),
         ];
 
