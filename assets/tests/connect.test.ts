@@ -50,13 +50,22 @@ jest.mock('quill', () => {
         if (name === 'blots/block') {
             return MockBlot;
         }
+        if (name === 'blots/embed') {
+            return MockBlot;
+        }
+        if (name === 'blots/inline') {
+            return MockBlot;
+        }
         if (name.startsWith('attributors/style/')) {
             return {};
         }
         return {};
     });
 
-    return mockQuill;
+    return {
+        __esModule: true,
+        default: mockQuill,
+    };
 });
 
 // Mock du module de fusion
@@ -135,23 +144,26 @@ describe('QuillController - méthode connect', () => {
 
     describe('connect', () => {
         it('devrait initialiser Quill correctement et dispatcher des événements', () => {
-            expect(mockDispatch).toHaveBeenCalledWith(
-                'options',
-                expect.objectContaining({
-                    detail: expect.any(Object),
-                    prefix: 'quill'
-                })
-            );
+            // Wait for next tick to ensure async operations complete
+            return new Promise(resolve => setTimeout(resolve, 0)).then(() => {
+                expect(mockDispatch).toHaveBeenCalledWith(
+                    'options',
+                    expect.objectContaining({
+                        detail: expect.any(Object),
+                        prefix: 'quill'
+                    })
+                );
 
-            expect(mockDispatch).toHaveBeenCalledWith(
-                'connect',
-                expect.objectContaining({
-                    detail: expect.any(Object),
-                    prefix: 'quill'
-                })
-            );
+                expect(mockDispatch).toHaveBeenCalledWith(
+                    'connect',
+                    expect.objectContaining({
+                        detail: expect.any(Object),
+                        prefix: 'quill'
+                    })
+                );
 
-            expect(inputElement.value).toBe('<p>Test content</p>');
+                expect(inputElement.value).toBe('<p>Test content</p>');
+            });
         });
     });
 });
