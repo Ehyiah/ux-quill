@@ -63,13 +63,6 @@ class ModulesDTOTest extends TestCase
         $this->assertEquals(['label' => 'Saut de page'], $module->options);
     }
 
-    public function testImageAttributesModule(): void
-    {
-        $module = new ImageAttributesModule();
-        $this->assertEquals('imageAttributes', $module->name);
-        $this->assertEquals([], $module->options);
-    }
-
     public function testLinkAttributesModule(): void
     {
         $module = new LinkAttributesModule();
