@@ -30,7 +30,7 @@ export default defineConfig({
             text: 'Configuration',
             collapsed: false,
             items: [
-              { text: 'Quill Options', link: '/guide/configuration/quill-options' },
+              { text: 'Quill Options (Fields)', link: '/guide/configuration/quill-options' },
               { text: 'Extra Options', link: '/guide/configuration/extra-options' },
               { text: 'Image Upload', link: '/guide/configuration/image-upload' }
             ]
