@@ -24,6 +24,12 @@ Quill.register('modules/htmlEditButton', htmlEditButton.default || htmlEditButto
 import ReadingTime from './modules/readtimeModule.ts';
 Quill.register('modules/readingTime', ReadingTime);
 
+import ImageSelection from './modules/imageSelection.ts';
+Quill.register('modules/imageSelection', ImageSelection);
+
+import NodeMover from './modules/nodeMover.ts';
+Quill.register('modules/nodeMover', NodeMover);
+
 import {Divider} from './modules/divider.ts';
 Quill.register('modules/divider', Divider);
 
@@ -32,9 +38,6 @@ Quill.register('modules/pageBreak', PageBreak);
 
 import {Markdown} from './modules/markdown.ts';
 Quill.register('modules/markdown', Markdown);
-
-import {ImageAttributes} from './modules/imageAttributes.ts';
-Quill.register('modules/imageAttributes', ImageAttributes);
 
 import {LinkAttributes} from './modules/linkAttributes.ts';
 Quill.register('modules/linkAttributes', LinkAttributes);

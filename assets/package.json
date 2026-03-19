@@ -1,8 +1,12 @@
 {
     "name": "@ehyiah/ux-quill",
     "description": "Symfony bundle to use Quill JS text editor",
-    "version": "3.0.0",
+    "version": "3.5.0",
     "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Ehyiah/ux-quill"
+    },
     "main": "dist/controller.js",
     "symfony": {
         "controllers": {
@@ -27,10 +31,10 @@
             "quill2-emoji/dist/style.css": "^0.1.2",
             "quill": "2.0.3",
             "quill-delta": "^5.1.0",
+            "quill-resize-image": "^1.0.5",
             "quill/dist/quill.snow.css": "2.0.3",
             "quill/dist/quill.bubble.css": "2.0.3",
             "axios": "^1.4.0",
-            "quill-resize-image": "^1.0.5",
             "quill-table-better": "^1.2.1",
             "quill-table-better/dist/quill-table-better.css": "^1.2.1",
             "quill-toggle-fullscreen-button": "^0.1.4",
@@ -106,8 +110,8 @@
         "lodash-es": "^4.17.21",
         "quill": "2.0.3",
         "quill-delta": "^5.1.0",
-        "quill-html-edit-button": "^3.0.0",
         "quill-resize-image": "^1.0.5",
+        "quill-html-edit-button": "^3.0.0",
         "quill-table-better": "^1.2.1",
         "quill-toggle-fullscreen-button": "^0.1.4",
         "quill2-emoji": "^0.1.2",
@@ -165,7 +169,7 @@
             "^.+\\.tsx?$": "ts-jest"
         },
         "transformIgnorePatterns": [
-            "/node_modules/(?!quill|quill-resize-image|quill2-emoji)"
+            "/node_modules/(?!quill|quill2-emoji)"
         ],
         "rootDir": ".",
         "moduleFileExtensions": [

@@ -1,6 +1,10 @@
 {
   "name": "ux-quill-docs",
   "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Ehyiah/ux-quill"
+  },
   "description": "Documentation for Symfony UX Quill",
   "type": "module",
   "scripts": {

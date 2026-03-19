@@ -1,3 +1,6 @@
+# 3.5.0 new image default module
+- New default image module, you can still use the old if you prefer (see doc)
+
 # 3.0.0 Break-changes
 
 ## PHP modifications
