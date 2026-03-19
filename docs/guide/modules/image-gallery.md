@@ -1,5 +1,7 @@
 # Image gallery module details
 
+<img src="/modules/image-gallery/img.png" alt="image selection">
+
 ::: danger Mandatory Configuration
 Activating the **ImageGalleryField** in your `quill_options` is not enough. You **must** also configure the **ImageGalleryModule** in your `modules` list with at least the `listEndpoint` option, otherwise the gallery will not be able to fetch or display any images.
 :::
@@ -141,6 +143,3 @@ class GalleryController extends AbstractController
     }
 }
 ```
-## Good to know
-If you want to edit your image once uploaded, either add the ImageField in options.
-Or add the ResizeModule in the modules options.

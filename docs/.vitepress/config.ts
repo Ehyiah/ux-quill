@@ -43,7 +43,7 @@ export default defineConfig({
               { text: 'ImageSelectionModule', link: '/guide/modules/image-selection' },
               { text: 'Image Gallery', link: '/guide/modules/image-gallery' },
               { text: 'ReadTimeModule', link: '/guide/modules/read-time' },
-              { text: 'STTModule', link: '/guide/modules/stt' },
+              { text: 'Speech to Text (STTModule)', link: '/guide/modules/stt' },
               { text: 'NodeMoverModule', link: '/guide/modules/node-mover' },
               { text: 'FullScreenModule', link: '/guide/modules/fullscreen' },
               { text: 'Other Modules', link: '/guide/modules/others' }

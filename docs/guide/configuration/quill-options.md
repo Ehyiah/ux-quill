@@ -60,11 +60,11 @@ Below is the list of available fields from QuillJS (https://v2.quilljs.com/docs/
 
 **Community Fields:**
 
-| Field | Description |
-| :---: | :---: |
+| Field | Description | How to use it
+| :---: | :---: | :---: |
 | **EmojiField** | Add an emoji |
 | **TableField** | Add a table field |
-| **ImageGalleryField** | Add an image gallery button |
+| **ImageGalleryField** | Add an image gallery button | [See specific module here](/guide/modules/image-gallery)
 
 > [!TIP]
 > If you need to add a field that is not provided by this bundle, you can create your own. See [Custom Fields](/guide/advanced/custom-fields) for more details.
