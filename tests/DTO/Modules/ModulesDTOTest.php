@@ -4,7 +4,6 @@ namespace Ehyiah\QuillJsBundle\Tests\DTO\Modules;
 
 use Ehyiah\QuillJsBundle\DTO\Modules\AutosaveModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\DividerModule;
-use Ehyiah\QuillJsBundle\DTO\Modules\ImageAttributesModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\LinkAttributesModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\MarkdownModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\MentionModule;
