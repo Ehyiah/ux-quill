@@ -248,7 +248,7 @@ final class QuillTypeTest extends TestCase
     {
         $options = [
             'quill_options' => [['bold', 'italic']],
-            'quill_extra_options' => function (OptionsResolver $resolver) {
+            'quill_extra_options' => static function (OptionsResolver $resolver) {
                 $resolver->setDefault('height', '700px');
             },
             'modules' => [],
