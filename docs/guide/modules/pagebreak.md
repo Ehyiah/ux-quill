@@ -2,6 +2,9 @@
 
 This module adds support for page breaks. It displays a visual indicator in the editor and applies a `page-break-after: always` rule when printing.
 
+<img src="/modules/pagebreak/image.png" alt="image selection">
+
+
 **Options:**
 - **label**: The text displayed on the page break line (default: `'Page Break'`)
 
@@ -10,7 +13,7 @@ This module adds support for page breaks. It displays a visual indicator in the 
 ```php
 'modules' => [
     new PageBreakModule([
-        'label' => 'Saut de page',
+        'label' => 'Page Break',
     ]),
 ],
 ```

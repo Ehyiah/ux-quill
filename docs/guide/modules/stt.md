@@ -2,6 +2,8 @@
 
 The Speech-to-Text module enables voice dictation using the Web Speech API. Allows users to dictate text directly into the editor with real-time audio visualization.
 
+<img src="/modules/stt/image.png" alt="image selection">
+
 **Note**: The Speech-to-Text module **requires a browser that supports the Web Speech API** (Chrome, Edge, Safari). If the API is not available, the module will display a disabled state with an appropriate message.
 
 ## Options

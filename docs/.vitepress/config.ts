@@ -40,12 +40,14 @@ export default defineConfig({
             collapsed: true,
             items: [
               { text: 'Concept', link: '/guide/modules/index' },
-              { text: 'ReadTimeModule', link: '/guide/modules/read-time' },
-              { text: 'STTModule', link: '/guide/modules/stt' },
-              { text: 'ImageSelectionModule', link: '/guide/modules/image-selection' },
-              { text: 'NodeMoverModule', link: '/guide/modules/node-mover' },
-              { text: 'FullScreenModule', link: '/guide/modules/fullscreen' },
-              { text: 'AutosaveModule', link: '/guide/modules/autosave' },
+              { text: 'Autosave', link: '/guide/modules/autosave' },
+              { text: 'Image Selection', link: '/guide/modules/image-selection' },
+              { text: 'Markdown', link: '/guide/modules/markdown' },
+              { text: 'Mention', link: '/guide/modules/mention' },
+              { text: 'ReadTime', link: '/guide/modules/read-time' },
+              { text: 'Speech To Text', link: '/guide/modules/stt' },
+              { text: 'NodeMover', link: '/guide/modules/node-mover' },
+              { text: 'FullScreen', link: '/guide/modules/fullscreen' },
               { text: 'Other Modules', link: '/guide/modules/others' }
             ]
           },
