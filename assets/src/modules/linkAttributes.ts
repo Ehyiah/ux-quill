@@ -1,13 +1,26 @@
 import Quill from 'quill';
 
+type LinkAttributesOptions = {
+    openInNewTabLabel: string;
+    noFollowLabel: string;
+    saveButtonLabel: string;
+};
+
 export class LinkAttributes {
     private quill: Quill;
+    private options: LinkAttributesOptions;
     private tooltip: HTMLElement | null = null;
     private currentLink: HTMLAnchorElement | null = null;
     private editButton: HTMLElement | null = null;
 
-    constructor(quill: Quill) {
+    constructor(quill: Quill, options: LinkAttributesOptions) {
         this.quill = quill;
+        this.options = {
+            openInNewTabLabel: 'Open in new tab',
+            noFollowLabel: 'No follow (SEO)',
+            saveButtonLabel: 'OK',
+            ...options
+        };
         this.injectStyles();
 
         this.quill.root.addEventListener('click', (ev) => {
@@ -53,13 +66,13 @@ export class LinkAttributes {
             this.tooltip.className = 'ql-link-attribute-tooltip';
             this.tooltip.innerHTML = `
                 <div class="ql-link-attribute-row">
-                    <label><input type="checkbox" class="ql-link-target-input"> Open in new tab</label>
+                    <label><input type="checkbox" class="ql-link-target-input"> ${this.options.openInNewTabLabel}</label>
                 </div>
                 <div class="ql-link-attribute-row">
-                    <label><input type="checkbox" class="ql-link-rel-input"> No follow (SEO)</label>
+                    <label><input type="checkbox" class="ql-link-rel-input"> ${this.options.noFollowLabel}</label>
                 </div>
                 <div class="ql-link-attribute-actions">
-                    <button type="button" class="ql-link-attribute-save">OK</button>
+                    <button type="button" class="ql-link-attribute-save">${this.options.saveButtonLabel}</button>
                 </div>
             `;
 

@@ -78,7 +78,18 @@ class ModulesDTOTest extends TestCase
     {
         $module = new LinkAttributesModule();
         $this->assertEquals('linkAttributes', $module->name);
-        $this->assertEquals([], $module->options);
+        $this->assertEquals('Open in new tab', $module->options['openInNewTabLabel']);
+        $this->assertEquals('No follow (SEO)', $module->options['noFollowLabel']);
+        $this->assertEquals('OK', $module->options['saveButtonLabel']);
+
+        $module = new LinkAttributesModule(options: [
+            'openInNewTabLabel' => 'Ouvrir dans un nouvel onglet',
+            'noFollowLabel' => 'Lien No-follow (SEO)',
+            'saveButtonLabel' => 'Valider',
+        ]);
+        $this->assertEquals('Ouvrir dans un nouvel onglet', $module->options['openInNewTabLabel']);
+        $this->assertEquals('Lien No-follow (SEO)', $module->options['noFollowLabel']);
+        $this->assertEquals('Valider', $module->options['saveButtonLabel']);
     }
 
     public function testMentionModule(): void

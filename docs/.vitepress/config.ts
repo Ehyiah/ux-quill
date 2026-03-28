@@ -48,6 +48,7 @@ export default defineConfig({
               { text: 'Speech To Text', link: '/guide/modules/stt' },
               { text: 'NodeMover', link: '/guide/modules/node-mover' },
               { text: 'FullScreen', link: '/guide/modules/fullscreen' },
+              { text: 'Link Attributes', link: '/guide/modules/link-attributes' },
               { text: 'Other Modules', link: '/guide/modules/others' }
             ]
           },
