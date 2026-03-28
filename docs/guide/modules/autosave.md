@@ -20,8 +20,19 @@ This module prevents data loss by automatically saving the editor content to the
 **Behavior:**
 - **Saving**: Content is saved automatically after the user stops typing for the specified interval.
   The storage key is unique per page and per editor instance: `quill_autosave_{sanitized_path}_{editor_id}{key_suffix}`.
+  Only changes from the user source are saved (not initial hydration or API changes).
 - **Restoration**: On page load, if a saved version is found and differs from the current content, the module acts according to `restore_type`.
 - **Cleanup**: The saved data is automatically cleared when the parent `<form>` is submitted.
+
+### Manual Cleanup
+
+If you are using a **LiveComponent** or a custom save mechanism that doesn't trigger the standard form `submit` event, you can manually clear the autosave cache by dispatching a global event:
+
+```javascript
+window.dispatchEvent(new CustomEvent('quill:autosave:clear', {
+    detail: { id: 'your_editor_id' } // ID of the editor container (optional)
+}));
+```
 
 **Usage example:**
 

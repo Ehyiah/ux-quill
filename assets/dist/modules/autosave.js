@@ -18,28 +18,41 @@ export class Autosave {
     // Use the ID of the container which now has a unique ID from the Twig template
     // We also use the current pathname to avoid collisions between different pages with same field IDs
     const id = this.quill.container.id || 'default';
-    const path = window.location.pathname.replace(/[^a-z0-0]/gi, '_');
+    const path = window.location.pathname.replace(/[^a-z0-9]/gi, '_');
     this.storageKey = `quill_autosave_${path}_${id}${this.options.key_suffix ? `_${this.options.key_suffix}` : ''}`;
     this.injectStyles();
 
     // Wait a small bit to let the Stimulus controller load initial data from the hidden input
-    setTimeout(() => this.init(), 100);
+    setTimeout(() => this.init(), 500);
   }
   init() {
     const savedData = localStorage.getItem(this.storageKey);
     if (savedData) {
-      const currentContent = this.quill.root.innerHTML;
-      const isEmpty = currentContent === '<p><br></p>' || currentContent === '' || currentContent === '<p></p>';
-      if (this.options.restore_type === 'auto' && isEmpty) {
-        this.restore(savedData);
-      } else if (savedData !== currentContent && !isEmpty) {
-        this.showRestoreNotification(savedData);
-      } else if (isEmpty && savedData !== currentContent) {
-        // Case where editor is empty but we have data (and not auto mode)
-        this.showRestoreNotification(savedData);
+      try {
+        const savedDelta = JSON.parse(savedData);
+        const currentContents = this.quill.getContents();
+
+        // Compare Deltas instead of HTML
+        if (JSON.stringify(savedDelta) === JSON.stringify(currentContents)) {
+          this.clear();
+          return;
+        }
+
+        // Check if current editor is effectively empty
+        const currentText = this.quill.getText().trim();
+        const isCurrentEmpty = currentText === '' && currentContents.ops?.length <= 1;
+        if (this.options.restore_type === 'auto' && isCurrentEmpty) {
+          this.restore(savedDelta);
+        } else {
+          this.showRestoreNotification(savedDelta);
+        }
+      } catch (e) {
+        // If parsing fails, it's probably old HTML data, clear it
+        this.clear();
       }
     }
-    this.quill.on('text-change', () => {
+    this.quill.on('text-change', (delta, oldDelta, source) => {
+      if (source !== 'user') return;
       if (this.saveTimeout) clearTimeout(this.saveTimeout);
       this.saveTimeout = setTimeout(() => this.save(), this.options.interval);
     });
@@ -47,25 +60,34 @@ export class Autosave {
     if (form) {
       form.addEventListener('submit', () => this.clear());
     }
+
+    // Listen for global clear event
+    window.addEventListener('quill:autosave:clear', event => {
+      if (!event.detail?.id || event.detail.id === this.quill.container.id) {
+        this.clear();
+        const id = `quill-autosave-notification-${this.quill.container.id}`;
+        document.getElementById(id)?.remove();
+      }
+    });
   }
   save() {
-    const content = this.quill.root.innerHTML;
-    const isEmpty = content === '<p><br></p>' || content === '' || content === '<p></p>';
-    if (isEmpty) {
+    const contents = this.quill.getContents();
+    const text = this.quill.getText().trim();
+    if (text === '' && contents.ops?.length <= 1) {
       this.clear();
       return;
     }
-    localStorage.setItem(this.storageKey, content);
+    localStorage.setItem(this.storageKey, JSON.stringify(contents));
   }
-  restore(content) {
-    this.quill.root.innerHTML = content;
-    // Important: tell Quill that content has changed to trigger Stimulus sync back to the hidden input
+  restore(contents) {
+    this.quill.setContents(contents, 'api');
+    // Important: tell Quill that content has changed to trigger Stimulus sync
     this.quill.update();
   }
   clear() {
     localStorage.removeItem(this.storageKey);
   }
-  showRestoreNotification(savedData) {
+  showRestoreNotification(savedDelta) {
     const id = `quill-autosave-notification-${this.quill.container.id}`;
     if (document.getElementById(id)) return;
     const notification = document.createElement('div');
@@ -85,7 +107,7 @@ export class Autosave {
       container.insertBefore(notification, this.quill.container);
     }
     notification.querySelector('.ql-restore-btn')?.addEventListener('click', () => {
-      this.restore(savedData);
+      this.restore(savedDelta);
       notification.remove();
     });
     notification.querySelector('.ql-ignore-btn')?.addEventListener('click', () => {

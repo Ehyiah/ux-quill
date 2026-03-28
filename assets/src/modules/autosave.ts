@@ -30,33 +30,47 @@ export class Autosave {
         // Use the ID of the container which now has a unique ID from the Twig template
         // We also use the current pathname to avoid collisions between different pages with same field IDs
         const id = this.quill.container.id || 'default';
-        const path = window.location.pathname.replace(/[^a-z0-0]/gi, '_');
+        const path = window.location.pathname.replace(/[^a-z0-9]/gi, '_');
         this.storageKey = `quill_autosave_${path}_${id}${this.options.key_suffix ? `_${this.options.key_suffix}` : ''}`;
 
         this.injectStyles();
 
         // Wait a small bit to let the Stimulus controller load initial data from the hidden input
-        setTimeout(() => this.init(), 100);
+        setTimeout(() => this.init(), 500);
     }
 
     private init(): void {
         const savedData = localStorage.getItem(this.storageKey);
 
         if (savedData) {
-            const currentContent = this.quill.root.innerHTML;
-            const isEmpty = currentContent === '<p><br></p>' || currentContent === '' || currentContent === '<p></p>';
+            try {
+                const savedDelta = JSON.parse(savedData);
+                const currentContents = this.quill.getContents();
 
-            if (this.options.restore_type === 'auto' && isEmpty) {
-                this.restore(savedData);
-            } else if (savedData !== currentContent && !isEmpty) {
-                this.showRestoreNotification(savedData);
-            } else if (isEmpty && savedData !== currentContent) {
-                // Case where editor is empty but we have data (and not auto mode)
-                this.showRestoreNotification(savedData);
+                // Compare Deltas instead of HTML
+                if (JSON.stringify(savedDelta) === JSON.stringify(currentContents)) {
+                    this.clear();
+                    return;
+                }
+
+                // Check if current editor is effectively empty
+                const currentText = this.quill.getText().trim();
+                const isCurrentEmpty = currentText === '' && currentContents.ops?.length <= 1;
+
+                if (this.options.restore_type === 'auto' && isCurrentEmpty) {
+                    this.restore(savedDelta);
+                } else {
+                    this.showRestoreNotification(savedDelta);
+                }
+            } catch (e) {
+                // If parsing fails, it's probably old HTML data, clear it
+                this.clear();
             }
         }
 
-        this.quill.on('text-change', () => {
+        this.quill.on('text-change', (delta, oldDelta, source) => {
+            if (source !== 'user') return;
+
             if (this.saveTimeout) clearTimeout(this.saveTimeout);
             this.saveTimeout = setTimeout(() => this.save(), this.options.interval);
         });
@@ -65,22 +79,31 @@ export class Autosave {
         if (form) {
             form.addEventListener('submit', () => this.clear());
         }
+
+        // Listen for global clear event
+        window.addEventListener('quill:autosave:clear', (event: any) => {
+            if (!event.detail?.id || event.detail.id === this.quill.container.id) {
+                this.clear();
+                const id = `quill-autosave-notification-${this.quill.container.id}`;
+                document.getElementById(id)?.remove();
+            }
+        });
     }
 
     private save(): void {
-        const content = this.quill.root.innerHTML;
-        const isEmpty = content === '<p><br></p>' || content === '' || content === '<p></p>';
+        const contents = this.quill.getContents();
+        const text = this.quill.getText().trim();
 
-        if (isEmpty) {
+        if (text === '' && contents.ops?.length <= 1) {
             this.clear();
             return;
         }
-        localStorage.setItem(this.storageKey, content);
+        localStorage.setItem(this.storageKey, JSON.stringify(contents));
     }
 
-    private restore(content: string): void {
-        this.quill.root.innerHTML = content;
-        // Important: tell Quill that content has changed to trigger Stimulus sync back to the hidden input
+    private restore(contents: any): void {
+        this.quill.setContents(contents, 'api');
+        // Important: tell Quill that content has changed to trigger Stimulus sync
         this.quill.update();
     }
 
@@ -88,7 +111,7 @@ export class Autosave {
         localStorage.removeItem(this.storageKey);
     }
 
-    private showRestoreNotification(savedData: string): void {
+    private showRestoreNotification(savedDelta: any): void {
         const id = `quill-autosave-notification-${this.quill.container.id}`;
         if (document.getElementById(id)) return;
 
@@ -110,7 +133,7 @@ export class Autosave {
         }
 
         notification.querySelector('.ql-restore-btn')?.addEventListener('click', () => {
-            this.restore(savedData);
+            this.restore(savedDelta);
             notification.remove();
         });
 
