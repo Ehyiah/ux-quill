@@ -1,5 +1,7 @@
 # STTModule
 
+**Auto-imported: NO** (requires manual addition to the `modules` option)
+
 The Speech-to-Text module enables voice dictation using the Web Speech API. Allows users to dictate text directly into the editor with real-time audio visualization.
 
 <img src="/modules/stt/image.png" alt="image selection">

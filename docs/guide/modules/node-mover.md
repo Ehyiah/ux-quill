@@ -1,7 +1,11 @@
 # NodeMover Module
 
+**Auto-imported: YES** (Always active by default)
+
 The `NodeMoverModule` is a powerful tool designed to make content reordering intuitive and fluid.
 Unlike standard modules that only handle specific elements, this module provides a universal interface to move any block-level element (paragraphs, headings, images, lists, etc.) within the editor.
+
+This module is **automatically enabled** in every Quill editor instance. To disable it, you must explicitly set `active => false` in your configuration.
 
 ## Features
 

@@ -1,5 +1,7 @@
 # MarkdownModule
 
+**Auto-imported: NO** (requires manual addition to the `modules` option)
+
 This module enables Markdown shortcuts directly in the editor while typing. When you type a specific sequence followed by a space or enter, it will automatically format the current line.
 
 **Available shortcuts:**

@@ -1,5 +1,7 @@
 # MentionModule
 
+**Auto-imported: NO** (requires manual addition to the `modules` option)
+
 This module allows you to trigger suggestions when typing a specific character (like `@` or `#`). It supports both static data and remote data fetching via AJAX.
 
 ### Options

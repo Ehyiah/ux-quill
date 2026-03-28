@@ -1,7 +1,9 @@
 # LinkAttributeModule
 
+**Auto-imported: YES** (if `LinkField` is present in `quill_options`)
+
 This module allows users to easily edit attributes of links, such as opening in a new tab or adding SEO attributes.
-This module is auto-loaded if the LinkField is present.
+This module is automatically loaded if the `LinkField` is present in your `quill_options`. If not, you must add it manually to the `modules` option.
 
 <img src="/modules/linkattributes/image.png" alt="image selection">
 

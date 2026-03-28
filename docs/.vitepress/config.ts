@@ -49,6 +49,12 @@ export default defineConfig({
               { text: 'NodeMover', link: '/guide/modules/node-mover' },
               { text: 'FullScreen', link: '/guide/modules/fullscreen' },
               { text: 'Link Attributes', link: '/guide/modules/link-attributes' },
+              { text: 'Counter', link: '/guide/modules/counter' },
+              { text: 'Divider', link: '/guide/modules/divider' },
+              { text: 'HtmlEdit', link: '/guide/modules/html-edit' },
+              { text: 'PageBreak', link: '/guide/modules/pagebreak' },
+              { text: 'Paste Sanitizer', link: '/guide/modules/paste-sanitizer' },
+              { text: 'SmartLinks', link: '/guide/modules/smart-links' },
               { text: 'Other Modules', link: '/guide/modules/others' }
             ]
           },
@@ -61,7 +67,7 @@ export default defineConfig({
               { text: 'Events', link: '/guide/advanced/events' },
             ]
           },
-          { text: 'EasyAdmin', link: '/guide/easyadmin' }
+          { text: 'EasyAdmin Integration', link: '/guide/easyadmin' }
         ]
       }
     ],

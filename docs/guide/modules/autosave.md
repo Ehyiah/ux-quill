@@ -1,5 +1,7 @@
 # AutosaveModule
 
+**Auto-imported: NO** (requires manual addition to the `modules` option)
+
 This module prevents data loss by automatically saving the editor content to the browser's `localStorage`.
 
 <img src="/modules/autosave/image.png" alt="image selection">

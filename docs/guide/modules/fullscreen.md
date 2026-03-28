@@ -1,5 +1,7 @@
 # FullScreenModule
 
+**Auto-imported: NO** (requires manual addition to the `modules` option)
+
 This module adds a button to the toolbar that allows toggling the editor into fullscreen mode.
 
 It uses the [quill-toggle-fullscreen-button](https://github.com/qvarts/quill-toggle-fullscreen-button) library.
