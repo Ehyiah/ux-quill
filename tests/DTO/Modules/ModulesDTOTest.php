@@ -32,10 +32,22 @@ class ModulesDTOTest extends TestCase
         $this->assertEquals('autosave', $module->name);
         $this->assertEquals(2000, $module->options['interval']);
         $this->assertEquals('manual', $module->options['restore_type']);
+        $this->assertEquals('An unsaved version of your text was found.', $module->options['notificationText']);
+        $this->assertEquals('Restore', $module->options['restoreButtonLabel']);
+        $this->assertEquals('Ignore', $module->options['ignoreButtonLabel']);
 
-        $module = new AutosaveModule(options: ['interval' => 5000, 'restore_type' => 'auto']);
+        $module = new AutosaveModule(options: [
+            'interval' => 5000,
+            'restore_type' => 'auto',
+            'notificationText' => 'Un texte a été trouvé.',
+            'restoreButtonLabel' => 'Restaurer',
+            'ignoreButtonLabel' => 'Ignorer',
+        ]);
         $this->assertEquals(5000, $module->options['interval']);
         $this->assertEquals('auto', $module->options['restore_type']);
+        $this->assertEquals('Un texte a été trouvé.', $module->options['notificationText']);
+        $this->assertEquals('Restaurer', $module->options['restoreButtonLabel']);
+        $this->assertEquals('Ignorer', $module->options['ignoreButtonLabel']);
     }
 
     public function testDividerModule(): void

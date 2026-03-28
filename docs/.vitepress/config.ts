@@ -45,6 +45,7 @@ export default defineConfig({
               { text: 'ImageSelectionModule', link: '/guide/modules/image-selection' },
               { text: 'NodeMoverModule', link: '/guide/modules/node-mover' },
               { text: 'FullScreenModule', link: '/guide/modules/fullscreen' },
+              { text: 'AutosaveModule', link: '/guide/modules/autosave' },
               { text: 'Other Modules', link: '/guide/modules/others' }
             ]
           },

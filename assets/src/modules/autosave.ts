@@ -4,6 +4,9 @@ type AutosaveOptions = {
     interval: number;
     restore_type: 'manual' | 'auto';
     key_suffix: string | null;
+    notificationText: string;
+    restoreButtonLabel: string;
+    ignoreButtonLabel: string;
 };
 
 export class Autosave {
@@ -18,6 +21,9 @@ export class Autosave {
             interval: 2000,
             restore_type: 'manual',
             key_suffix: null,
+            notificationText: 'An unsaved version of your text was found.',
+            restoreButtonLabel: 'Restore',
+            ignoreButtonLabel: 'Ignore',
             ...options
         };
 
@@ -88,10 +94,10 @@ export class Autosave {
         notification.id = id;
         notification.className = 'ql-autosave-notification';
         notification.innerHTML = `
-            <span>Une version non enregistrée de votre texte a été trouvée.</span>
+            <span>${this.options.notificationText}</span>
             <div class="ql-autosave-actions">
-                <button type="button" class="ql-restore-btn">Restaurer</button>
-                <button type="button" class="ql-ignore-btn">Ignorer</button>
+                <button type="button" class="ql-restore-btn">${this.options.restoreButtonLabel}</button>
+                <button type="button" class="ql-ignore-btn">${this.options.ignoreButtonLabel}</button>
             </div>
         `;
 
