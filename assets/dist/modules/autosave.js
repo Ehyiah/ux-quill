@@ -16,8 +16,10 @@ export class Autosave {
     };
 
     // Use the ID of the container which now has a unique ID from the Twig template
+    // We also use the current pathname to avoid collisions between different pages with same field IDs
     const id = this.quill.container.id || 'default';
-    this.storageKey = `quill_autosave_${id}${this.options.key_suffix ? `_${this.options.key_suffix}` : ''}`;
+    const path = window.location.pathname.replace(/[^a-z0-0]/gi, '_');
+    this.storageKey = `quill_autosave_${path}_${id}${this.options.key_suffix ? `_${this.options.key_suffix}` : ''}`;
     this.injectStyles();
 
     // Wait a small bit to let the Stimulus controller load initial data from the hidden input

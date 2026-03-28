@@ -17,6 +17,7 @@ This module prevents data loss by automatically saving the editor content to the
 
 **Behavior:**
 - **Saving**: Content is saved automatically after the user stops typing for the specified interval.
+  The storage key is unique per page and per editor instance: `quill_autosave_{sanitized_path}_{editor_id}{key_suffix}`.
 - **Restoration**: On page load, if a saved version is found and differs from the current content, the module acts according to `restore_type`.
 - **Cleanup**: The saved data is automatically cleared when the parent `<form>` is submitted.
 
