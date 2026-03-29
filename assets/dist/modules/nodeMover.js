@@ -1,3 +1,4 @@
+function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 import Quill from 'quill';
 import Delta from 'quill-delta';
 const ICONS = {
@@ -8,29 +9,28 @@ const ICONS = {
   delete: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>'
 };
 export default class NodeMover {
-  quill;
-  options;
-  container;
-  toolbar = null;
-  overlay = null;
-  dropIndicator = null;
-  currentBlocks = [];
-  selectionRange = null;
-  dragTarget = null;
-  hideTimeout = null;
-  lastMouseEvent = null;
   constructor(quill, options) {
     if (options === void 0) {
       options = {};
     }
+    this.quill = void 0;
+    this.options = void 0;
+    this.container = void 0;
+    this.toolbar = null;
+    this.overlay = null;
+    this.dropIndicator = null;
+    this.currentBlocks = [];
+    this.selectionRange = null;
+    this.dragTarget = null;
+    this.hideTimeout = null;
+    this.lastMouseEvent = null;
     this.quill = quill;
-    this.options = {
+    this.options = _extends({
       borderColor: '#007bff',
       dropIndicatorColor: '#ff0000',
       // Red as default
-      duplicate: true,
-      ...options
-    };
+      duplicate: true
+    }, options);
     this.container = quill.container;
     this.injectStyles();
     this.createToolbar();
@@ -95,64 +95,7 @@ export default class NodeMover {
     if (document.getElementById(styleId)) return;
     const style = document.createElement('style');
     style.id = styleId;
-    style.innerHTML = `
-            .ql-node-mover-toolbar {
-                position: absolute;
-                display: none;
-                background: #fff;
-                border: 1px solid #ccc;
-                border-radius: 4px;
-                padding: 2px;
-                z-index: 1000;
-                flex-direction: column;
-                gap: 1px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                pointer-events: auto;
-            }
-            .ql-node-mover-toolbar button {
-                background: transparent;
-                border: none;
-                color: #666;
-                padding: 2px;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border-radius: 2px;
-                transition: background 0.2s, color 0.2s;
-                width: 20px;
-                height: 20px;
-            }
-            .ql-node-mover-toolbar button:hover {
-                background: #f0f0f0;
-                color: #333;
-            }
-            .ql-node-mover-handle {
-                cursor: move !important;
-                color: #999 !important;
-            }
-            .ql-node-mover-overlay {
-                position: absolute;
-                display: none;
-                border: 2px solid ${this.options.borderColor};
-                pointer-events: none;
-                z-index: 999;
-                border-radius: 2px;
-            }
-            .ql-node-mover-drop-indicator {
-                position: absolute;
-                display: none;
-                height: 4px;
-                background: ${this.options.dropIndicatorColor};
-                pointer-events: none;
-                z-index: 1001;
-                border-radius: 2px;
-                transition: top 0.05s ease;
-            }
-            .ql-node-mover-dragging {
-                opacity: 0.5 !important;
-            }
-        `;
+    style.innerHTML = "\n            .ql-node-mover-toolbar {\n                position: absolute;\n                display: none;\n                background: #fff;\n                border: 1px solid #ccc;\n                border-radius: 4px;\n                padding: 2px;\n                z-index: 1000;\n                flex-direction: column;\n                gap: 1px;\n                box-shadow: 0 2px 4px rgba(0,0,0,0.1);\n                pointer-events: auto;\n            }\n            .ql-node-mover-toolbar button {\n                background: transparent;\n                border: none;\n                color: #666;\n                padding: 2px;\n                cursor: pointer;\n                display: flex;\n                align-items: center;\n                justify-content: center;\n                border-radius: 2px;\n                transition: background 0.2s, color 0.2s;\n                width: 20px;\n                height: 20px;\n            }\n            .ql-node-mover-toolbar button:hover {\n                background: #f0f0f0;\n                color: #333;\n            }\n            .ql-node-mover-handle {\n                cursor: move !important;\n                color: #999 !important;\n            }\n            .ql-node-mover-overlay {\n                position: absolute;\n                display: none;\n                border: 2px solid " + this.options.borderColor + ";\n                pointer-events: none;\n                z-index: 999;\n                border-radius: 2px;\n            }\n            .ql-node-mover-drop-indicator {\n                position: absolute;\n                display: none;\n                height: 4px;\n                background: " + this.options.dropIndicatorColor + ";\n                pointer-events: none;\n                z-index: 1001;\n                border-radius: 2px;\n                transition: top 0.05s ease;\n            }\n            .ql-node-mover-dragging {\n                opacity: 0.5 !important;\n            }\n        ";
     document.head.appendChild(style);
   }
   createToolbar() {
@@ -218,8 +161,9 @@ export default class NodeMover {
         blocks = lines.map(line => line.domNode);
         selectionFound = true;
       } else {
+        var _this$lastMouseEvent;
         // Single point (cursor) or clicked element (embeds/images)
-        const target = event?.target || this.lastMouseEvent?.target;
+        const target = (event == null ? void 0 : event.target) || ((_this$lastMouseEvent = this.lastMouseEvent) == null ? void 0 : _this$lastMouseEvent.target);
         if (target && this.quill.root.contains(target)) {
           const block = this.findBlock(target);
           if (block) {
@@ -304,10 +248,10 @@ export default class NodeMover {
     });
     const padding = 2;
     this.overlay.style.display = 'block';
-    this.overlay.style.top = `${minTop - containerRect.top - padding}px`;
-    this.overlay.style.left = `${minLeft - containerRect.left - padding}px`;
-    this.overlay.style.width = `${maxRight - minLeft + padding * 2}px`;
-    this.overlay.style.height = `${maxBottom - minTop + padding * 2}px`;
+    this.overlay.style.top = minTop - containerRect.top - padding + "px";
+    this.overlay.style.left = minLeft - containerRect.left - padding + "px";
+    this.overlay.style.width = maxRight - minLeft + padding * 2 + "px";
+    this.overlay.style.height = maxBottom - minTop + padding * 2 + "px";
     this.toolbar.style.display = 'flex';
     const top = minTop - containerRect.top;
     const rootRect = this.quill.root.getBoundingClientRect();
@@ -318,8 +262,8 @@ export default class NodeMover {
     if (rootRect.left < toolbarWidth + 10) {
       left = rootRect.left - containerRect.left + 5;
     }
-    this.toolbar.style.top = `${top}px`;
-    this.toolbar.style.left = `${left}px`;
+    this.toolbar.style.top = top + "px";
+    this.toolbar.style.left = left + "px";
   }
   hideToolbar() {
     if (this.dragTarget) return;
@@ -439,10 +383,10 @@ export default class NodeMover {
     if (targetRect) {
       const containerRect = this.container.getBoundingClientRect();
       this.dropIndicator.style.display = 'block';
-      this.dropIndicator.style.width = `${targetRect.width}px`;
-      this.dropIndicator.style.left = `${targetRect.left - containerRect.left}px`;
+      this.dropIndicator.style.width = targetRect.width + "px";
+      this.dropIndicator.style.left = targetRect.left - containerRect.left + "px";
       const top = isAfter ? targetRect.bottom : targetRect.top;
-      this.dropIndicator.style.top = `${top - containerRect.top - 2}px`;
+      this.dropIndicator.style.top = top - containerRect.top - 2 + "px";
     } else {
       this.dropIndicator.style.display = 'none';
     }

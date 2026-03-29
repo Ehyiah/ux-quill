@@ -30,7 +30,7 @@ export default defineConfig({
             text: 'Configuration',
             collapsed: false,
             items: [
-              { text: 'Quill Options', link: '/guide/configuration/quill-options' },
+              { text: 'Quill Options (Fields)', link: '/guide/configuration/quill-options' },
               { text: 'Extra Options', link: '/guide/configuration/extra-options' },
               { text: 'Image Upload', link: '/guide/configuration/image-upload' }
             ]
@@ -47,6 +47,7 @@ export default defineConfig({
                   { text: 'Autosave', link: '/guide/modules/autosave' },
                   { text: 'Counter', link: '/guide/modules/counter' },
                   { text: 'FullScreen', link: '/guide/modules/fullscreen' },
+                  { text: 'Image Gallery', link: '/guide/modules/image-gallery' },
                   { text: 'HtmlEdit', link: '/guide/modules/html-edit' },
                   { text: 'Markdown', link: '/guide/modules/markdown' },
                   { text: 'Mention', link: '/guide/modules/mention' },

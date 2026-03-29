@@ -25,16 +25,27 @@ final class TableModule implements ModuleInterface
     public const LANGUAGE_OPTION_DE_DE = 'de_DE';
     public const LANGUAGE_OPTION_TR_TR = 'tr_TR';
 
+    /**
+     * @var array<string, string|string[]>
+     */
+    public $options;
+
     public function __construct(
         public string $name = self::NAME,
-        /**
-         * @var array<string, string|string[]>
-         */
-        public $options = [
+        array $options = [],
+    ) {
+        $this->options = array_merge($this->getDefaultOptions(), $options);
+    }
+
+    /**
+     * @return array<string, string|string[]>
+     */
+    private function getDefaultOptions(): array
+    {
+        return [
             self::MENU_OPTION => ['column', 'row', 'merge', 'table', 'cell', 'wrap', 'copy', 'delete'],
             self::LANGUAGE_TOOLBAR_TABLE_OPTION => 'true', // must be set to true to show the table toolbar options
             self::LANGUAGE_OPTION => self::LANGUAGE_OPTION_EN_US,
-        ],
-    ) {
+        ];
     }
 }

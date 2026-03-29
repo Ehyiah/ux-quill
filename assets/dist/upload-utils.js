@@ -1,3 +1,4 @@
+function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 import axios from 'axios';
 export const uploadStrategies = {
   'form': uploadFileForm,
@@ -7,25 +8,23 @@ function applyAuthConfig(config, authConfig) {
   if (!authConfig) {
     return config;
   }
-  const newConfig = {
-    ...config
-  };
+  const newConfig = _extends({}, config);
   if (!newConfig.headers) {
     newConfig.headers = {};
   }
   switch (authConfig.type) {
     case 'jwt':
       if (authConfig.jwt_token) {
-        newConfig.headers['Authorization'] = `Bearer ${authConfig.jwt_token}`;
+        newConfig.headers['Authorization'] = "Bearer " + authConfig.jwt_token;
       } else {
         console.error('JWT auth configured but no token provided');
       }
       break;
     case 'basic':
       if (authConfig.username && authConfig.password) {
-        const credentials = `${authConfig.username}:${authConfig.password}`;
+        const credentials = authConfig.username + ":" + authConfig.password;
         const encoded = typeof btoa === 'function' ? btoa(credentials) : Buffer.from(credentials).toString('base64');
-        newConfig.headers['Authorization'] = `Basic ${encoded}`;
+        newConfig.headers['Authorization'] = "Basic " + encoded;
       } else {
         console.error('Basic auth configured but missing credentials');
       }
@@ -84,7 +83,7 @@ export function handleUploadResponse(response, jsonResponseFilePath) {
           if (result && typeof result === 'object' && part in result) {
             result = result[part];
           } else {
-            throw new Error(`Invalid json path for response: '${jsonResponseFilePath}'. Property '${part}' not found.`);
+            throw new Error("Invalid json path for response: '" + jsonResponseFilePath + "'. Property '" + part + "' not found.");
           }
         }
         if (typeof result !== 'string') {
@@ -94,7 +93,7 @@ export function handleUploadResponse(response, jsonResponseFilePath) {
       } catch (error) {
         console.error(error);
         if (error instanceof Error) {
-          reject(`Error while processing upload response: ${error.message}`);
+          reject("Error while processing upload response: " + error.message);
         } else {
           reject('Unknown error while processing upload response');
         }

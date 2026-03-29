@@ -10,23 +10,11 @@ import ImageFigure from "./blots/imageFigure.js";
 // Register custom ImageFigure blot to override default image
 Quill.register(ImageFigure, true);
 import { Mention } from "./modules/mention.js";
-export default class extends Controller {
-  static targets = ['input', 'editorContainer'];
-  static values = (() => ({
-    toolbarOptions: {
-      type: Array,
-      default: []
-    },
-    extraOptions: {
-      type: Object,
-      default: {}
-    },
-    modulesOptions: {
-      type: Array,
-      default: []
-    }
-  }))();
-  quillInstance = null;
+export default class _Class extends Controller {
+  constructor() {
+    super(...arguments);
+    this.quillInstance = null;
+  }
   connect() {
     // Prevent re-initialization if Quill instance already exists
     // This is important for LiveComponent compatibility
@@ -59,6 +47,7 @@ export default class extends Controller {
       'toolbar': this.toolbarOptionsValue
     };
     const mergedModules = mergeModules(this.modulesOptionsValue, enabledModules);
+    this.enrichImageGalleryModule(mergedModules);
     return {
       debug,
       modules: mergedModules,
@@ -68,15 +57,35 @@ export default class extends Controller {
       readOnly
     };
   }
+  enrichImageGalleryModule(modules) {
+    if (modules['imageGallery']) {
+      const galleryOptions = modules['imageGallery'];
+      const uploadConfig = this.extraOptionsValue.upload_handler;
+      if (uploadConfig) {
+        if (galleryOptions.uploadEndpoint === undefined) {
+          galleryOptions.uploadEndpoint = uploadConfig.upload_endpoint;
+        }
+        if (galleryOptions.uploadStrategy === undefined) {
+          galleryOptions.uploadStrategy = uploadConfig.type;
+        }
+        if (galleryOptions.authConfig === undefined) {
+          galleryOptions.authConfig = uploadConfig.security;
+        }
+        if (galleryOptions.jsonResponseFilePath === undefined) {
+          galleryOptions.jsonResponseFilePath = uploadConfig.json_response_file_path;
+        }
+      }
+    }
+  }
   setupQuillStyles(options) {
     if (options.style === 'inline') {
       const styleAttributes = ['align', 'background', 'color', 'direction', 'font', 'size'];
-      styleAttributes.forEach(attr => Quill.register(Quill.import(`attributors/style/${attr}`), true));
+      styleAttributes.forEach(attr => Quill.register(Quill.import("attributors/style/" + attr), true));
     }
   }
   setupUploadHandler(options) {
     const config = this.extraOptionsValue.upload_handler;
-    if (config?.upload_endpoint && uploadStrategies[config.type]) {
+    if (config != null && config.upload_endpoint && uploadStrategies[config.type]) {
       const uploadFunction = file => uploadStrategies[config.type](config.upload_endpoint, file, config.security).then(response => handleUploadResponse(response, config.json_response_file_path));
       Object.assign(options.modules, {
         imageUploader: {
@@ -107,7 +116,8 @@ export default class extends Controller {
     quill.updateContents(initialData);
     this.dispatchEvent('hydrate:after', quill);
     quill.on('text-change', () => {
-      const quillContent = this.extraOptionsValue?.use_semantic_html ? quill.getSemanticHTML() : quill.root.innerHTML;
+      var _this$extraOptionsVal;
+      const quillContent = (_this$extraOptionsVal = this.extraOptionsValue) != null && _this$extraOptionsVal.use_semantic_html ? quill.getSemanticHTML() : quill.root.innerHTML;
       const inputContent = this.inputTarget;
       inputContent.value = quillContent;
       this.bubbles(inputContent);
@@ -174,9 +184,24 @@ export default class extends Controller {
     if (options.modules) {
       for (const moduleName in options.modules) {
         if (moduleName.startsWith('mention')) {
-          Quill.register(`modules/${moduleName}`, Mention);
+          Quill.register("modules/" + moduleName, Mention);
         }
       }
     }
   }
 }
+_Class.targets = ['input', 'editorContainer'];
+_Class.values = {
+  toolbarOptions: {
+    type: Array,
+    default: []
+  },
+  extraOptions: {
+    type: Object,
+    default: {}
+  },
+  modulesOptions: {
+    type: Array,
+    default: []
+  }
+};

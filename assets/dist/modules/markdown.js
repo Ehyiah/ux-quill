@@ -1,8 +1,9 @@
 export class Markdown {
   constructor(quill) {
     quill.on('text-change', (delta, oldDelta, source) => {
+      var _delta$ops;
       if (source !== 'user') return;
-      const insert = delta?.ops?.find(op => op.insert)?.insert;
+      const insert = delta == null || (_delta$ops = delta.ops) == null || (_delta$ops = _delta$ops.find(op => op.insert)) == null ? void 0 : _delta$ops.insert;
       if (insert === ' ' || insert === '\n') {
         this.handleTextChange(quill);
       }

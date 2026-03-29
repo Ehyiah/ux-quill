@@ -1,18 +1,18 @@
+function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 import Quill from 'quill';
 export class LinkAttributes {
-  quill;
-  options;
-  tooltip = null;
-  currentLink = null;
-  editButton = null;
   constructor(quill, options) {
+    this.quill = void 0;
+    this.options = void 0;
+    this.tooltip = null;
+    this.currentLink = null;
+    this.editButton = null;
     this.quill = quill;
-    this.options = {
+    this.options = _extends({
       openInNewTabLabel: 'Open in new tab',
       noFollowLabel: 'No follow (SEO)',
-      saveButtonLabel: 'OK',
-      ...options
-    };
+      saveButtonLabel: 'OK'
+    }, options);
     this.injectStyles();
     this.quill.root.addEventListener('click', ev => {
       const target = ev.target;
@@ -47,20 +47,11 @@ export class LinkAttributes {
   showTooltip() {
     if (!this.currentLink) return;
     if (!this.tooltip) {
+      var _this$tooltip$querySe;
       this.tooltip = document.createElement('div');
       this.tooltip.className = 'ql-link-attribute-tooltip';
-      this.tooltip.innerHTML = `
-                <div class="ql-link-attribute-row">
-                    <label><input type="checkbox" class="ql-link-target-input"> ${this.options.openInNewTabLabel}</label>
-                </div>
-                <div class="ql-link-attribute-row">
-                    <label><input type="checkbox" class="ql-link-rel-input"> ${this.options.noFollowLabel}</label>
-                </div>
-                <div class="ql-link-attribute-actions">
-                    <button type="button" class="ql-link-attribute-save">${this.options.saveButtonLabel}</button>
-                </div>
-            `;
-      this.tooltip.querySelector('.ql-link-attribute-save')?.addEventListener('click', () => this.hideAll());
+      this.tooltip.innerHTML = "\n                <div class=\"ql-link-attribute-row\">\n                    <label><input type=\"checkbox\" class=\"ql-link-target-input\"> " + this.options.openInNewTabLabel + "</label>\n                </div>\n                <div class=\"ql-link-attribute-row\">\n                    <label><input type=\"checkbox\" class=\"ql-link-rel-input\"> " + this.options.noFollowLabel + "</label>\n                </div>\n                <div class=\"ql-link-attribute-actions\">\n                    <button type=\"button\" class=\"ql-link-attribute-save\">" + this.options.saveButtonLabel + "</button>\n                </div>\n            ";
+      (_this$tooltip$querySe = this.tooltip.querySelector('.ql-link-attribute-save')) == null || _this$tooltip$querySe.addEventListener('click', () => this.hideAll());
       const targetInput = this.tooltip.querySelector('.ql-link-target-input');
       const relInput = this.tooltip.querySelector('.ql-link-rel-input');
       targetInput.addEventListener('change', () => {
@@ -97,11 +88,11 @@ export class LinkAttributes {
     const top = rect.top - containerRect.top;
     const left = rect.left - containerRect.left;
     if (type === 'button') {
-      element.style.top = `${top - 30}px`;
-      element.style.left = `${left + rect.width / 2 - 13}px`;
+      element.style.top = top - 30 + "px";
+      element.style.left = left + rect.width / 2 - 13 + "px";
     } else {
-      element.style.top = `${top + rect.height + 5}px`;
-      element.style.left = `${left}px`;
+      element.style.top = top + rect.height + 5 + "px";
+      element.style.left = left + "px";
     }
   }
   hideTooltip() {
@@ -117,65 +108,7 @@ export class LinkAttributes {
     if (document.getElementById(id)) return;
     const style = document.createElement('style');
     style.id = id;
-    style.innerHTML = `
-            .ql-link-edit-button {
-                position: absolute;
-                background: #fff;
-                border: 1px solid #ccc;
-                border-radius: 4px;
-                width: 26px;
-                height: 26px;
-                display: none;
-                align-items: center;
-                justify-content: center;
-                cursor: pointer;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                z-index: 1000;
-                color: #444;
-            }
-            .ql-link-edit-button:hover {
-                background: #f0f0f0;
-                color: #06c;
-            }
-            .ql-link-attribute-tooltip {
-                position: absolute;
-                background: #fff;
-                border: 1px solid #ccc;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-                padding: 10px;
-                border-radius: 4px;
-                z-index: 1001;
-                display: none;
-                min-width: 150px;
-                font-family: sans-serif;
-            }
-            .ql-link-attribute-row {
-                margin-bottom: 5px;
-            }
-            .ql-link-attribute-row label {
-                display: flex;
-                align-items: center;
-                font-size: 13px;
-                color: #444;
-                cursor: pointer;
-            }
-            .ql-link-attribute-row input {
-                margin-right: 8px;
-            }
-            .ql-link-attribute-actions {
-                text-align: right;
-                margin-top: 8px;
-            }
-            .ql-link-attribute-save {
-                background: #06c;
-                color: #fff;
-                border: none;
-                padding: 3px 10px;
-                border-radius: 3px;
-                cursor: pointer;
-                font-size: 12px;
-            }
-        `;
+    style.innerHTML = "\n            .ql-link-edit-button {\n                position: absolute;\n                background: #fff;\n                border: 1px solid #ccc;\n                border-radius: 4px;\n                width: 26px;\n                height: 26px;\n                display: none;\n                align-items: center;\n                justify-content: center;\n                cursor: pointer;\n                box-shadow: 0 2px 4px rgba(0,0,0,0.1);\n                z-index: 1000;\n                color: #444;\n            }\n            .ql-link-edit-button:hover {\n                background: #f0f0f0;\n                color: #06c;\n            }\n            .ql-link-attribute-tooltip {\n                position: absolute;\n                background: #fff;\n                border: 1px solid #ccc;\n                box-shadow: 0 2px 8px rgba(0,0,0,0.15);\n                padding: 10px;\n                border-radius: 4px;\n                z-index: 1001;\n                display: none;\n                min-width: 150px;\n                font-family: sans-serif;\n            }\n            .ql-link-attribute-row {\n                margin-bottom: 5px;\n            }\n            .ql-link-attribute-row label {\n                display: flex;\n                align-items: center;\n                font-size: 13px;\n                color: #444;\n                cursor: pointer;\n            }\n            .ql-link-attribute-row input {\n                margin-right: 8px;\n            }\n            .ql-link-attribute-actions {\n                text-align: right;\n                margin-top: 8px;\n            }\n            .ql-link-attribute-save {\n                background: #06c;\n                color: #fff;\n                border: none;\n                padding: 3px 10px;\n                border-radius: 3px;\n                cursor: pointer;\n                font-size: 12px;\n            }\n        ";
     document.head.appendChild(style);
   }
 }

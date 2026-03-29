@@ -95,7 +95,9 @@ public function buildForm(FormBuilderInterface $builder, array $options)
                     new HeaderField(HeaderField::HEADER_OPTION_2),
                 ),
                 // Add all built-in available fields at once (includes Table, Emoji, etc.)
-                QuillGroup::buildWithAllFields()
+                QuillGroup::build(
+                    new ImageGalleryField(),
+                ),
             ]
         ])
     ;
