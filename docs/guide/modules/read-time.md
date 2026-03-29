@@ -1,5 +1,7 @@
 # ReadTimeModule
 
+**Auto-imported: NO** (requires manual addition to the `modules` option)
+
 This module calculates the estimated reading time based on the content of the editor.
 It displays the result in the toolbar by default, or in a specific element if targeted.
 

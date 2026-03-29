@@ -1,71 +1,102 @@
 import { Application, Controller } from '@hotwired/stimulus';
 import QuillController from '../src/controller';
 
-// Capturer les appels à new Quill()
-const mockQuillInstance = {
-    on: jest.fn().mockImplementation((event, callback) => {
-        if (event === 'text-change') {
-            callback();
-        }
-    }),
-    root: {
-        innerHTML: '<p>Test content</p>'
-    },
-    clipboard: {
-        convert: jest.fn().mockReturnValue({ ops: [] })
-    },
-    updateContents: jest.fn(),
-    getModule: jest.fn().mockImplementation((name) => {
-        if (name === 'toolbar') {
-            return {
-                addHandler: jest.fn()
-            };
-        }
-        return {};
-    })
-};
+// --- Mocks ---
 
-// Les mocks doivent être définis avant l'import du module à tester
+// Mock Quill
 jest.mock('quill', () => {
-    // Mock de base pour les Blots
-    class MockBlot {
-        static create() { return document.createElement('div'); }
-        static value() { return {}; }
-        static formats() { return {}; }
-        format() {}
-    }
-
-    // Mock Quill en tant que fonction constructeur avec des méthodes statiques
-    const mockQuill = jest.fn().mockImplementation(() => mockQuillInstance);
-
-    // Ajouter les méthodes statiques au mock
-    mockQuill.register = jest.fn();
-    mockQuill.import = jest.fn().mockImplementation((name) => {
-        if (name === 'formats/image') {
-            return MockBlot;
-        }
-        if (name === 'blots/block/embed') {
-            return MockBlot;
-        }
-        if (name === 'blots/block') {
-            return MockBlot;
-        }
-        if (name.startsWith('attributors/style/')) {
+    const mockQuillInstance = {
+        on: jest.fn((event, callback) => {
+            if (event === 'text-change') {
+                callback();
+            }
+        }),
+        root: {
+            innerHTML: '<p>Test content</p>',
+            addEventListener: jest.fn(),
+        },
+        clipboard: {
+            convert: jest.fn().mockReturnValue({ ops: [] })
+        },
+        updateContents: jest.fn(),
+        getModule: jest.fn().mockImplementation((name) => {
+            if (name === 'toolbar') {
+                return { addHandler: jest.fn() };
+            }
             return {};
-        }
-        return {};
+        }),
+        container: {
+            getBoundingClientRect: jest.fn().mockReturnValue({ top: 0, left: 0, width: 100, height: 100 })
+        },
+        getSelection: jest.fn(),
+        getSemanticHTML: jest.fn().mockReturnValue('<p>Test content</p>'),
+        deleteText: jest.fn(),
+        insertEmbed: jest.fn(),
+        insertText: jest.fn(),
+        setSelection: jest.fn(),
+        getLine: jest.fn(),
+        getIndex: jest.fn(),
+        getText: jest.fn(),
+        getBounds: jest.fn(),
+    };
+
+    const MockQuill = jest.fn().mockImplementation(() => mockQuillInstance);
+
+    // @ts-ignore
+    MockQuill.register = jest.fn();
+
+    // @ts-ignore
+    MockQuill.import = jest.fn().mockImplementation((name) => {
+        // Return a dummy Blot class
+        return class MockBlot {
+            static blotName = 'mock';
+            static tagName = 'div';
+            static create() { return document.createElement('div'); }
+            static value() { return {}; }
+            static formats() { return {}; }
+            format() {}
+        };
     });
 
-    return mockQuill;
+    return {
+        __esModule: true,
+        default: MockQuill,
+    };
 });
 
-// Mock du module de fusion
+// Mock dependencies
 jest.mock('../src/modules.ts', () => ({
     __esModule: true,
     default: jest.fn().mockImplementation((moduleOptions, enabledModules) => {
         return { ...moduleOptions, ...enabledModules };
     })
 }));
+
+// IMPORTANT: Mock both the Blot and the Module for Mention
+// This prevents the real code in src/blots/mention.ts from running and trying to extend a real Quill Blot
+jest.mock('../src/blots/mention.ts', () => {
+    return {
+        __esModule: true,
+        default: class MockMentionBlot {
+            static blotName = 'mention';
+            static tagName = 'span';
+        }
+    };
+});
+jest.mock('../src/modules/mention.ts', () => ({
+    Mention: jest.fn()
+}));
+
+// IMPORTANT: Mock ImageFigure to avoid inheritance issues
+jest.mock('../src/blots/imageFigure.ts', () => {
+    return {
+        __esModule: true,
+        default: class MockImageFigure {
+            static blotName = 'image';
+            static tagName = 'figure';
+        }
+    };
+});
 
 jest.mock('quill-table-better', () => ({
     QuillTableBetter: jest.fn()
@@ -82,9 +113,11 @@ jest.mock('../src/upload-utils.ts', () => ({
     }
 }));
 
-// Mock de la méthode dispatch du Controller
+// Mock Controller dispatch
 const mockDispatch = jest.fn();
 Controller.prototype.dispatch = mockDispatch;
+
+// --- Tests ---
 
 describe('QuillController - méthode connect', () => {
     let application: Application;
@@ -135,23 +168,27 @@ describe('QuillController - méthode connect', () => {
 
     describe('connect', () => {
         it('devrait initialiser Quill correctement et dispatcher des événements', () => {
-            expect(mockDispatch).toHaveBeenCalledWith(
-                'options',
-                expect.objectContaining({
-                    detail: expect.any(Object),
-                    prefix: 'quill'
-                })
-            );
+            // Wait for next tick to ensure async operations complete
+            return new Promise(resolve => setTimeout(resolve, 0)).then(() => {
+                expect(mockDispatch).toHaveBeenCalledWith(
+                    'options',
+                    expect.objectContaining({
+                        detail: expect.any(Object),
+                        prefix: 'quill'
+                    })
+                );
 
-            expect(mockDispatch).toHaveBeenCalledWith(
-                'connect',
-                expect.objectContaining({
-                    detail: expect.any(Object),
-                    prefix: 'quill'
-                })
-            );
+                expect(mockDispatch).toHaveBeenCalledWith(
+                    'connect',
+                    expect.objectContaining({
+                        detail: expect.any(Object),
+                        prefix: 'quill'
+                    })
+                );
 
-            expect(inputElement.value).toBe('<p>Test content</p>');
+                // Check that the input value was updated (via the mock text-change event)
+                expect(inputElement.value).toBe('<p>Test content</p>');
+            });
         });
     });
 });

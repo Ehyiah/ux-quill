@@ -37,15 +37,40 @@ export default defineConfig({
           },
           {
             text: 'Modules',
-            collapsed: true,
+            collapsed: false,
             items: [
               { text: 'Concept', link: '/guide/modules/index' },
-              { text: 'ReadTimeModule', link: '/guide/modules/read-time' },
-              { text: 'STTModule', link: '/guide/modules/stt' },
-              { text: 'ImageSelectionModule', link: '/guide/modules/image-selection' },
-              { text: 'NodeMoverModule', link: '/guide/modules/node-mover' },
-              { text: 'FullScreenModule', link: '/guide/modules/fullscreen' },
-              { text: 'Other Modules', link: '/guide/modules/others' }
+              {
+                text: 'Independent',
+                collapsed: true,
+                items: [
+                  { text: 'Autosave', link: '/guide/modules/autosave' },
+                  { text: 'Counter', link: '/guide/modules/counter' },
+                  { text: 'FullScreen', link: '/guide/modules/fullscreen' },
+                  { text: 'HtmlEdit', link: '/guide/modules/html-edit' },
+                  { text: 'Markdown', link: '/guide/modules/markdown' },
+                  { text: 'Mention', link: '/guide/modules/mention' },
+                  { text: 'NodeMover', link: '/guide/modules/node-mover' },
+                  { text: 'Paste Sanitizer', link: '/guide/modules/paste-sanitizer' },
+                  { text: 'ReadTime', link: '/guide/modules/read-time' },
+                  { text: 'SmartLinks', link: '/guide/modules/smart-links' },
+                  { text: 'Speech To Text', link: '/guide/modules/stt' },
+                  { text: 'Other Modules', link: '/guide/modules/others' }
+                ]
+              },
+              {
+                text: 'Field-dependent',
+                collapsed: true,
+                items: [
+                  { text: 'Divider', link: '/guide/modules/divider' },
+                  { text: 'Emoji', link: 'https://github.com/contentco/quill-emoji' },
+                  { text: 'Image Selection', link: '/guide/modules/image-selection' },
+                  { text: 'Link Attributes', link: '/guide/modules/link-attributes' },
+                  { text: 'PageBreak', link: '/guide/modules/pagebreak' },
+                  { text: 'Syntax (Highlight)', link: 'https://quilljs.com/docs/modules/syntax/' },
+                  { text: 'Table', link: 'https://github.com/attoae/quill-table-better' }
+                ]
+              },
             ]
           },
           { text: 'Advanced',
@@ -57,7 +82,7 @@ export default defineConfig({
               { text: 'Events', link: '/guide/advanced/events' },
             ]
           },
-          { text: 'EasyAdmin', link: '/guide/easyadmin' }
+          { text: 'EasyAdmin Integration', link: '/guide/easyadmin' }
         ]
       }
     ],

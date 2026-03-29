@@ -1,8 +1,10 @@
 # ImageSelectionModule
 
+**Auto-imported: YES** (if `ImageField` is present in `quill_options`)
+
 The `ImageSelectionModule` provides an interactive way to manage images within the editor. It adds a selection overlay with resize handles and a dedicated toolbar for quick actions.
 
-This module is **automatically enabled** when the `ImageField` is used.
+This module is **automatically enabled** when the `ImageField` is used. If you don't use the `ImageField` but still want the module, you must add it manually to the `modules` option.
 
 <img src="/modules/images/image-selection.png" alt="image selection">
 

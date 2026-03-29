@@ -14,6 +14,13 @@ They allow you to add interactive features, modify event handling, or integrate 
 
 ---
 
+This bundle categorizes modules into two types:
+
+1. **Field-dependent Modules**: These modules are tied to a specific Field DTO in `quill_options`. They are usually **auto-loaded** as soon as the corresponding field is added to the toolbar.
+2. **Independent Modules**: These modules provide global functionality or behavior regardless of specific fields. They usually require manual registration in the `modules` array.
+
+---
+
 - You can add/customize quill modules in this option field.
 - You can create your own modules classes, they need to implement the ``ModuleInterface`` and add the name and options properties.
 - Some modules are automatically loaded when they are needed in fields by implementing the `QuillFieldModuleInterface`.
@@ -49,18 +56,34 @@ public function buildForm(FormBuilderInterface $builder, array $options)
 ## Modules list
 See module details on the left menu
 
-|         modules          | auto-imported | description                                                                                                                                                                                                                                                                                           | name | options type | options | default options |
-|:------------------------:|:-------------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------| :---: | :---: | :---: | :---: |
-|     **EmojiModule**      |      YES      | required if emoji Field is activated                                                                                                                                                                                                                                  | emoji-toolbar | string | NONE | ``'true'`` |
-| **ImageSelectionModule** |      YES      | Automatically active with ImageField. Adds a selection overlay with resize handles, alignment toolbar, paragraph insertion, rotation, flip, caption, alt text and link editing. | imageSelection | array | ``borderColor``, ``borderWidth``, ``buttonBeforeLabel``, ``buttonAfterLabel``, ``buttonBeforeTitle``, ``buttonAfterTitle``, ``alignLabels``, ``rotateLeftTitle``, ``rotateRightTitle``, ``flipHorizontalTitle``, ``flipVerticalTitle``, ``resetTitle``, ``linkTitle``, ``captionBackgroundColor`` | see ``Ehyiah\QuillJsBundle\DTO\Modules\ImageSelectionModule`` |
-|    **ResizeModule**      |      YES      | (Legacy) Basic image resizing functionality using `quill-resize-image`. Use it if you prefer the old behavior over `ImageSelectionModule`. | resize | array | NONE | [] |
-|     **SyntaxModule**     |      YES      | To use with CodeBlockField field, see official [description](https://quilljs.com/docs/modules/syntax)                                                                                                                                                                                                 | syntax | string | NONE | ``'true'`` |
-|    **HistoryModule**     |      NO       | The History module is responsible for handling undo and redo for Quill. see details on official [site](https://quilljs.com/docs/modules/history)                                                                                                                                                      | history | array | ``delay``, ``maxStack``, ``userOnly`` | ['delay' => '1000', 'maxStack' => '100', 'userOnly' => 'false'] |
-|   **SmartLinksModule**   |      NO       | automatic recognition of links (can be customized within options)                                                                                                                                                                                                                                     | smartLinks | array | ``linkRegex`` | ['linkRegex' => '/https?:\/\/[^\s]+/'] |
-|    **CounterModule**     |      NO       | Count of number and Words inside WYSIWYG (display below WYSIWYG instance by default or inside a custom html Element if you want : specify an ID in *_container with the '#') characters counter display 1 character by default because Quill is instantiated with a <p></p> that count as 1 character | counter | array | ``words``, ``words_label``, ``words_container``, ``characters``, ``characters_label``, ``characters_container`` | ['words' => true, 'words_label' => 'Number of words : ', 'words_container' => '', 'characters' => true, 'characters_label' => 'Number of characters : ', 'characters_container' => ''] |
-|     **TableModule**      |      YES      | The Table module is responsible for handling table options. see details on repository [site](https://github.com/attoae/quill-table-better)                                                                                                                                                            | table-better | array | https://github.com/attoae/quill-table-better | see ``Ehyiah\QuillJsBundle\DTO\Modules\TableModule`` |
-|   **FullScreenModule**   |      NO       | Add a FullScreen button to the toolbar [site](https://github.com/qvarts/quill-toggle-fullscreen-button)                                                                                                                                                                                               | toggleFullscreen | array | `buttonTitle`, `buttonHTML` check https://github.com/qvarts/quill-toggle-fullscreen-button?tab=readme-ov-file#api | see ``Ehyiah\QuillJsBundle\DTO\Modules\FullScreenModule`` |
-|    **HtmlEditModule**    |      NO       | The HtmlEditModule allow to edit the raw html. see details on repository [site](https://github.com/benwinding/quill-html-edit-button)                                                                                                                                                                 | htmlEditButton | array | https://github.com/benwinding/quill-html-edit-button | see ``Ehyiah\QuillJsBundle\DTO\Modules\htmlEditButton`` | There is currently a conflict with tableField. Don't use both of them at the same time as the table inserted via the htmlEdit module will not be displayed |
-|    **ReadTimeModule**    |      NO       | The ReadTimeModule add an indication on how many minutes it will take to a person to read what your write inside the WYSIWYG editor                                                                                                                                                                   | readingTime | array | ``wpm``, ``label``, ``suffix``, ``readTimeOk``, ``readTimeMedium``, ``target`` | ['wpm' => '200', 'label' => 'Reading time: ', 'suffix' => ' min read', 'readTimeOk' => '2', 'readTimeMedium' => '5'] |
-|      **STTModule**       |      NO       | The Speech-to-Text module enables voice dictation using the Web Speech API. Allows users to dictate text directly into the editor with real-time audio visualization                                                                                                                                  | speechToText | array | ``language``, ``continuous``, ``visualizer``, ``waveformColor``, ``histogramColor``, ``debug``, ``buttonTitleStart``, ``buttonTitleStop``, ``titleInactive``, ``titleStarting``, ``titleActive`` | see ``Ehyiah\QuillJsBundle\DTO\Modules\STTModule`` |
-|    **NodeMoverModule**   |      YES      | Enable moving any block element (text, images, videos) with a toolbar and drag handle.                                                                                                                                                                                                                   | nodeMover | array | [see details](./node-mover.md) | [] |
+### Field-dependent Modules
+These modules are usually automatically imported when the corresponding field is present in `quill_options`.
+
+| module | auto-imported | description | name | options type | default options |
+| :--- | :---: | :--- | :---: | :---: | :--- |
+| **DividerModule** | YES | [see details](./divider.md) | divider | array | [] |
+| **EmojiModule** | YES | Required if EmojiField is activated. | emoji-toolbar | string | `'true'` |
+| **ImageSelectionModule** | YES | [see details](./image-selection.md) | imageSelection | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\ImageSelectionModule`` |
+| **LinkAttributesModule** | YES | [see details](./link-attributes.md) | linkAttributes | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\LinkAttributesModule`` |
+| **PageBreakModule** | YES | [see details](./pagebreak.md) | pageBreak | array | ['label' => 'Page Break'] |
+| **ResizeModule** | YES | (Legacy) Basic image resizing functionality. | resize | array | [] |
+| **SyntaxModule** | YES | Required for CodeBlockField. | syntax | string | `'true'` |
+| **TableModule** | YES | [see details](https://github.com/attoae/quill-table-better) | table-better | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\TableModule`` |
+
+### Independent Modules
+These modules provide global behavior and must usually be added manually to the `modules` option.
+
+| module | auto-imported | description | name | options type | default options |
+| :--- | :---: | :--- | :---: | :---: | :--- |
+| **AutosaveModule** | NO | [see details](./autosave.md) | autosave | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\AutosaveModule`` |
+| **CounterModule** | NO | [see details](./counter.md) | counter | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\CounterModule`` |
+| **FullScreenModule** | NO | [see details](./fullscreen.md) | toggleFullscreen | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\FullScreenModule`` |
+| **HistoryModule** | NO | Responsible for handling undo and redo. | history | array | ['delay' => '1000', 'maxStack' => '100', 'userOnly' => 'false'] |
+| **HtmlEditModule** | NO | [see details](./html-edit.md) | htmlEditButton | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\HtmlEditModule`` |
+| **MarkdownModule** | NO | [see details](./markdown.md) | markdown | array | [] |
+| **MentionModule** | NO | [see details](./mention.md) | mention | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\MentionModule`` |
+| **NodeMoverModule** | **ALWAYS** | [see details](./node-mover.md) | nodeMover | array | [] |
+| **PasteSanitizerModule** | NO | [see details](./paste-sanitizer.md) | pasteSanitizer | array | ['plain_text' => true] |
+| **ReadTimeModule** | NO | [see details](./read-time.md) | readingTime | array | ['wpm' => '200', 'label' => 'Reading time: ', 'suffix' => ' min read'] |
+| **SmartLinksModule** | NO | [see details](./smart-links.md) | smartLinks | array | ['linkRegex' => '/https?:\/\/[^\s]+/'] |
+| **STTModule** | NO | [see details](./stt.md) | speechToText | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\STTModule`` |
