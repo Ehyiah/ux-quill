@@ -2,8 +2,8 @@ import Quill from 'quill';
 import PageBreakBlot from "../blots/pageBreak.js";
 Quill.register(PageBreakBlot);
 export class PageBreak {
-  label;
   constructor(quill, options) {
+    this.label = void 0;
     this.label = options.label || 'Page Break';
     this.injectStyles();
     const toolbar = quill.getModule('toolbar');
@@ -24,45 +24,7 @@ export class PageBreak {
     if (document.getElementById(id)) return;
     const style = document.createElement('style');
     style.id = id;
-    style.innerHTML = `
-            .ql-editor .ql-page-break {
-                border-top: 1px dashed #ccc;
-                height: 1px;
-                margin: 24px 0;
-                position: relative;
-                text-align: center;
-                cursor: default;
-                display: block;
-            }
-            .ql-editor .ql-page-break::after {
-                background-color: #fff;
-                color: #777;
-                content: attr(data-label);
-                font-size: 11px;
-                font-weight: bold;
-                padding: 0 10px;
-                position: absolute;
-                top: -8px;
-                left: 50%;
-                transform: translateX(-50%);
-                text-transform: uppercase;
-                letter-spacing: 1px;
-            }
-            /* Fallback if data-label is missing */
-            .ql-editor .ql-page-break:not([data-label])::after {
-                content: 'Page Break';
-            }
-            @media print {
-                .ql-page-break {
-                    page-break-after: always;
-                    border: none;
-                    visibility: hidden;
-                    display: block;
-                    height: 0;
-                    margin: 0;
-                }
-            }
-        `;
+    style.innerHTML = "\n            .ql-editor .ql-page-break {\n                border-top: 1px dashed #ccc;\n                height: 1px;\n                margin: 24px 0;\n                position: relative;\n                text-align: center;\n                cursor: default;\n                display: block;\n            }\n            .ql-editor .ql-page-break::after {\n                background-color: #fff;\n                color: #777;\n                content: attr(data-label);\n                font-size: 11px;\n                font-weight: bold;\n                padding: 0 10px;\n                position: absolute;\n                top: -8px;\n                left: 50%;\n                transform: translateX(-50%);\n                text-transform: uppercase;\n                letter-spacing: 1px;\n            }\n            /* Fallback if data-label is missing */\n            .ql-editor .ql-page-break:not([data-label])::after {\n                content: 'Page Break';\n            }\n            @media print {\n                .ql-page-break {\n                    page-break-after: always;\n                    border: none;\n                    visibility: hidden;\n                    display: block;\n                    height: 0;\n                    margin: 0;\n                }\n            }\n        ";
     document.head.appendChild(style);
   }
 }

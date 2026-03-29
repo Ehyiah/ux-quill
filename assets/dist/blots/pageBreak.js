@@ -1,9 +1,6 @@
 import Quill from 'quill';
 const BlockEmbed = Quill.import('blots/block/embed');
 class PageBreakBlot extends BlockEmbed {
-  static blotName = 'pageBreak';
-  static tagName = 'div';
-  static className = 'ql-page-break';
   static create(value) {
     const node = super.create();
     if (typeof value === 'string') {
@@ -15,4 +12,7 @@ class PageBreakBlot extends BlockEmbed {
     return node.getAttribute('data-label');
   }
 }
+PageBreakBlot.blotName = 'pageBreak';
+PageBreakBlot.tagName = 'div';
+PageBreakBlot.className = 'ql-page-break';
 export default PageBreakBlot;

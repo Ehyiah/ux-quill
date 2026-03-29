@@ -6,12 +6,9 @@ try {
   Embed = Quill.import('blots/inline');
 }
 class MentionBlot extends Embed {
-  static blotName = 'mention';
-  static tagName = 'span';
-  static className = 'ql-mention';
   static create(data) {
     const node = super.create(data);
-    node.innerText = `${data.trigger}${data.value}`;
+    node.innerText = "" + data.trigger + data.value;
     node.setAttribute('data-id', data.id);
     node.setAttribute('data-value', data.value);
     node.setAttribute('data-trigger', data.trigger);
@@ -27,4 +24,7 @@ class MentionBlot extends Embed {
     };
   }
 }
+MentionBlot.blotName = 'mention';
+MentionBlot.tagName = 'span';
+MentionBlot.className = 'ql-mention';
 export default MentionBlot;

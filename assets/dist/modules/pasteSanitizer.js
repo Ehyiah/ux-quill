@@ -1,14 +1,14 @@
+function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 import Quill from 'quill';
 const Delta = Quill.import('delta');
 export class PasteSanitizer {
-  quill;
-  options;
   constructor(quill, options) {
+    this.quill = void 0;
+    this.options = void 0;
     this.quill = quill;
-    this.options = {
-      plain_text: false,
-      ...options
-    };
+    this.options = _extends({
+      plain_text: false
+    }, options);
     this.init();
   }
   init() {

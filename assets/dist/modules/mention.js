@@ -1,24 +1,24 @@
+function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 import Quill from 'quill';
 import MentionBlot from "../blots/mention.js";
 Quill.register(MentionBlot);
 export class Mention {
-  quill;
-  options;
-  list = null;
-  selectedIndex = 0;
-  currentSearch = '';
-  currentResults = [];
-  startSelection = null;
   constructor(quill, options) {
+    this.quill = void 0;
+    this.options = void 0;
+    this.list = null;
+    this.selectedIndex = 0;
+    this.currentSearch = '';
+    this.currentResults = [];
+    this.startSelection = null;
     this.quill = quill;
-    this.options = {
+    this.options = _extends({
       trigger: '@',
       data: [],
       remote_url: null,
       min_chars: 0,
-      max_results: 10,
-      ...options
-    };
+      max_results: 10
+    }, options);
     this.injectStyles();
     this.quill.on('text-change', (delta, oldDelta, source) => {
       if (source === 'user') {
@@ -90,15 +90,16 @@ export class Mention {
     }
     this.list.innerHTML = '';
     this.currentResults.forEach((item, index) => {
+      var _this$list;
       const div = document.createElement('div');
-      div.className = `ql-mention-item ${index === this.selectedIndex ? 'selected' : ''}`;
+      div.className = "ql-mention-item " + (index === this.selectedIndex ? 'selected' : '');
       div.innerText = item.value;
       div.addEventListener('mousedown', ev => {
         ev.preventDefault();
         ev.stopPropagation();
         this.selectItem(item);
       });
-      this.list?.appendChild(div);
+      (_this$list = this.list) == null || _this$list.appendChild(div);
     });
     const range = this.quill.getSelection();
     if (range) {
@@ -108,8 +109,8 @@ export class Mention {
         const top = containerBounds.top + bounds.top + bounds.height + 5;
         const left = containerBounds.left + bounds.left;
         this.list.style.position = 'fixed';
-        this.list.style.top = `${top}px`;
-        this.list.style.left = `${left}px`;
+        this.list.style.top = top + "px";
+        this.list.style.left = left + "px";
         this.list.style.display = 'block';
       }
     }
@@ -160,39 +161,7 @@ export class Mention {
     if (document.getElementById(id)) return;
     const style = document.createElement('style');
     style.id = id;
-    style.innerHTML = `
-            .ql-mention {
-                background-color: #e1f5fe;
-                color: #01579b;
-                border-radius: 4px;
-                padding: 0 4px;
-                font-weight: bold;
-                display: inline-block;
-            }
-            .ql-mention-list {
-                position: fixed;
-                background: #fff;
-                border: 1px solid #ddd;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                border-radius: 4px;
-                z-index: 9999;
-                min-width: 180px;
-                display: none;
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-                overflow: hidden;
-            }
-            .ql-mention-item {
-                padding: 10px 15px;
-                cursor: pointer;
-                font-size: 14px;
-                color: #333;
-                transition: background 0.1s;
-            }
-            .ql-mention-item:hover, .ql-mention-item.selected {
-                background-color: #e3f2fd;
-                color: #1976d2;
-            }
-        `;
+    style.innerHTML = "\n            .ql-mention {\n                background-color: #e1f5fe;\n                color: #01579b;\n                border-radius: 4px;\n                padding: 0 4px;\n                font-weight: bold;\n                display: inline-block;\n            }\n            .ql-mention-list {\n                position: fixed;\n                background: #fff;\n                border: 1px solid #ddd;\n                box-shadow: 0 4px 12px rgba(0,0,0,0.15);\n                border-radius: 4px;\n                z-index: 9999;\n                min-width: 180px;\n                display: none;\n                font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif;\n                overflow: hidden;\n            }\n            .ql-mention-item {\n                padding: 10px 15px;\n                cursor: pointer;\n                font-size: 14px;\n                color: #333;\n                transition: background 0.1s;\n            }\n            .ql-mention-item:hover, .ql-mention-item.selected {\n                background-color: #e3f2fd;\n                color: #1976d2;\n            }\n        ";
     document.head.appendChild(style);
   }
 }

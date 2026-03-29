@@ -10,23 +10,6 @@ import ImageFigure from "./blots/imageFigure.js";
 // Register custom ImageFigure blot to override default image
 Quill.register(ImageFigure, true);
 import { Mention } from "./modules/mention.js";
-export default class extends Controller {
-  static targets = ['input', 'editorContainer'];
-  static values = (() => ({
-    toolbarOptions: {
-      type: Array,
-      default: []
-    },
-    extraOptions: {
-      type: Object,
-      default: {}
-    },
-    modulesOptions: {
-      type: Array,
-      default: []
-    }
-  }))();
-  quillInstance = null;
 export default class _Class extends Controller {
   constructor() {
     super(...arguments);
@@ -201,7 +184,7 @@ export default class _Class extends Controller {
     if (options.modules) {
       for (const moduleName in options.modules) {
         if (moduleName.startsWith('mention')) {
-          Quill.register(`modules/${moduleName}`, Mention);
+          Quill.register("modules/" + moduleName, Mention);
         }
       }
     }
