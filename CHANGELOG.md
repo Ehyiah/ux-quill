@@ -1,3 +1,13 @@
+# 3.5.1 (Symfony 8 better compatibility)
+
+## PHP modifications
+- `quill_extra_options` now accepts arrays directly in addition to callables. 
+When passing an array, it is validated by the OptionsResolver and all missing options are filled with their default values. Previously, arrays were passed through as-is without validation or defaults.
+- When passing a callable to `quill_extra_options`, the resolver is now pre-configured with all default options before the callable is invoked. 
+The callable can override any option via `setDefault()`. Previously, the callable received an empty resolver and had to define everything from scratch.
+
+> **Note:** If you were passing an array with keys not defined in `quill_extra_options`, an `UndefinedOptionsException` will now be thrown. Remove any unknown keys from your array.
+
 # 3.5.0 new image default module
 - New default image module, you can still use the old if you prefer (see doc)
 

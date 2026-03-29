@@ -18,11 +18,13 @@ use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\BoldField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\CleanField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\CodeBlockField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\CodeField;
+use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\DividerField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\EmojiField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\FormulaField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ImageField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ItalicField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\LinkField;
+use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\PageBreakField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\StrikeField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\TableField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\UnderlineField;
@@ -58,6 +60,8 @@ final class QuillGroup implements QuillGroupInterface
             new HeaderGroupField(),
             new ColorField(),
             new IndentField(),
+            new DividerField(),
+            new PageBreakField(),
         ];
 
         $orgaFields = [
