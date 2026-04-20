@@ -45,6 +45,9 @@ Quill.register('modules/linkAttributes', LinkAttributes);
 import {Autosave} from './modules/autosave.ts';
 Quill.register('modules/autosave', Autosave);
 
+import NotionToolbar from './modules/notionToolbar.ts';
+Quill.register('modules/notionToolbar', NotionToolbar);
+
 import {PasteSanitizer} from './modules/pasteSanitizer.ts';
 Quill.register('modules/pasteSanitizer', PasteSanitizer);
 

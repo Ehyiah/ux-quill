@@ -82,6 +82,7 @@ These modules provide global behavior and must usually be added manually to the 
 | **HtmlEditModule** | NO | [see details](./html-edit.md) | htmlEditButton | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\HtmlEditModule`` |
 | **MarkdownModule** | NO | [see details](./markdown.md) | markdown | array | [] |
 | **MentionModule** | NO | [see details](./mention.md) | mention | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\MentionModule`` |
+| **NotionToolbarModule** | NO | [see details](./notion-toolbar.md) | notionToolbar | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\NotionToolbarModule`` |
 | **NodeMoverModule** | **ALWAYS** | [see details](./node-mover.md) | nodeMover | array | [] |
 | **PasteSanitizerModule** | NO | [see details](./paste-sanitizer.md) | pasteSanitizer | array | ['plain_text' => true] |
 | **ReadTimeModule** | NO | [see details](./read-time.md) | readingTime | array | ['wpm' => '200', 'label' => 'Reading time: ', 'suffix' => ' min read'] |
