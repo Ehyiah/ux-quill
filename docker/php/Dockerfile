@@ -17,7 +17,6 @@ RUN apt-get update && apt-get install -y  --fix-missing \
 RUN curl -sL https://deb.nodesource.com/setup_22.x -o node_setup.sh && \
     bash node_setup.sh && \
     apt-get install -y nodejs && \
-    npm install npm -g && \
     rm -rf /var/lib/apt/lists/*
 
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
