@@ -103,8 +103,7 @@ final class QuillTypeTest extends TestCase
                     [new ImageField()],
                     [new EmojiField()],
                 ],
-                'quill_extra_options' => [
-                ],
+                'quill_extra_options' => [],
                 'modules' => [],
             ],
             [
@@ -130,8 +129,7 @@ final class QuillTypeTest extends TestCase
                     [new BoldField(), new ItalicField()],
                     [new BoldField(), new UnderlineField()],
                 ],
-                'quill_extra_options' => [
-                ],
+                'quill_extra_options' => [],
                 'modules' => [],
             ],
             [
