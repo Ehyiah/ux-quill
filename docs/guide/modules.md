@@ -36,6 +36,7 @@ Example of how to use modules:
 | **DividerModule** | YES | Add a horizontal separator (`<hr>`) support and toolbar button | divider | array | [] | [] |
 | **PageBreakModule** | YES | Add a page break support for print (`page-break-after: always`) | pageBreak | array | `label` | ['label' => 'Page Break'] |
 | **MentionModule** | NO | Add support for mentions (`@user`, `#tag`) with static or remote data. | mention | array | `trigger`, `data`, `remote_url`, `min_chars`, `max_results` | see documentation |
+| **NotionToolbarModule** | NO | Enable a Notion-like experience with a floating selection toolbar and a slash command menu (type `/` to see options). | notionToolbar | array | `slashMenu`, `floatingToolbar` | ['slashMenu' => true, 'floatingToolbar' => true] |
 | **AutosaveModule** | NO | Automatically saves content to `localStorage` to prevent data loss. | autosave | array | `interval`, `restore_type`, `key_suffix` | see documentation |
 | **PasteSanitizerModule** | NO | Clean or strip HTML when pasting content from external sources. | pasteSanitizer | array | `plain_text`, `remove_styles`, `remove_classes` | see documentation |
 | **MarkdownModule** | NO | Enable Markdown-like shortcuts during typing (e.g. `# ` for H1, `* ` for list) | markdown | array | [] | [] |
@@ -102,6 +103,24 @@ This module adds support for page breaks. It displays a visual indicator in the 
     new PageBreakModule([
         'label' => 'Saut de page',
     ]),
+],
+```
+
+## NotionToolbarModule
+
+This module provides a modern, "Notion-like" editing experience. It includes:
+1.  **Floating Toolbar**: A context menu that appears above selected text for quick formatting (Bold, Italic, etc.).
+2.  **Slash Menu**: A block selection menu that appears when you type `/` at the beginning of a line or after a space.
+
+**Options:**
+- **slashMenu**: Enable/Disable the `/` command menu (default: `true`).
+- **floatingToolbar**: Enable/Disable the floating selection toolbar (default: `true`).
+
+**Usage example:**
+
+```php
+'modules' => [
+    new NotionToolbarModule(),
 ],
 ```
 
