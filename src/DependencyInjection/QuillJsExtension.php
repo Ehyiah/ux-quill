@@ -4,6 +4,7 @@ namespace Ehyiah\QuillJsBundle\DependencyInjection;
 
 use Ehyiah\QuillJsBundle\Form\QuillAdminField;
 use Ehyiah\QuillJsBundle\Form\QuillType;
+use Ehyiah\QuillJsBundle\Twig\Components\QuillContent;
 use Symfony\Component\AssetMapper\AssetMapperInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -20,7 +21,12 @@ class QuillJsExtension extends Extension implements PrependExtensionInterface
         $bundles = $container->getParameter('kernel.bundles');
 
         if (is_array($bundles) && isset($bundles['TwigBundle'])) {
-            $container->prependExtensionConfig('twig', ['form_themes' => ['@QuillJs/form.html.twig']]);
+            $container->prependExtensionConfig('twig', [
+                'form_themes' => ['@QuillJs/form.html.twig'],
+                'paths' => [
+                    __DIR__ . '/../templates' => 'QuillJs',
+                ],
+            ]);
         }
 
         if ($this->isAssetMapperAvailable($container)) {
@@ -42,6 +48,15 @@ class QuillJsExtension extends Extension implements PrependExtensionInterface
         $definition->setPublic(false);
 
         $container->setDefinition('form.ux-quill-js', $definition);
+
+        if (class_exists('Symfony\UX\TwigComponent\Attribute\AsTwigComponent')) {
+            $definition = new Definition(QuillContent::class);
+            $definition->addTag('twig.component', [
+                'key' => 'QuillContent',
+                'template' => '@QuillJs/components/QuillContent.html.twig',
+            ]);
+            $container->setDefinition('quill_js.twig_component.quill_content', $definition);
+        }
 
         $bundles = $container->getParameter('kernel.bundles');
 

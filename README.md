@@ -52,7 +52,18 @@ In a form, use QuillType. It works like a classic Type except it has more option
 ```
 
 # Display result
-in a twig template :
+In a twig template, the easiest way is to use the provided Twig component:
+
+```twig
+<twig:QuillContent value="{{ post.content }}" />
+```
+
+For inline style (no CSS required on frontend):
+```twig
+<twig:QuillContent value="{{ post.content }}" style="inline" />
+```
+
+Or manually:
 
 - if you use the default class styling option you may need to encapsulate the content so the quill stylesheet can be applied like this :
 ```

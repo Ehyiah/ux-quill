@@ -21,7 +21,26 @@ public function buildForm(FormBuilderInterface $builder, array $options)
 
 How you display the content depends on the `style` option used during entry (see [Quill Options](./configuration/quill-options.md)).
 
-### 1. Default Styling (Class based)
+### Using the Twig Component (Recommended)
+
+The easiest way to display Quill content is to use the provided Twig component. It handles the necessary wrappers and modes automatically.
+
+```twig
+{# Default mode (class) #}
+<twig:QuillContent value="{{ post.content }}" />
+
+{# Inline mode #}
+<twig:QuillContent value="{{ post.content }}" style="inline" />
+
+{# Custom HTML tag, theme and extra classes #}
+<twig:QuillContent tag="article" value="{{ post.content }}" theme="bubble" class="my-custom-class" />
+```
+
+### Manual Display
+
+If you prefer to wrap the content manually:
+
+#### 1. Default Styling (Class based)
 
 By default, Quill uses CSS classes (e.g., `ql-align-center`, `ql-indent-1`) to format content.
 

@@ -1,0 +1,11 @@
+<{{ this.tag }} {{ attributes.defaults({
+    class: this.isClassStyle ? 'ql-' ~ this.theme : ''
+}) }}>
+    {% if this.isClassStyle %}
+        <div class="ql-editor">
+            {{ this.value|raw }}
+        </div>
+    {% else %}
+        {{ this.value|raw }}
+    {% endif %}
+</{{ this.tag }}>
