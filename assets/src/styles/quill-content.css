@@ -1,0 +1,34 @@
+/* ============================================
+   Quill Content Rendering Styles
+   ============================================ */
+
+.ql-editor .ql-page-break {
+    display: block;
+    height: 0;
+    visibility: hidden;
+}
+
+@media print {
+    .ql-editor .ql-page-break {
+        page-break-after: always;
+    }
+}
+
+.ql-editor .ql-mention {
+    background-color: #e1f5fe;
+    color: #01579b;
+    border-radius: 4px;
+    padding: 0 4px;
+    font-weight: bold;
+    display: inline-block;
+}
+
+.ql-editor .ql-video {
+    display: block;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+.ql-editor .ql-image-figure {
+    margin: 1em auto;
+}

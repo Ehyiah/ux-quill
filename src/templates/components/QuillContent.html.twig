@@ -1,11 +1,14 @@
 <{{ this.tag }} {{ attributes.defaults({
-    class: this.isClassStyle ? 'ql-' ~ this.theme : ''
+    class: this.isClassStyle ? 'ql-' ~ this.theme : '',
+    'data-controller': this.isClassStyle ? 'ehyiah--ux-quill--quill-render' : ''
 }) }}>
-    {% if this.isClassStyle %}
-        <div class="ql-editor">
-            {{ this.value|raw }}
-        </div>
-    {% else %}
-        {{ this.value|raw }}
-    {% endif %}
+    {% block content %}
+        {% if this.isClassStyle %}
+            <div class="ql-editor">
+                {{ (this.value ?? '')|raw }}
+            </div>
+        {% else %}
+            {{ (this.value ?? '')|raw }}
+        {% endif %}
+    {% endblock %}
 </{{ this.tag }}>
