@@ -17,6 +17,30 @@ public function buildForm(FormBuilderInterface $builder, array $options)
 }
 ```
 
+## Toolbar Presets
+
+The bundle ships with a few ready-made toolbar compositions exposed by `QuillGroup`. Pick the preset that matches the context, or assemble your own with `QuillGroup::build(...)`.
+
+| Preset                             | Intended use | Notable fields |
+|------------------------------------| --- | --- |
+| `QuillGroup::buildMinimal()`       | Comments, short descriptions, note fields. | bold, italic, underline, link, clean |
+| `QuillGroup::buildForNewsletter()` | Newsletter / email content: light formatting, no technical fields. | text emphasis, headings, colors, alignment, lists, image |
+| `QuillGroup::buildAdvanced()`      | Rich editorial content for blog articles. | full text formatting, headings, lists, media, code, table |
+| `QuillGroup::buildWithAllFields()` | Every available field, including specialised ones (formula, RTL direction, script, font, emoji). | all |
+
+Example:
+
+```php
+use Ehyiah\QuillJsBundle\DTO\QuillGroup;
+use Ehyiah\QuillJsBundle\Form\QuillType;
+
+$builder->add('content', QuillType::class, [
+    'quill_options' => [
+        QuillGroup::buildForNewsletter(),
+    ],
+]);
+```
+
 ## Display Result
 
 How you display the content depends on the `style` option used during entry (see [Quill Options](./configuration/quill-options.md)).
