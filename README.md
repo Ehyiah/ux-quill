@@ -52,7 +52,23 @@ In a form, use QuillType. It works like a classic Type except it has more option
 ```
 
 # Display result
-in a twig template :
+In a twig template, the easiest way is to use the provided Twig component:
+
+```twig
+{# emits the required <link> tags once per request (AssetMapper only) #}
+{{ quill_content_styles() }}
+
+<twig:QuillContent value="{{ post.content }}" />
+```
+
+The component only renders the HTML wrappers; it does not pull any CSS by itself. Use `quill_content_styles()` (AssetMapper) or import the stylesheets in your CSS entry (Webpack). See [usage docs](docs/guide/usage.md#loading-the-required-css) for details, including the opt-in cosmetic stylesheet for mentions.
+
+For inline style (no CSS required on frontend):
+```twig
+<twig:QuillContent value="{{ post.content }}" style="inline" />
+```
+
+Or manually:
 
 - if you use the default class styling option you may need to encapsulate the content so the quill stylesheet can be applied like this :
 ```
