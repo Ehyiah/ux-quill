@@ -36,7 +36,7 @@
         "symfony/twig-bundle": "^6.1|^7.0|^8.0",
         "symfony/form": "^6.1|^7.0|^8.0",
         "symfony/translation": "^6.1|^7.0|^8.0",
-        "symfony/ux-twig-component": "^2.13"
+        "symfony/ux-twig-component": "^2.13|^3.0"
     },
     "require-dev": {
         "phpstan/phpstan": "^2.1.17",
