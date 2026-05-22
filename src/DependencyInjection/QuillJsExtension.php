@@ -4,6 +4,8 @@ namespace Ehyiah\QuillJsBundle\DependencyInjection;
 
 use Ehyiah\QuillJsBundle\Form\QuillAdminField;
 use Ehyiah\QuillJsBundle\Form\QuillType;
+use Ehyiah\QuillJsBundle\Twig\Components\QuillContent;
+use Ehyiah\QuillJsBundle\Twig\QuillContentExtension;
 use Symfony\Component\AssetMapper\AssetMapperInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -20,14 +22,19 @@ class QuillJsExtension extends Extension implements PrependExtensionInterface
         $bundles = $container->getParameter('kernel.bundles');
 
         if (is_array($bundles) && isset($bundles['TwigBundle'])) {
-            $container->prependExtensionConfig('twig', ['form_themes' => ['@QuillJs/form.html.twig']]);
+            $container->prependExtensionConfig('twig', [
+                'form_themes' => ['@QuillJs/form.html.twig'],
+                'paths' => [
+                    __DIR__ . '/../templates' => 'QuillJs',
+                ],
+            ]);
         }
 
         if ($this->isAssetMapperAvailable($container)) {
             $container->prependExtensionConfig('framework', [
                 'asset_mapper' => [
                     'paths' => [
-                        __DIR__ . '/../../assets/dist' => '@ehyiah/ux-quill',
+                        __DIR__ . '/../../assets/dist' => '@ehyiah/ux-quill/dist',
                     ],
                 ],
             ]);
@@ -42,6 +49,23 @@ class QuillJsExtension extends Extension implements PrependExtensionInterface
         $definition->setPublic(false);
 
         $container->setDefinition('form.ux-quill-js', $definition);
+
+        if (class_exists('Symfony\UX\TwigComponent\Attribute\AsTwigComponent')) {
+            $definition = new Definition(QuillContent::class);
+            $definition->addTag('twig.component', [
+                'key' => 'QuillContent',
+                'template' => '@QuillJs/components/QuillContent.html.twig',
+            ]);
+            $container->setDefinition('quill_js.twig_component.quill_content', $definition);
+        }
+
+        $extensionDefinition = new Definition(QuillContentExtension::class);
+        $extensionDefinition->addTag('twig.extension');
+        $extensionDefinition->setPublic(false);
+        if (interface_exists(AssetMapperInterface::class)) {
+            $extensionDefinition->setArgument('$assetMapper', new Reference(AssetMapperInterface::class, ContainerBuilder::IGNORE_ON_INVALID_REFERENCE));
+        }
+        $container->setDefinition('quill_js.twig_extension.quill_content', $extensionDefinition);
 
         $bundles = $container->getParameter('kernel.bundles');
 

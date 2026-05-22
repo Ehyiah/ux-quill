@@ -21,7 +21,9 @@
                     "quill-table-better/dist/quill-table-better.css": true,
                     "quill2-emoji/dist/style.css": true,
                     "highlight.js/styles/atom-one-dark.css": true,
-                    "katex/dist/katex.min.css": true
+                    "katex/dist/katex.min.css": true,
+                    "quill-html-edit-button/src/styles.css": true,
+                    "@ehyiah/ux-quill/dist/styles/gallery/gallery.css": true
                 }
             }
         },
@@ -41,10 +43,13 @@
             "quill-table-better/dist/quill-table-better.css": "^1.2.1",
             "quill-toggle-fullscreen-button": "^0.1.4",
             "quill-html-edit-button": "^3.0.0",
+            "quill-html-edit-button/src/styles.css": "^3.0.0",
             "highlight.js": "^11.9.0",
             "highlight.js/styles/atom-one-dark.css": "^11.9.0",
             "katex": "^0.16.9",
-            "katex/dist/katex.min.css": "^0.16.9"
+            "katex/dist/katex.min.css": "^0.16.9",
+            "eventemitter3": "^5.0.1",
+            "lodash-es": "^4.17.21"
         }
     },
     "scripts": {
@@ -97,7 +102,6 @@
         "@hotwired/stimulus": "^3.0.0",
         "axios": "^1.4.0",
         "eventemitter3": "^5.0.1",
-        "file-loader": "^6.2.0",
         "lodash-es": "^4.17.21",
         "quill": "2.0.3",
         "quill-delta": "^5.1.0",
@@ -113,7 +117,6 @@
         "@hotwired/stimulus": "^3.0.0",
         "axios": "^1.4.0",
         "eventemitter3": "^5.0.1",
-        "file-loader": "^6.2.0",
         "lodash-es": "^4.17.21",
         "quill": "2.0.3",
         "quill-delta": "^5.1.0",
