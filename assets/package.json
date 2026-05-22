@@ -25,16 +25,6 @@
                     "quill-html-edit-button/src/styles.css": true,
                     "@ehyiah/ux-quill/dist/styles/gallery/gallery.css": true
                 }
-            },
-            "quill-render": {
-                "main": "dist/render-controller.js",
-                "webpackMode": "eager",
-                "fetch": "eager",
-                "enabled": true,
-                "autoimport": {
-                    "quill/dist/quill.snow.css": true,
-                    "@ehyiah/ux-quill/dist/styles/quill-content.css": true
-                }
             }
         },
         "importmap": {
