@@ -91,10 +91,10 @@ class QuillType extends AbstractType
             'error_bubbling' => true,
             'quill_options' => [['bold', 'italic']],
             'modules' => [],
-            'quill_extra_options' => function (OptionsResolver $extraResolver) {
-                $this->configureExtraOptions($extraResolver);
-            },
         ]);
+        self::defineNestedOptions($resolver, 'quill_extra_options', function (OptionsResolver $extraResolver): void {
+            $this->configureExtraOptions($extraResolver);
+        });
 
         $resolver->setAllowedTypes('quill_options', ['array']);
         $resolver->setAllowedTypes('quill_extra_options', ['array', 'callable']);
@@ -110,39 +110,53 @@ class QuillType extends AbstractType
         });
     }
 
+    /**
+     * Defines a nested option using OptionsResolver::setOptions() when available
+     * (symfony/options-resolver 7.3+) and falling back to the deprecated
+     * setDefault() closure form on the older Symfony versions this bundle still
+     * supports. Defining nested options via setDefault() is deprecated since
+     * Symfony 7.3 and removed in 8.0.
+     */
+    private static function defineNestedOptions(OptionsResolver $resolver, string $option, \Closure $configurator): void
+    {
+        if (method_exists($resolver, 'setOptions')) {
+            $resolver->setOptions($option, $configurator);
+        } else {
+            $resolver->setDefault($option, $configurator);
+        }
+    }
+
     private function configureExtraOptions(OptionsResolver $extraResolver): void
     {
-        $extraResolver
-            ->setDefault('upload_handler', static function (OptionsResolver $spoolResolver): void {
-                $spoolResolver->setDefaults([
-                    'type' => 'form',
-                    'upload_endpoint' => null,
-                    'json_response_file_path' => null,
-                    'security' => static function (OptionsResolver $securityResolver) {
-                        $securityResolver->setDefaults([
-                            'type' => null,
-                            'jwt_token' => null,
-                            'username' => null,
-                            'password' => null,
-                            'custom_header' => null,
-                            'custom_header_value' => null,
-                        ]);
-                        $securityResolver->setAllowedTypes('type', ['string', 'null']);
-                        $securityResolver->setAllowedValues('type', ['basic', 'jwt', 'custom_header', null]);
-                        $securityResolver->setAllowedTypes('jwt_token', ['string', 'null']);
-                        $securityResolver->setAllowedTypes('username', ['string', 'null']);
-                        $securityResolver->setAllowedTypes('password', ['string', 'null']);
-                        $securityResolver->setAllowedTypes('custom_header', ['string', 'null']);
-                        $securityResolver->setAllowedTypes('custom_header_value', ['string', 'null']);
-                    },
+        self::defineNestedOptions($extraResolver, 'upload_handler', static function (OptionsResolver $spoolResolver): void {
+            $spoolResolver->setDefaults([
+                'type' => 'form',
+                'upload_endpoint' => null,
+                'json_response_file_path' => null,
+            ]);
+            self::defineNestedOptions($spoolResolver, 'security', static function (OptionsResolver $securityResolver): void {
+                $securityResolver->setDefaults([
+                    'type' => null,
+                    'jwt_token' => null,
+                    'username' => null,
+                    'password' => null,
+                    'custom_header' => null,
+                    'custom_header_value' => null,
                 ]);
-                $spoolResolver->setAllowedTypes('type', ['string', 'null']);
-                $spoolResolver->setAllowedValues('type', ['json', 'form', null]);
-                $spoolResolver->setAllowedTypes('upload_endpoint', ['string', 'null']);
-                $spoolResolver->setAllowedTypes('json_response_file_path', ['string', 'null']);
-                $spoolResolver->setAllowedTypes('security', ['array', 'null']);
-            })
-        ;
+                $securityResolver->setAllowedTypes('type', ['string', 'null']);
+                $securityResolver->setAllowedValues('type', ['basic', 'jwt', 'custom_header', null]);
+                $securityResolver->setAllowedTypes('jwt_token', ['string', 'null']);
+                $securityResolver->setAllowedTypes('username', ['string', 'null']);
+                $securityResolver->setAllowedTypes('password', ['string', 'null']);
+                $securityResolver->setAllowedTypes('custom_header', ['string', 'null']);
+                $securityResolver->setAllowedTypes('custom_header_value', ['string', 'null']);
+            });
+            $spoolResolver->setAllowedTypes('type', ['string', 'null']);
+            $spoolResolver->setAllowedValues('type', ['json', 'form', null]);
+            $spoolResolver->setAllowedTypes('upload_endpoint', ['string', 'null']);
+            $spoolResolver->setAllowedTypes('json_response_file_path', ['string', 'null']);
+            $spoolResolver->setAllowedTypes('security', ['array', 'null']);
+        });
         $extraResolver
             ->setDefault('debug', DebugOption::DEBUG_OPTION_ERROR)
             ->setAllowedTypes('debug', 'string')
