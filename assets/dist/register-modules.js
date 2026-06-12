@@ -29,6 +29,8 @@ import { LinkAttributes } from "./modules/linkAttributes.js";
 Quill.register('modules/linkAttributes', LinkAttributes);
 import { Autosave } from "./modules/autosave.js";
 Quill.register('modules/autosave', Autosave);
+import NotionToolbar from "./modules/notionToolbar.js";
+Quill.register('modules/notionToolbar', NotionToolbar);
 import { PasteSanitizer } from "./modules/pasteSanitizer.js";
 Quill.register('modules/pasteSanitizer', PasteSanitizer);
 const icons = Quill.import('ui/icons');
