@@ -5,7 +5,7 @@ namespace Ehyiah\QuillJsBundle\DTO\Modules;
 /**
  * To be used if the CodeBlock and is registered automatically
  */
-class SyntaxModule implements ModuleInterface
+final class SyntaxModule implements ModuleInterface
 {
     public const NAME = 'syntax';
 

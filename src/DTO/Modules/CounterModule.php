@@ -2,7 +2,7 @@
 
 namespace Ehyiah\QuillJsBundle\DTO\Modules;
 
-class CounterModule implements ModuleInterface
+final class CounterModule implements ModuleInterface
 {
     public const NAME = 'counter';
 
