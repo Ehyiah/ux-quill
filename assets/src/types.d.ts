@@ -75,9 +75,20 @@ export type CountOptions = {
     characters_container?: string;
 }
 
+export type LayoutPreset = {
+    cols: number;
+    ratios: string[];
+    label: string;
+};
+
+export type LayoutOptions = {
+    presets: LayoutPreset[];
+    allow_wrap: boolean;
+};
+
 export interface ModuleInterface {
     name: string;
-    options: any | ImageGalleryOptions | ReadingTimeOptions | SpeechToTextOptions | CountOptions;
+    options: any | ImageGalleryOptions | ReadingTimeOptions | SpeechToTextOptions | CountOptions | LayoutOptions;
 }
 
 export type ModuleOptions = ModuleInterface[];

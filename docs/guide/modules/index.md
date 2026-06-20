@@ -69,6 +69,7 @@ These modules are usually automatically imported when the corresponding field is
 | **ResizeModule** | YES | (Legacy) Basic image resizing functionality. | resize | array | [] |
 | **SyntaxModule** | YES | Required for CodeBlockField. | syntax | string | `'true'` |
 | **TableModule** | YES | [see details](https://github.com/attoae/quill-table-better) | table-better | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\TableModule`` |
+| **LayoutModule** | YES | [see details](./layout.md) | layout | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\LayoutModule`` |
 
 ### Independent Modules
 These modules provide global behavior and must usually be added manually to the `modules` option.

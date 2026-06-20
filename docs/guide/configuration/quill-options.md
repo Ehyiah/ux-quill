@@ -66,6 +66,7 @@ These fields are provided by the bundle or integrated community modules. Most of
 | :--- | :--- | :--- | :---: |
 | **DividerField** | Horizontal separator | `DividerModule` | `divider` |
 | **EmojiField** | Emoji picker | `EmojiModule` | `emoji` |
+| **LayoutField** | Multi-column layout (grid) | [`LayoutModule`](/guide/modules/layout) | `layout` |
 | **PageBreakField** | Page break (for print) | `PageBreakModule` | `pageBreak` |
 | **TableField** | Advanced table support | `TableModule` | `table-better` |
 

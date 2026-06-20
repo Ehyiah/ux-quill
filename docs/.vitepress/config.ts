@@ -66,6 +66,7 @@ export default defineConfig({
                   { text: 'Emoji', link: 'https://github.com/contentco/quill-emoji' },
                   { text: 'Image Selection', link: '/guide/modules/image-selection' },
                   { text: 'Image Gallery', link: '/guide/modules/image-gallery' },
+                  { text: 'Layout', link: '/guide/modules/layout' },
                   { text: 'Link Attributes', link: '/guide/modules/link-attributes' },
                   { text: 'PageBreak', link: '/guide/modules/pagebreak' },
                   { text: 'Syntax (Highlight)', link: 'https://quilljs.com/docs/modules/syntax/' },
