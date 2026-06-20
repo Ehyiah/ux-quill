@@ -2,6 +2,7 @@
 
 namespace Ehyiah\QuillJsBundle\DependencyInjection;
 
+use Ehyiah\QuillJsBundle\Config\QuillConfigBuilder;
 use Ehyiah\QuillJsBundle\Form\QuillAdminField;
 use Ehyiah\QuillJsBundle\Form\QuillType;
 use Ehyiah\QuillJsBundle\Twig\Components\QuillContent;
@@ -43,12 +44,16 @@ class QuillJsExtension extends Extension implements PrependExtensionInterface
 
     public function load(array $configs, ContainerBuilder $container): void
     {
-        $definition = new Definition(QuillType::class);
-        $definition->setArgument('$translator', new Reference(TranslatorInterface::class));
-        $definition->addTag('form.type');
-        $definition->setPublic(false);
+        $builderDefinition = new Definition(QuillConfigBuilder::class);
+        $builderDefinition->setArgument('$translator', new Reference(TranslatorInterface::class));
+        $builderDefinition->setPublic(false);
+        $container->setDefinition('quill_js.config_builder', $builderDefinition);
 
-        $container->setDefinition('form.ux-quill-js', $definition);
+        $typeDefinition = new Definition(QuillType::class);
+        $typeDefinition->setArgument('$configBuilder', new Reference('quill_js.config_builder'));
+        $typeDefinition->addTag('form.type');
+        $typeDefinition->setPublic(false);
+        $container->setDefinition('form.ux-quill-js', $typeDefinition);
 
         if (class_exists('Symfony\UX\TwigComponent\Attribute\AsTwigComponent')) {
             $definition = new Definition(QuillContent::class);

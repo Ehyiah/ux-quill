@@ -2,6 +2,7 @@
 
 namespace Ehyiah\QuillJsBundle\Tests\Functional;
 
+use Ehyiah\QuillJsBundle\Config\QuillConfigBuilder;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\BoldField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\CodeBlockField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ImageField;
@@ -28,9 +29,10 @@ final class FormTypeTest extends TestCase
         parent::setUp();
 
         $translator = $this->createMock(TranslatorInterface::class);
+        $configBuilder = new QuillConfigBuilder($translator);
 
         $this->formFactory = Forms::createFormFactoryBuilder()
-            ->addType(new QuillType($translator))
+            ->addType(new QuillType($configBuilder))
             ->getFormFactory()
         ;
     }
