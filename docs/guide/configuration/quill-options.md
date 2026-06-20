@@ -64,10 +64,10 @@ These fields are provided by the bundle or integrated community modules. Most of
 
 | Field | Description | Auto-imported module | QuillJS name |
 | :--- | :--- | :--- | :---: |
-| **DividerField** | Horizontal separator | `DividerModule` | `divider` |
+| **DividerField** | Horizontal separator | [`DividerModule`](/guide/modules/divider) | `divider` |
 | **EmojiField** | Emoji picker | `EmojiModule` | `emoji` |
 | **LayoutField** | Multi-column layout (grid) | [`LayoutModule`](/guide/modules/layout) | `layout` |
-| **PageBreakField** | Page break (for print) | `PageBreakModule` | `pageBreak` |
+| **PageBreakField** | Page break (for print) | [`PageBreakModule`](/guide/modules/pagebreak) | `pageBreak` |
 | **TableField** | Advanced table support | `TableModule` | `table-better` |
 
 > [!TIP]
