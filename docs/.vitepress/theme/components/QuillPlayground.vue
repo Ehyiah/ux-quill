@@ -121,7 +121,18 @@ onMounted(async () => {
 
 watch(theme, async () => {
   if (mounted) {
-    editorRef.value!.innerHTML = ''
+    quill = null
+    await nextTick()
+    const el = editorRef.value
+    if (el) {
+      const parent = el.parentElement
+      if (parent) {
+        parent.querySelectorAll('.ql-toolbar, .ql-stt-bar, .ql-table-menus-container').forEach(t => t.remove())
+        parent.classList.remove('ql-container')
+      }
+      el.className = ''
+      el.innerHTML = ''
+    }
     await initEditor()
   }
 })

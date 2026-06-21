@@ -2,6 +2,7 @@
 
 namespace Ehyiah\QuillJsBundle\Form;
 
+use Closure;
 use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillBlockFieldInterface;
 use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillFieldModuleInterface;
 use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillInlineFieldInterface;
@@ -117,7 +118,7 @@ class QuillType extends AbstractType
      * supports. Defining nested options via setDefault() is deprecated since
      * Symfony 7.3 and removed in 8.0.
      */
-    private static function defineNestedOptions(OptionsResolver $resolver, string $option, \Closure $configurator): void
+    private static function defineNestedOptions(OptionsResolver $resolver, string $option, Closure $configurator): void
     {
         if (method_exists($resolver, 'setOptions')) {
             $resolver->setOptions($option, $configurator);
