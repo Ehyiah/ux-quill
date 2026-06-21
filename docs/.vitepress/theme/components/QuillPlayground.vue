@@ -515,4 +515,75 @@ onBeforeUnmount(() => {
   font-size: 12px;
   outline: none;
 }
+
+/* Dark mode overrides */
+.dark .quill-playground {
+  border-color: #3d3d3d;
+}
+.dark .playground-controls {
+  background: #1e1e1e;
+  border-bottom-color: #3d3d3d;
+}
+.dark .playground-controls label {
+  color: #c0c0c0;
+}
+.dark .playground-controls select {
+  background: #2d2d2d;
+  border-color: #555;
+  color: #e0e0e0;
+}
+.dark .playground-editor .ql-toolbar {
+  background: #2d2d2d;
+  border-color: #3d3d3d;
+}
+.dark .playground-editor .ql-toolbar .ql-stroke {
+  stroke: #c0c0c0;
+}
+.dark .playground-editor .ql-toolbar .ql-fill {
+  fill: #c0c0c0;
+}
+.dark .playground-editor .ql-toolbar button:hover .ql-stroke {
+  stroke: #fff;
+}
+.dark .playground-editor .ql-toolbar button:hover .ql-fill {
+  fill: #fff;
+}
+.dark .playground-editor .ql-toolbar .ql-picker-label {
+  color: #c0c0c0;
+}
+.dark .playground-editor .ql-toolbar .ql-picker-label:hover {
+  color: #fff;
+}
+.dark .playground-editor .ql-toolbar .ql-picker-options {
+  background: #2d2d2d;
+  border-color: #3d3d3d;
+}
+.dark .playground-editor .ql-container {
+  background: #1e1e1e;
+  border-color: #3d3d3d;
+}
+.dark .playground-editor .ql-editor {
+  color: #e0e0e0;
+}
+.dark .playground-editor .ql-editor.ql-blank::before {
+  color: #777;
+}
+.dark .playground-output {
+  border-top-color: #3d3d3d;
+}
+.dark .playground-output-header {
+  background: #1e1e1e;
+  color: #c0c0c0;
+}
+.dark .playground-output-header button {
+  background: #2d2d2d;
+  border-color: #555;
+  color: #c0c0c0;
+}
+.dark .playground-output-header button:hover:not(:disabled) {
+  background: #3d3d3d;
+}
+.dark .playground-stat {
+  color: #999;
+}
 </style>
