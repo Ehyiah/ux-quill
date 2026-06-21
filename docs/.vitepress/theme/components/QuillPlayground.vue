@@ -154,6 +154,46 @@ const MODULE_DEFS: Record<string, ModuleDefEntry> = {
       },
     },
   },
+  pageBreak: {
+    toolbar: ['pageBreak'],
+    config: { pageBreak: { label: 'Page Break' } },
+  },
+  link: {
+    toolbar: ['link'],
+    config: { linkAttributes: {} },
+  },
+  codeBlock: {
+    toolbar: ['code-block'],
+    config: { syntax: true },
+  },
+  textFormatting: {
+    toolbar: ['bold', 'italic', 'underline', 'strike', 'code', 'blockquote', 'clean'],
+    config: {},
+  },
+  headers: {
+    toolbar: [{ header: [1, 2, 3, 4, 5, 6, false] }],
+    config: {},
+  },
+  listsAlignment: {
+    toolbar: [
+      { list: 'ordered' },
+      { list: 'bullet' },
+      { list: 'check' },
+      { indent: '-1' },
+      { indent: '+1' },
+      { align: [] },
+      { direction: 'rtl' },
+    ],
+    config: {},
+  },
+  colorsFonts: {
+    toolbar: [{ color: [] }, { background: [] }, { font: [] }, { size: [] }, { script: 'sub' }, { script: 'super' }],
+    config: {},
+  },
+  media: {
+    toolbar: ['video', 'formula'],
+    config: {},
+  },
 }
 
 const BASE_TOOLBAR = [

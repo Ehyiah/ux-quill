@@ -36,9 +36,29 @@ export default defineConfig({
             text: 'Configuration',
             collapsed: false,
             items: [
-              { text: 'Quill Options (Fields)', link: '/guide/configuration/quill-options' },
+              { text: 'Quill Options', link: '/guide/configuration/quill-options' },
               { text: 'Extra Options', link: '/guide/configuration/extra-options' },
               { text: 'Image Upload', link: '/guide/configuration/image-upload' }
+            ]
+          },
+          {
+            text: 'Fields',
+            collapsed: false,
+            items: [
+              { text: 'Concept', link: '/guide/fields/index' },
+              { text: 'Code Block', link: '/guide/fields/code-block' },
+              { text: 'Colors & Fonts', link: '/guide/fields/colors-fonts' },
+              { text: 'Divider', link: '/guide/fields/divider' },
+              { text: 'Emoji', link: '/guide/fields/emoji' },
+              { text: 'Headers', link: '/guide/fields/headers' },
+              { text: 'Image', link: '/guide/fields/image' },
+              { text: 'Image Gallery', link: '/guide/fields/image-gallery' },
+              { text: 'Link', link: '/guide/fields/link' },
+              { text: 'Lists & Alignment', link: '/guide/fields/lists-alignment' },
+              { text: 'Media', link: '/guide/fields/media' },
+              { text: 'Page Break', link: '/guide/fields/pagebreak' },
+              { text: 'Table', link: '/guide/fields/table' },
+              { text: 'Text Formatting', link: '/guide/fields/text-formatting' },
             ]
           },
           {
@@ -68,14 +88,11 @@ export default defineConfig({
                 text: 'Field-dependent',
                 collapsed: true,
                 items: [
-                  { text: 'Divider', link: '/guide/modules/divider' },
-                  { text: 'Emoji', link: 'https://github.com/contentco/quill-emoji' },
                   { text: 'Image Selection', link: '/guide/modules/image-selection' },
                   { text: 'Image Gallery', link: '/guide/modules/image-gallery' },
                   { text: 'Link Attributes', link: '/guide/modules/link-attributes' },
                   { text: 'PageBreak', link: '/guide/modules/pagebreak' },
                   { text: 'Syntax (Highlight)', link: 'https://quilljs.com/docs/modules/syntax/' },
-                  { text: 'Table', link: 'https://github.com/attoae/quill-table-better' }
                 ]
               },
             ]
