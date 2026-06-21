@@ -28,7 +28,25 @@ import QuillTableBetter from 'quill-table-better'
 import { Mention } from '../../../assets/dist/modules/mention.js'
 
 Quill.register(ImageFigure, true)
+
+// Save original Toolbar.attach before TableToolbar potentially overrides it
+const OriginalToolbar = Quill.import('modules/toolbar')
+const originalAttach = OriginalToolbar.prototype.attach
+
+// This registers table formats + overrides modules/toolbar with TableToolbar
 QuillTableBetter.register()
+
+// Wrap TableToolbar.attach to not crash when table-better module is absent
+const TableToolbar = Quill.import('modules/toolbar')
+const tableToolbarAttach = TableToolbar.prototype.attach
+TableToolbar.prototype.attach = function (this: any, input: HTMLElement) {
+  const tableBetter = this.quill?.getModule('table-better')
+  if (!tableBetter) {
+    return originalAttach.call(this, input)
+  }
+  return tableToolbarAttach.call(this, input)
+}
+
 Quill.register('modules/table-better', QuillTableBetter, true)
 Quill.register('modules/mention', Mention)
 

@@ -14,7 +14,7 @@
         Read only
       </label>
 
-      <div class="playground-stats">
+      <div v-if="showStats" class="playground-stats">
         <span class="playground-stat" id="playground-counter"></span>
         <span class="playground-stat" id="playground-reading-time"></span>
       </div>
@@ -35,59 +35,74 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, onBeforeUnmount, nextTick } from 'vue'
+import { ref, onMounted, watch, onBeforeUnmount, computed, nextTick } from 'vue'
 
-const editorRef = ref<HTMLDivElement>()
-const htmlOutput = ref('')
-const theme = ref('snow')
-const readOnly = ref(false)
+const props = withDefaults(defineProps<{
+  enabled?: string
+  placeholder?: string
+}>(), {
+  enabled: 'all',
+  placeholder: 'Try all the features… type @ to mention someone, paste a URL for smart links, etc.',
+})
 
-let quill: any = null
-let mounted = false
+const enabledList = computed(() => {
+  if (props.enabled === 'all') return ['all']
+  return props.enabled.split(',').map(s => s.trim()).filter(Boolean)
+})
 
-async function initEditor() {
-  if (!editorRef.value) return
+interface ModuleDefEntry {
+  toolbar: any[]
+  config: Record<string, any>
+}
 
-  await import('../playground-register')
-  const { default: Quill } = await import('quill')
-
-  const config = {
-    theme: theme.value,
-    readOnly: readOnly.value,
-    placeholder: 'Try all the features… type @ to mention someone, paste a URL for smart links, etc.',
-    modules: {
-      toolbar: [
-        [{ header: [1, 2, 3, 4, 5, 6, false] }],
-        ['bold', 'italic', 'underline', 'strike'],
-        [{ list: 'ordered' }, { list: 'bullet' }, { list: 'check' }],
-        [{ indent: '-1' }, { indent: '+1' }],
-        [{ align: [] }],
-        ['blockquote', 'code-block', 'formula'],
-        [{ script: 'sub' }, { script: 'super' }],
-        [{ color: [] }, { background: [] }],
-        ['link', 'image', 'video'],
-        ['emoji'],
-        ['table-better'],
-        ['divider', 'pageBreak'],
-        ['clean'],
-      ],
-      table: false,
-      'table-better': { toolbarTable: true },
-      'emoji-toolbar': {},
-      toggleFullscreen: {},
-      htmlEditButton: {},
-      counter: { container: '#playground-counter', unit: 'word' },
-      readingTime: { container: '#playground-reading-time', wordsPerMinute: 200 },
-      markdown: true,
-      smartLinks: { linkRegex: '/https?:\\/\\/[^\\s]+/' },
-      linkAttributes: {},
-      pasteSanitizer: { plainText: false },
-      imageSelection: {},
-      nodeMover: {},
-      divider: {},
-      pageBreak: {},
-      autosave: { key: 'playground-demo', interval: 30000 },
-      speechToText: { language: 'en-US' },
+const MODULE_DEFS: Record<string, ModuleDefEntry> = {
+  imageSelection: {
+    toolbar: ['image'],
+    config: { imageSelection: {}, resize: {} },
+  },
+  table: {
+    toolbar: ['table-better'],
+    config: { table: false, 'table-better': { toolbarTable: true } },
+  },
+  emoji: {
+    toolbar: ['emoji'],
+    config: { 'emoji-toolbar': {} },
+  },
+  divider: {
+    toolbar: ['divider', 'pageBreak'],
+    config: { divider: {}, pageBreak: {} },
+  },
+  markdown: {
+    toolbar: [],
+    config: { markdown: true },
+  },
+  smartLinks: {
+    toolbar: [],
+    config: { smartLinks: { linkRegex: '/https?:\\/\\/[^\\s]+/' } },
+  },
+  linkAttributes: {
+    toolbar: [],
+    config: { linkAttributes: {} },
+  },
+  pasteSanitizer: {
+    toolbar: [],
+    config: { pasteSanitizer: { plainText: false } },
+  },
+  nodeMover: {
+    toolbar: [],
+    config: { nodeMover: {} },
+  },
+  autosave: {
+    toolbar: [],
+    config: { autosave: { key: 'playground-demo', interval: 30000 } },
+  },
+  speechToText: {
+    toolbar: [],
+    config: { speechToText: { language: 'en-US' } },
+  },
+  mention: {
+    toolbar: [],
+    config: {
       mention: {
         trigger: '@',
         min_chars: 1,
@@ -101,6 +116,132 @@ async function initEditor() {
           { id: 6, value: 'Frank Castle' },
         ],
       },
+    },
+  },
+  counter: {
+    toolbar: [],
+    config: { counter: { container: '#playground-counter', unit: 'word' } },
+  },
+  readingTime: {
+    toolbar: [],
+    config: { readingTime: { container: '#playground-reading-time', wordsPerMinute: 200 } },
+  },
+  toggleFullscreen: {
+    toolbar: [],
+    config: { toggleFullscreen: {} },
+  },
+  htmlEditButton: {
+    toolbar: [],
+    config: { htmlEditButton: {} },
+  },
+}
+
+const BASE_TOOLBAR = [
+  [{ header: [1, 2, 3, 4, 5, 6, false] }],
+  ['bold', 'italic', 'underline', 'strike'],
+  [{ list: 'ordered' }, { list: 'bullet' }, { list: 'check' }],
+  [{ indent: '-1' }, { indent: '+1' }],
+  [{ align: [] }],
+  ['blockquote', 'code-block', 'formula'],
+  [{ script: 'sub' }, { script: 'super' }],
+  [{ color: [] }, { background: [] }],
+  ['clean'],
+]
+
+const isAll = () => enabledList.value.length === 1 && enabledList.value[0] === 'all'
+
+const showStats = computed(() => isAll() || enabledList.value.includes('counter') || enabledList.value.includes('readingTime'))
+
+const editorRef = ref<HTMLDivElement>()
+const htmlOutput = ref('')
+const theme = ref('snow')
+const readOnly = ref(false)
+
+let quill: any = null
+let mounted = false
+
+function buildConfig() {
+  const toolbar: any[] = isAll() ? [...BASE_TOOLBAR] : []
+  const modules: Record<string, any> = {}
+
+  if (isAll()) {
+    return {
+      toolbar: [
+        ...BASE_TOOLBAR,
+        ['link', 'image', 'video'],
+        ['emoji'],
+        ['table-better'],
+        ['divider', 'pageBreak'],
+      ],
+      modules: {
+        table: false,
+        'table-better': { toolbarTable: true },
+        'emoji-toolbar': {},
+        toggleFullscreen: {},
+        htmlEditButton: {},
+        counter: { container: '#playground-counter', unit: 'word' },
+        readingTime: { container: '#playground-reading-time', wordsPerMinute: 200 },
+        markdown: true,
+        smartLinks: { linkRegex: '/https?:\\/\\/[^\\s]+/' },
+        linkAttributes: {},
+        pasteSanitizer: { plainText: false },
+        imageSelection: {},
+        nodeMover: {},
+        divider: {},
+        pageBreak: {},
+        autosave: { key: 'playground-demo', interval: 30000 },
+        speechToText: { language: 'en-US' },
+        mention: {
+          trigger: '@',
+          min_chars: 1,
+          max_results: 8,
+          data: [
+            { id: 1, value: 'Alice Johnson' },
+            { id: 2, value: 'Bob Smith' },
+            { id: 3, value: 'Charlie Brown' },
+            { id: 4, value: 'Diana Prince' },
+            { id: 5, value: 'Eve Wilson' },
+            { id: 6, value: 'Frank Castle' },
+          ],
+        },
+      },
+    }
+  }
+
+  if (enabledList.value.includes('counter')) {
+    modules.counter = { container: '#playground-counter', unit: 'word' }
+  }
+  if (enabledList.value.includes('readingTime')) {
+    modules.readingTime = { container: '#playground-reading-time', wordsPerMinute: 200 }
+  }
+
+  for (const name of enabledList.value) {
+    const def = MODULE_DEFS[name]
+    if (!def) continue
+    if (def.toolbar.length > 0) {
+      toolbar.push(def.toolbar)
+    }
+    Object.assign(modules, def.config)
+  }
+
+  return { toolbar, modules }
+}
+
+async function initEditor() {
+  if (!editorRef.value) return
+
+  await import('../playground-register')
+  const { default: Quill } = await import('quill')
+
+  const { toolbar, modules } = buildConfig()
+
+  const config = {
+    theme: theme.value,
+    readOnly: readOnly.value,
+    placeholder: props.placeholder,
+    modules: {
+      toolbar,
+      ...modules,
     },
   }
 
