@@ -1,6 +1,6 @@
 # EmojiModule
 
-**Auto-imported: YES** (if `EmojiField` is present in `quill_options`)
+**Auto-imported: YES** (if [`EmojiField`](/guide/fields/emoji) is present in `quill_options`)
 
 The Emoji module adds an emoji picker to the editor. When the emoji toolbar button is clicked, a popup opens with categorized emojis that the user can select to insert into the content.
 

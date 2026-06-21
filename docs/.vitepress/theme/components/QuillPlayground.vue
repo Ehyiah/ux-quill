@@ -240,6 +240,7 @@ function buildConfig() {
         'emoji-toolbar': {},
         toggleFullscreen: {},
         htmlEditButton: {},
+        syntax: true,
         imageGallery: {
           listEndpoint: '/ux-quill/gallery-mock.json',
           searchEndpoint: '/ux-quill/gallery-mock.json',
@@ -305,6 +306,11 @@ function buildConfig() {
 
 async function initEditor() {
   if (!editorRef.value) return
+
+  // highlight.js must be on window BEFORE Quill loads (Syntax.DEFAULTS captures it)
+  const hljsModule = await import('highlight.js')
+  const hljs = hljsModule.default || hljsModule
+  window.hljs = hljs
 
   await import('../playground-register')
   const { default: Quill } = await import('quill')
@@ -497,5 +503,16 @@ onBeforeUnmount(() => {
 }
 .ql-editor td {
   min-width: 100px;
+}
+
+/* Fix code block language dropdown contrast */
+.ql-editor .ql-code-block-container select {
+  color: #fff;
+  background: #2d2d2d;
+  border: 1px solid #555;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 12px;
+  outline: none;
 }
 </style>

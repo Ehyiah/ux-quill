@@ -1,6 +1,6 @@
 # SyntaxModule
 
-**Auto-imported: YES** (if `CodeBlockField` is present in `quill_options`)
+**Auto-imported: YES** (if [`CodeBlockField`](/guide/fields/code-block) is present in `quill_options`)
 
 The Syntax module adds syntax highlighting to code blocks in the editor. It uses [highlight.js](https://highlightjs.org/) to colorize code when the editor content is rendered.
 
