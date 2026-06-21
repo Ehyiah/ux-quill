@@ -10,8 +10,6 @@ use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ItalicField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\UnderlineField;
 use Ehyiah\QuillJsBundle\DTO\Modules\NodeMoverModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\SyntaxModule;
-use Ehyiah\QuillJsBundle\DTO\Options\DebugOption;
-use Ehyiah\QuillJsBundle\DTO\Options\ThemeOption;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Translation\TranslatableMessage;
 use Symfony\Contracts\Translation\TranslatorInterface;
