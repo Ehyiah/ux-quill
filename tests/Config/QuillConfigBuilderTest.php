@@ -6,8 +6,10 @@ use Ehyiah\QuillJsBundle\Config\QuillConfigBuilder;
 use Ehyiah\QuillJsBundle\DTO\Fields\BlockField\HeaderField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\BoldField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\CodeBlockField;
+use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ImageGalleryField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ItalicField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\UnderlineField;
+use Ehyiah\QuillJsBundle\DTO\Modules\ImageGalleryModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\NodeMoverModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\SyntaxModule;
 use PHPUnit\Framework\TestCase;
@@ -340,5 +342,25 @@ final class QuillConfigBuilderTest extends TestCase
         $this->assertSame('data.url', $upload['json_response_file_path']);
         $this->assertSame('jwt', $upload['security']['type']);
         $this->assertSame('my-token', $upload['security']['jwt_token']);
+    }
+
+    /**
+     * @covers ::build
+     */
+    public function testBuildSkipsAutoImportForModulesWithRequiredConstructorParams(): void
+    {
+        $config = $this->builder->build(
+            fields: [
+                [new ImageGalleryField()],
+            ],
+            modules: [],
+            extraOptions: [],
+        );
+
+        $galleryModules = array_filter(
+            $config->modules,
+            static fn ($m) => $m instanceof ImageGalleryModule,
+        );
+        $this->assertCount(0, $galleryModules);
     }
 }

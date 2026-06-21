@@ -13,9 +13,20 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @coversNothing
+ *
+ * @covers \Ehyiah\QuillJsBundle\DTO\Modules\PasteSanitizerModule::__construct
+ * @covers \Ehyiah\QuillJsBundle\DTO\Modules\AutosaveModule::__construct
+ * @covers \Ehyiah\QuillJsBundle\DTO\Modules\DividerModule::__construct
+ * @covers \Ehyiah\QuillJsBundle\DTO\Modules\MarkdownModule::__construct
+ * @covers \Ehyiah\QuillJsBundle\DTO\Modules\PageBreakModule::__construct
+ * @covers \Ehyiah\QuillJsBundle\DTO\Modules\LinkAttributesModule::__construct
+ * @covers \Ehyiah\QuillJsBundle\DTO\Modules\MentionModule::__construct
  */
 class ModulesDTOTest extends TestCase
 {
+    /**
+     * @covers \Ehyiah\QuillJsBundle\DTO\Modules\PasteSanitizerModule::__construct
+     */
     public function testPasteSanitizerModule(): void
     {
         $module = new PasteSanitizerModule();
@@ -26,6 +37,9 @@ class ModulesDTOTest extends TestCase
         $this->assertFalse($module->options['plain_text']);
     }
 
+    /**
+     * @covers \Ehyiah\QuillJsBundle\DTO\Modules\AutosaveModule::__construct
+     */
     public function testAutosaveModule(): void
     {
         $module = new AutosaveModule();
@@ -50,6 +64,9 @@ class ModulesDTOTest extends TestCase
         $this->assertEquals('Ignorer', $module->options['ignoreButtonLabel']);
     }
 
+    /**
+     * @covers \Ehyiah\QuillJsBundle\DTO\Modules\DividerModule::__construct
+     */
     public function testDividerModule(): void
     {
         $module = new DividerModule();
@@ -57,6 +74,9 @@ class ModulesDTOTest extends TestCase
         $this->assertEquals([], $module->options);
     }
 
+    /**
+     * @covers \Ehyiah\QuillJsBundle\DTO\Modules\MarkdownModule::__construct
+     */
     public function testMarkdownModule(): void
     {
         $module = new MarkdownModule();
@@ -64,6 +84,9 @@ class ModulesDTOTest extends TestCase
         $this->assertEquals([], $module->options);
     }
 
+    /**
+     * @covers \Ehyiah\QuillJsBundle\DTO\Modules\PageBreakModule::__construct
+     */
     public function testPageBreakModule(): void
     {
         $module = new PageBreakModule();
@@ -74,6 +97,9 @@ class ModulesDTOTest extends TestCase
         $this->assertEquals(['label' => 'Saut de page'], $module->options);
     }
 
+    /**
+     * @covers \Ehyiah\QuillJsBundle\DTO\Modules\LinkAttributesModule::__construct
+     */
     public function testLinkAttributesModule(): void
     {
         $module = new LinkAttributesModule();
@@ -92,6 +118,9 @@ class ModulesDTOTest extends TestCase
         $this->assertEquals('Valider', $module->options['saveButtonLabel']);
     }
 
+    /**
+     * @covers \Ehyiah\QuillJsBundle\DTO\Modules\MentionModule::__construct
+     */
     public function testMentionModule(): void
     {
         $module = new MentionModule();

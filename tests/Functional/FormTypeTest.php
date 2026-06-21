@@ -18,7 +18,7 @@ use Symfony\Component\Form\Forms;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
- * @coversNothing
+ * @coversDefaultClass \Ehyiah\QuillJsBundle\Form\QuillType
  */
 final class FormTypeTest extends TestCase
 {
@@ -37,6 +37,10 @@ final class FormTypeTest extends TestCase
         ;
     }
 
+    /**
+     * @covers ::buildView
+     * @covers ::configureOptions
+     */
     public function testCreateBasicQuillForm(): void
     {
         $form = $this->formFactory->createBuilder()
@@ -58,6 +62,10 @@ final class FormTypeTest extends TestCase
         $this->assertTrue(in_array('quill', $contentView->vars['block_prefixes'], true));
     }
 
+    /**
+     * @covers ::buildView
+     * @covers ::configureOptions
+     */
     public function testCreateQuillFormWithCustomOptions(): void
     {
         $customOptions = [
@@ -107,6 +115,9 @@ final class FormTypeTest extends TestCase
         $this->assertContains(SyntaxModule::NAME, $moduleNames);
     }
 
+    /**
+     * @covers ::buildView
+     */
     public function testImageFieldIncludesSelectionModule(): void
     {
         $customOptions = [
@@ -129,6 +140,10 @@ final class FormTypeTest extends TestCase
         $this->assertContains(\Ehyiah\QuillJsBundle\DTO\Modules\ImageSelectionModule::NAME, $moduleNames);
     }
 
+    /**
+     * @covers ::buildView
+     * @covers ::configureOptions
+     */
     public function testFormSubmission(): void
     {
         $form = $this->formFactory->createBuilder()
