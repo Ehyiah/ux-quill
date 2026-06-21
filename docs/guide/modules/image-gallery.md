@@ -126,6 +126,15 @@ $builder->add('content', QuillType::class, [
 ]);
 ```
 
+## Try it live
+
+<ClientOnly>
+  <QuillPlayground
+    enabled="imageGallery"
+    placeholder="Try opening the gallery and inserting an image…"
+  />
+</ClientOnly>
+
 ## Example of a listing API endpoint (Symfony)
 
 Below is a full example of a Symfony controller that implements both the listing (with pagination) and search functionality required by the gallery module.

@@ -134,6 +134,26 @@ const MODULE_DEFS: Record<string, ModuleDefEntry> = {
     toolbar: [],
     config: { htmlEditButton: {} },
   },
+  imageGallery: {
+    toolbar: ['imageGallery'],
+    config: {
+      imageGallery: {
+        listEndpoint: '/ux-quill/gallery-mock.json',
+        searchEndpoint: '/ux-quill/gallery-mock.json',
+        uploadEndpoint: 'https://httpbin.org/post',
+        buttonTitle: 'Open the media gallery',
+        uploadTitle: '⬆️ Upload',
+        messageTitleOption: 'Media gallery',
+        messageLoadingOption: 'Loading…',
+        messageNextPageOption: 'Next page >',
+        messagePrevPageOption: '< Previous page',
+        messageErrorOption: 'Error',
+        messageNoImageOption: 'No image',
+        messageSearchPlaceholderOption: 'Search…',
+        messageCloseOption: 'Close',
+      },
+    },
+  },
 }
 
 const BASE_TOOLBAR = [
@@ -172,6 +192,7 @@ function buildConfig() {
         ['emoji'],
         ['table-better'],
         ['divider', 'pageBreak'],
+        ['imageGallery'],
       ],
       modules: {
         table: false,
@@ -179,6 +200,21 @@ function buildConfig() {
         'emoji-toolbar': {},
         toggleFullscreen: {},
         htmlEditButton: {},
+        imageGallery: {
+          listEndpoint: '/ux-quill/gallery-mock.json',
+          searchEndpoint: '/ux-quill/gallery-mock.json',
+          uploadEndpoint: 'https://httpbin.org/post',
+          buttonTitle: 'Open the media gallery',
+          uploadTitle: '⬆️ Upload',
+          messageTitleOption: 'Media gallery',
+          messageLoadingOption: 'Loading…',
+          messageNextPageOption: 'Next page >',
+          messagePrevPageOption: '< Previous page',
+          messageErrorOption: 'Error',
+          messageNoImageOption: 'No image',
+          messageSearchPlaceholderOption: 'Search…',
+          messageCloseOption: 'Close',
+        },
         counter: { container: '#playground-counter', unit: 'word' },
         readingTime: { container: '#playground-reading-time', wordsPerMinute: 200 },
         markdown: true,
