@@ -1,6 +1,6 @@
 # PageBreakField
 
-**Auto-imported module:** `PageBreakModule` (automatically loaded when this field is used)
+**Auto-imported module:** `PageBreakModule` (automatically loaded when this field is used) — see the [module documentation](/guide/modules/pagebreak) for details.
 
 The `PageBreakField` adds a page break button to the toolbar. Clicking it inserts a visual page break indicator in the editor. When printing, the content after the break starts on a new page.
 

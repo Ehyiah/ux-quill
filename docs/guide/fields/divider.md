@@ -1,6 +1,6 @@
 # DividerField
 
-**Auto-imported module:** `DividerModule` (automatically loaded when this field is used)
+**Auto-imported module:** `DividerModule` (automatically loaded when this field is used) — see the [module documentation](/guide/modules/divider) for details.
 
 The `DividerField` adds a horizontal line button to the toolbar. Clicking it inserts a thematic break (`<hr>`) at the cursor position.
 

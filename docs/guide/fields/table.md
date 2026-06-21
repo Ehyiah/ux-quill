@@ -1,6 +1,6 @@
 # TableField
 
-**Auto-imported module:** `TableModule` (automatically loaded when this field is used)
+**Auto-imported module:** `TableModule` (automatically loaded when this field is used) — see the [module documentation](/guide/modules/table) for all details.
 
 The `TableField` adds an advanced table button to the toolbar. Clicking it lets the user insert and manage complex tables with cell merging, row/column operations, and more.
 

@@ -1,6 +1,6 @@
 # CodeBlockField
 
-**Auto-imported module:** `SyntaxModule` (automatically loaded when this field is used)
+**Auto-imported module:** `SyntaxModule` (automatically loaded when this field is used) — see the [module documentation](/guide/modules/syntax) for details.
 
 The `CodeBlockField` adds a code block button to the toolbar. Clicking it inserts a code block with syntax highlighting powered by [highlight.js](https://highlightjs.org/).
 

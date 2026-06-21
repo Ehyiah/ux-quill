@@ -1,6 +1,6 @@
 # EmojiField
 
-**Auto-imported module:** `EmojiModule` (automatically loaded when this field is used)
+**Auto-imported module:** `EmojiModule` (automatically loaded when this field is used) — see the [module documentation](/guide/modules/emoji) for details.
 
 The `EmojiField` adds an emoji picker button to the toolbar. Clicking it opens a popup with emoji categories, letting the user insert emojis into the editor.
 
