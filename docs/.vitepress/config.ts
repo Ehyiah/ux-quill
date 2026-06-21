@@ -5,6 +5,11 @@ export default defineConfig({
   description: "Quill JS wysiwyg text editor for Symfony",
   base: '/ux-quill/',
   lastUpdated: true,
+  vite: {
+    resolve: {
+      dedupe: ['quill'],
+    },
+  },
   themeConfig: {
     search: {
       provider: 'local'
@@ -26,6 +31,7 @@ export default defineConfig({
         items: [
           { text: 'Installation', link: '/guide/installation' },
           { text: 'Usage', link: '/guide/usage' },
+          { text: 'Playground', link: '/guide/playground' },
           {
             text: 'Configuration',
             collapsed: false,
