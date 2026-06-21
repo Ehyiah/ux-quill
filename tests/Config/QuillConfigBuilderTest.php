@@ -347,9 +347,35 @@ final class QuillConfigBuilderTest extends TestCase
     /**
      * @covers ::build
      */
+    public function testBuildWarnsWhenAutoImportFails(): void
+    {
+        $warning = null;
+        set_error_handler(static function (int $severity, string $message) use (&$warning): bool {
+            $warning = $message;
+
+            return true;
+        });
+
+        $this->builder->build(
+            fields: [
+                [new ImageGalleryField()],
+            ],
+            modules: [],
+            extraOptions: [],
+        );
+
+        restore_error_handler();
+
+        $this->assertNotNull($warning);
+        $this->assertStringContainsString('Could not auto-import module', $warning);
+    }
+
+    /**
+     * @covers ::build
+     */
     public function testBuildSkipsAutoImportForModulesWithRequiredConstructorParams(): void
     {
-        $config = $this->builder->build(
+        $config = @$this->builder->build(
             fields: [
                 [new ImageGalleryField()],
             ],

@@ -10,6 +10,7 @@ use Ehyiah\QuillJsBundle\DTO\Modules\NodeMoverModule;
 use Ehyiah\QuillJsBundle\DTO\Options\DebugOption;
 use Ehyiah\QuillJsBundle\DTO\Options\StyleOption;
 use Ehyiah\QuillJsBundle\DTO\Options\ThemeOption;
+use Exception;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Translation\TranslatableMessage;
 use Symfony\Contracts\Translation\TranslatableInterface;
@@ -180,7 +181,17 @@ final class QuillConfigBuilder
                     continue;
                 }
 
-                $modules[] = new $moduleClass();
+                try {
+                    $modules[] = new $moduleClass();
+                } catch (Exception $e) {
+                    trigger_error(sprintf(
+                        'Could not auto-import module "%s" required by field "%s": %s',
+                        $moduleClass,
+                        $field::class,
+                        $e->getMessage(),
+                    ), E_USER_WARNING);
+                    continue;
+                }
             }
         }
     }
