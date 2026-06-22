@@ -54,16 +54,19 @@ class CalloutBlot extends BlockEmbed {
     header.style.letterSpacing = '0.5px';
     header.style.color = cfg.color;
     header.innerHTML = cfg.icon + " " + cfg.label;
-    header.contentEditable = 'false';
     const content = document.createElement('div');
     content.className = 'ql-callout-content';
     content.style.padding = '8px 14px 12px';
     content.style.minHeight = '1em';
     content.innerHTML = (value == null ? void 0 : value.content) || '<p><br></p>';
-    content.contentEditable = 'true';
     node.appendChild(header);
     node.appendChild(content);
     return node;
+  }
+  attach() {
+    super.attach();
+    const header = this.domNode.querySelector('.ql-callout-header');
+    if (header) header.contentEditable = 'false';
   }
   static value(node) {
     const contentEl = node.querySelector('.ql-callout-content');

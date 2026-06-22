@@ -21,6 +21,9 @@ jest.mock('quill', () => {
             return {};
         }
         format(name: string, value: any): void {}
+        attach(): void {
+            // no-op for tests
+        }
     };
 
     const MockQuill = jest.fn().mockImplementation(() => ({
@@ -73,11 +76,21 @@ describe('CalloutBlot', () => {
 
         const header = node.querySelector('.ql-callout-header');
         expect(header).toBeTruthy();
-        expect(header!.contentEditable).toBe('false');
 
         const content = node.querySelector('.ql-callout-content');
         expect(content).toBeTruthy();
-        expect(content!.contentEditable).toBe('true');
+    });
+
+    test('attach() makes header non-editable, but leaves content unset', () => {
+        const node = CalloutBlot.create({ type: 'info' });
+        const blot = new CalloutBlot(node);
+        blot.attach();
+
+        const header = node.querySelector('.ql-callout-header') as HTMLElement;
+        expect(header.contentEditable).toBe('false');
+
+        const content = node.querySelector('.ql-callout-content') as HTMLElement;
+        expect(content.contentEditable).toBeUndefined();
     });
 
     test('create() defaults to info type', () => {
