@@ -56,6 +56,7 @@ if (icons) {
     icons['callout'] = '<svg viewBox="0 0 18 18"><path class="ql-stroke" d="M3 3h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H9l-3 3v-3H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/></svg>';
     icons['divider'] = '<svg viewBox="0 0 18 18"><line class="ql-stroke" x1="3" x2="15" y1="9" y2="9"></line></svg>';
     icons['pageBreak'] = '<svg viewBox="0 0 18 18"><line class="ql-stroke" x1="3" x2="15" y1="5" y2="5" style="stroke-dasharray: 2, 2"/><line class="ql-stroke" x1="3" x2="15" y1="13" y2="13" style="stroke-dasharray: 2, 2"/><polyline class="ql-stroke" points="6 11 9 8 12 11"/><polyline class="ql-stroke" points="6 7 9 10 12 7"/></svg>';
+    icons['imageGallery'] = '<svg viewBox="0 0 18 18"><rect class="ql-stroke" x="3" y="4" width="12" height="10" rx="1" fill="none"/><circle class="ql-fill" cx="7" cy="8" r="1.5"/><polyline class="ql-stroke" points="14 13 10 9 4 14" fill="none"/></svg>';
 }
 
 import SpeechToText from './modules/speechToText.ts';

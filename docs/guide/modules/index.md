@@ -63,13 +63,13 @@ These modules are usually automatically imported when the corresponding field is
 | :--- | :---: | :--- | :---: | :---: | :--- |
 | **CalloutModule** | YES | [see details](./callout.md) | callout | array | `['types' => ['info', 'warning', 'danger', 'success'], 'defaultType' => 'info']` |
 | **DividerModule** | YES | [see details](./divider.md) | divider | array | [] |
-| **EmojiModule** | YES | Required if EmojiField is activated. | emoji-toolbar | string | `'true'` |
+| **EmojiModule** | YES | [see details](./emoji.md) | emoji-toolbar | string | `'true'` |
 | **ImageSelectionModule** | YES | [see details](./image-selection.md) | imageSelection | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\ImageSelectionModule`` |
 | **LinkAttributesModule** | YES | [see details](./link-attributes.md) | linkAttributes | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\LinkAttributesModule`` |
 | **PageBreakModule** | YES | [see details](./pagebreak.md) | pageBreak | array | ['label' => 'Page Break'] |
-| **ResizeModule** | YES | (Legacy) Basic image resizing functionality. | resize | array | [] |
-| **SyntaxModule** | YES | Required for CodeBlockField. | syntax | string | `'true'` |
-| **TableModule** | YES | [see details](https://github.com/attoae/quill-table-better) | table-better | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\TableModule`` |
+| **ResizeModule** | YES | [see details](./resize.md) | resize | array | [] |
+| **SyntaxModule** | YES | [see details](./syntax.md) | syntax | string | `'true'` |
+| **TableModule** | YES | [see details](./table.md) | table-better | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\TableModule`` |
 
 ### Independent Modules
 These modules provide global behavior and must usually be added manually to the `modules` option.
@@ -79,8 +79,9 @@ These modules provide global behavior and must usually be added manually to the 
 | **AutosaveModule** | NO | [see details](./autosave.md) | autosave | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\AutosaveModule`` |
 | **CounterModule** | NO | [see details](./counter.md) | counter | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\CounterModule`` |
 | **FullScreenModule** | NO | [see details](./fullscreen.md) | toggleFullscreen | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\FullScreenModule`` |
-| **HistoryModule** | NO | Responsible for handling undo and redo. | history | array | ['delay' => '1000', 'maxStack' => '100', 'userOnly' => 'false'] |
+| **HistoryModule** | NO | [see details](./history.md) | history | array | ['delay' => '1000', 'maxStack' => '100', 'userOnly' => 'false'] |
 | **HtmlEditModule** | NO | [see details](./html-edit.md) | htmlEditButton | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\HtmlEditModule`` |
+| **ImageGalleryModule** | YES | [see details](./image-gallery.md) | imageGallery | array | `listEndpoint`, `uploadEndpoint`, `searchEndpoint`, `icon` |
 | **MarkdownModule** | NO | [see details](./markdown.md) | markdown | array | [] |
 | **MentionModule** | NO | [see details](./mention.md) | mention | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\MentionModule`` |
 | **NodeMoverModule** | **ALWAYS** | [see details](./node-mover.md) | nodeMover | array | [] |
@@ -88,4 +89,4 @@ These modules provide global behavior and must usually be added manually to the 
 | **ReadTimeModule** | NO | [see details](./read-time.md) | readingTime | array | ['wpm' => '200', 'label' => 'Reading time: ', 'suffix' => ' min read'] |
 | **SmartLinksModule** | NO | [see details](./smart-links.md) | smartLinks | array | ['linkRegex' => '/https?:\/\/[^\s]+/'] |
 | **STTModule** | NO | [see details](./stt.md) | speechToText | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\STTModule`` |
-| **ImageGalleryModule**    |          YES          | An image gallery to allow to pick images from a gallery                                                                                                                                                                                     | imageGallery  |    array     |                                       `listEndpoint`, `uploadEndpoint`, `searchEndpoint`, `icon`                                       |                               see ``Ehyiah\QuillJsBundle\DTO\Modules\ImageGalleryModule``                                                                                                   |
+| **ImageGalleryModule** | YES | [see details](./image-gallery.md) | imageGallery | array | `listEndpoint`, `uploadEndpoint`, `searchEndpoint`, `icon` |
