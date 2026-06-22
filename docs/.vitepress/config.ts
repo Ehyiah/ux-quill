@@ -46,6 +46,7 @@ export default defineConfig({
             collapsed: false,
             items: [
               { text: 'Concept', link: '/guide/fields/index' },
+              { text: 'Callout', link: '/guide/fields/callout' },
               { text: 'Code Block', link: '/guide/fields/code-block' },
               { text: 'Colors & Fonts', link: '/guide/fields/colors-fonts' },
               { text: 'Divider', link: '/guide/fields/divider' },

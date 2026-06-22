@@ -52,3 +52,12 @@ new CalloutModule(options: [
     ],
 ]),
 ```
+
+## Try it live
+
+<ClientOnly>
+  <QuillPlayground
+    enabled="callout"
+    placeholder="Try inserting a callout block…"
+  />
+</ClientOnly>
