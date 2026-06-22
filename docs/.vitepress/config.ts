@@ -62,6 +62,7 @@ export default defineConfig({
                 text: 'Field-dependent',
                 collapsed: true,
                 items: [
+                  { text: 'Callout', link: '/guide/modules/callout' },
                   { text: 'Divider', link: '/guide/modules/divider' },
                   { text: 'Emoji', link: 'https://github.com/contentco/quill-emoji' },
                   { text: 'Image Selection', link: '/guide/modules/image-selection' },

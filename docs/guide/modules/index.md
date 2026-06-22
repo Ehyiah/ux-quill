@@ -61,6 +61,7 @@ These modules are usually automatically imported when the corresponding field is
 
 | module | auto-imported | description | name | options type | default options |
 | :--- | :---: | :--- | :---: | :---: | :--- |
+| **CalloutModule** | YES | [see details](./callout.md) | callout | array | `['types' => ['info', 'warning', 'danger', 'success'], 'defaultType' => 'info']` |
 | **DividerModule** | YES | [see details](./divider.md) | divider | array | [] |
 | **EmojiModule** | YES | Required if EmojiField is activated. | emoji-toolbar | string | `'true'` |
 | **ImageSelectionModule** | YES | [see details](./image-selection.md) | imageSelection | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\ImageSelectionModule`` |

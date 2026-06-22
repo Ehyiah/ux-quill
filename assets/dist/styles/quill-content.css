@@ -27,3 +27,36 @@
 .ql-editor .ql-image-figure {
     margin: 1em auto;
 }
+
+.ql-editor .ql-callout {
+    position: relative;
+    box-sizing: border-box;
+    padding: 0;
+    margin: 12px 0;
+    border-radius: 8px;
+}
+
+.ql-editor .ql-callout-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px 0;
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    user-select: none;
+}
+
+.ql-editor .ql-callout-content {
+    padding: 8px 14px 12px;
+    min-height: 1em;
+}
+
+.ql-editor .ql-callout-content p {
+    margin: 0;
+}
+
+.ql-editor .ql-callout-content p + p {
+    margin-top: 8px;
+}

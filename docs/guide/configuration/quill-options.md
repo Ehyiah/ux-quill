@@ -64,6 +64,7 @@ These fields are provided by the bundle or integrated community modules. Most of
 
 | Field | Description | Auto-imported module | QuillJS name |
 | :--- | :--- | :--- | :---: |
+| **CalloutField** | Styled alert/callout block with type dropdown (info, warning, danger, success) | `CalloutModule` | `callout` |
 | **DividerField** | Horizontal separator | `DividerModule` | `divider` |
 | **EmojiField** | Emoji picker | `EmojiModule` | `emoji` |
 | **PageBreakField** | Page break (for print) | `PageBreakModule` | `pageBreak` |

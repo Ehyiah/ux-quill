@@ -15,3 +15,39 @@
     font-weight: bold;
     display: inline-block;
 }
+
+.ql-editor .ql-callout--info {
+    border-left: 4px solid #1a73e8;
+    background-color: #e8f0fe;
+}
+
+.ql-editor .ql-callout--info .ql-callout-header {
+    color: #1a73e8;
+}
+
+.ql-editor .ql-callout--warning {
+    border-left: 4px solid #e37400;
+    background-color: #fef7e0;
+}
+
+.ql-editor .ql-callout--warning .ql-callout-header {
+    color: #e37400;
+}
+
+.ql-editor .ql-callout--danger {
+    border-left: 4px solid #d93025;
+    background-color: #fce8e6;
+}
+
+.ql-editor .ql-callout--danger .ql-callout-header {
+    color: #d93025;
+}
+
+.ql-editor .ql-callout--success {
+    border-left: 4px solid #188038;
+    background-color: #e6f4ea;
+}
+
+.ql-editor .ql-callout--success .ql-callout-header {
+    color: #188038;
+}

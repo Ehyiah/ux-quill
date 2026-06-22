@@ -30,6 +30,9 @@ Quill.register('modules/imageSelection', ImageSelection);
 import NodeMover from './modules/nodeMover.ts';
 Quill.register('modules/nodeMover', NodeMover);
 
+import {Callout} from './modules/callout.ts';
+Quill.register('modules/callout', Callout);
+
 import {Divider} from './modules/divider.ts';
 Quill.register('modules/divider', Divider);
 
@@ -50,6 +53,7 @@ Quill.register('modules/pasteSanitizer', PasteSanitizer);
 
 const icons = Quill.import('ui/icons');
 if (icons) {
+    icons['callout'] = '<svg viewBox="0 0 18 18"><path class="ql-stroke" d="M3 3h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H9l-3 3v-3H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/></svg>';
     icons['divider'] = '<svg viewBox="0 0 18 18"><line class="ql-stroke" x1="3" x2="15" y1="9" y2="9"></line></svg>';
     icons['pageBreak'] = '<svg viewBox="0 0 18 18"><line class="ql-stroke" x1="3" x2="15" y1="5" y2="5" style="stroke-dasharray: 2, 2"/><line class="ql-stroke" x1="3" x2="15" y1="13" y2="13" style="stroke-dasharray: 2, 2"/><polyline class="ql-stroke" points="6 11 9 8 12 11"/><polyline class="ql-stroke" points="6 7 9 10 12 7"/></svg>';
 }
