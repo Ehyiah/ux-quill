@@ -1,0 +1,48 @@
+{
+  "data": [
+    {
+      "url": "https://picsum.photos/id/100/800/600",
+      "thumbnail": "https://picsum.photos/id/100/200/200",
+      "title": "Beach"
+    },
+    {
+      "url": "https://picsum.photos/id/110/800/600",
+      "thumbnail": "https://picsum.photos/id/110/200/200",
+      "title": "Bridge"
+    },
+    {
+      "url": "https://picsum.photos/id/120/800/600",
+      "thumbnail": "https://picsum.photos/id/120/200/200",
+      "title": "Flowers"
+    },
+    {
+      "url": "https://picsum.photos/id/130/800/600",
+      "thumbnail": "https://picsum.photos/id/130/200/200",
+      "title": "Architecture"
+    },
+    {
+      "url": "https://picsum.photos/id/140/800/600",
+      "thumbnail": "https://picsum.photos/id/140/200/200",
+      "title": "Ocean"
+    },
+    {
+      "url": "https://picsum.photos/id/150/800/600",
+      "thumbnail": "https://picsum.photos/id/150/200/200",
+      "title": "Mountains"
+    },
+    {
+      "url": "https://picsum.photos/id/160/800/600",
+      "thumbnail": "https://picsum.photos/id/160/200/200",
+      "title": "City"
+    },
+    {
+      "url": "https://picsum.photos/id/170/800/600",
+      "thumbnail": "https://picsum.photos/id/170/200/200",
+      "title": "Sunset"
+    }
+  ],
+  "links": {
+    "next": null,
+    "prev": "/ux-quill/gallery-mock.json"
+  }
+}
