@@ -68,7 +68,7 @@ These fields are provided by the bundle or integrated community modules. Most of
 | **[EmojiField](/guide/fields/emoji)** | Emoji picker | `EmojiModule` | `emoji` |
 | **[PageBreakField](/guide/fields/pagebreak)** | Page break (for print) | `PageBreakModule` | `pageBreak` |
 | **[TableField](/guide/fields/table)** | Advanced table support | `TableModule` | `table-better` |
-| **LayoutField** | Multi-column layout (grid) | [`LayoutModule`](/guide/modules/layout) | `layout` |
+| **[LayoutField](/guide/fields/layout)** | Multi-column layout (grid) | [`LayoutModule`](/guide/modules/layout) | `layout` |
 
 > [!TIP]
 > If you need to add a field that is not provided by this bundle, you can create your own. See [Custom Fields](/guide/advanced/custom-fields) for more details.

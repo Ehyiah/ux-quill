@@ -53,6 +53,7 @@ export default defineConfig({
               { text: 'Headers', link: '/guide/fields/headers' },
               { text: 'Image', link: '/guide/fields/image' },
               { text: 'Image Gallery', link: '/guide/fields/image-gallery' },
+              { text: 'Layout', link: '/guide/fields/layout' },
               { text: 'Link', link: '/guide/fields/link' },
               { text: 'Lists & Alignment', link: '/guide/fields/lists-alignment' },
               { text: 'Media', link: '/guide/fields/media' },

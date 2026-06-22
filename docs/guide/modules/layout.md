@@ -121,3 +121,12 @@ If text is selected when clicking the layout button, the selected content is dis
 | ArrowDown (at column end) | Move to start of next column |
 | Enter | New paragraph inside column |
 | Shift+Enter | Line break (`<br>`) inside column |
+
+## Try it live
+
+<ClientOnly>
+  <QuillPlayground
+    enabled="layout"
+    placeholder="Try inserting a multi-column layout…"
+  />
+</ClientOnly>

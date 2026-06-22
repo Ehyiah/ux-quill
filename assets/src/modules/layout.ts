@@ -49,10 +49,10 @@ export class Layout {
         const style = document.createElement('style');
         style.id = id;
         style.innerHTML = `
-            .ql-layout {
+            .ql-editor .ql-layout {
                 position: relative;
             }
-            .ql-layout-col {
+            .ql-editor .ql-layout-col {
                 min-height: 48px;
                 padding: 8px;
                 border: 1px dashed #c0c0c0;
@@ -60,19 +60,19 @@ export class Layout {
                 outline: none;
                 transition: border-color 0.15s, box-shadow 0.15s;
             }
-            .ql-layout-col:focus {
+            .ql-editor .ql-layout-col:focus {
                 border-color: #4a90d9;
                 border-style: solid;
                 box-shadow: 0 0 0 2px rgba(74, 144, 217, 0.25);
             }
-            .ql-layout-col p:first-child {
+            .ql-editor .ql-layout-col p:first-child {
                 margin-top: 0;
             }
-            .ql-layout-col p:last-child {
+            .ql-editor .ql-layout-col p:last-child {
                 margin-bottom: 0;
             }
             .ql-layout-picker {
-                position: absolute;
+                position: fixed;
                 z-index: 1000;
                 background: #fff;
                 border: 1px solid #ccc;
