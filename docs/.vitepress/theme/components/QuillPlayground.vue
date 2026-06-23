@@ -158,6 +158,10 @@ const MODULE_DEFS: Record<string, ModuleDefEntry> = {
     toolbar: ['pageBreak'],
     config: { pageBreak: { label: 'Page Break' } },
   },
+  spoiler: {
+    toolbar: ['spoiler'],
+    config: { spoiler: { title: 'Spoiler', content: '<p>Revealed content</p>' } },
+  },
   link: {
     toolbar: ['link'],
     config: { linkAttributes: {} },

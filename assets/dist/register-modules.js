@@ -23,6 +23,8 @@ import { Divider } from "./modules/divider.js";
 Quill.register('modules/divider', Divider);
 import { PageBreak } from "./modules/pageBreak.js";
 Quill.register('modules/pageBreak', PageBreak);
+import { Spoiler } from "./modules/spoiler.js";
+Quill.register('modules/spoiler', Spoiler);
 import { Markdown } from "./modules/markdown.js";
 Quill.register('modules/markdown', Markdown);
 import { LinkAttributes } from "./modules/linkAttributes.js";
@@ -36,6 +38,7 @@ if (icons) {
   icons['divider'] = '<svg viewBox="0 0 18 18"><line class="ql-stroke" x1="3" x2="15" y1="9" y2="9"></line></svg>';
   icons['pageBreak'] = '<svg viewBox="0 0 18 18"><line class="ql-stroke" x1="3" x2="15" y1="5" y2="5" style="stroke-dasharray: 2, 2"/><line class="ql-stroke" x1="3" x2="15" y1="13" y2="13" style="stroke-dasharray: 2, 2"/><polyline class="ql-stroke" points="6 11 9 8 12 11"/><polyline class="ql-stroke" points="6 7 9 10 12 7"/></svg>';
   icons['imageGallery'] = '<svg viewBox="0 0 18 18"><rect class="ql-stroke" x="3" y="4" width="12" height="10" rx="1" fill="none"/><circle class="ql-fill" cx="7" cy="8" r="1.5"/><polyline class="ql-stroke" points="14 13 10 9 4 14" fill="none"/></svg>';
+  icons['spoiler'] = '<svg viewBox="0 0 18 18"><rect class="ql-stroke" x="2" y="2" width="14" height="14" rx="2" fill="none"/><polygon class="ql-fill" points="8,6 12,9 8,12" fill="currentColor"/><line class="ql-stroke" x1="4" y1="5" x2="7" y2="5"/><line class="ql-stroke" x1="4" y1="9" x2="7" y2="9"/><line class="ql-stroke" x1="4" y1="13" x2="7" y2="13"/></svg>';
 }
 import SpeechToText from "./modules/speechToText.js";
 Quill.register('modules/speechToText', SpeechToText);

@@ -67,6 +67,7 @@ These modules are usually automatically imported when the corresponding field is
 | **LinkAttributesModule** | YES | [see details](./link-attributes.md) | linkAttributes | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\LinkAttributesModule`` |
 | **PageBreakModule** | YES | [see details](./pagebreak.md) | pageBreak | array | ['label' => 'Page Break'] |
 | **ResizeModule** | YES | [see details](./resize.md) | resize | array | [] |
+| **SpoilerModule** | YES | [see details](./spoiler.md) | spoiler | array | ['title' => 'Spoiler', 'content' => ''] |
 | **SyntaxModule** | YES | [see details](./syntax.md) | syntax | string | `'true'` |
 | **TableModule** | YES | [see details](./table.md) | table-better | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\TableModule`` |
 
