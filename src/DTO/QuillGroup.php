@@ -45,9 +45,20 @@ final class QuillGroup implements QuillGroupInterface
 
     /**
      * @return array<QuillBlockFieldInterface|QuillInlineFieldInterface>
+     *
+     * @deprecated since 3.9, will be removed in 4.0.
+     *     Some Field‑dependent modules (e.g. SpoilerField, MentionField, ImageGallery...) cannot
+     *     be auto‑included here because they need explicit configuration in their modules. Use other presets or QuillGroup::build() with explicit
+     *     fields instead.
      */
     public static function buildWithAllFields(): array
     {
+        @trigger_error(sprintf(
+            'The "%s()" method is deprecated since 3.9 and will be removed in 4.0. Use "%s()" with other presets instead.',
+            __METHOD__,
+            self::class . '::build'
+        ), E_USER_DEPRECATED);
+
         $stylingFields = [
             new BoldField(),
             new ItalicField(),
