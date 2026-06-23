@@ -31,6 +31,13 @@
       </div>
       <pre><code>{{ htmlOutput }}</code></pre>
     </div>
+
+    <div class="playground-preview" v-if="htmlOutput">
+      <div class="playground-preview-header">
+        <span>Rendered Preview</span>
+      </div>
+      <div class="playground-preview-body ql-editor" v-html="htmlOutput"></div>
+    </div>
   </div>
 </template>
 
@@ -157,6 +164,10 @@ const MODULE_DEFS: Record<string, ModuleDefEntry> = {
   pageBreak: {
     toolbar: ['pageBreak'],
     config: { pageBreak: { label: 'Page Break' } },
+  },
+  spoiler: {
+    toolbar: ['spoiler'],
+    config: { spoiler: { title: 'Spoiler', content: '<p>Revealed content</p>' } },
   },
   link: {
     toolbar: ['link'],
@@ -330,9 +341,13 @@ async function initEditor() {
   quill = new Quill(editorRef.value, config)
 
   htmlOutput.value = quill.root.innerHTML
+    .replace(/\scontenteditable="[^"]*"/gi, '')
+    .replace(/\sopen(?:="[^"]*")?/gi, '')
 
   quill.on('text-change', () => {
     htmlOutput.value = quill.root.innerHTML
+      .replace(/\scontenteditable="[^"]*"/gi, '')
+      .replace(/\sopen(?:="[^"]*")?/gi, '')
   })
 }
 
@@ -585,5 +600,43 @@ onBeforeUnmount(() => {
 }
 .dark .playground-stat {
   color: #999;
+}
+
+.playground-preview {
+  border-top: 1px solid #d0d5dd;
+}
+
+.playground-preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: #f9fafb;
+  font-size: 13px;
+  font-weight: 600;
+  color: #344054;
+}
+
+.playground-preview-body.ql-editor {
+  padding: 16px;
+  min-height: 60px;
+  height: auto;
+  overflow: visible;
+  white-space: normal;
+  cursor: default;
+}
+
+.dark .playground-preview {
+  border-top-color: #3d3d3d;
+}
+
+.dark .playground-preview-header {
+  background: #1e1e1e;
+  color: #c0c0c0;
+}
+
+.dark .playground-preview-body.ql-editor {
+  background: #1e1e1e;
+  color: #e0e0e0;
 }
 </style>

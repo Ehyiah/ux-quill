@@ -117,7 +117,12 @@ export default class _Class extends Controller {
     this.dispatchEvent('hydrate:after', quill);
     quill.on('text-change', () => {
       var _this$extraOptionsVal;
-      const quillContent = (_this$extraOptionsVal = this.extraOptionsValue) != null && _this$extraOptionsVal.use_semantic_html ? quill.getSemanticHTML() : quill.root.innerHTML;
+      let quillContent;
+      if ((_this$extraOptionsVal = this.extraOptionsValue) != null && _this$extraOptionsVal.use_semantic_html) {
+        quillContent = quill.getSemanticHTML();
+      } else {
+        quillContent = quill.root.innerHTML.replace(/\scontenteditable="[^"]*"/gi, '').replace(/\sopen(?:="[^"]*")?/gi, '');
+      }
       const inputContent = this.inputTarget;
       inputContent.value = quillContent;
       this.bubbles(inputContent);

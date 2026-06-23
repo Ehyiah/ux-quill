@@ -57,6 +57,7 @@ export default defineConfig({
               { text: 'Lists & Alignment', link: '/guide/fields/lists-alignment' },
               { text: 'Media', link: '/guide/fields/media' },
               { text: 'Page Break', link: '/guide/fields/pagebreak' },
+              { text: 'Spoiler', link: '/guide/fields/spoiler' },
               { text: 'Table', link: '/guide/fields/table' },
               { text: 'Text Formatting', link: '/guide/fields/text-formatting' },
             ]
@@ -96,6 +97,7 @@ export default defineConfig({
                   { text: 'PageBreak', link: '/guide/modules/pagebreak' },
                   { text: 'Resize', link: '/guide/modules/resize' },
                   { text: 'Syntax (Highlight)', link: '/guide/modules/syntax' },
+                  { text: 'Spoiler', link: '/guide/modules/spoiler' },
                   { text: 'Table', link: '/guide/modules/table' },
                 ]
               },

@@ -27,3 +27,28 @@
 .ql-editor .ql-image-figure {
     margin: 1em auto;
 }
+
+.ql-editor .ql-spoiler {
+    display: block;
+    margin: 1em 0;
+}
+.ql-editor .ql-spoiler[open] {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 8px 12px;
+    background: #fafafa;
+}
+.ql-editor .ql-spoiler-summary {
+    font-weight: bold;
+    cursor: pointer;
+    padding: 4px 0;
+    list-style: none;
+}
+.ql-editor .ql-spoiler-summary::-webkit-details-marker {
+    display: none;
+}
+.ql-editor .ql-spoiler-content {
+    padding: 8px 0 4px 16px;
+    border-left: 3px solid #ccc;
+    margin-top: 6px;
+}

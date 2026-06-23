@@ -9,6 +9,7 @@ use Ehyiah\QuillJsBundle\DTO\Modules\MarkdownModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\MentionModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\PageBreakModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\PasteSanitizerModule;
+use Ehyiah\QuillJsBundle\DTO\Modules\SpoilerModule;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -90,6 +91,17 @@ class ModulesDTOTest extends TestCase
         $this->assertEquals('Ouvrir dans un nouvel onglet', $module->options['openInNewTabLabel']);
         $this->assertEquals('Lien No-follow (SEO)', $module->options['noFollowLabel']);
         $this->assertEquals('Valider', $module->options['saveButtonLabel']);
+    }
+
+    public function testSpoilerModule(): void
+    {
+        $module = new SpoilerModule();
+        $this->assertEquals('spoiler', $module->name);
+        $this->assertEquals(['title' => 'Spoiler', 'content' => ''], $module->options);
+
+        $module = new SpoilerModule(options: ['title' => 'Click to reveal', 'content' => '<p>Hidden content</p>']);
+        $this->assertEquals('Click to reveal', $module->options['title']);
+        $this->assertEquals('<p>Hidden content</p>', $module->options['content']);
     }
 
     public function testMentionModule(): void
