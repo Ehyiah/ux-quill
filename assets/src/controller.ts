@@ -113,7 +113,7 @@ export default class extends Controller {
 
     private setupQuillStyles(options: Options) {
         if (options.style === 'inline') {
-            const styleAttributes = ['align', 'background', 'color', 'direction', 'font', 'size', 'indent'];
+            const styleAttributes = ['align', 'background', 'color', 'direction', 'font', 'size'];
             styleAttributes.forEach(attr =>
                 Quill.register(Quill.import(`attributors/style/${attr}`), true)
             );
