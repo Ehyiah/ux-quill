@@ -43,7 +43,7 @@ Type `/` to open the menu. You can then:
 - Use **Code** for code blocks.
 - Use **Text** to return to a normal paragraph.
 
-**Behavior**: 
+**Behavior**:
 - If you type `/` at the start of an empty line, selecting an item transforms that line.
 - If you type `/` after some text, selecting an item creates a **new line** below with the chosen format, preserving what you already wrote.
 
