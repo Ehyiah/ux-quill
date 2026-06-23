@@ -73,7 +73,7 @@ export class Spoiler {
                 padding: 8px 0 4px 20px;
                 border-left: 3px solid #ccc;
                 margin-top: 6px;
-                min-height: 1em;
+                min-height: 2.5em;
             }
         `;
         document.head.appendChild(style);
