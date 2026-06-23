@@ -46,6 +46,7 @@ export default defineConfig({
             collapsed: false,
             items: [
               { text: 'Concept', link: '/guide/fields/index' },
+              { text: 'Callout', link: '/guide/fields/callout' },
               { text: 'Code Block', link: '/guide/fields/code-block' },
               { text: 'Colors & Fonts', link: '/guide/fields/colors-fonts' },
               { text: 'Divider', link: '/guide/fields/divider' },
@@ -90,6 +91,7 @@ export default defineConfig({
                 collapsed: true,
                 items: [
                   { text: 'Emoji', link: '/guide/modules/emoji' },
+                  { text: 'Callout', link: '/guide/modules/callout' },
                   { text: 'Image Selection', link: '/guide/modules/image-selection' },
                   { text: 'Image Gallery', link: '/guide/modules/image-gallery' },
                   { text: 'Link Attributes', link: '/guide/modules/link-attributes' },

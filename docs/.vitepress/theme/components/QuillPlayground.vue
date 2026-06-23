@@ -194,6 +194,10 @@ const MODULE_DEFS: Record<string, ModuleDefEntry> = {
     toolbar: ['video', 'formula'],
     config: {},
   },
+  callout: {
+    toolbar: ['callout'],
+    config: {},
+  },
 }
 
 const BASE_TOOLBAR = [
@@ -232,6 +236,7 @@ function buildConfig() {
         ['emoji'],
         ['table-better'],
         ['divider', 'pageBreak'],
+        ['callout'],
         ['imageGallery'],
       ],
       modules: {
@@ -328,6 +333,15 @@ async function initEditor() {
   }
 
   quill = new Quill(editorRef.value, config)
+
+  // callout module must be instantiated manually if auto-registration didn't work
+  if (enabledList.value.includes('callout') || isAll()) {
+    const toolbar = quill.getModule('toolbar')
+    if (toolbar && !toolbar.handlers.callout) {
+      const mod = await import('../../../../assets/dist/modules/callout.js')
+      new mod.Callout(quill, {})
+    }
+  }
 
   htmlOutput.value = quill.root.innerHTML
 
