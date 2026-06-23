@@ -107,3 +107,12 @@ use Ehyiah\QuillJsBundle\DTO\Modules\ResizeModule;
     new ResizeModule(), // Enable the old one
 ],
 ```
+
+## Try it live
+
+<ClientOnly>
+  <QuillPlayground
+    enabled="imageSelection,counter"
+    placeholder="Try inserting and editing images…"
+  />
+</ClientOnly>

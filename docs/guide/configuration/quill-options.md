@@ -64,10 +64,10 @@ These fields are provided by the bundle or integrated community modules. Most of
 
 | Field | Description | Auto-imported module | QuillJS name |
 | :--- | :--- | :--- | :---: |
-| **DividerField** | Horizontal separator | `DividerModule` | `divider` |
-| **EmojiField** | Emoji picker | `EmojiModule` | `emoji` |
-| **PageBreakField** | Page break (for print) | `PageBreakModule` | `pageBreak` |
-| **TableField** | Advanced table support | `TableModule` | `table-better` |
+| **[DividerField](/guide/fields/divider)** | Horizontal separator | `DividerModule` | `divider` |
+| **[EmojiField](/guide/fields/emoji)** | Emoji picker | `EmojiModule` | `emoji` |
+| **[PageBreakField](/guide/fields/pagebreak)** | Page break (for print) | `PageBreakModule` | `pageBreak` |
+| **[TableField](/guide/fields/table)** | Advanced table support | `TableModule` | `table-better` |
 
 > [!TIP]
 > If you need to add a field that is not provided by this bundle, you can create your own. See [Custom Fields](/guide/advanced/custom-fields) for more details.
