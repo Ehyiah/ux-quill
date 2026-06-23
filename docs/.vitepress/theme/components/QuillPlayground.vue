@@ -158,6 +158,10 @@ const MODULE_DEFS: Record<string, ModuleDefEntry> = {
     toolbar: ['pageBreak'],
     config: { pageBreak: { label: 'Page Break' } },
   },
+  notionToolbar: {
+    toolbar: [],
+    config: { notionToolbar: { slashMenu: true, floatingToolbar: true } },
+  },
   link: {
     toolbar: ['link'],
     config: { linkAttributes: {} },
@@ -261,6 +265,7 @@ function buildConfig() {
         markdown: true,
         smartLinks: { linkRegex: '/https?:\\/\\/[^\\s]+/' },
         linkAttributes: {},
+        notionToolbar: { slashMenu: true, floatingToolbar: true },
         pasteSanitizer: { plainText: false },
         imageSelection: {},
         nodeMover: {},
@@ -382,8 +387,8 @@ onBeforeUnmount(() => {
 .quill-playground {
   border: 1px solid #d0d5dd;
   border-radius: 10px;
-  overflow: hidden;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  position: relative;
 }
 
 .playground-controls {

@@ -78,6 +78,7 @@ export default defineConfig({
                   { text: 'Markdown', link: '/guide/modules/markdown' },
                   { text: 'Mention', link: '/guide/modules/mention' },
                   { text: 'NodeMover', link: '/guide/modules/node-mover' },
+                  { text: 'Notion Toolbar', link: '/guide/modules/notion-toolbar' },
                   { text: 'Paste Sanitizer', link: '/guide/modules/paste-sanitizer' },
                   { text: 'ReadTime', link: '/guide/modules/read-time' },
                   { text: 'SmartLinks', link: '/guide/modules/smart-links' },

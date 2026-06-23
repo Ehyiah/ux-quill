@@ -52,6 +52,15 @@ When you select text with your mouse or keyboard, a small bubble appears above t
 - It displays icons for **Bold**, **Italic**, **Underline**, and **Strikethrough**.
 - The icons reflect the current state of the selection (e.g., the Bold icon is highlighted if the text is already bold).
 
+## Try it live
+
+<ClientOnly>
+  <QuillPlayground
+    enabled="notionToolbar"
+    placeholder="Try the Notion-like toolbar — select text for floating formatting, or type / for slash commands…"
+  />
+</ClientOnly>
+
 ## Visual Customization
 
 The module injects its own CSS with a clean, modern aesthetic (white background, soft shadows). You can override the styles in your own CSS using these classes:
