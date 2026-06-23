@@ -50,5 +50,4 @@ window.katex = katex;
 import ImageGalleryModule from "./modules/gallery/gallery-module.js";
 Quill.register('modules/imageGallery', ImageGalleryModule.default || ImageGalleryModule);
 import { PlaceholderModule } from "./modules/placeHolderModule/placeHolderModule.js";
-import './styles/placeHolderModule/placeHolderModule.css';
 Quill.register('modules/placeholder', PlaceholderModule);

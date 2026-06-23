@@ -2,7 +2,7 @@
 
 namespace Ehyiah\QuillJsBundle\DTO\Modules;
 
-class PlaceholderModule implements ModuleInterface
+final class PlaceholderModule implements ModuleInterface
 {
     public const NAME = 'placeholder';
 

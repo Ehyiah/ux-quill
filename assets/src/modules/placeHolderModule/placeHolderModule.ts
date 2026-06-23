@@ -31,6 +31,8 @@ export class PlaceholderModule {
         this.startTag = options.startTag || '{{';
         this.endTag = options.endTag || '}}';
 
+        this.injectStyles();
+
         if (options.icon) {
             icons['placeholder'] = options.icon;
         }
@@ -45,6 +47,45 @@ export class PlaceholderModule {
                 this.dropdown.style.display = 'none';
             }
         });
+    }
+
+    private injectStyles(): void {
+        const id = 'ql-placeholder-styles';
+        if (document.getElementById(id)) return;
+
+        const style = document.createElement('style');
+        style.id = id;
+        style.innerHTML = `
+            button.ql-placeholder {
+                width: 28px;
+                height: 24px;
+            }
+            button.ql-placeholder svg {
+                width: 18px;
+                height: 18px;
+            }
+            .ql-placeholder-dropdown {
+                position: absolute;
+                background-color: #fff;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                z-index: 1000;
+                margin-top: 2px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+                min-width: 150px;
+                max-height: 300px;
+                overflow-y: auto;
+            }
+            .ql-placeholder-item {
+                padding: 8px 12px;
+                cursor: pointer;
+                white-space: nowrap;
+            }
+            .ql-placeholder-item:hover {
+                background-color: #f0f0f0;
+            }
+        `;
+        document.head.appendChild(style);
     }
 
     private addButton(toolbar: ToolbarModule): void {

@@ -72,5 +72,4 @@ import ImageGalleryModule from './modules/gallery/gallery-module.ts'
 Quill.register('modules/imageGallery', ImageGalleryModule.default || ImageGalleryModule);
 
 import {PlaceholderModule} from './modules/placeHolderModule/placeHolderModule.ts';
-// import './modules/placeHolderModule/placeHolderModule.css';
 Quill.register('modules/placeholder', PlaceholderModule);

@@ -85,3 +85,12 @@ $processedContent = str_replace(
     $content
 );
 ```
+
+## Try it live
+
+<ClientOnly>
+  <QuillPlayground
+    enabled="placeholder"
+    placeholder="Try selecting a placeholder from the toolbar…"
+  />
+</ClientOnly>

@@ -88,6 +88,10 @@ const MODULE_DEFS: Record<string, ModuleDefEntry> = {
     toolbar: [],
     config: { pasteSanitizer: { plainText: false } },
   },
+  placeholder: {
+    toolbar: [],
+    config: { placeholder: { placeholders: ['firstName', 'lastName', 'email', 'companyName', 'invoiceNumber', 'currentDate'], startTag: '{{', endTag: '}}' } },
+  },
   nodeMover: {
     toolbar: [],
     config: { nodeMover: {} },
