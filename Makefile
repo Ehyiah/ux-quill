@@ -5,6 +5,8 @@ PHP?= $(EXEC) php
 COMPOSER?= $(PHP) composer
 CONSOLE?= $(PHP) php bin/console
 YARN?= $(EXECYARN) php yarn
+EXECDOCS?= $(DOCKER_COMPOSE) exec -w /var/www/symfony/docs
+DOCSYARN?= $(EXECDOCS) php yarn
 
 help:  ## Display this help
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m\033[0m\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
@@ -42,6 +44,20 @@ node_modules: assets ## Install yarn dependency
 	$(YARN) install
 
 .PHONY: assets watch node_modules
+
+##@ Documentation
+docs-install: docs-node_modules ## Install doc dependencies
+
+docs-dev: docs-node_modules ## Start VitePress dev server with watch
+	$(DOCSYARN) run docs:dev
+
+docs-build: docs-node_modules ## Build VitePress documentation
+	$(DOCSYARN) run docs:build
+
+docs-node_modules:
+	$(DOCSYARN) install
+
+.PHONY: docs-install docs-dev docs-build docs-node_modules
 
 ##@ Utility
 bash-php: ## Launch PHP bash

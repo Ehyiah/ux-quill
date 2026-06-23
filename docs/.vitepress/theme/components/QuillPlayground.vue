@@ -194,6 +194,10 @@ const MODULE_DEFS: Record<string, ModuleDefEntry> = {
     toolbar: ['video', 'formula'],
     config: {},
   },
+  layout: {
+    toolbar: ['layout'],
+    config: {},
+  },
 }
 
 const BASE_TOOLBAR = [
@@ -232,6 +236,7 @@ function buildConfig() {
         ['emoji'],
         ['table-better'],
         ['divider', 'pageBreak'],
+        ['layout'],
         ['imageGallery'],
       ],
       modules: {
@@ -328,6 +333,16 @@ async function initEditor() {
   }
 
   quill = new Quill(editorRef.value, config)
+
+  // modules whose constructor may fail to register their toolbar handler
+  // must be instantiated manually after Quill is fully initialized
+  if (enabledList.value.includes('layout') || isAll()) {
+    const tb = quill.getModule('toolbar')
+    if (tb && !tb.handlers.layout) {
+      const mod = await import('../../../../assets/dist/modules/layout.js')
+      new mod.Layout(quill, {})
+    }
+  }
 
   htmlOutput.value = quill.root.innerHTML
 

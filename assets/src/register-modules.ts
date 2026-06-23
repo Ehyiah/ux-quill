@@ -48,8 +48,12 @@ Quill.register('modules/autosave', Autosave);
 import {PasteSanitizer} from './modules/pasteSanitizer.ts';
 Quill.register('modules/pasteSanitizer', PasteSanitizer);
 
+import {Layout} from './modules/layout.ts';
+Quill.register('modules/layout', Layout);
+
 const icons = Quill.import('ui/icons');
 if (icons) {
+    icons['layout'] = '<svg viewBox="0 0 18 18"><rect class="ql-stroke" x="3" y="4" width="5" height="10" rx="1"/><rect class="ql-stroke" x="10" y="4" width="5" height="10" rx="1"/></svg>';
     icons['divider'] = '<svg viewBox="0 0 18 18"><line class="ql-stroke" x1="3" x2="15" y1="9" y2="9"></line></svg>';
     icons['pageBreak'] = '<svg viewBox="0 0 18 18"><line class="ql-stroke" x1="3" x2="15" y1="5" y2="5" style="stroke-dasharray: 2, 2"/><line class="ql-stroke" x1="3" x2="15" y1="13" y2="13" style="stroke-dasharray: 2, 2"/><polyline class="ql-stroke" points="6 11 9 8 12 11"/><polyline class="ql-stroke" points="6 7 9 10 12 7"/></svg>';
     icons['imageGallery'] = '<svg viewBox="0 0 18 18"><rect class="ql-stroke" x="3" y="4" width="12" height="10" rx="1" fill="none"/><circle class="ql-fill" cx="7" cy="8" r="1.5"/><polyline class="ql-stroke" points="14 13 10 9 4 14" fill="none"/></svg>';

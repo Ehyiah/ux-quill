@@ -69,6 +69,7 @@ These modules are usually automatically imported when the corresponding field is
 | **ResizeModule** | YES | [see details](./resize.md) | resize | array | [] |
 | **SyntaxModule** | YES | [see details](./syntax.md) | syntax | string | `'true'` |
 | **TableModule** | YES | [see details](./table.md) | table-better | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\TableModule`` |
+| **LayoutModule** | YES | [see details](./layout.md) | layout | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\LayoutModule`` |
 
 ### Independent Modules
 These modules provide global behavior and must usually be added manually to the `modules` option.
