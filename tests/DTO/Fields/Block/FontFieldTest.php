@@ -20,8 +20,7 @@ final class FontFieldTest extends TestCase
         $result = $field->getOption();
 
         $expectedResult = [
-            'font' => [
-            ],
+            'font' => [],
         ];
 
         $this->assertEquals($expectedResult, $result);

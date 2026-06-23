@@ -2,10 +2,12 @@
 
 namespace Ehyiah\QuillJsBundle\Form;
 
+use Closure;
 use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillBlockFieldInterface;
 use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillFieldModuleInterface;
 use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillInlineFieldInterface;
 use Ehyiah\QuillJsBundle\DTO\Modules\ModuleInterface;
+use Ehyiah\QuillJsBundle\DTO\Modules\NodeMoverModule;
 use Ehyiah\QuillJsBundle\DTO\Options\DebugOption;
 use Ehyiah\QuillJsBundle\DTO\Options\StyleOption;
 use Ehyiah\QuillJsBundle\DTO\Options\ThemeOption;
@@ -49,16 +51,33 @@ class QuillType extends AbstractType
 
         $extraOptions = $options['quill_extra_options'];
 
-        // Handle callable (closure) for quill_extra_options (Symfony 8 compatibility)
+        $extraResolver = new OptionsResolver();
+        $this->configureExtraOptions($extraResolver);
+
         if (is_callable($extraOptions)) {
-            $extraResolver = new OptionsResolver();
             $extraOptions($extraResolver);
             $extraOptions = $extraResolver->resolve([]);
+        } else {
+            $extraOptions = $extraResolver->resolve($extraOptions);
         }
 
         if (isset($extraOptions['placeholder']) && $extraOptions['placeholder'] instanceof TranslatableInterface) {
             $extraOptions['placeholder'] = $extraOptions['placeholder']->trans($this->translator);
         }
+
+        $nodeMoverFound = false;
+        foreach ($modules as $i => $module) {
+            if ($module instanceof NodeMoverModule) {
+                $nodeMoverFound = true;
+                if (isset($module->options['active']) && false === $module->options['active']) {
+                    unset($modules[$i]);
+                }
+            }
+        }
+        if (!$nodeMoverFound) {
+            $modules[] = new NodeMoverModule();
+        }
+        $modules = array_values($modules);
 
         $view->vars['attr']['quill_extra_options'] = json_encode($extraOptions);
         $view->vars['attr']['quill_modules_options'] = json_encode($modules);
@@ -73,90 +92,10 @@ class QuillType extends AbstractType
             'error_bubbling' => true,
             'quill_options' => [['bold', 'italic']],
             'modules' => [],
-            'quill_extra_options' => static function (OptionsResolver $extraResolver) {
-                $extraResolver
-                    ->setDefault('upload_handler', static function (OptionsResolver $spoolResolver): void {
-                        $spoolResolver->setDefaults([
-                            'type' => 'form',
-                            'upload_endpoint' => null,
-                            'json_response_file_path' => null,
-                            'security' => static function (OptionsResolver $securityResolver) {
-                                $securityResolver->setDefaults([
-                                    'type' => null,
-                                    'jwt_token' => null,
-                                    'username' => null,
-                                    'password' => null,
-                                    'custom_header' => null,
-                                    'custom_header_value' => null,
-                                ]);
-                                $securityResolver->setAllowedTypes('type', ['string', 'null']);
-                                $securityResolver->setAllowedValues('type', ['basic', 'jwt', 'custom_header', null]);
-                                $securityResolver->setAllowedTypes('jwt_token', ['string', 'null']);
-                                $securityResolver->setAllowedTypes('username', ['string', 'null']);
-                                $securityResolver->setAllowedTypes('password', ['string', 'null']);
-                                $securityResolver->setAllowedTypes('custom_header', ['string', 'null']);
-                                $securityResolver->setAllowedTypes('custom_header_value', ['string', 'null']);
-                            },
-                        ]);
-                        $spoolResolver->setAllowedTypes('type', ['string', 'null']);
-                        $spoolResolver->setAllowedValues('type', ['json', 'form', null]);
-                        $spoolResolver->setAllowedTypes('upload_endpoint', ['string', 'null']);
-                        $spoolResolver->setAllowedTypes('json_response_file_path', ['string', 'null']);
-                        $spoolResolver->setAllowedTypes('security', ['array', 'null']);
-                    })
-                ;
-                $extraResolver
-                    ->setDefault('debug', DebugOption::DEBUG_OPTION_ERROR)
-                    ->setAllowedTypes('debug', 'string')
-                    ->setAllowedValues('debug', [DebugOption::DEBUG_OPTION_ERROR, DebugOption::DEBUG_OPTION_WARNING, DebugOption::DEBUG_OPTION_LOG, DebugOption::DEBUG_OPTION_INFO])
-                ;
-                $extraResolver
-                    ->setDefault('height', '200px')
-                    ->setAllowedTypes('height', ['string', 'null'])
-                    ->setAllowedValues('height', static function (?string $value) {
-                        if (null === $value) {
-                            return true;
-                        }
-
-                        return preg_match('/(\d+)(px$|em$|ex$|%$)/', $value);
-                    })
-                ;
-                $extraResolver
-                    ->setDefault('theme', 'snow')
-                    ->setAllowedTypes('theme', 'string')
-                    ->setAllowedValues('theme', [ThemeOption::QUILL_THEME_SNOW, ThemeOption::QUILL_THEME_BUBBLE])
-                ;
-                $extraResolver
-                    ->setDefault('placeholder', 'Quill editor')
-                    ->setAllowedTypes('placeholder', ['string', TranslatableMessage::class, TranslatableInterface::class])
-                ;
-                $extraResolver
-                    ->setDefault('style', StyleOption::QUILL_STYLE_CLASS)
-                    ->setAllowedTypes('style', 'string')
-                    ->setAllowedValues('style', [StyleOption::QUILL_STYLE_INLINE, StyleOption::QUILL_STYLE_CLASS])
-                ;
-                $extraResolver
-                    ->setDefault('modules', [])
-                    ->setAllowedTypes('modules', ['array'])
-                ;
-                $extraResolver
-                    ->setDefault('use_semantic_html', false)
-                    ->setAllowedTypes('use_semantic_html', 'bool')
-                    ->setAllowedValues('use_semantic_html', [true, false])
-                ;
-                $extraResolver
-                    ->setDefault('custom_icons', [])
-                ;
-                $extraResolver
-                    ->setDefault('read_only', false)
-                    ->setAllowedTypes('read_only', 'bool')
-                ;
-                $extraResolver
-                    ->setDefault('assets', [])
-                    ->setAllowedTypes('assets', ['array'])
-                ;
-            },
         ]);
+        self::defineNestedOptions($resolver, 'quill_extra_options', function (OptionsResolver $extraResolver): void {
+            $this->configureExtraOptions($extraResolver);
+        });
 
         $resolver->setAllowedTypes('quill_options', ['array']);
         $resolver->setAllowedTypes('quill_extra_options', ['array', 'callable']);
@@ -170,6 +109,105 @@ class QuillType extends AbstractType
 
             return true;
         });
+    }
+
+    /**
+     * Defines a nested option using OptionsResolver::setOptions() when available
+     * (symfony/options-resolver 7.3+) and falling back to the deprecated
+     * setDefault() closure form on the older Symfony versions this bundle still
+     * supports. Defining nested options via setDefault() is deprecated since
+     * Symfony 7.3 and removed in 8.0.
+     */
+    private static function defineNestedOptions(OptionsResolver $resolver, string $option, Closure $configurator): void
+    {
+        if (method_exists($resolver, 'setOptions')) {
+            $resolver->setOptions($option, $configurator);
+        } else {
+            $resolver->setDefault($option, $configurator);
+        }
+    }
+
+    private function configureExtraOptions(OptionsResolver $extraResolver): void
+    {
+        self::defineNestedOptions($extraResolver, 'upload_handler', static function (OptionsResolver $spoolResolver): void {
+            $spoolResolver->setDefaults([
+                'type' => 'form',
+                'upload_endpoint' => null,
+                'json_response_file_path' => null,
+            ]);
+            self::defineNestedOptions($spoolResolver, 'security', static function (OptionsResolver $securityResolver): void {
+                $securityResolver->setDefaults([
+                    'type' => null,
+                    'jwt_token' => null,
+                    'username' => null,
+                    'password' => null,
+                    'custom_header' => null,
+                    'custom_header_value' => null,
+                ]);
+                $securityResolver->setAllowedTypes('type', ['string', 'null']);
+                $securityResolver->setAllowedValues('type', ['basic', 'jwt', 'custom_header', null]);
+                $securityResolver->setAllowedTypes('jwt_token', ['string', 'null']);
+                $securityResolver->setAllowedTypes('username', ['string', 'null']);
+                $securityResolver->setAllowedTypes('password', ['string', 'null']);
+                $securityResolver->setAllowedTypes('custom_header', ['string', 'null']);
+                $securityResolver->setAllowedTypes('custom_header_value', ['string', 'null']);
+            });
+            $spoolResolver->setAllowedTypes('type', ['string', 'null']);
+            $spoolResolver->setAllowedValues('type', ['json', 'form', null]);
+            $spoolResolver->setAllowedTypes('upload_endpoint', ['string', 'null']);
+            $spoolResolver->setAllowedTypes('json_response_file_path', ['string', 'null']);
+            $spoolResolver->setAllowedTypes('security', ['array', 'null']);
+        });
+        $extraResolver
+            ->setDefault('debug', DebugOption::DEBUG_OPTION_ERROR)
+            ->setAllowedTypes('debug', 'string')
+            ->setAllowedValues('debug', [DebugOption::DEBUG_OPTION_ERROR, DebugOption::DEBUG_OPTION_WARNING, DebugOption::DEBUG_OPTION_LOG, DebugOption::DEBUG_OPTION_INFO])
+        ;
+        $extraResolver
+            ->setDefault('height', '200px')
+            ->setAllowedTypes('height', ['string', 'null'])
+            ->setAllowedValues('height', static function (?string $value) {
+                if (null === $value) {
+                    return true;
+                }
+
+                return preg_match('/(\d+)(px$|em$|ex$|%$)/', $value);
+            })
+        ;
+        $extraResolver
+            ->setDefault('theme', 'snow')
+            ->setAllowedTypes('theme', 'string')
+            ->setAllowedValues('theme', [ThemeOption::QUILL_THEME_SNOW, ThemeOption::QUILL_THEME_BUBBLE])
+        ;
+        $extraResolver
+            ->setDefault('placeholder', 'Quill editor')
+            ->setAllowedTypes('placeholder', ['string', TranslatableMessage::class, TranslatableInterface::class])
+        ;
+        $extraResolver
+            ->setDefault('style', StyleOption::QUILL_STYLE_CLASS)
+            ->setAllowedTypes('style', 'string')
+            ->setAllowedValues('style', [StyleOption::QUILL_STYLE_INLINE, StyleOption::QUILL_STYLE_CLASS])
+        ;
+        $extraResolver
+            ->setDefault('modules', [])
+            ->setAllowedTypes('modules', ['array'])
+        ;
+        $extraResolver
+            ->setDefault('use_semantic_html', false)
+            ->setAllowedTypes('use_semantic_html', 'bool')
+            ->setAllowedValues('use_semantic_html', [true, false])
+        ;
+        $extraResolver
+            ->setDefault('custom_icons', [])
+        ;
+        $extraResolver
+            ->setDefault('read_only', false)
+            ->setAllowedTypes('read_only', 'bool')
+        ;
+        $extraResolver
+            ->setDefault('assets', [])
+            ->setAllowedTypes('assets', ['array'])
+        ;
     }
 
     public function getBlockPrefix(): string
