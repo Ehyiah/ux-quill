@@ -23,12 +23,13 @@ export class PlaceholderModule {
     const toolbar = quill.getModule('toolbar');
     if (toolbar) {
       this.addButton(toolbar);
+
+      document.addEventListener('click', e => {
+        if (!this.button.contains(e.target) && !this.dropdown.contains(e.target)) {
+          this.dropdown.style.display = 'none';
+        }
+      });
     }
-    document.addEventListener('click', e => {
-      if (!this.button.contains(e.target) && !this.dropdown.contains(e.target)) {
-        this.dropdown.style.display = 'none';
-      }
-    });
   }
   injectStyles() {
     const id = 'ql-placeholder-styles';

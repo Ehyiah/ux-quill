@@ -40,13 +40,13 @@ export class PlaceholderModule {
         const toolbar = quill.getModule('toolbar');
         if (toolbar) {
             this.addButton(toolbar);
-        }
 
-        document.addEventListener('click', (e: Event) => {
-            if (!this.button.contains(e.target as Node) && !this.dropdown.contains(e.target as Node)) {
-                this.dropdown.style.display = 'none';
-            }
-        });
+            document.addEventListener('click', (e: Event) => {
+                if (!this.button.contains(e.target as Node) && !this.dropdown.contains(e.target as Node)) {
+                    this.dropdown.style.display = 'none';
+                }
+            });
+        }
     }
 
     private injectStyles(): void {
