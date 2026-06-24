@@ -70,3 +70,6 @@ window.katex = katex;
 
 import ImageGalleryModule from './modules/gallery/gallery-module.ts'
 Quill.register('modules/imageGallery', ImageGalleryModule.default || ImageGalleryModule);
+
+import GridBorders from './modules/gridBorders.ts';
+Quill.register('modules/gridBorders', GridBorders);

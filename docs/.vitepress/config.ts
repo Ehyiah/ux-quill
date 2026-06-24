@@ -81,6 +81,7 @@ export default defineConfig({
                   { text: 'Paste Sanitizer', link: '/guide/modules/paste-sanitizer' },
                   { text: 'ReadTime', link: '/guide/modules/read-time' },
                   { text: 'SmartLinks', link: '/guide/modules/smart-links' },
+                  { text: 'Grid Borders', link: '/guide/modules/grid-borders' },
                   { text: 'Speech To Text', link: '/guide/modules/stt' },
                   { text: 'Other Modules', link: '/guide/modules/others' }
                 ]

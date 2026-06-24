@@ -40,6 +40,7 @@ import { ref, onMounted, watch, onBeforeUnmount, computed, nextTick } from 'vue'
 const props = withDefaults(defineProps<{
   enabled?: string
   placeholder?: string
+  content?: string
 }>(), {
   enabled: 'all',
   placeholder: 'Try all the features… type @ to mention someone, paste a URL for smart links, etc.',
@@ -91,6 +92,10 @@ const MODULE_DEFS: Record<string, ModuleDefEntry> = {
   nodeMover: {
     toolbar: [],
     config: { nodeMover: {} },
+  },
+  gridBorders: {
+    toolbar: [],
+    config: { gridBorders: { toggleButton: true } },
   },
   autosave: {
     toolbar: [],
@@ -328,6 +333,11 @@ async function initEditor() {
   }
 
   quill = new Quill(editorRef.value, config)
+
+  if (props.content) {
+    const delta = quill.clipboard.convert({ html: props.content })
+    quill.setContents(delta)
+  }
 
   htmlOutput.value = quill.root.innerHTML
 
