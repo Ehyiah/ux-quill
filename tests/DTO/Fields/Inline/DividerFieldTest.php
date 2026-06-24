@@ -7,10 +7,14 @@ use Ehyiah\QuillJsBundle\DTO\Modules\DividerModule;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @coversNothing
+ * @coversDefaultClass \Ehyiah\QuillJsBundle\DTO\Fields\InlineField\DividerField
  */
 class DividerFieldTest extends TestCase
 {
+    /**
+     * @covers ::getOption
+     * @covers ::importModules
+     */
     public function testDividerField(): void
     {
         $field = new DividerField();

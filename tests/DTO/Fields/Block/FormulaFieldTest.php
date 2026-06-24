@@ -1,12 +1,12 @@
 <?php
 
-namespace DTO\Fields\Block;
+namespace Ehyiah\QuillJsBundle\Tests\DTO\Fields\Block;
 
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\FormulaField;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @coversDefaultClass \Ehyiah\QuillJsBundle\DTO\Fields\BlockField\AlignField
+ * @coversDefaultClass \Ehyiah\QuillJsBundle\DTO\Fields\InlineField\FormulaField
  */
 final class FormulaFieldTest extends TestCase
 {

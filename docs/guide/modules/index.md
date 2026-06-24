@@ -86,7 +86,9 @@ These modules provide global behavior and must usually be added manually to the 
 | **NotionToolbarModule** | NO | [see details](./notion-toolbar.md) | notionToolbar | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\NotionToolbarModule`` |
 | **NodeMoverModule** | **ALWAYS** | [see details](./node-mover.md) | nodeMover | array | [] |
 | **PasteSanitizerModule** | NO | [see details](./paste-sanitizer.md) | pasteSanitizer | array | ['plain_text' => true] |
+| **PlaceholderModule** | NO | [see details](./placeholder.md) | placeholder | array | ['placeholders' => [], 'icon' => null, 'startTag' => '{{', 'endTag' => '}}'] |
 | **ReadTimeModule** | NO | [see details](./read-time.md) | readingTime | array | ['wpm' => '200', 'label' => 'Reading time: ', 'suffix' => ' min read'] |
 | **SmartLinksModule** | NO | [see details](./smart-links.md) | smartLinks | array | ['linkRegex' => '/https?:\/\/[^\s]+/'] |
+| **GridBordersModule** | NO | [see details](./grid-borders.md) | gridBorders | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\GridBordersModule`` |
 | **STTModule** | NO | [see details](./stt.md) | speechToText | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\STTModule`` |
 | **ImageGalleryModule** | YES | [see details](./image-gallery.md) | imageGallery | array | `listEndpoint`, `uploadEndpoint`, `searchEndpoint`, `icon` |

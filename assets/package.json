@@ -64,7 +64,6 @@
         "lint-fix": "yarn run eslint src --fix",
         "build:types": "tsc --emitDeclarationOnly",
         "test": "jest",
-        "test:simple": "jest tests/simple.test.ts",
         "test:watch": "jest --watch",
         "install-tests": "yarn add --dev @testing-library/jest-dom"
     },

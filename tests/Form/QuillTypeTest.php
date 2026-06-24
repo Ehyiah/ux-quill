@@ -2,6 +2,7 @@
 
 namespace Ehyiah\QuillJsBundle\Tests\Form;
 
+use Ehyiah\QuillJsBundle\Config\QuillConfigBuilder;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\BoldField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\CodeBlockField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\EmojiField;
@@ -28,6 +29,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 final class QuillTypeTest extends TestCase
 {
     private QuillType $quillType;
+    private QuillConfigBuilder $configBuilder;
     private FormInterface $form;
     private FormView $formView;
 
@@ -36,7 +38,8 @@ final class QuillTypeTest extends TestCase
         parent::setUp();
 
         $translator = $this->createMock(TranslatorInterface::class);
-        $this->quillType = new QuillType($translator);
+        $this->configBuilder = new QuillConfigBuilder($translator);
+        $this->quillType = new QuillType($this->configBuilder);
         $this->form = $this->createMock(FormInterface::class);
         $this->formView = new FormView();
     }
@@ -151,7 +154,8 @@ final class QuillTypeTest extends TestCase
     public function testConfigureOptions(): void
     {
         $translator = $this->createMock(TranslatorInterface::class);
-        $quillType = new QuillType($translator);
+        $configBuilder = new QuillConfigBuilder($translator);
+        $quillType = new QuillType($configBuilder);
 
         $resolver = new OptionsResolver();
         $quillType->configureOptions($resolver);
@@ -170,7 +174,8 @@ final class QuillTypeTest extends TestCase
     public function testGetBlockPrefix(): void
     {
         $translator = $this->createMock(TranslatorInterface::class);
-        $quillType = new QuillType($translator);
+        $configBuilder = new QuillConfigBuilder($translator);
+        $quillType = new QuillType($configBuilder);
 
         $this->assertEquals('quill', $quillType->getBlockPrefix());
     }
@@ -181,7 +186,8 @@ final class QuillTypeTest extends TestCase
     public function testGetParent(): void
     {
         $translator = $this->createMock(TranslatorInterface::class);
-        $quillType = new QuillType($translator);
+        $configBuilder = new QuillConfigBuilder($translator);
+        $quillType = new QuillType($configBuilder);
 
         $this->assertEquals(TextareaType::class, $quillType->getParent());
     }
