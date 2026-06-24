@@ -1,6 +1,6 @@
 <?php
 
-namespace Ehyiah\QuillJsBundle\Tests\DTO\Fields\Block;
+namespace Ehyiah\QuillJsBundle\Tests\DTO\Fields\Inline;
 
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\FormulaField;
 use PHPUnit\Framework\TestCase;
@@ -13,14 +13,9 @@ final class FormulaFieldTest extends TestCase
     /**
      * @covers ::getOption
      */
-    public function testGetOptionWithTrueValues(): void
+    public function testGetOption(): void
     {
-        $alignField = new FormulaField();
-
-        $result = $alignField->getOption();
-
-        $expectedResult = 'formula';
-
-        $this->assertEquals($expectedResult, $result);
+        $field = new FormulaField();
+        $this->assertEquals('formula', $field->getOption());
     }
 }

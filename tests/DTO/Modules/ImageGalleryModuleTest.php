@@ -7,10 +7,13 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @coversNothing
+ * @coversDefaultClass \Ehyiah\QuillJsBundle\DTO\Modules\ImageGalleryModule
  */
 class ImageGalleryModuleTest extends TestCase
 {
+    /**
+     * @covers ::__construct
+     */
     public function testDefaultOptions(): void
     {
         $module = new ImageGalleryModule(options: [
@@ -25,6 +28,9 @@ class ImageGalleryModuleTest extends TestCase
         $this->assertEquals('Close', $module->options['messageCloseOption']);
     }
 
+    /**
+     * @covers ::__construct
+     */
     public function testMissingListEndpointThrowsException(): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -33,6 +39,9 @@ class ImageGalleryModuleTest extends TestCase
         new ImageGalleryModule();
     }
 
+    /**
+     * @covers ::__construct
+     */
     public function testCustomOptions(): void
     {
         $module = new ImageGalleryModule(options: [
@@ -50,6 +59,9 @@ class ImageGalleryModuleTest extends TestCase
         $this->assertEquals('data.link', $module->options['jsonResponseFilePath']);
     }
 
+    /**
+     * @covers ::__construct
+     */
     public function testNullUploadEndpoint(): void
     {
         $module = new ImageGalleryModule(options: [

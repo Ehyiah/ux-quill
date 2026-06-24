@@ -6,10 +6,13 @@ use Ehyiah\QuillJsBundle\DTO\Modules\ImageSelectionModule;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @coversNothing
+ * @coversDefaultClass \Ehyiah\QuillJsBundle\DTO\Modules\ImageSelectionModule
  */
 final class ImageSelectionModuleTest extends TestCase
 {
+    /**
+     * @covers ::__construct
+     */
     public function testDefaultOptions(): void
     {
         $module = new ImageSelectionModule();
@@ -24,6 +27,9 @@ final class ImageSelectionModuleTest extends TestCase
         $this->assertEquals('Size', $module->options['sectionLabels']['size']);
     }
 
+    /**
+     * @covers ::__construct
+     */
     public function testEmptyLabelsOption(): void
     {
         $module = new ImageSelectionModule('imageSelection', [
@@ -34,6 +40,9 @@ final class ImageSelectionModuleTest extends TestCase
         $this->assertEmpty($module->options['sectionLabels']);
     }
 
+    /**
+     * @covers ::__construct
+     */
     public function testNullLabelsOption(): void
     {
         $module = new ImageSelectionModule('imageSelection', [
@@ -44,6 +53,9 @@ final class ImageSelectionModuleTest extends TestCase
         $this->assertEmpty($module->options['sectionLabels']);
     }
 
+    /**
+     * @covers ::__construct
+     */
     public function testCustomOptions(): void
     {
         $module = new ImageSelectionModule('imageSelection', [

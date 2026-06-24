@@ -2,7 +2,7 @@
 
 namespace Ehyiah\QuillJsBundle\DTO\Options;
 
-class DebugOption
+final class DebugOption
 {
     public const DEBUG_OPTION_ERROR = 'error';
     public const DEBUG_OPTION_WARNING = 'warn';
