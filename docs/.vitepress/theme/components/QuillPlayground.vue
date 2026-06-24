@@ -171,9 +171,13 @@ const MODULE_DEFS: Record<string, ModuleDefEntry> = {
     toolbar: ['pageBreak'],
     config: { pageBreak: { label: 'Page Break' } },
   },
-  notionToolbar: {
+  inlineToolbar: {
     toolbar: [],
-    config: { notionToolbar: { slashMenu: true, floatingToolbar: true } },
+    config: { inlineToolbar: { buttons: ['bold', 'italic', 'underline', 'strike'] } },
+  },
+  slashModule: {
+    toolbar: [],
+    config: { slashModule: {} },
   },
   link: {
     toolbar: ['link'],
@@ -278,7 +282,8 @@ function buildConfig() {
         markdown: true,
         smartLinks: { linkRegex: '/https?:\\/\\/[^\\s]+/' },
         linkAttributes: {},
-        notionToolbar: { slashMenu: true, floatingToolbar: true },
+        inlineToolbar: { buttons: ['bold', 'italic', 'underline', 'strike'] },
+        slashModule: {},
         pasteSanitizer: { plainText: false },
         imageSelection: {},
         nodeMover: {

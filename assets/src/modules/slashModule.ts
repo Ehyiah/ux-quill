@@ -1,15 +1,6 @@
 import Quill from 'quill';
 
-export interface NotionToolbarOptions {
-    slashMenu?: boolean;
-    floatingToolbar?: boolean;
-}
-
 const ICONS = {
-    bold: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path></svg>',
-    italic: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="4" x2="10" y2="4"></line><line x1="14" y1="20" x2="5" y2="20"></line><line x1="15" y1="4" x2="9" y2="20"></line></svg>',
-    underline: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v7a6 6 0 0 0 12 0V3"></path><line x1="4" y1="21" x2="20" y2="21"></line></svg>',
-    strike: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4H9a3 3 0 0 0-2.83 2"></path><path d="M14 12H4"></path><path d="M7 12h10a3 3 0 0 1 0 6H9a3 3 0 0 1-2.83-2"></path><path d="M14 20h7"></path></svg>',
     text: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg>',
     h1: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h8"></path><path d="M4 18V6"></path><path d="M12 18V6"></path><path d="M17 12l3-2v8"></path></svg>',
     h2: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h8"></path><path d="M4 18V6"></path><path d="M12 18V6"></path><path d="M21 18h-4c0-4 4-3 4-6 0-1.5-2-2.5-4-1"></path></svg>',
@@ -20,72 +11,29 @@ const ICONS = {
     code: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>',
 };
 
-export default class NotionToolbar {
-    static NAME = 'notionToolbar';
+export default class SlashModule {
+    static NAME = 'slashModule';
     private quill: Quill;
-    private options: NotionToolbarOptions;
-    private toolbar: HTMLElement | null = null;
+    private options: Record<string, never>;
     private slashMenu: HTMLElement | null = null;
     private lastRange: { index: number, length: number } | null = null;
 
-    constructor(quill: Quill, options: NotionToolbarOptions = {}) {
+    constructor(quill: Quill, options: Record<string, never> = {}) {
         this.quill = quill;
-        this.options = {
-            slashMenu: true,
-            floatingToolbar: true,
-            ...options
-        };
+        this.options = options;
 
         this.injectStyles();
         this.setupListeners();
     }
 
     private injectStyles() {
-        const styleId = 'ql-notion-toolbar-styles';
+        const styleId = 'ql-slash-module-styles';
         if (document.getElementById(styleId)) return;
 
         const style = document.createElement('style');
         style.id = styleId;
         style.innerHTML = `
-            .ql-notion-toolbar {
-                position: absolute;
-                background: white;
-                border-radius: 6px;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-                padding: 4px;
-                display: none;
-                gap: 2px;
-                z-index: 2000;
-                border: 1px solid #eee;
-                transition: opacity 0.2s ease;
-                pointer-events: auto;
-            }
-            .ql-notion-toolbar button {
-                background: transparent;
-                border: none;
-                cursor: pointer;
-                padding: 6px 8px;
-                border-radius: 4px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: #37352f;
-                transition: background 0.2s;
-            }
-            .ql-notion-toolbar button:hover {
-                background: #f1f1f1;
-            }
-            .ql-notion-toolbar button.active {
-                color: #2383e2;
-                background: #ebf5ff;
-            }
-            .ql-notion-toolbar .divider {
-                width: 1px;
-                background: #eee;
-                margin: 4px 4px;
-            }
-            
-            .ql-notion-slash-menu {
+            .ql-slash-menu {
                 position: absolute;
                 background: white;
                 border-radius: 6px;
@@ -99,7 +47,7 @@ export default class NotionToolbar {
                 overflow-y: auto;
                 pointer-events: auto;
             }
-            .ql-notion-slash-menu .item {
+            .ql-slash-menu .item {
                 display: flex;
                 align-items: center;
                 gap: 10px;
@@ -110,10 +58,10 @@ export default class NotionToolbar {
                 font-size: 14px;
                 transition: background 0.2s;
             }
-            .ql-notion-slash-menu .item:hover {
+            .ql-slash-menu .item:hover {
                 background: #f1f1f1;
             }
-            .ql-notion-slash-menu .item-icon {
+            .ql-slash-menu .item-icon {
                 width: 28px;
                 height: 28px;
                 display: flex;
@@ -124,15 +72,15 @@ export default class NotionToolbar {
                 border: 1px solid #eee;
                 color: #666;
             }
-            .ql-notion-slash-menu .item-content {
+            .ql-slash-menu .item-content {
                 display: flex;
                 flex-direction: column;
             }
-            .ql-notion-slash-menu .item-label {
+            .ql-slash-menu .item-label {
                 font-weight: 500;
                 line-height: 1.2;
             }
-            .ql-notion-slash-menu .item-description {
+            .ql-slash-menu .item-description {
                 font-size: 11px;
                 color: #777;
                 margin-top: 2px;
@@ -142,129 +90,18 @@ export default class NotionToolbar {
     }
 
     private setupListeners() {
-        if (this.options.floatingToolbar) {
-            this.quill.on('selection-change', (range) => {
-                if (range && range.length > 0) {
-                    this.lastRange = range;
-                    setTimeout(() => this.showToolbar(range), 10);
-                } else {
-                    this.hideToolbar();
-                }
-            });
-        }
-
-        if (this.options.slashMenu) {
-            this.quill.root.addEventListener('keydown', (e) => {
-                if (e.key === '/') {
-                    setTimeout(() => this.checkSlashCommand(), 1);
-                } else if (e.key === 'Escape') {
-                    this.hideSlashMenu();
-                    this.hideToolbar();
-                }
-            });
-        }
-
-        document.addEventListener('mousedown', (e) => {
-            const target = e.target as HTMLElement;
-            if (this.toolbar && !this.toolbar.contains(target) && !this.quill.container.contains(target)) {
-                this.hideToolbar();
-            }
-            if (this.slashMenu && !this.slashMenu.contains(target)) {
+        this.quill.root.addEventListener('keydown', (e) => {
+            if (e.key === '/') {
+                setTimeout(() => this.checkSlashCommand(), 1);
+            } else if (e.key === 'Escape') {
                 this.hideSlashMenu();
             }
         });
 
-        this.quill.on('text-change', () => {
-            if (this.toolbar && this.toolbar.style.display === 'flex') {
-                const range = this.quill.getSelection();
-                if (range && range.length > 0) {
-                    this.lastRange = range;
-                    this.showToolbar(range);
-                } else {
-                    this.hideToolbar();
-                }
-            }
-        });
-    }
-
-    private showToolbar(range: { index: number, length: number }) {
-        if (!this.toolbar) {
-            this.createToolbar();
-        }
-        
-        const bounds = this.quill.getBounds(range.index, range.length);
-        if (!bounds) return;
-
-        const containerRect = this.quill.container.getBoundingClientRect();
-        
-        this.toolbar!.style.display = 'flex';
-        
-        const toolbarHeight = this.toolbar!.offsetHeight;
-        const toolbarWidth = this.toolbar!.offsetWidth;
-        
-        let top = bounds.top - toolbarHeight - 10;
-        let left = bounds.left + (bounds.width / 2) - (toolbarWidth / 2);
-
-        if (top < 0) top = bounds.bottom + 10;
-        if (left < 0) left = 5;
-        if (left + toolbarWidth > containerRect.width) left = containerRect.width - toolbarWidth - 5;
-
-        this.toolbar!.style.top = `${top}px`;
-        this.toolbar!.style.left = `${left}px`;
-
-        this.updateButtonStates();
-    }
-
-    private hideToolbar() {
-        if (this.toolbar) {
-            this.toolbar.style.display = 'none';
-        }
-    }
-
-    private createToolbar() {
-        this.toolbar = document.createElement('div');
-        this.toolbar.className = 'ql-notion-toolbar';
-        
-        const formats = [
-            { name: 'bold', icon: ICONS.bold, title: 'Bold' },
-            { name: 'italic', icon: ICONS.italic, title: 'Italic' },
-            { name: 'underline', icon: ICONS.underline, title: 'Underline' },
-            { name: 'strike', icon: ICONS.strike, title: 'Strikethrough' }
-        ];
-
-        formats.forEach(f => {
-            const btn = document.createElement('button');
-            btn.innerHTML = f.icon!;
-            btn.title = f.title!;
-            btn.type = 'button';
-            btn.onmousedown = (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                const range = this.lastRange || this.quill.getSelection();
-                if (!range) return;
-
-                const current = this.quill.getFormat(range);
-                this.quill.format(f.name!, !current[f.name!]);
-                this.updateButtonStates();
-            };
-            btn.dataset.format = f.name;
-            this.toolbar!.appendChild(btn);
-        });
-
-        this.quill.container.appendChild(this.toolbar);
-    }
-
-    private updateButtonStates() {
-        if (!this.toolbar) return;
-        const range = this.lastRange || this.quill.getSelection();
-        const current = range ? this.quill.getFormat(range) : {};
-        this.toolbar.querySelectorAll('button').forEach(btn => {
-            const format = btn.dataset.format;
-            if (format && current[format]) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
+        document.addEventListener('mousedown', (e) => {
+            const target = e.target as HTMLElement;
+            if (this.slashMenu && !this.slashMenu.contains(target)) {
+                this.hideSlashMenu();
             }
         });
     }
@@ -293,7 +130,7 @@ export default class NotionToolbar {
 
         const containerRect = this.quill.container.getBoundingClientRect();
         this.slashMenu!.style.display = 'block';
-        
+
         let top = bounds.bottom + 5;
         let left = bounds.left;
 
@@ -317,7 +154,7 @@ export default class NotionToolbar {
 
     private createSlashMenu() {
         this.slashMenu = document.createElement('div');
-        this.slashMenu.className = 'ql-notion-slash-menu';
+        this.slashMenu.className = 'ql-slash-menu';
 
         const items = [
             { label: 'Text', description: 'Just start writing', icon: ICONS.text, action: (index: number) => this.setBlock(index, null) },
@@ -330,7 +167,7 @@ export default class NotionToolbar {
             { label: 'Code', description: 'Code snippet', icon: ICONS.code, action: (index: number) => this.setBlock(index, 'code-block', true) },
         ];
 
-        items.forEach(item => {
+        items.forEach((item) => {
             const el = document.createElement('div');
             el.className = 'item';
             el.innerHTML = `
@@ -374,7 +211,7 @@ export default class NotionToolbar {
                 header: false,
                 blockquote: false,
                 list: false,
-                'code-block': false
+                'code-block': false,
             }, 'user');
         }
         this.quill.setSelection(index, 0, 'user');

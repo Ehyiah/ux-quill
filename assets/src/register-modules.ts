@@ -45,8 +45,11 @@ Quill.register('modules/linkAttributes', LinkAttributes);
 import {Autosave} from './modules/autosave.ts';
 Quill.register('modules/autosave', Autosave);
 
-import NotionToolbar from './modules/notionToolbar.ts';
-Quill.register('modules/notionToolbar', NotionToolbar);
+import InlineToolbar from './modules/inlineToolbar.ts';
+Quill.register('modules/inlineToolbar', InlineToolbar);
+
+import SlashModule from './modules/slashModule.ts';
+Quill.register('modules/slashModule', SlashModule);
 
 import {PasteSanitizer} from './modules/pasteSanitizer.ts';
 Quill.register('modules/pasteSanitizer', PasteSanitizer);
