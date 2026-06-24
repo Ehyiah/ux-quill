@@ -171,6 +171,14 @@ const MODULE_DEFS: Record<string, ModuleDefEntry> = {
     toolbar: ['pageBreak'],
     config: { pageBreak: { label: 'Page Break' } },
   },
+  inlineToolbar: {
+    toolbar: [],
+    config: { inlineToolbar: { buttons: ['bold', 'italic', 'underline', 'strike'] } },
+  },
+  slashModule: {
+    toolbar: [],
+    config: { slashModule: {} },
+  },
   link: {
     toolbar: ['link'],
     config: { linkAttributes: {} },
@@ -274,6 +282,8 @@ function buildConfig() {
         markdown: true,
         smartLinks: { linkRegex: '/https?:\\/\\/[^\\s]+/' },
         linkAttributes: {},
+        inlineToolbar: { buttons: ['bold', 'italic', 'underline', 'strike'] },
+        slashModule: {},
         pasteSanitizer: { plainText: false },
         imageSelection: {},
         nodeMover: {
@@ -405,6 +415,7 @@ onBeforeUnmount(() => {
   border: 1px solid #d0d5dd;
   border-radius: 10px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  position: relative;
 }
 
 .playground-controls {

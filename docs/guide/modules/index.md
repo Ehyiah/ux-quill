@@ -83,6 +83,8 @@ These modules provide global behavior and must usually be added manually to the 
 | **ImageGalleryModule** | YES | [see details](./image-gallery.md) | imageGallery | array | `listEndpoint`, `uploadEndpoint`, `searchEndpoint`, `icon` |
 | **MarkdownModule** | NO | [see details](./markdown.md) | markdown | array | [] |
 | **MentionModule** | NO | [see details](./mention.md) | mention | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\MentionModule`` |
+| **InlineToolbarModule** | NO | [see details](./inline-toolbar.md) | inlineToolbar | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\InlineToolbarModule`` |
+| **SlashModule** | NO | [see details](./slash-module.md) | slashModule | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\SlashModule`` |
 | **NodeMoverModule** | **ALWAYS** | [see details](./node-mover.md) | nodeMover | array | [] |
 | **PasteSanitizerModule** | NO | [see details](./paste-sanitizer.md) | pasteSanitizer | array | ['plain_text' => true] |
 | **PlaceholderModule** | NO | [see details](./placeholder.md) | placeholder | array | ['placeholders' => [], 'icon' => null, 'startTag' => '{{', 'endTag' => '}}'] |
