@@ -40,6 +40,7 @@ import { ref, onMounted, watch, onBeforeUnmount, computed, nextTick } from 'vue'
 const props = withDefaults(defineProps<{
   enabled?: string
   placeholder?: string
+  content?: string
 }>(), {
   enabled: 'all',
   placeholder: 'Try all the features… type @ to mention someone, paste a URL for smart links, etc.',
@@ -90,7 +91,15 @@ const MODULE_DEFS: Record<string, ModuleDefEntry> = {
   },
   nodeMover: {
     toolbar: [],
-    config: { nodeMover: {} },
+    config: { nodeMover: {
+      borderColor: '#007bff',
+      dropIndicatorColor: '#ff0000',
+      duplicate: true,
+    } },
+  },
+  gridBorders: {
+    toolbar: [],
+    config: { gridBorders: { toggleButton: true } },
   },
   autosave: {
     toolbar: [],
@@ -120,11 +129,11 @@ const MODULE_DEFS: Record<string, ModuleDefEntry> = {
   },
   counter: {
     toolbar: [],
-    config: { counter: { container: '#playground-counter', unit: 'word' } },
+    config: { counter: { words: true, words_container: 'playground-counter' } },
   },
   readingTime: {
     toolbar: [],
-    config: { readingTime: { container: '#playground-reading-time', wordsPerMinute: 200 } },
+    config: { readingTime: { target: '#playground-reading-time', wpm: 200 } },
   },
   toggleFullscreen: {
     toolbar: [],
@@ -256,14 +265,18 @@ function buildConfig() {
           messageSearchPlaceholderOption: 'Search…',
           messageCloseOption: 'Close',
         },
-        counter: { container: '#playground-counter', unit: 'word' },
-        readingTime: { container: '#playground-reading-time', wordsPerMinute: 200 },
+        counter: { words: true, words_container: 'playground-counter' },
+        readingTime: { target: '#playground-reading-time', wpm: 200 },
         markdown: true,
         smartLinks: { linkRegex: '/https?:\\/\\/[^\\s]+/' },
         linkAttributes: {},
         pasteSanitizer: { plainText: false },
         imageSelection: {},
-        nodeMover: {},
+        nodeMover: {
+          borderColor: null,
+          dropIndicatorColor: '#ff0000',
+          duplicate: true,
+        },
         divider: {},
         pageBreak: {},
         autosave: { key: 'playground-demo', interval: 30000 },
@@ -286,10 +299,10 @@ function buildConfig() {
   }
 
   if (enabledList.value.includes('counter')) {
-    modules.counter = { container: '#playground-counter', unit: 'word' }
+    modules.counter = { words: true, words_container: 'playground-counter' }
   }
   if (enabledList.value.includes('readingTime')) {
-    modules.readingTime = { container: '#playground-reading-time', wordsPerMinute: 200 }
+    modules.readingTime = { target: '#playground-reading-time', wpm: 200 }
   }
 
   for (const name of enabledList.value) {
@@ -328,6 +341,11 @@ async function initEditor() {
   }
 
   quill = new Quill(editorRef.value, config)
+
+  if (props.content) {
+    const delta = quill.clipboard.convert({ html: props.content })
+    quill.setContents(delta)
+  }
 
   htmlOutput.value = quill.root.innerHTML
 
@@ -382,7 +400,6 @@ onBeforeUnmount(() => {
 .quill-playground {
   border: 1px solid #d0d5dd;
   border-radius: 10px;
-  overflow: hidden;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 
