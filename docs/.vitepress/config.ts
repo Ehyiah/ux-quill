@@ -79,6 +79,7 @@ export default defineConfig({
                   { text: 'Mention', link: '/guide/modules/mention' },
                   { text: 'NodeMover', link: '/guide/modules/node-mover' },
                   { text: 'Paste Sanitizer', link: '/guide/modules/paste-sanitizer' },
+                  { text: 'Placeholder', link: '/guide/modules/placeholder' },
                   { text: 'ReadTime', link: '/guide/modules/read-time' },
                   { text: 'SmartLinks', link: '/guide/modules/smart-links' },
                   { text: 'Grid Borders', link: '/guide/modules/grid-borders' },

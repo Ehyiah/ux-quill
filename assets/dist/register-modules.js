@@ -51,3 +51,5 @@ import ImageGalleryModule from "./modules/gallery/gallery-module.js";
 Quill.register('modules/imageGallery', ImageGalleryModule.default || ImageGalleryModule);
 import GridBorders from "./modules/gridBorders.js";
 Quill.register('modules/gridBorders', GridBorders);
+import { PlaceholderModule } from "./modules/placeHolderModule/placeHolderModule.js";
+Quill.register('modules/placeholder', PlaceholderModule);
