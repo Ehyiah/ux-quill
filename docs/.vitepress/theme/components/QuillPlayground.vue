@@ -129,11 +129,11 @@ const MODULE_DEFS: Record<string, ModuleDefEntry> = {
   },
   counter: {
     toolbar: [],
-    config: { counter: { container: '#playground-counter', unit: 'word' } },
+    config: { counter: { words: true, words_container: 'playground-counter' } },
   },
   readingTime: {
     toolbar: [],
-    config: { readingTime: { container: '#playground-reading-time', wordsPerMinute: 200 } },
+    config: { readingTime: { target: '#playground-reading-time', wpm: 200 } },
   },
   toggleFullscreen: {
     toolbar: [],
@@ -265,8 +265,8 @@ function buildConfig() {
           messageSearchPlaceholderOption: 'Search…',
           messageCloseOption: 'Close',
         },
-        counter: { container: '#playground-counter', unit: 'word' },
-        readingTime: { container: '#playground-reading-time', wordsPerMinute: 200 },
+        counter: { words: true, words_container: 'playground-counter' },
+        readingTime: { target: '#playground-reading-time', wpm: 200 },
         markdown: true,
         smartLinks: { linkRegex: '/https?:\\/\\/[^\\s]+/' },
         linkAttributes: {},
@@ -299,10 +299,10 @@ function buildConfig() {
   }
 
   if (enabledList.value.includes('counter')) {
-    modules.counter = { container: '#playground-counter', unit: 'word' }
+    modules.counter = { words: true, words_container: 'playground-counter' }
   }
   if (enabledList.value.includes('readingTime')) {
-    modules.readingTime = { container: '#playground-reading-time', wordsPerMinute: 200 }
+    modules.readingTime = { target: '#playground-reading-time', wpm: 200 }
   }
 
   for (const name of enabledList.value) {
