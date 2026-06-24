@@ -18,9 +18,7 @@ This module is **automatically enabled** in every Quill editor instance. To disa
 - **No-Merge Logic**: Ensures that dropping a block between others never accidentally merges or breaks your HTML structure.
 - **Quick Delete**: A trash icon to instantly remove the selected blocks.
 
-## Installation
-
-This module is **optional** and must be explicitly enabled in your `FormType`.
+## Customization
 
 ```php
 use Ehyiah\QuillJsBundle\DTO\Modules\NodeMoverModule;
