@@ -33,7 +33,7 @@ The bundle ships with a few ready-made toolbar compositions exposed by `QuillGro
 | `QuillGroup::buildWithAllFields()` _see below warning_ | Every available field, including specialised ones (formula, RTL direction, script, font, emoji). | all |
 
 ::: warning
-**QuillGroup::buildWithAllFields()** is deprecated and will be removed in a future version (v4.0.0). 
+**QuillGroup::buildWithAllFields()** is deprecated and will be removed in a future version (v4.0.0).
 Because all the fields cannot be included anymore (_e.g. ImageGalleryField cannot be included as this field require an explicit configuration in order to work_).
 :::
 
@@ -80,9 +80,9 @@ How you display the content depends on the `style` option used during entry (see
 
 ### Twig Component (Recommended)
 
-The easiest way to display Quill content is to use the provided Twig component. 
+The easiest way to display Quill content is to use the provided Twig component.
 
-It handles the necessary HTML wrappers and modes automatically. 
+It handles the necessary HTML wrappers and modes automatically.
 
 It does **not** load any CSS by itself — you stay in control of what stylesheets are shipped to the public page.
 
@@ -102,9 +102,9 @@ It does **not** load any CSS by itself — you stay in control of what styleshee
 
 ### Loading the required CSS
 
-When using the `class` style, the rendered HTML needs CSS to look right. 
+When using the `class` style, the rendered HTML needs CSS to look right.
 
-The `<twig:QuillContent>` component **does not load any stylesheet by itself** — you decide what to ship to the page. 
+The `<twig:QuillContent>` component **does not load any stylesheet by itself** — you decide what to ship to the page.
 
 #### AssetMapper
 
