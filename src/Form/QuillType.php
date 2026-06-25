@@ -35,7 +35,6 @@ class QuillType extends AbstractType
     {
         $resolver->setDefaults([
             'label' => false,
-            'error_bubbling' => true,
             'quill_options' => [['bold', 'italic']],
             'modules' => [],
         ]);
