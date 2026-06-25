@@ -1,0 +1,10 @@
+/* Élargir la zone de contenu pour les tableaux */
+.VPDoc.has-sidebar .content-container {
+  max-width: 1200px !important;
+}
+
+@media (min-width: 1440px) {
+  .VPDoc.has-sidebar .content-container {
+    max-width: 1400px !important;
+  }
+}

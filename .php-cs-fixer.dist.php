@@ -11,7 +11,6 @@ return (new \PhpCsFixer\Config())
     ->setRules([
            '@PhpCsFixer' => true,
            '@DoctrineAnnotation' => true,
-           '@PHP71Migration' => true,
            '@Symfony' => true,
            '@Symfony:risky' => true,
            'cast_spaces' => ['space' => 'none'],
@@ -37,6 +36,7 @@ return (new \PhpCsFixer\Config())
            'random_api_migration' => true,
            'list_syntax' => ['syntax' => 'short'],
            'method_chaining_indentation' => false,
+            'static_lambda' => true,
        ])
     ->setFinder($finder)
     ;

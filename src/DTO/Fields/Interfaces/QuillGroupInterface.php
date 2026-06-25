@@ -5,7 +5,7 @@ namespace Ehyiah\QuillJsBundle\DTO\Fields\Interfaces;
 interface QuillGroupInterface
 {
     /**
-     * @return array<QuillInlineFieldInterface>
+     * @return array<QuillBlockFieldInterface|QuillInlineFieldInterface>
      */
-    public static function build(QuillInlineFieldInterface ...$fields): array;
+    public static function build(QuillBlockFieldInterface|QuillInlineFieldInterface ...$fields): array;
 }

@@ -1,0 +1,11 @@
+services:
+    php:
+        volumes:
+            - ~/.ssh:/MY_USER/.ssh
+
+    github-actions:
+        environment:
+            # Remplacez par votre token GitHub personnel
+            # Créez un token sur : https://github.com/settings/tokens
+            # Permissions : repo (ou public_repo pour dépôts publics uniquement)
+            - GITHUB_TOKEN=YOUR_GITHUB_TOKEN_HERE

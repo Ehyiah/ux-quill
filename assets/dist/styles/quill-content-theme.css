@@ -1,0 +1,17 @@
+/* ============================================
+   Quill Content Rendering Styles — cosmetic
+   ============================================
+   Optional, opinionated styles for blots that
+   have no default look (mentions, ...).
+   Import only if you want the bundle's default
+   appearance — otherwise style these yourself.
+   ============================================ */
+
+.ql-editor .ql-mention {
+    background-color: #e1f5fe;
+    color: #01579b;
+    border-radius: 4px;
+    padding: 0 4px;
+    font-weight: bold;
+    display: inline-block;
+}

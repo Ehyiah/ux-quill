@@ -1,0 +1,29 @@
+/* ============================================
+   Quill Content Rendering Styles — structural
+   ============================================
+   Layout-only rules required to render blots
+   that do not work out of the box with the
+   default Quill snow/bubble themes.
+   ============================================ */
+
+.ql-editor .ql-page-break {
+    display: block;
+    height: 0;
+    visibility: hidden;
+}
+
+@media print {
+    .ql-editor .ql-page-break {
+        page-break-after: always;
+    }
+}
+
+.ql-editor .ql-video {
+    display: block;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+.ql-editor .ql-image-figure {
+    margin: 1em auto;
+}
