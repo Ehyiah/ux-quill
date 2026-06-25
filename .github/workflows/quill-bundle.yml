@@ -71,6 +71,48 @@ jobs:
             - name: Run functionnal and unit tests
               run: ./vendor/bin/phpunit
 
+    lowest-deps:
+        name: Lowest dependency versions (PHP 8.1)
+        runs-on: ubuntu-22.04
+        steps:
+            - name: Checkout
+              if: ${{ !env.ACT }}
+              uses: actions/checkout@v4
+              with:
+                  ref: ${{ github.event.pull_request.head.sha || github.ref }}
+                  fetch-depth: 0
+
+            - name: Setup PHP 8.1
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: '8.1'
+                  extensions: mbstring, xml, ctype, iconv, intl, pdo, pdo_mysql, dom, filter, gd, iconv, json
+              env:
+                  update: true
+
+            - name: Check PHP Version
+              run: php -v
+
+            - name: Validate composer.json
+              run: composer validate
+
+            - name: Install lowest dependency versions
+              run: composer update --prefer-lowest --prefer-stable --no-interaction --no-progress --no-scripts
+
+            - name: Coding standards checks (php-cs-fixer)
+              run: ./vendor/bin/php-cs-fixer fix --dry-run --diff
+
+            - name: Static analysis of PHP code (PHPStan)
+              run: |
+                  rm -rf /tmp/phpstan
+                  ./vendor/bin/phpstan --memory-limit=1G analyse
+
+            - name: Coding standards checks (twig-cs-fixer)
+              run: ./vendor/bin/twigcs ./src/templates/
+
+            - name: Run functionnal and unit tests
+              run: ./vendor/bin/phpunit
+
     security:
         name: Security checks for Quill bundle (PHP ${{ matrix.php-versions }})
         runs-on: ubuntu-22.04
