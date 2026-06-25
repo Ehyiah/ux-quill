@@ -27,9 +27,7 @@ final class SynonymModule implements ModuleInterface
 
         $providerOptions = $options[self::PROVIDER_OPTIONS] ?? [];
         if (isset($providerOptions['apiKey'])) {
-            throw new InvalidArgumentException(
-                'The "apiKey" option cannot be set in providerOptions. Use environment variables instead.'
-            );
+            throw new InvalidArgumentException('The "apiKey" option cannot be set in providerOptions. Use environment variables instead.');
         }
     }
 }
