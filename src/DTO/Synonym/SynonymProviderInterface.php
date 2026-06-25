@@ -7,6 +7,13 @@ use RuntimeException;
 interface SynonymProviderInterface
 {
     /**
+     * Apply runtime options from the form (non-sensitive config only).
+     *
+     * @param array<string, mixed> $options
+     */
+    public function configureOptions(array $options): void;
+
+    /**
      * @return Synonym[]
      */
     public function getSynonyms(

@@ -52,6 +52,13 @@ class SynonymController
             return $this->error($e->getMessage());
         }
 
+        $providerOptions = $payload['providerOptions'] ?? [];
+        if (!is_array($providerOptions)) {
+            $providerOptions = [];
+        }
+
+        $providerInstance->configureOptions($providerOptions);
+
         try {
             $providerInstance->validate();
         } catch (RuntimeException $e) {

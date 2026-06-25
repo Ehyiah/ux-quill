@@ -15,6 +15,7 @@ class SynonymModule {
     this.outsideClickListener = void 0;
     this.showScore = void 0;
     this.debug = void 0;
+    this.providerOptions = void 0;
     this.quill = quill;
     this.provider = options.provider;
     this.locale = options.locale || 'en';
@@ -27,6 +28,7 @@ class SynonymModule {
     this.debounceTimeout = null;
     this.outsideClickListener = null;
     this.debug = options.debug || false;
+    this.providerOptions = options.providerOptions || {};
     if (this.debug) {
       console.log('[SynonymModule] Initialized with options:', {
         provider: this.provider,
@@ -129,7 +131,8 @@ class SynonymModule {
         provider: this.provider,
         word,
         context,
-        locale: this.locale
+        locale: this.locale,
+        providerOptions: this.providerOptions
       })
     });
     if (!response.ok) {

@@ -9,4 +9,15 @@ final class DatamuseSynonymConfig
         public readonly int $timeout = 15,
     ) {
     }
+
+    /**
+     * @param array<string, mixed> $options
+     */
+    public function withOptions(array $options): self
+    {
+        return new self(
+            maxResults: $options['maxResults'] ?? $this->maxResults,
+            timeout: $options['timeout'] ?? $this->timeout,
+        );
+    }
 }

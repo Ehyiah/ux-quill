@@ -7,14 +7,27 @@ use RuntimeException;
 
 final class OpenAiSynonymProvider implements SynonymProviderInterface
 {
+    /** @var array<string, mixed> */
+    private array $runtimeOptions = [];
+
     public function __construct(
         private readonly OpenAiSynonymConfig $config,
     ) {
     }
 
+    /**
+     * @param array<string, mixed> $options
+     */
+    public function configureOptions(array $options): void
+    {
+        $this->runtimeOptions = $options;
+    }
+
     public function validate(): void
     {
-        if (null === $this->config->apiKey || '' === $this->config->apiKey) {
+        $config = $this->config->withOptions($this->runtimeOptions);
+
+        if (null === $config->apiKey || '' === $config->apiKey) {
             throw new RuntimeException('OpenAiSynonymProvider requires an API key.');
         }
     }
@@ -27,9 +40,10 @@ final class OpenAiSynonymProvider implements SynonymProviderInterface
         ?string $context = null,
         string $locale = 'en',
     ): array {
-        $prompt = $this->buildPrompt($word, $context, $locale);
+        $config = $this->config->withOptions($this->runtimeOptions);
+        $prompt = $this->buildPrompt($config, $word, $context, $locale);
 
-        $response = $this->callOpenAI($prompt);
+        $response = $this->callOpenAI($config, $prompt);
 
         $synonyms = [];
         foreach ($response as $item) {
@@ -45,10 +59,10 @@ final class OpenAiSynonymProvider implements SynonymProviderInterface
     /**
      * @return array<int, array{word: string, score: float}>
      */
-    private function callOpenAI(string $prompt): array
+    private function callOpenAI(OpenAiSynonymConfig $config, string $prompt): array
     {
         $payload = json_encode([
-            'model' => $this->config->model,
+            'model' => $config->model,
             'messages' => [
                 ['role' => 'system', 'content' => 'You are a helpful lexicography assistant. Respond only with valid JSON.'],
                 ['role' => 'user', 'content' => $prompt],
@@ -57,13 +71,13 @@ final class OpenAiSynonymProvider implements SynonymProviderInterface
             'max_tokens' => 300,
         ], JSON_THROW_ON_ERROR);
 
-        $ch = curl_init($this->config->apiUrl);
+        $ch = curl_init($config->apiUrl);
         curl_setopt_array($ch, [
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => $payload,
             CURLOPT_HTTPHEADER => [
                 'Content-Type: application/json',
-                'Authorization: Bearer ' . $this->config->apiKey,
+                'Authorization: Bearer ' . $config->apiKey,
             ],
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT => 15,
@@ -102,7 +116,7 @@ final class OpenAiSynonymProvider implements SynonymProviderInterface
         }, $items);
     }
 
-    private function buildPrompt(string $word, ?string $context, string $locale): string
+    private function buildPrompt(OpenAiSynonymConfig $config, string $word, ?string $context, string $locale): string
     {
         $parts = [
             sprintf('Find synonyms for the word "%s" in %s.', $word, $locale),
@@ -115,7 +129,7 @@ final class OpenAiSynonymProvider implements SynonymProviderInterface
 
         $parts[] = 'Respond ONLY with a JSON array of objects in format [{"word": "...", "score": 0.0-1.0}].';
         $parts[] = 'Sort by relevance (highest score first).';
-        $parts[] = sprintf('Return at most %d results.', $this->config->maxResults);
+        $parts[] = sprintf('Return at most %d results.', $config->maxResults);
 
         return implode(' ', $parts);
     }

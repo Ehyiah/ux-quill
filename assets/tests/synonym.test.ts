@@ -220,6 +220,7 @@ describe('SynonymModule', () => {
                     word: 'bonjour',
                     context: 'Contexte ici',
                     locale: 'fr',
+                    providerOptions: {},
                 }),
             });
             expect(result).toEqual([{ word: 'salut', score: 0.9 }]);

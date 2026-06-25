@@ -9,9 +9,20 @@ final class ConceptNetSynonymProvider implements SynonymProviderInterface
 {
     private const API_URL = 'https://api.conceptnet.io/query';
 
+    /** @var array<string, mixed> */
+    private array $runtimeOptions = [];
+
     public function __construct(
         private readonly ConceptNetSynonymConfig $config,
     ) {
+    }
+
+    /**
+     * @param array<string, mixed> $options
+     */
+    public function configureOptions(array $options): void
+    {
+        $this->runtimeOptions = $options;
     }
 
     public function validate(): void
@@ -26,15 +37,17 @@ final class ConceptNetSynonymProvider implements SynonymProviderInterface
         ?string $context = null,
         string $locale = 'en',
     ): array {
+        $config = $this->config->withOptions($this->runtimeOptions);
+
         $url = sprintf(
             '%s?node=/c/%s/%s&rel=/r/Synonym&limit=%d',
             self::API_URL,
             $locale,
             rawurlencode($word),
-            $this->config->maxResults,
+            $config->maxResults,
         );
 
-        $data = $this->callApi($url);
+        $data = $this->callApi($config, $url);
 
         return $this->parseResponse($data, $locale, $word);
     }
@@ -42,12 +55,12 @@ final class ConceptNetSynonymProvider implements SynonymProviderInterface
     /**
      * @return array<string, mixed>
      */
-    private function callApi(string $url): array
+    private function callApi(ConceptNetSynonymConfig $config, string $url): array
     {
         $ch = curl_init($url);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT => $this->config->timeout,
+            CURLOPT_TIMEOUT => $config->timeout,
             CURLOPT_HTTPHEADER => ['Accept: application/json'],
         ]);
 

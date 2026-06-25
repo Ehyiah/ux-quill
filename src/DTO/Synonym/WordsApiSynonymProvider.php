@@ -9,14 +9,27 @@ final class WordsApiSynonymProvider implements SynonymProviderInterface
 {
     private const API_URL = 'https://wordsapiv1.p.rapidapi.com/words';
 
+    /** @var array<string, mixed> */
+    private array $runtimeOptions = [];
+
     public function __construct(
         private readonly WordsApiSynonymConfig $config,
     ) {
     }
 
+    /**
+     * @param array<string, mixed> $options
+     */
+    public function configureOptions(array $options): void
+    {
+        $this->runtimeOptions = $options;
+    }
+
     public function validate(): void
     {
-        if (null === $this->config->apiKey || '' === $this->config->apiKey) {
+        $config = $this->config->withOptions($this->runtimeOptions);
+
+        if (null === $config->apiKey || '' === $config->apiKey) {
             throw new RuntimeException('WordsApiSynonymProvider requires an API key.');
         }
     }
@@ -29,13 +42,15 @@ final class WordsApiSynonymProvider implements SynonymProviderInterface
         ?string $context = null,
         string $locale = 'en',
     ): array {
+        $config = $this->config->withOptions($this->runtimeOptions);
+
         $url = sprintf(
             '%s/%s/synonyms',
             self::API_URL,
             rawurlencode($word),
         );
 
-        $data = $this->callApi($url);
+        $data = $this->callApi($config, $url);
 
         return $this->parseResponse($data, $word);
     }
@@ -43,16 +58,16 @@ final class WordsApiSynonymProvider implements SynonymProviderInterface
     /**
      * @return array<string, mixed>
      */
-    private function callApi(string $url): array
+    private function callApi(WordsApiSynonymConfig $config, string $url): array
     {
         $ch = curl_init($url);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT => $this->config->timeout,
+            CURLOPT_TIMEOUT => $config->timeout,
             CURLOPT_HTTPHEADER => [
                 'Accept: application/json',
-                'X-RapidAPI-Key: ' . $this->config->apiKey,
-                'X-RapidAPI-Host: ' . $this->config->apiHost,
+                'X-RapidAPI-Key: ' . $config->apiKey,
+                'X-RapidAPI-Host: ' . $config->apiHost,
             ],
         ]);
 

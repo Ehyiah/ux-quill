@@ -9,14 +9,27 @@ final class BabelNetSynonymProvider implements SynonymProviderInterface
 {
     private const API_BASE = 'https://babelnet.io/v9';
 
+    /** @var array<string, mixed> */
+    private array $runtimeOptions = [];
+
     public function __construct(
         private readonly BabelNetSynonymConfig $config,
     ) {
     }
 
+    /**
+     * @param array<string, mixed> $options
+     */
+    public function configureOptions(array $options): void
+    {
+        $this->runtimeOptions = $options;
+    }
+
     public function validate(): void
     {
-        if (null === $this->config->apiKey || '' === $this->config->apiKey) {
+        $config = $this->config->withOptions($this->runtimeOptions);
+
+        if (null === $config->apiKey || '' === $config->apiKey) {
             throw new RuntimeException('BabelNetSynonymProvider requires an API key.');
         }
     }
@@ -29,27 +42,28 @@ final class BabelNetSynonymProvider implements SynonymProviderInterface
         ?string $context = null,
         string $locale = 'en',
     ): array {
+        $config = $this->config->withOptions($this->runtimeOptions);
         $targetLang = strtoupper($locale);
 
-        $synsetIds = $this->fetchSynsetIds($word, $targetLang);
+        $synsetIds = $this->fetchSynsetIds($config, $word, $targetLang);
 
-        return $this->fetchSynonymLemmas($synsetIds, $targetLang, $word);
+        return $this->fetchSynonymLemmas($config, $synsetIds, $targetLang, $word);
     }
 
     /**
      * @return string[]
      */
-    private function fetchSynsetIds(string $word, string $targetLang): array
+    private function fetchSynsetIds(BabelNetSynonymConfig $config, string $word, string $targetLang): array
     {
         $url = sprintf(
             '%s/getSynsetIds?lemma=%s&searchLang=%s&key=%s',
             self::API_BASE,
             rawurlencode($word),
             $targetLang,
-            $this->config->apiKey,
+            $config->apiKey,
         );
 
-        $data = $this->callApi($url);
+        $data = $this->callApi($config, $url);
 
         $ids = [];
 
@@ -67,12 +81,12 @@ final class BabelNetSynonymProvider implements SynonymProviderInterface
      *
      * @return Synonym[]
      */
-    private function fetchSynonymLemmas(array $synsetIds, string $targetLang, string $word): array
+    private function fetchSynonymLemmas(BabelNetSynonymConfig $config, array $synsetIds, string $targetLang, string $word): array
     {
         $normalized = mb_strtolower($word);
         $seen = [];
         $synonyms = [];
-        $limit = min(count($synsetIds), $this->config->maxSynsets);
+        $limit = min(count($synsetIds), $config->maxSynsets);
 
         for ($i = 0; $i < $limit; ++$i) {
             $url = sprintf(
@@ -80,11 +94,11 @@ final class BabelNetSynonymProvider implements SynonymProviderInterface
                 self::API_BASE,
                 $synsetIds[$i],
                 $targetLang,
-                $this->config->apiKey,
+                $config->apiKey,
             );
 
             try {
-                $data = $this->callApi($url);
+                $data = $this->callApi($config, $url);
             } catch (RuntimeException) {
                 continue;
             }
@@ -198,12 +212,12 @@ final class BabelNetSynonymProvider implements SynonymProviderInterface
     /**
      * @return array<string, mixed>
      */
-    private function callApi(string $url): array
+    private function callApi(BabelNetSynonymConfig $config, string $url): array
     {
         $ch = curl_init($url);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT => $this->config->timeout,
+            CURLOPT_TIMEOUT => $config->timeout,
             CURLOPT_HTTPHEADER => ['Accept: application/json'],
         ]);
 

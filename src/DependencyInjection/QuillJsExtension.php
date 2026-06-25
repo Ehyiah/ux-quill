@@ -121,6 +121,9 @@ class QuillJsExtension extends Extension implements PrependExtensionInterface
         // Register all Config DTOs as services
         $container->setDefinition(OpenAiSynonymConfig::class, (new Definition(OpenAiSynonymConfig::class))
             ->setArgument('$apiKey', '%env(default::QUILL_OPENAI_API_KEY)%')
+            ->setArgument('$model', '%env(default::QUILL_OPENAI_MODEL)%')
+            ->setArgument('$maxResults', '%env(default::QUILL_OPENAI_MAX_RESULTS)%')
+            ->setArgument('$apiUrl', '%env(default::QUILL_OPENAI_API_URL)%')
         );
         $container->setDefinition(BabelNetSynonymConfig::class, (new Definition(BabelNetSynonymConfig::class))
             ->setArgument('$apiKey', '%env(default::QUILL_BABELNET_API_KEY)%')

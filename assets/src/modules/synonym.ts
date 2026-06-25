@@ -6,6 +6,7 @@ interface SynonymModuleOptions {
     noSynonymText?: string;
     showScore?: boolean;
     debug?: boolean;
+    providerOptions?: Record<string, any>;
 }
 
 interface QuillRange {
@@ -39,6 +40,7 @@ class SynonymModule {
     private outsideClickListener: ((e: MouseEvent) => void) | null;
     private showScore: boolean;
     private debug: boolean;
+    private providerOptions: Record<string, any>;
 
     constructor(quill: QuillLike, options: SynonymModuleOptions = {} as SynonymModuleOptions) {
         this.quill = quill;
@@ -53,6 +55,7 @@ class SynonymModule {
         this.debounceTimeout = null;
         this.outsideClickListener = null;
         this.debug = options.debug || false;
+        this.providerOptions = options.providerOptions || {};
 
         if (this.debug) {
             console.log('[SynonymModule] Initialized with options:', {
@@ -176,6 +179,7 @@ class SynonymModule {
                 word,
                 context,
                 locale: this.locale,
+                providerOptions: this.providerOptions,
             }),
         });
 

@@ -5,6 +5,13 @@ namespace Ehyiah\QuillJsBundle\DTO\Synonym;
 final class DummySynonymProvider implements SynonymProviderInterface
 {
     /**
+     * @param array<string, mixed> $options
+     */
+    public function configureOptions(array $options): void
+    {
+    }
+
+    /**
      * @return Synonym[]
      */
     public function getSynonyms(

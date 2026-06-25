@@ -232,6 +232,10 @@ final class SynonymControllerTest extends TestCase
     public function testEmptyResponse(): void
     {
         $provider = new class implements SynonymProviderInterface {
+            public function configureOptions(array $options): void
+            {
+            }
+
             public function getSynonyms(string $word, ?string $context = null, string $locale = 'fr'): array
             {
                 return [];
@@ -282,6 +286,10 @@ final class SynonymControllerTest extends TestCase
     public function testProviderValidationFailure(): void
     {
         $provider = new class implements SynonymProviderInterface {
+            public function configureOptions(array $options): void
+            {
+            }
+
             public function getSynonyms(string $word, ?string $context = null, string $locale = 'fr'): array
             {
                 return [];

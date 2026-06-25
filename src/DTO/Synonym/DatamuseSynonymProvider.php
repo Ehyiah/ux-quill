@@ -9,9 +9,20 @@ final class DatamuseSynonymProvider implements SynonymProviderInterface
 {
     private const API_URL = 'https://api.datamuse.com/words';
 
+    /** @var array<string, mixed> */
+    private array $runtimeOptions = [];
+
     public function __construct(
         private readonly DatamuseSynonymConfig $config,
     ) {
+    }
+
+    /**
+     * @param array<string, mixed> $options
+     */
+    public function configureOptions(array $options): void
+    {
+        $this->runtimeOptions = $options;
     }
 
     public function validate(): void
@@ -26,14 +37,16 @@ final class DatamuseSynonymProvider implements SynonymProviderInterface
         ?string $context = null,
         string $locale = 'en',
     ): array {
+        $config = $this->config->withOptions($this->runtimeOptions);
+
         $url = sprintf(
             '%s?rel_syn=%s&max=%d',
             self::API_URL,
             rawurlencode($word),
-            $this->config->maxResults,
+            $config->maxResults,
         );
 
-        $data = $this->callApi($url);
+        $data = $this->callApi($config, $url);
 
         return $this->parseResponse($data, $word);
     }
@@ -41,12 +54,12 @@ final class DatamuseSynonymProvider implements SynonymProviderInterface
     /**
      * @return array<int, mixed>
      */
-    private function callApi(string $url): array
+    private function callApi(DatamuseSynonymConfig $config, string $url): array
     {
         $ch = curl_init($url);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT => $this->config->timeout,
+            CURLOPT_TIMEOUT => $config->timeout,
             CURLOPT_HTTPHEADER => ['Accept: application/json'],
         ]);
 

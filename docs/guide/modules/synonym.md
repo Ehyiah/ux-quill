@@ -1,3 +1,7 @@
+---
+outline: [1, 5]
+---
+
 # Synonym Module
 
 The Synonym module allows users to find and replace words with synonyms directly from the Quill editor.
@@ -7,23 +11,309 @@ The Synonym module allows users to find and replace words with synonyms directly
 Instead of hardcoding API providers in JavaScript, this module delegates all synonym lookups to a **server-side provider**. The frontend sends the selected word (and optional context) to a Symfony endpoint, which delegates the request to a registered `SynonymProviderInterface` implementation.
 
 ```
-┌──────────────┐   POST /_ux/quill/synonyms   ┌──────────────────┐
-│  Quill Editor │ ──────────────────────────►  │ SynonymController │
-│  (JavaScript) │                               │      (PHP)       │
-│               │ ◄──────────────────────────── │                  │
-│               │   JSON [{word, score}]        └────────┬─────────┘
-└──────────────┘                                        │
+┌──────────────┐   POST /_ux/quill/synonyms     ┌──────────────────┐
+│  Quill Editor│  ──────────────────────────►   │ SynonymController│
+│  (JavaScript)│                                │      (PHP)       │
+│              │  ◄──────────────────────────── │    (built-in)    │
+│              │    JSON [{word, score}]        └────────┬─────────┘
+└──────────────┘                                         │
                                                   ┌──────▼──────┐
                                                   │  Provider   │
                                                   │  Registry   │
                                                   └──────┬──────┘
                                                   ┌──────▼──────┐
-                                                  │  MyProvider  │
-                                                  │  (interface) │
+                                                  │  MyProvider │
+                                                  │  (interface)│
                                                   └─────────────┘
 ```
 
-## Creating a provider
+---
+
+# Using the module
+
+In order to use this module you need to :
+1. Add the module in your Quill form Type and choose a provider.
+2. Choose one of the built-in providers (or create your custom provider) and pass it to the module as an option.
+3. Add the back-end route in your application.
+
+```php
+use Ehyiah\QuillJsBundle\DTO\Modules\SynonymModule;
+
+// Basic usage
+new SynonymModule(
+    options: [
+        SynonymModule::PROVIDER_OPTION => App\Quill\MySynonymProvider::class,
+    ],
+);
+
+// With provider options (non-sensitive config)
+// each provider has differents available options depending on its API see providers detailed doc
+new SynonymModule(
+    options: [
+        SynonymModule::PROVIDER_OPTION => App\Quill\MySynonymProvider::class,
+        SynonymModule::PROVIDER_OPTIONS => [
+            'maxResults' => 5,
+            'timeout' => 30,
+        ],
+    ],
+);
+
+// With module custom options but withouth provider options
+new SynonymModule(
+    options: [
+        SynonymModule::PROVIDER_OPTION => App\Quill\MySynonymProvider::class,
+        'locale' => 'en',
+        'icon' => '<svg>...</svg>',
+        'headerText' => 'Synonyms for',
+        'noSynonymText' => 'No synonyms found for : {word}',
+    ],
+);
+```
+
+## Module options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `provider` | `string` | — | FQCN of the synonym provider |
+| `providerOptions` | `array` | `[]` | Per-form provider config overrides (non-sensitive options only) |
+| `locale` | `string` | `'en'` | Locale for the synonym search |
+| `icon` | `string\|HTMLElement` | `'🔄'` | Icon for the toolbar button |
+| `headerText` | `string` | `'Look for synonyms'` | Popup header text |
+| `noSynonymText` | `string` | `'No Results for : {word}'` | Text shown when no synonyms are found |
+| `showScore` | `bool` | `false` | Show relevance score badge (useful with AI providers like `OpenAiSynonymProvider`) |
+| `debug` | `bool` | `false` | Enable console debug logs |
+
+## Configuring provider options
+
+Provider configuration works at two levels:
+
+1. **Sensitive options** (API keys): set via environment variables — never sent to the client
+2. **Non-sensitive options** (`maxResults`, `timeout`, `model`, etc.): configurable per-form via `providerOptions`
+
+```php
+use Ehyiah\QuillJsBundle\Form\QuillType;
+use Ehyiah\QuillJsBundle\DTO\Modules\SynonymModule;
+use Ehyiah\QuillJsBundle\DTO\Synonym\OpenAiSynonymProvider;
+
+$builder->add('content', QuillType::class, [
+    'modules' => [
+        new SynonymModule(options: [
+            SynonymModule::PROVIDER_OPTION => OpenAiSynonymProvider::class,
+            SynonymModule::PROVIDER_OPTIONS => [
+                'maxResults' => 5,
+                'model' => 'gpt-4o',
+            ],
+        ]),
+    ],
+]);
+```
+
+These options are merged with the defaults from environment variables. Sensitive options (`apiKey`) can only be set via environment variables and cannot be overridden through `providerOptions`.
+
+
+## Routing
+
+Import the bundle's routes in your application:
+
+```yaml
+# config/routes/ux_quill.yaml
+ux_quill_synonyms:
+    resource: '@QuillJsBundle/Resources/config/routes/synonym.xml'
+```
+
+---
+
+# Built-in providers
+
+Each provider accepts a **Config DTO** as its single constructor argument. Config DTOs expose all available options as typed public readonly properties — visible directly in your IDE via autocompletion.
+
+| Provider | Key | Free | Multi-lang | Score |
+|----------|-----|------|------------|-------|
+| `OpenAiSynonymProvider` | Yes (OpenAI) | No | Yes | Yes |
+| `DummySynonymProvider` | No | Yes | Static | Static |
+| `FreeDictionarySynonymProvider` | No | Yes | Yes | No |
+| `DatamuseSynonymProvider` | No | Yes | EN mainly | Yes |
+| `BabelNetSynonymProvider` | Yes (free tier) | Yes | Yes | No |
+| `WordsApiSynonymProvider` | Yes (RapidAPI) | No | EN | No |
+| `ConceptNetSynonymProvider` | No | Yes | Yes | No |
+
+## DummySynonymProvider
+
+Returns static synonyms for testing. No API key or HTTP calls needed.
+
+```php
+use Ehyiah\QuillJsBundle\Form\QuillType;
+use Ehyiah\QuillJsBundle\DTO\Modules\SynonymModule;
+use Ehyiah\QuillJsBundle\DTO\Synonym\DummySynonymProvider;
+
+$builder->add('content', QuillType::class, [
+    'modules' => [
+        new SynonymModule(options: [
+            SynonymModule::PROVIDER_OPTION => DummySynonymProvider::class,
+        ]),
+    ],
+]);
+```
+
+## OpenAiSynonymProvider
+
+Uses OpenAI (GPT-4o-mini) to find contextual synonyms.
+The API key stays server-side. Supports custom model and endpoint (Azure, LocalAI, etc.).
+
+#### Environment variables
+
+| Variable | Required | Default |
+|----------|----------|---------|
+| `QUILL_OPENAI_API_KEY` | Yes | — |
+| `QUILL_OPENAI_MODEL` | No | `gpt-4o-mini` |
+| `QUILL_OPENAI_MAX_RESULTS` | No | `10` |
+| `QUILL_OPENAI_API_URL` | No | `https://api.openai.com/v1/chat/completions` |
+
+#### Options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `model` | `gpt-4o-mini` | Model name |
+| `maxResults` | `10` | Max synonyms per request |
+| `apiUrl` | `https://api.openai.com/v1/chat/completions` | API endpoint |
+
+```php
+$builder->add('content', QuillType::class, [
+    'modules' => [
+        new SynonymModule(options: [
+            SynonymModule::PROVIDER_OPTION => OpenAiSynonymProvider::class,
+            SynonymModule::PROVIDER_OPTIONS => [
+                'model' => 'gpt-4o',
+                'maxResults' => 5,
+            ],
+        ]),
+    ],
+]);
+```
+
+## FreeDictionarySynonymProvider
+
+Uses the [Free Dictionary API](https://dictionaryapi.dev/) to find synonyms. Free, no API key, supports many languages.
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `timeout` | `15` | HTTP timeout in seconds |
+
+```php
+$builder->add('content', QuillType::class, [
+    'modules' => [
+        new SynonymModule(options: [
+            SynonymModule::PROVIDER_OPTION => FreeDictionarySynonymProvider::class,
+        ]),
+    ],
+]);
+```
+
+## DatamuseSynonymProvider
+
+Uses the [Datamuse](https://www.datamuse.com/api/) API to find synonyms. Includes relevance scoring. Primarily English.
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `maxResults` | `20` | Max results per request |
+| `timeout` | `15` | HTTP timeout in seconds |
+
+```php
+$builder->add('content', QuillType::class, [
+    'modules' => [
+        new SynonymModule(options: [
+            SynonymModule::PROVIDER_OPTION => DatamuseSynonymProvider::class,
+            SynonymModule::PROVIDER_OPTIONS => [
+                'maxResults' => 10,
+            ],
+        ]),
+    ],
+]);
+```
+
+## BabelNetSynonymProvider
+
+Uses the [BabelNet](https://babelnet.org/) API (v9) to find synonyms. Requires a free API key (1000 requests/day limit).
+
+#### Environment variables
+
+| Variable | Required | Default |
+|----------|----------|---------|
+| `QUILL_BABELNET_API_KEY` | Yes | — |
+
+#### Options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `maxSynsets` | `3` | Max synsets to query |
+| `timeout` | `15` | HTTP timeout in seconds |
+
+```php
+$builder->add('content', QuillType::class, [
+    'modules' => [
+        new SynonymModule(options: [
+            SynonymModule::PROVIDER_OPTION => BabelNetSynonymProvider::class,
+            SynonymModule::PROVIDER_OPTIONS => [
+                'maxSynsets' => 5,
+            ],
+        ]),
+    ],
+]);
+```
+
+## WordsApiSynonymProvider
+
+Uses the [WordsAPI](https://www.wordsapi.com/) via RapidAPI. Requires a RapidAPI key. Primarily English.
+
+#### Environment variables
+
+| Variable | Required | Default |
+|----------|----------|---------|
+| `QUILL_WORDSAPI_API_KEY` | Yes | — |
+
+#### Options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `apiHost` | `wordsapiv1.p.rapidapi.com` | RapidAPI host |
+| `timeout` | `15` | HTTP timeout in seconds |
+
+```php
+$builder->add('content', QuillType::class, [
+    'modules' => [
+        new SynonymModule(options: [
+            SynonymModule::PROVIDER_OPTION => WordsApiSynonymProvider::class,
+        ]),
+    ],
+]);
+```
+
+## ConceptNetSynonymProvider (Api are currently down, will be removed if Api is permanently unavailable)
+
+Uses the [ConceptNet](http://conceptnet.io) API to find synonyms. Free, no API key required, supports many languages.
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `maxResults` | `20` | Max results per request |
+| `timeout` | `15` | HTTP timeout in seconds |
+
+```php
+$builder->add('content', QuillType::class, [
+    'modules' => [
+        new SynonymModule(options: [
+            SynonymModule::PROVIDER_OPTION => ConceptNetSynonymProvider::class,
+            SynonymModule::PROVIDER_OPTIONS => [
+                'maxResults' => 5,
+            ],
+        ]),
+    ],
+]);
+```
+
+
+# Creating a custom provider
+
+## Create a provider class
 
 Implement the `SynonymProviderInterface`:
 
@@ -34,6 +324,13 @@ use RuntimeException;
 
 class MySynonymProvider implements SynonymProviderInterface
 {
+    private array $runtimeOptions = [];
+
+    public function configureOptions(array $options): void
+    {
+        $this->runtimeOptions = $options;
+    }
+
     /**
      * @return Synonym[]
      */
@@ -43,6 +340,7 @@ class MySynonymProvider implements SynonymProviderInterface
         string $locale = 'fr',
     ): array {
         // Your custom logic here
+        // Access per-form options via $this->runtimeOptions
         return [
             new Synonym('essentiel', 0.95),
             new Synonym('crucial', 0.85),
@@ -82,53 +380,8 @@ The `SynonymController` automatically calls `validate()` before `getSynonyms()`.
 
 Providers without prerequisites (`DummySynonymProvider`, `ConceptNetSynonymProvider`, etc.) implement an empty `validate(): void`.
 
-## Using the module
 
-```php
-use Ehyiah\QuillJsBundle\DTO\Modules\SynonymModule;
-
-// Basic usage
-new SynonymModule(
-    options: [
-        SynonymModule::PROVIDER_OPTION => App\Quill\MySynonymProvider::class,
-    ],
-);
-
-// With custom options
-new SynonymModule(
-    options: [
-        SynonymModule::PROVIDER_OPTION => App\Quill\MySynonymProvider::class,
-        'locale' => 'en',
-        'icon' => '<svg>...</svg>',
-        'headerText' => 'Synonyms for',
-        'noSynonymText' => 'No synonyms found for : {word}',
-    ],
-);
-```
-
-## Module options
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `PROVIDER_OPTION` | `string` | — | FQCN of the synonym provider |
-| `locale` | `string` | `'en'` | Locale for the synonym search |
-| `icon` | `string\|HTMLElement` | `'🔄'` | Icon for the toolbar button |
-| `headerText` | `string` | `'Look for synonyms'` | Popup header text |
-| `noSynonymText` | `string` | `'No Results for : {word}'` | Text shown when no synonyms are found |
-| `showScore` | `bool` | `false` | Show relevance score badge (useful with AI providers like `OpenAiSynonymProvider`) |
-| `debug` | `bool` | `false` | Enable console debug logs |
-
-## Routing
-
-Import the bundle's routes in your application:
-
-```yaml
-# config/routes/ux_quill.yaml
-ux_quill_synonyms:
-    resource: '@QuillJsBundle/Resources/config/routes/synonym.xml'
-```
-
-## Events
+# Events
 
 Two events are dispatched during synonym lookup, allowing you to extend or observe the behaviour.
 
@@ -186,24 +439,24 @@ public function onAfterSynonymSearch(AfterSynonymSearchEvent $event): void
 
 > **Note**: Events are not designed to implement security. See the Security section below.
 
-## Security
+# Security
 
-The bundle UX Quill n'impose aucune politique de sécurité sur l'endpoint des synonymes.
+The UX Quill bundle does not enforce any security policy on the synonym endpoint.
 
-Cette décision est volontaire afin de permettre tous les cas d'usage :
+This is intentional to support all use cases:
 
 * Back-office
-* CMS public
-* Application métier
-* API headless
+* Public CMS
+* Business application
+* Headless API
 * Intranet
 * SaaS
 
-L'application hôte reste entièrement responsable de la sécurisation de la route.
+The host application is solely responsible for securing the route.
 
-### Protection par rôle
+### Role-based protection
 
-Pour limiter l'accès aux utilisateurs disposant d'un rôle spécifique :
+To restrict access to users with a specific role:
 
 ```yaml
 # config/packages/security.yaml
@@ -213,11 +466,11 @@ security:
         - { path: ^/_ux/quill/synonyms, roles: ROLE_EDITOR }
 ```
 
-### Protection avancée avec un Voter Symfony
+### Advanced protection with a Symfony Voter
 
-Si la décision dépend de règles métier plus complexes (abonnement actif, organisation, licence, quota, etc.), vous pouvez utiliser un Voter Symfony via une expression `allow_if`.
+If the decision depends on more complex business rules (active subscription, organization, license, quota, etc.), you can use a Symfony Voter via an `allow_if` expression.
 
-#### Configuration de sécurité
+#### Security configuration
 
 ```yaml
 # config/packages/security.yaml
@@ -230,7 +483,7 @@ security:
           }
 ```
 
-#### Création du Voter
+#### Creating the Voter
 
 ```php
 <?php
@@ -256,202 +509,17 @@ final class SynonymVoter extends Voter
     ): bool {
         $user = $token->getUser();
 
-        // Exemple : vérifier un abonnement actif
+        // Example: check for an active subscription
         return $user instanceof User
             && $user->hasActiveSubscription();
     }
 }
 ```
 
-Dans cet exemple, Symfony appellera automatiquement le Voter lorsqu'une requête sera effectuée sur l'endpoint des synonymes.
+In this example, Symfony will automatically call the Voter when a request is made to the synonym endpoint.
 
-### Recommandations
+### Recommendations
 
-Si votre provider effectue des appels vers des services externes payants (OpenAI, Anthropic, etc.), il est fortement recommandé de protéger l'endpoint afin d'éviter les abus et les coûts inattendus.
+If your provider makes calls to paid external services (OpenAI, Anthropic, etc.), it is strongly recommended to protect the endpoint to prevent abuse and unexpected costs.
 
-Le bundle ne fait aucun appel à `isGranted()` ou `denyAccessUnlessGranted()` et ne connaît pas les rôles ou voters de votre application. Toutes les décisions de sécurité restent sous le contrôle de l'application hôte.
-
-## Environment variables
-
-Providers requiring an API key use the following environment variables in your `.env` file:
-
-| Variable | Required by |
-|----------|-------------|
-| `QUILL_OPENAI_API_KEY` | `OpenAiSynonymProvider` |
-| `QUILL_BABELNET_API_KEY` | `BabelNetSynonymProvider` |
-| `QUILL_WORDSAPI_API_KEY` | `WordsApiSynonymProvider` |
-
-## Built-in providers
-
-Each provider accepts a **Config DTO** as its single constructor argument. Config DTOs expose all available options as typed public readonly properties — visible directly in your IDE via autocompletion.
-
-| Provider | Key | Free | Multi-lang | Score |
-|----------|-----|------|------------|-------|
-| `DummySynonymProvider` | No | Yes | Static | Static |
-| `ConceptNetSynonymProvider` | No | Yes | Yes | No |
-| `DatamuseSynonymProvider` | No | Yes | EN mainly | Yes |
-| `FreeDictionarySynonymProvider` | No | Yes | Yes | No |
-| `BabelNetSynonymProvider` | Yes (free tier) | Yes | Yes | No |
-| `WordsApiSynonymProvider` | Yes (RapidAPI) | No | EN | No |
-| `OpenAiSynonymProvider` | Yes (OpenAI) | No | Yes | Yes |
-
-### DummySynonymProvider
-
-Returns static synonyms for testing. No API key or HTTP calls needed.
-
-```php
-use Ehyiah\QuillJsBundle\Form\QuillType;
-use Ehyiah\QuillJsBundle\DTO\Modules\SynonymModule;
-use Ehyiah\QuillJsBundle\DTO\Synonym\DummySynonymProvider;
-
-$builder->add('content', QuillType::class, [
-    'modules' => [
-        new SynonymModule(options: [
-            SynonymModule::PROVIDER_OPTION => DummySynonymProvider::class,
-        ]),
-    ],
-]);
-```
-
-### ConceptNetSynonymProvider
-
-Uses the [ConceptNet](http://conceptnet.io) API to find synonyms. Free, no API key required, supports many languages.
-
-| Config option | Type | Default | Description |
-|---|---|---|---|
-| `maxResults` | `int` | `20` | Max results per request |
-| `timeout` | `int` | `15` | HTTP timeout in seconds |
-
-```php
-use App\Form\SomeType;
-use Ehyiah\QuillJsBundle\Form\QuillType;
-use Ehyiah\QuillJsBundle\DTO\Modules\SynonymModule;
-use Ehyiah\QuillJsBundle\DTO\Synonym\ConceptNetSynonymProvider;
-
-// Dans votre FormType::buildForm
-$builder->add('content', QuillType::class, [
-    'modules' => [
-        new SynonymModule(options: [
-            SynonymModule::PROVIDER_OPTION => ConceptNetSynonymProvider::class,
-        ]),
-    ],
-]);
-```
-
-### DatamuseSynonymProvider
-
-Uses the [Datamuse](https://www.datamuse.com/api/) API to find synonyms. Includes relevance scoring. Primarily English.
-
-| Config option | Type | Default | Description |
-|---|---|---|---|
-| `maxResults` | `int` | `20` | Max results per request |
-| `timeout` | `int` | `15` | HTTP timeout in seconds |
-
-```php
-use Ehyiah\QuillJsBundle\Form\QuillType;
-use Ehyiah\QuillJsBundle\DTO\Modules\SynonymModule;
-use Ehyiah\QuillJsBundle\DTO\Synonym\DatamuseSynonymProvider;
-
-$builder->add('content', QuillType::class, [
-    'modules' => [
-        new SynonymModule(options: [
-            SynonymModule::PROVIDER_OPTION => DatamuseSynonymProvider::class,
-        ]),
-    ],
-]);
-```
-
-### FreeDictionarySynonymProvider
-
-Uses the [Free Dictionary API](https://dictionaryapi.dev/) to find synonyms. Free, no API key, supports many languages.
-
-| Config option | Type | Default | Description |
-|---|---|---|---|
-| `timeout` | `int` | `15` | HTTP timeout in seconds |
-
-```php
-use Ehyiah\QuillJsBundle\Form\QuillType;
-use Ehyiah\QuillJsBundle\DTO\Modules\SynonymModule;
-use Ehyiah\QuillJsBundle\DTO\Synonym\FreeDictionarySynonymProvider;
-
-$builder->add('content', QuillType::class, [
-    'modules' => [
-        new SynonymModule(options: [
-            SynonymModule::PROVIDER_OPTION => FreeDictionarySynonymProvider::class,
-        ]),
-    ],
-]);
-```
-
-### BabelNetSynonymProvider
-
-Uses the [BabelNet](https://babelnet.org/) API (v9) to find synonyms. Requires a free API key (1000 requests/day limit).
-
-| Config option | Type | Default | Description |
-|---|---|---|---|
-| `apiKey` | `?string` | `null` | BabelNet API key (set via `QUILL_BABELNET_API_KEY` env var) |
-| `maxSynsets` | `int` | `3` | Max synsets to query |
-| `timeout` | `int` | `15` | HTTP timeout in seconds |
-
-```php
-use Ehyiah\QuillJsBundle\Form\QuillType;
-use Ehyiah\QuillJsBundle\DTO\Modules\SynonymModule;
-use Ehyiah\QuillJsBundle\DTO\Synonym\BabelNetSynonymProvider;
-
-$builder->add('content', QuillType::class, [
-    'modules' => [
-        new SynonymModule(options: [
-            SynonymModule::PROVIDER_OPTION => BabelNetSynonymProvider::class,
-        ]),
-    ],
-]);
-```
-
-### WordsApiSynonymProvider
-
-Uses the [WordsAPI](https://www.wordsapi.com/) via RapidAPI. Requires a RapidAPI key. Primarily English.
-
-| Config option | Type | Default | Description |
-|---|---|---|---|
-| `apiKey` | `?string` | `null` | RapidAPI key (set via `QUILL_WORDSAPI_API_KEY` env var) |
-| `apiHost` | `string` | `wordsapiv1.p.rapidapi.com` | RapidAPI host |
-| `timeout` | `int` | `15` | HTTP timeout in seconds |
-
-```php
-use Ehyiah\QuillJsBundle\Form\QuillType;
-use Ehyiah\QuillJsBundle\DTO\Modules\SynonymModule;
-use Ehyiah\QuillJsBundle\DTO\Synonym\WordsApiSynonymProvider;
-
-$builder->add('content', QuillType::class, [
-    'modules' => [
-        new SynonymModule(options: [
-            SynonymModule::PROVIDER_OPTION => WordsApiSynonymProvider::class,
-        ]),
-    ],
-]);
-```
-
-### OpenAiSynonymProvider
-
-Uses OpenAI (GPT-4o-mini) to find contextual synonyms. The API key stays server-side. Supports custom model and endpoint (Azure, LocalAI, etc.).
-
-| Config option | Type | Default | Description |
-|---|---|---|---|
-| `apiKey` | `?string` | `null` | OpenAI API key (set via `QUILL_OPENAI_API_KEY` env var) |
-| `model` | `string` | `gpt-4o-mini` | Model name |
-| `maxResults` | `int` | `10` | Max synonyms per request |
-| `apiUrl` | `string` | `https://api.openai.com/v1/chat/completions` | API endpoint |
-
-```php
-use Ehyiah\QuillJsBundle\Form\QuillType;
-use Ehyiah\QuillJsBundle\DTO\Modules\SynonymModule;
-use Ehyiah\QuillJsBundle\DTO\Synonym\OpenAiSynonymProvider;
-
-$builder->add('content', QuillType::class, [
-    'modules' => [
-        new SynonymModule(options: [
-            SynonymModule::PROVIDER_OPTION => OpenAiSynonymProvider::class,
-        ]),
-    ],
-]);
-```
+The bundle does not call `isGranted()` or `denyAccessUnlessGranted()` and is not aware of your application's roles or voters. All security decisions remain under the control of the host application.
