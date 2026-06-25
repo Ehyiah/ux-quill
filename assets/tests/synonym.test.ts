@@ -54,9 +54,10 @@ describe('SynonymModule', () => {
                 provider: 'App\\Test\\Provider',
             });
 
-            expect((module as any).locale).toBe('fr');
+            expect((module as any).locale).toBe('en');
             expect((module as any).icon).toBe('🔄');
             expect((module as any).headerText).toBe('Look for synonyms');
+            expect((module as any).showScore).toBe(false);
             expect((module as any).debug).toBe(false);
         });
 
@@ -64,6 +65,15 @@ describe('SynonymModule', () => {
             expect(() => {
                 new SynonymModule(mockQuill, {} as any);
             }).not.toThrow();
+        });
+
+        it('devrait stocker showScore quand fourni', () => {
+            const module = new SynonymModule(mockQuill, {
+                provider: 'App\\Test\\Provider',
+                showScore: true,
+            });
+
+            expect((module as any).showScore).toBe(true);
         });
     });
 
@@ -257,6 +267,35 @@ describe('SynonymModule', () => {
 
             const popup = mockQuill.container.querySelector('[role="dialog"]');
             expect(popup?.textContent).toContain('Rien pour : xyz');
+        });
+
+        it('devrait ne pas afficher le badge de score par défaut', () => {
+            const module = new SynonymModule(mockQuill, {
+                provider: 'App\\Test\\Provider',
+            });
+            (module as any).openPopup(
+                [{ word: 'salut', score: 0.9 }],
+                'bonjour',
+                { index: 10, length: 7 },
+            );
+
+            const popup = mockQuill.container.querySelector('[role="dialog"]');
+            expect(popup?.textContent).not.toContain('%');
+        });
+
+        it('devrait afficher le badge de score quand showScore est true', () => {
+            const module = new SynonymModule(mockQuill, {
+                provider: 'App\\Test\\Provider',
+                showScore: true,
+            });
+            (module as any).openPopup(
+                [{ word: 'salut', score: 0.9 }],
+                'bonjour',
+                { index: 10, length: 7 },
+            );
+
+            const popup = mockQuill.container.querySelector('[role="dialog"]');
+            expect(popup?.textContent).toContain('90%');
         });
 
         it('devrait fermer le popup au clic sur le bouton fermer', () => {

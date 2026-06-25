@@ -115,6 +115,7 @@ new SynonymModule(
 | `icon` | `string\|HTMLElement` | `'🔄'` | Icon for the toolbar button |
 | `headerText` | `string` | `'Look for synonyms'` | Popup header text |
 | `noSynonymText` | `string` | `'No Results for : {word}'` | Text shown when no synonyms are found |
+| `showScore` | `bool` | `false` | Show relevance score badge (useful with AI providers like `OpenAiSynonymProvider`) |
 | `debug` | `bool` | `false` | Enable console debug logs |
 
 ## Routing

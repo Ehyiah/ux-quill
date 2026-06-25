@@ -4,6 +4,7 @@ interface SynonymModuleOptions {
     icon?: string | HTMLElement;
     headerText?: string;
     noSynonymText?: string;
+    showScore?: boolean;
     debug?: boolean;
 }
 
@@ -36,6 +37,7 @@ class SynonymModule {
     private headerText: string;
     private noSynonymText: string;
     private outsideClickListener: ((e: MouseEvent) => void) | null;
+    private showScore: boolean;
     private debug: boolean;
 
     constructor(quill: QuillLike, options: SynonymModuleOptions = {} as SynonymModuleOptions) {
@@ -45,6 +47,7 @@ class SynonymModule {
         this.icon = options.icon || '🔄';
         this.headerText = options.headerText || 'Look for synonyms';
         this.noSynonymText = options.noSynonymText || 'No Results for : {word}';
+        this.showScore = options.showScore || false;
         this.container = quill.container;
         this.popup = null;
         this.debounceTimeout = null;
@@ -302,12 +305,13 @@ class SynonymModule {
                 li.style.justifyContent = 'space-between';
                 li.style.alignItems = 'center';
 
-                const scoreBadge = document.createElement('span');
-                scoreBadge.textContent = (s.score * 100).toFixed(0) + '%';
-                scoreBadge.style.fontSize = '0.75rem';
-                scoreBadge.style.color = '#999';
-                li.appendChild(document.createTextNode(''));
-                li.appendChild(scoreBadge);
+                if (this.showScore) {
+                    const scoreBadge = document.createElement('span');
+                    scoreBadge.textContent = (s.score * 100).toFixed(0) + '%';
+                    scoreBadge.style.fontSize = '0.75rem';
+                    scoreBadge.style.color = '#999';
+                    li.appendChild(scoreBadge);
+                }
 
                 li.addEventListener('mouseenter', () => {
                     li.style.backgroundColor = '#e6f0ff';

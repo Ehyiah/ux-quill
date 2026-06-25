@@ -13,13 +13,15 @@ class SynonymModule {
     this.headerText = void 0;
     this.noSynonymText = void 0;
     this.outsideClickListener = void 0;
+    this.showScore = void 0;
     this.debug = void 0;
     this.quill = quill;
     this.provider = options.provider;
-    this.locale = options.locale || 'fr';
+    this.locale = options.locale || 'en';
     this.icon = options.icon || '🔄';
     this.headerText = options.headerText || 'Look for synonyms';
     this.noSynonymText = options.noSynonymText || 'No Results for : {word}';
+    this.showScore = options.showScore || false;
     this.container = quill.container;
     this.popup = null;
     this.debounceTimeout = null;
@@ -240,12 +242,13 @@ class SynonymModule {
         li.style.display = 'flex';
         li.style.justifyContent = 'space-between';
         li.style.alignItems = 'center';
-        const scoreBadge = document.createElement('span');
-        scoreBadge.textContent = (s.score * 100).toFixed(0) + '%';
-        scoreBadge.style.fontSize = '0.75rem';
-        scoreBadge.style.color = '#999';
-        li.appendChild(document.createTextNode(''));
-        li.appendChild(scoreBadge);
+        if (this.showScore) {
+          const scoreBadge = document.createElement('span');
+          scoreBadge.textContent = (s.score * 100).toFixed(0) + '%';
+          scoreBadge.style.fontSize = '0.75rem';
+          scoreBadge.style.color = '#999';
+          li.appendChild(scoreBadge);
+        }
         li.addEventListener('mouseenter', () => {
           li.style.backgroundColor = '#e6f0ff';
         });
