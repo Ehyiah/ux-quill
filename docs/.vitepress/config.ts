@@ -86,6 +86,7 @@ export default defineConfig({
                   { text: 'SmartLinks', link: '/guide/modules/smart-links' },
                   { text: 'Grid Borders', link: '/guide/modules/grid-borders' },
                   { text: 'Speech To Text', link: '/guide/modules/stt' },
+                  { text: 'Synonym', link: '/guide/modules/synonym' },
                   { text: 'Other Modules', link: '/guide/modules/others' }
                 ]
               },

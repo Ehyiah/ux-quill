@@ -14,9 +14,6 @@ import ImageFigure from './blots/imageFigure.ts';
 Quill.register(ImageFigure, true);
 import {Mention} from './modules/mention.ts';
 
-import SynonymModule from './modules/synonym.ts';
-Quill.register('modules/synonym', SynonymModule);
-
 interface DOMNode extends HTMLElement {
     getAttribute(name: string): string | null;
 }
