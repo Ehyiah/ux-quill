@@ -92,4 +92,5 @@ These modules provide global behavior and must usually be added manually to the 
 | **SmartLinksModule** | NO | [see details](./smart-links.md) | smartLinks | array | ['linkRegex' => '/https?:\/\/[^\s]+/'] |
 | **GridBordersModule** | NO | [see details](./grid-borders.md) | gridBorders | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\GridBordersModule`` |
 | **STTModule** | NO | [see details](./stt.md) | speechToText | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\STTModule`` |
+| **SynonymModule** | NO | [see details](./synonym.md) | synonym | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\SynonymModule`` |
 | **ImageGalleryModule** | YES | [see details](./image-gallery.md) | imageGallery | array | `listEndpoint`, `uploadEndpoint`, `searchEndpoint`, `icon` |

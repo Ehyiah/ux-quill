@@ -54,6 +54,9 @@ Quill.register('modules/slashModule', SlashModule);
 import {PasteSanitizer} from './modules/pasteSanitizer.ts';
 Quill.register('modules/pasteSanitizer', PasteSanitizer);
 
+import SynonymModule from './modules/synonym.ts';
+Quill.register('modules/synonym', SynonymModule);
+
 const icons = Quill.import('ui/icons');
 if (icons) {
     icons['divider'] = '<svg viewBox="0 0 18 18"><line class="ql-stroke" x1="3" x2="15" y1="9" y2="9"></line></svg>';
