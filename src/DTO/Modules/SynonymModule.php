@@ -24,5 +24,12 @@ final class SynonymModule implements ModuleInterface
         if (!is_string($provider) || '' === $provider) {
             throw new InvalidArgumentException('SynonymModule requires a non-empty "provider" option.');
         }
+
+        $providerOptions = $options[self::PROVIDER_OPTIONS] ?? [];
+        if (isset($providerOptions['apiKey'])) {
+            throw new InvalidArgumentException(
+                'The "apiKey" option cannot be set in providerOptions. Use environment variables instead.'
+            );
+        }
     }
 }
