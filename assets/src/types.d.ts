@@ -16,6 +16,20 @@ export type ExtraOptions = {
     };
 }
 
+export type AiOptions = {
+    provider?: string;
+    api_key?: string | null;
+    features?: Partial<Record<string, boolean | Record<string, unknown>>>;
+    models?: Partial<Record<string, string>>;
+    translate?: {
+        target_languages?: string[];
+        default_language?: string;
+    };
+    toc?: {
+        depth?: number;
+    };
+}
+
 export type UploadOptions = {
     type: 'form' | 'json';
     upload_endpoint: null | string;

@@ -3,6 +3,7 @@ import Quill from 'quill';
 import mergeModules from "./modules.js";
 import { ToolbarCustomizer } from "./ui/toolbarCustomizer.js";
 import { handleUploadResponse, uploadStrategies } from "./upload-utils.js";
+import { AiManager } from "./modules/aiAssistant/aiManager.js";
 import "./register-modules.js";
 import QuillTableBetter from 'quill-table-better';
 import ImageFigure from "./blots/imageFigure.js";
@@ -26,6 +27,7 @@ export default class _Class extends Controller {
     this.setupQuillStyles(options);
     this.setupUploadHandler(options);
     this.setupEditorHeight();
+    this.setupAiAssistant(options);
     this.dispatchEvent('options', options);
     const unprocessedIcons = this.processIconReplacementFromQuillCore();
     this.initializeQuill(options, unprocessedIcons);
@@ -99,6 +101,25 @@ export default class _Class extends Controller {
     if (height !== null) {
       this.editorContainerTarget.style.height = height;
     }
+  }
+  setupAiAssistant(options) {
+    const raw = options.modules.aiAssistant;
+    if (!raw || !Array.isArray(raw.features) || raw.features.length === 0) {
+      return;
+    }
+    const features = {};
+    raw.features.forEach(f => {
+      features[f] = true;
+    });
+    const aiManager = new AiManager({
+      provider: 'transformers',
+      features
+    });
+    aiManager.initialize();
+    options.modules.aiAssistant = {
+      aiManager,
+      features
+    };
   }
   initializeQuill(options, unprocessedIcons) {
     const quill = new Quill(this.editorContainerTarget, options);

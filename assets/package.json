@@ -99,6 +99,7 @@
     },
     "peerDependencies": {
         "@hotwired/stimulus": "^3.0.0",
+        "@xenova/transformers": "^2.17.0",
         "axios": "^1.4.0",
         "eventemitter3": "^5.0.1",
         "lodash-es": "^4.17.21",
@@ -114,6 +115,7 @@
     },
     "dependencies": {
         "@hotwired/stimulus": "^3.0.0",
+        "@xenova/transformers": "^2.17.0",
         "axios": "^1.4.0",
         "eventemitter3": "^5.0.1",
         "lodash-es": "^4.17.21",
@@ -163,9 +165,10 @@
             "<rootDir>/tests/setup/jest.setup.ts"
         ],
         "moduleNameMapper": {
-            "\\.(css|less)$": "<rootDir>/tests/setup/__mocks__/styleMock.js",
-            "^../src/blots/image$": "<rootDir>/tests/setup/__mocks__/image.ts",
-            "^quill$": "<rootDir>/tests/setup/__mocks__/quill.ts"
+        "\\.(css|less)$": "<rootDir>/tests/setup/__mocks__/styleMock.js",
+        "^../src/blots/image$": "<rootDir>/tests/setup/__mocks__/image.ts",
+        "^quill$": "<rootDir>/tests/setup/__mocks__/quill.ts",
+        "^@xenova/transformers$": "<rootDir>/tests/setup/__mocks__/transformers.js"
         },
         "testMatch": [
             "<rootDir>/tests/**/*.test.ts"
@@ -178,7 +181,7 @@
             "^.+\\.tsx?$": "ts-jest"
         },
         "transformIgnorePatterns": [
-            "/node_modules/(?!quill|quill2-emoji)"
+            "/node_modules/(?!quill|quill2-emoji|@xenova/transformers)"
         ],
         "rootDir": ".",
         "moduleFileExtensions": [

@@ -54,6 +54,7 @@ const enabledList = computed(() => {
 interface ModuleDefEntry {
   toolbar: any[]
   config: Record<string, any>
+  aiConfig?: Record<string, any>
 }
 
 const MODULE_DEFS: Record<string, ModuleDefEntry> = {
@@ -215,6 +216,22 @@ const MODULE_DEFS: Record<string, ModuleDefEntry> = {
     toolbar: ['video', 'formula'],
     config: {},
   },
+  aiAssistant: {
+    toolbar: [],
+    config: {},
+    aiConfig: {
+      provider: 'transformers',
+      features: {
+        rewrite: true,
+        translate: true,
+        grammar: true,
+        generate: true,
+        summarize: true,
+        semantic: true,
+        toc: true,
+      },
+    },
+  },
 }
 
 const BASE_TOOLBAR = [
@@ -256,6 +273,18 @@ function buildConfig() {
         ['imageGallery'],
       ],
       modules: {
+        _aiConfig: {
+          provider: 'transformers',
+          features: {
+            rewrite: true,
+            translate: true,
+            grammar: true,
+            generate: true,
+            summarize: true,
+            semantic: true,
+            toc: true,
+          },
+        },
         table: false,
         'table-better': { toolbarTable: true },
         'emoji-toolbar': {},
@@ -326,6 +355,9 @@ function buildConfig() {
       toolbar.push(def.toolbar)
     }
     Object.assign(modules, def.config)
+    if (def.aiConfig) {
+      modules._aiConfig = def.aiConfig
+    }
   }
 
   return { toolbar, modules }
@@ -343,6 +375,17 @@ async function initEditor() {
   const { default: Quill } = await import('quill')
 
   const { toolbar, modules } = buildConfig()
+
+  if (modules._aiConfig) {
+    const { AiManager } = await import('../../../../assets/src/modules/aiAssistant/aiManager.ts')
+    const aiManager = new AiManager(modules._aiConfig)
+    aiManager.initialize()
+    modules.aiAssistant = {
+      aiManager,
+      features: modules._aiConfig.features,
+    }
+    delete modules._aiConfig
+  }
 
   const config = {
     theme: theme.value,
