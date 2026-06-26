@@ -48,6 +48,7 @@ class QuillJsExtension extends Extension implements PrependExtensionInterface
         $builderDefinition->setArgument('$translator', new Reference(TranslatorInterface::class));
         $builderDefinition->setPublic(false);
         $container->setDefinition('quill_js.config_builder', $builderDefinition);
+        $container->setAlias(QuillConfigBuilder::class, 'quill_js.config_builder')->setPublic(false);
 
         $typeDefinition = new Definition(QuillType::class);
         $typeDefinition->setArgument('$configBuilder', new Reference('quill_js.config_builder'));
