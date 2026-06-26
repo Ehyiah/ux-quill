@@ -1,4 +1,5 @@
 import Quill from 'quill';
+import { transformVideoUrl, addProvider } from '../utils/videoProviders.ts';
 
 export interface VideoSelectionOptions {
     borderColor?: string;
@@ -12,6 +13,11 @@ export interface VideoSelectionOptions {
     buttonBeforeTitle?: string;
     buttonAfterTitle?: string;
     deleteTitle?: string;
+    videoProviders?: Array<{
+        name: string;
+        match: string;
+        embed: string;
+    }>;
     alignLabels?: {
         left?: string;
         leftBlock?: string;
@@ -91,6 +97,19 @@ export default class VideoSelection {
             },
             ...options,
         };
+
+        if (this.options.videoProviders) {
+            for (const provider of this.options.videoProviders) {
+                const regex = new RegExp(provider.match);
+                addProvider(provider.name, regex, (m) => {
+                    let embed = provider.embed;
+                    for (let i = 1; i < m.length; i++) {
+                        embed = embed.replace(new RegExp(`\\{${i}\\}`, 'g'), m[i] || '');
+                    }
+                    return embed;
+                });
+            }
+        }
 
         this.repositionHandler = () => {
             this.reposition();
@@ -571,7 +590,7 @@ export default class VideoSelection {
         if (!iframe) return;
         const cleanUrl = url.trim();
         if (cleanUrl) {
-            iframe.src = cleanUrl;
+            iframe.src = transformVideoUrl(cleanUrl);
         }
     }
 

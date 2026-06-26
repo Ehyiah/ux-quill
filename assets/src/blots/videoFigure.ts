@@ -1,4 +1,5 @@
 import Quill from 'quill';
+import { transformVideoUrl } from '../utils/videoProviders.ts';
 
 const BlockEmbed = Quill.import('blots/block/embed');
 
@@ -12,7 +13,7 @@ class VideoFigure extends BlockEmbed {
         const iframe = document.createElement('iframe');
         iframe.className = 'ql-video';
 
-        const src = typeof value === 'string' ? value : value.src;
+        const src = typeof value === 'string' ? transformVideoUrl(value) : transformVideoUrl(value.src);
         iframe.setAttribute('src', src);
         iframe.setAttribute('frameborder', '0');
         iframe.setAttribute('allowfullscreen', 'true');

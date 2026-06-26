@@ -19,6 +19,7 @@ final class VideoSelectionModule implements ModuleInterface
      *     buttonBeforeTitle?: string,
      *     buttonAfterTitle?: string,
      *     deleteTitle?: string,
+     *     videoProviders?: array<int, array{name: string, match: string, embed: string}>,
      *     alignLabels?: array{left: string, leftBlock: string, center: string, right: string},
      *     sectionLabels?: array{size?: string, align?: string, video?: string, insert?: string}|null
      * }|bool $options
@@ -43,6 +44,7 @@ final class VideoSelectionModule implements ModuleInterface
             'buttonBeforeTitle' => 'Insert a paragraph before',
             'buttonAfterTitle' => 'Insert a paragraph after',
             'deleteTitle' => 'Delete video',
+            'videoProviders' => [],
             'alignLabels' => [
                 'left' => 'Left (wrapped)',
                 'leftBlock' => 'Left (no wrap)',

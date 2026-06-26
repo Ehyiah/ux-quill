@@ -1,5 +1,6 @@
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 import Quill from 'quill';
+import { transformVideoUrl, addProvider } from "../utils/videoProviders.js";
 const VIDEO_SELECTOR = 'figure.ql-video-figure';
 const ICONS = {
   play: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor"></polygon></svg>',
@@ -118,6 +119,18 @@ export default class VideoSelection {
         insert: 'Insert'
       }
     }, options);
+    if (this.options.videoProviders) {
+      for (const provider of this.options.videoProviders) {
+        const regex = new RegExp(provider.match);
+        addProvider(provider.name, regex, m => {
+          let embed = provider.embed;
+          for (let i = 1; i < m.length; i++) {
+            embed = embed.replace(new RegExp("\\{" + i + "\\}", 'g'), m[i] || '');
+          }
+          return embed;
+        });
+      }
+    }
     this.repositionHandler = () => {
       this.reposition();
     };
@@ -497,7 +510,7 @@ export default class VideoSelection {
     if (!iframe) return;
     const cleanUrl = url.trim();
     if (cleanUrl) {
-      iframe.src = cleanUrl;
+      iframe.src = transformVideoUrl(cleanUrl);
     }
   }
   setTitle(title) {
