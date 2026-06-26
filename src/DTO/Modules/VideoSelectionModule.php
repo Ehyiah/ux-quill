@@ -10,13 +10,17 @@ final class VideoSelectionModule implements ModuleInterface
      * @param array{
      *     borderColor?: string,
      *     borderWidth?: string,
-     *     lockTitle?: string,
-     *     unlockTitle?: string,
      *     playTitle?: string,
      *     editUrlTitle?: string,
+     *     editTitleTitle?: string,
+     *     editCaptionTitle?: string,
+     *     buttonBeforeLabel?: string,
+     *     buttonAfterLabel?: string,
+     *     buttonBeforeTitle?: string,
+     *     buttonAfterTitle?: string,
      *     deleteTitle?: string,
      *     alignLabels?: array{left: string, leftBlock: string, center: string, right: string},
-     *     sectionLabels?: array{size?: string, align?: string, video?: string}|null
+     *     sectionLabels?: array{size?: string, align?: string, video?: string, insert?: string}|null
      * }|bool $options
      */
     public function __construct(
@@ -30,10 +34,14 @@ final class VideoSelectionModule implements ModuleInterface
         $defaults = [
             'borderColor' => '#007bff',
             'borderWidth' => '4px',
-            'lockTitle' => 'Lock video (disable play)',
-            'unlockTitle' => 'Unlock video (enable play)',
             'playTitle' => 'Play video',
             'editUrlTitle' => 'Edit video URL',
+            'editTitleTitle' => 'Edit title',
+            'editCaptionTitle' => 'Edit caption',
+            'buttonBeforeLabel' => '¶+',
+            'buttonAfterLabel' => '+¶',
+            'buttonBeforeTitle' => 'Insert a paragraph before',
+            'buttonAfterTitle' => 'Insert a paragraph after',
             'deleteTitle' => 'Delete video',
             'alignLabels' => [
                 'left' => 'Left (wrapped)',
@@ -45,6 +53,7 @@ final class VideoSelectionModule implements ModuleInterface
                 'size' => 'Size',
                 'align' => 'Align',
                 'video' => 'Video',
+                'insert' => 'Insert',
             ],
         ];
 

@@ -1,5 +1,8 @@
 import Quill from 'quill';
 
+import VideoFigure from './blots/videoFigure.ts';
+Quill.register('formats/video', VideoFigure, true);
+
 import ImageUploader from './imageUploader.ts'
 Quill.register('modules/imageUploader', ImageUploader);
 

@@ -1,4 +1,6 @@
 import Quill from 'quill';
+import VideoFigure from "./blots/videoFigure.js";
+Quill.register('formats/video', VideoFigure, true);
 import ImageUploader from "./imageUploader.js";
 Quill.register('modules/imageUploader', ImageUploader);
 import * as Emoji from 'quill2-emoji';
