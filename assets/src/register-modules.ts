@@ -82,3 +82,6 @@ Quill.register('modules/gridBorders', GridBorders);
 
 import {PlaceholderModule} from './modules/placeHolderModule/placeHolderModule.ts';
 Quill.register('modules/placeholder', PlaceholderModule);
+
+import VideoSelection from './modules/videoSelection.ts';
+Quill.register('modules/videoSelection', VideoSelection);
