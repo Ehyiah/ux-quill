@@ -123,6 +123,9 @@ export default class VideoSelection {
         const style = document.createElement('style');
         style.id = styleId;
         style.textContent = `
+.ql-video-figure {
+    cursor: pointer;
+}
 .ql-video-figure iframe {
     pointer-events: none;
 }
