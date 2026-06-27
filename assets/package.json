@@ -24,8 +24,7 @@
                     "katex/dist/katex.min.css": true,
                     "quill-html-edit-button/src/styles.css": true,
                     "@ehyiah/ux-quill/dist/styles/gallery/gallery.css": true,
-                    "@ehyiah/ux-quill/dist/styles/map-modal.css": true,
-                    "leaflet/dist/leaflet.css": true
+                    "@ehyiah/ux-quill/dist/styles/map-modal.css": true
                 }
             }
         },

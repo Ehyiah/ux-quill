@@ -1,4 +1,5 @@
 import type { MapModule } from './mapModule.ts';
+import { injectLeafletStyles } from './map-utils.ts';
 
 type NominatimResult = {
     lat: string;
@@ -135,7 +136,18 @@ export default class MapModal {
         if (!previewEl) return;
 
         try {
+            await injectLeafletStyles();
             const L = await import('leaflet');
+
+            const markerIcon = new (L as any).Icon({
+                iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+                iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+                shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41],
+            });
 
             this.map = (L as any).map(previewEl as HTMLElement, {
                 center: [this.selectedLat, this.selectedLng],
@@ -150,6 +162,7 @@ export default class MapModal {
 
             this.marker = (L as any).marker([this.selectedLat, this.selectedLng], {
                 draggable: true,
+                icon: markerIcon,
             }).addTo(this.map);
 
             this.marker.on('dragend', () => {

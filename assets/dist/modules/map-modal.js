@@ -1,3 +1,4 @@
+import { injectLeafletStyles } from "./map-utils.js";
 export default class MapModal {
   constructor(module) {
     this.module = void 0;
@@ -75,7 +76,17 @@ export default class MapModal {
     const previewEl = (_this$container = this.container) == null ? void 0 : _this$container.querySelector('#quill-map-preview');
     if (!previewEl) return;
     try {
+      await injectLeafletStyles();
       const L = await import('leaflet');
+      const markerIcon = new L.Icon({
+        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+      });
       this.map = L.map(previewEl, {
         center: [this.selectedLat, this.selectedLng],
         zoom: 13,
@@ -86,7 +97,8 @@ export default class MapModal {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       }).addTo(this.map);
       this.marker = L.marker([this.selectedLat, this.selectedLng], {
-        draggable: true
+        draggable: true,
+        icon: markerIcon
       }).addTo(this.map);
       this.marker.on('dragend', () => {
         const pos = this.marker.getLatLng();

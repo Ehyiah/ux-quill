@@ -2,40 +2,11 @@ import Quill from 'quill';
 import MapBlot from '../blots/map.ts';
 import MapModal from './map-modal.ts';
 import type { MapOptions, MapValue } from '../types.d.ts';
+import { loadScript, injectLeafletStyles } from './map-utils.ts';
 
 Quill.register(MapBlot);
 
 const MAPS_INSTANCES = new WeakMap<HTMLElement, any>();
-const LOADED_SCRIPTS = new Map<string, Promise<void>>();
-const LOADED_STYLESHEETS = new Set<string>();
-
-function loadScript(url: string): Promise<void> {
-    if (LOADED_SCRIPTS.has(url)) {
-        return LOADED_SCRIPTS.get(url)!;
-    }
-    const promise = new Promise<void>((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = url;
-        script.onload = () => resolve();
-        script.onerror = () => reject(new Error(`Failed to load script: ${url}`));
-        document.head.appendChild(script);
-    });
-    LOADED_SCRIPTS.set(url, promise);
-    return promise;
-}
-
-function loadStylesheet(url: string): void {
-    if (LOADED_STYLESHEETS.has(url)) return;
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = url;
-    document.head.appendChild(link);
-    LOADED_STYLESHEETS.add(url);
-}
-
-function injectLeafletStyles(): void {
-    loadStylesheet('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
-}
 
 export class MapModule {
     private quill: Quill;
@@ -136,8 +107,18 @@ export class MapModule {
 
     private async initOsmMap(container: HTMLElement, value: MapValue): Promise<void> {
         try {
-            injectLeafletStyles();
+            await injectLeafletStyles();
             const L = await import('leaflet');
+
+            const markerIcon = new (L as any).Icon({
+                iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+                iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+                shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41],
+            });
 
             const mapDiv = document.createElement('div');
             mapDiv.style.width = '100%';
@@ -157,6 +138,7 @@ export class MapModule {
 
             const marker = (L as any).marker([value.lat, value.lng], {
                 draggable: value.draggable,
+                icon: markerIcon,
             }).addTo(map);
 
             if (value.draggable) {

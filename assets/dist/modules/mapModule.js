@@ -1,35 +1,9 @@
 import Quill from 'quill';
 import MapBlot from "../blots/map.js";
 import MapModal from "./map-modal.js";
+import { loadScript, injectLeafletStyles } from "./map-utils.js";
 Quill.register(MapBlot);
 const MAPS_INSTANCES = new WeakMap();
-const LOADED_SCRIPTS = new Map();
-const LOADED_STYLESHEETS = new Set();
-function loadScript(url) {
-  if (LOADED_SCRIPTS.has(url)) {
-    return LOADED_SCRIPTS.get(url);
-  }
-  const promise = new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    script.src = url;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error("Failed to load script: " + url));
-    document.head.appendChild(script);
-  });
-  LOADED_SCRIPTS.set(url, promise);
-  return promise;
-}
-function loadStylesheet(url) {
-  if (LOADED_STYLESHEETS.has(url)) return;
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = url;
-  document.head.appendChild(link);
-  LOADED_STYLESHEETS.add(url);
-}
-function injectLeafletStyles() {
-  loadStylesheet('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
-}
 export class MapModule {
   constructor(quill, options) {
     this.quill = void 0;
@@ -117,8 +91,17 @@ export class MapModule {
   }
   async initOsmMap(container, value) {
     try {
-      injectLeafletStyles();
+      await injectLeafletStyles();
       const L = await import('leaflet');
+      const markerIcon = new L.Icon({
+        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+      });
       const mapDiv = document.createElement('div');
       mapDiv.style.width = '100%';
       mapDiv.style.height = '100%';
@@ -133,7 +116,8 @@ export class MapModule {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       }).addTo(map);
       const marker = L.marker([value.lat, value.lng], {
-        draggable: value.draggable
+        draggable: value.draggable,
+        icon: markerIcon
       }).addTo(map);
       if (value.draggable) {
         marker.on('dragend', () => {
