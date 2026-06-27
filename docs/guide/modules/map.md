@@ -101,6 +101,19 @@ The map container uses the class `.ql-map`. You can customize it with CSS:
 }
 ```
 
+## Displaying saved maps
+
+To render saved maps on a page (outside the editor), include the `quill_content_scripts()` function in your template:
+
+```twig
+<twig:QuillContent :value="content" />
+
+{{ quill_content_styles() }}
+{{ quill_content_scripts() }}
+```
+
+The `quill_content_scripts()` function emits a `<script>` tag that automatically initializes all `.ql-map` elements on the page.
+
 ## Try it live
 
 <ClientOnly>
