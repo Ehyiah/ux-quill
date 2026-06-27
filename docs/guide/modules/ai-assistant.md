@@ -1,6 +1,12 @@
+---
+outline: [1, 5]
+---
+
 # AiAssistantModule
 
-The AiAssistantModule adds an AI-powered writing assistant to the Quill editor. It provides seven features — reformulation, translation, grammar correction, content generation, summarization, semantic analysis, and automatic table of contents.
+The AiAssistantModule adds an AI-powered writing assistant to the Quill editor.
+It provides seven features at the moment
+— reformulation, translation, grammar correction, content generation, summarization, semantic analysis, and automatic table of contents generation.
 
 ## Provider options
 
@@ -9,11 +15,11 @@ The module supports two providers:
 | Provider | Type | Description |
 | :--- | :--- | :--- |
 | **`api`** (recommended) | Backend proxy | Routes all AI requests through a PHP controller (`/_ux/quill/ai-assistant`) which calls an OpenAI-compatible API. API keys stay server-side (environment variables). |
-| **`transformers`** | Local browser (dormant) | Runs models entirely in-browser via `@huggingface/transformers` (ONNX runtime). Models are large (60–350 MB each) and quality is limited. No API key needed. |
+| **`transformers`** (not recommended or for testing purpose only)| Local browser (dormant) | Runs models entirely in-browser via `@huggingface/transformers` (ONNX runtime). Models are large (60–350 MB each) and quality of responses is very limited. No API key needed. |
 
 The recommended provider is `api` — configure your AI backend via environment variables (see [API configuration](#api-provider-configuration)).
 
-When enabled, the module adds a "star" icon button (<svg viewBox="0 0 18 18" width="14" height="14"><path d="M9 2 L11 7 L16 7 L12 10.5 L13.5 16 L9 12.5 L4.5 16 L6 10.5 L2 7 L7 7 Z" fill="currentColor"/></svg>) to the toolbar. Clicking it opens a dropdown menu listing the enabled features.
+When enabled, the module adds a "star" icon button to the toolbar. Clicking it opens a dropdown menu listing the enabled features.
 
 ## Configuration
 
@@ -73,6 +79,22 @@ When using `provider: 'api'`, the module sends requests to a backend PHP control
 
 > **Unauthenticated endpoints:** When `QUILL_AI_API_KEY` is not set, the controller sends no `Authorization` header. This works with local endpoints like Ollama and LLM Studio.
 
+::: warning
+You need to configure the route in order tu use `api` providers (see below).
+:::
+
+### Routing
+
+The AI Assistant backend controller is registered as a service automatically, but its route needs to be imported in your Symfony application. Create a file `config/routes/ux_quill.yaml` (or add to an existing one) with the following content:
+
+```yaml
+# config/routes/ux_quill.yaml
+ux_quill_ai_assistant:
+    resource: '@QuillJsBundle/Resources/config/routes/ai_assistant.xml'
+```
+
+This imports the route `/_ux/quill/ai-assistant` (POST) which the JavaScript `ApiProvider` calls for all AI features.
+
 ### Per-task models
 
 You can configure a different model for each task via the `models` option:
@@ -90,18 +112,6 @@ new AiAssistantModule(options: [
 ```
 
 If a task has no model override, the default model (`QUILL_AI_MODEL`) is used.
-
-## Routing
-
-The AI Assistant backend controller is registered as a service automatically, but its route needs to be imported in your Symfony application. Create a file `config/routes/ux_quill.yaml` (or add to an existing one) with the following content:
-
-```yaml
-# config/routes/ux_quill.yaml
-ux_quill_ai_assistant:
-    resource: '@QuillJsBundle/Resources/config/routes/ai_assistant.xml'
-```
-
-This imports the route `/_ux/quill/ai-assistant` (POST) which the JavaScript `ApiProvider` calls for all AI features.
 
 ### Full example with API provider
 
@@ -144,6 +154,8 @@ $builder->add('content', QuillType::class, [
 ```
 
 ---
+
+# Features
 
 ## Rewrite
 
@@ -308,7 +320,7 @@ new AiAssistantModule(options: [
 ]),
 ```
 
-## Try it live
+# Try it live
 
 <ClientOnly>
   <QuillPlayground
