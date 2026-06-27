@@ -112,8 +112,10 @@ export default class _Class extends Controller {
       features[f] = true;
     });
     const aiManager = new AiManager({
-      provider: 'transformers',
-      features
+      provider: raw.provider || 'transformers',
+      models: raw.models || undefined,
+      features,
+      debug: !!raw.debug
     });
     aiManager.initialize();
     options.modules.aiAssistant = {

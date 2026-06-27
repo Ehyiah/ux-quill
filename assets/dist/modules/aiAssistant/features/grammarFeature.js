@@ -14,11 +14,14 @@ export class GrammarFeature {
     if (!fullText) return;
     const provider = this.aiManager.getProvider();
     try {
+      this.aiManager.setLoading(true);
       const suggestions = await provider.correct(fullText);
       if (suggestions.length === 0) return;
       this.applySuggestions(suggestions);
     } catch (error) {
       console.error('Grammar check failed:', error);
+    } finally {
+      this.aiManager.setLoading(false);
     }
   }
   applySuggestions(suggestions) {

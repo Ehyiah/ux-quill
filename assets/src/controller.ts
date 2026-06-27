@@ -160,7 +160,12 @@ export default class extends Controller {
         const features: Record<string, boolean> = {};
         raw.features.forEach((f: string) => { features[f] = true; });
 
-        const aiManager = new AiManager({ provider: 'transformers', features });
+        const aiManager = new AiManager({
+            provider: raw.provider || 'transformers',
+            models: raw.models || undefined,
+            features,
+            debug: !!raw.debug,
+        });
         aiManager.initialize();
 
         options.modules.aiAssistant = { aiManager, features };

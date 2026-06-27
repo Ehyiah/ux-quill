@@ -1,3 +1,4 @@
+import { expandWordSelection } from "../utils/wordSelection.js";
 export class SummarizeFeature {
   constructor(quill, aiManager) {
     this.name = 'summarize';
@@ -14,8 +15,10 @@ export class SummarizeFeature {
     let textToSummarize;
     let insertIndex;
     if (selection && selection.length > 0) {
-      textToSummarize = quill.getText(selection.index, selection.length).trim();
-      insertIndex = selection.index + selection.length;
+      const fullText = quill.getText();
+      const wordRange = expandWordSelection(fullText, selection.index, selection.length);
+      textToSummarize = quill.getText(wordRange.index, wordRange.length).trim();
+      insertIndex = wordRange.index + wordRange.length;
     } else {
       textToSummarize = quill.getText().trim();
       insertIndex = quill.getLength();
@@ -25,6 +28,7 @@ export class SummarizeFeature {
     if (!format) return;
     const provider = this.aiManager.getProvider();
     try {
+      this.aiManager.setLoading(true);
       const summary = await provider.summarize(textToSummarize, format);
       const prefix = format === 'bullets' ? '\n\nRésumé :\n' : '\n\nRésumé : ';
       quill.updateContents([{
@@ -34,6 +38,8 @@ export class SummarizeFeature {
       }]);
     } catch (error) {
       console.error('Summarization failed:', error);
+    } finally {
+      this.aiManager.setLoading(false);
     }
   }
   async promptFormat() {

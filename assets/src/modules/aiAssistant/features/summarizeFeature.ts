@@ -1,5 +1,6 @@
-import type { AiManager } from '../aiManager';
-import type { AiFeature, AiFeatureInterface, SummaryFormat } from '../aiTypes';
+import type { AiManager } from '../aiManager.js';
+import type { AiFeature, AiFeatureInterface, SummaryFormat } from '../aiTypes.js';
+import { expandWordSelection } from '../utils/wordSelection.js';
 
 export class SummarizeFeature implements AiFeatureInterface {
   readonly name: AiFeature = 'summarize';
@@ -22,8 +23,10 @@ export class SummarizeFeature implements AiFeatureInterface {
     let insertIndex: number;
 
     if (selection && selection.length > 0) {
-      textToSummarize = quill.getText(selection.index, selection.length).trim();
-      insertIndex = selection.index + selection.length;
+      const fullText = quill.getText();
+      const wordRange = expandWordSelection(fullText, selection.index, selection.length);
+      textToSummarize = quill.getText(wordRange.index, wordRange.length).trim();
+      insertIndex = wordRange.index + wordRange.length;
     } else {
       textToSummarize = quill.getText().trim();
       insertIndex = quill.getLength();
@@ -37,6 +40,7 @@ export class SummarizeFeature implements AiFeatureInterface {
     const provider = this.aiManager.getProvider();
 
     try {
+      this.aiManager.setLoading(true);
       const summary = await provider.summarize(textToSummarize, format);
 
       const prefix = format === 'bullets' ? '\n\nRésumé :\n' : '\n\nRésumé : ';
@@ -46,6 +50,8 @@ export class SummarizeFeature implements AiFeatureInterface {
       ]);
     } catch (error) {
       console.error('Summarization failed:', error);
+    } finally {
+      this.aiManager.setLoading(false);
     }
   }
 

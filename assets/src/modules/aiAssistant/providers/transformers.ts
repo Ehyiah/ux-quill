@@ -1,5 +1,5 @@
-import { pipeline } from '@xenova/transformers';
-import { BaseAiProvider } from './base';
+import { pipeline } from '@huggingface/transformers';
+import { BaseAiProvider } from './base.js';
 import type { AiFeature, RewriteStyle, SummaryFormat, GrammarSuggestion, SemanticResult } from '../aiTypes';
 
 type PipelineFunction = (...args: unknown[]) => Promise<unknown>;
@@ -63,7 +63,7 @@ export class TransformersProvider extends BaseAiProvider {
       this.loaders.set(
         key,
         pipeline(config.task, config.model, {
-          // @ts-expect-error - progress_callback is valid in @xenova/transformers
+          // @ts-expect-error - progress_callback is valid in @huggingface/transformers
           progress_callback: (progress: { status: string; progress: number }) => {
             if (progress.status === 'progress' && typeof progress.progress === 'number') {
               this.modelProgress.set(key, Math.round(progress.progress * 100));

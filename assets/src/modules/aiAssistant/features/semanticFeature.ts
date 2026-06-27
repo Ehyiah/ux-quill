@@ -1,5 +1,5 @@
-import type { AiManager } from '../aiManager';
-import type { AiFeature, AiFeatureInterface, SemanticResult } from '../aiTypes';
+import type { AiManager } from '../aiManager.js';
+import type { AiFeature, AiFeatureInterface, SemanticResult } from '../aiTypes.js';
 
 export class SemanticFeature implements AiFeatureInterface {
   readonly name: AiFeature = 'semantic';

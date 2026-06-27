@@ -1,3 +1,4 @@
+import { expandWordSelection } from "../utils/wordSelection.js";
 export class RewriteFeature {
   constructor(quill, aiManager) {
     this.name = 'rewrite';
@@ -14,22 +15,27 @@ export class RewriteFeature {
     if (!selection || selection.length === 0) {
       return;
     }
-    const selectedText = quill.getText(selection.index, selection.length).trim();
+    const fullText = quill.getText();
+    const wordRange = expandWordSelection(fullText, selection.index, selection.length);
+    const selectedText = quill.getText(wordRange.index, wordRange.length).trim();
     if (!selectedText) return;
     const style = await this.promptStyle();
     if (!style) return;
     const provider = this.aiManager.getProvider();
     try {
+      this.aiManager.setLoading(true);
       const rewritten = await provider.rewrite(selectedText, style);
       quill.updateContents([{
-        retain: selection.index
+        retain: wordRange.index
       }, {
-        delete: selection.length
+        delete: wordRange.length
       }, {
         insert: rewritten
       }]);
     } catch (error) {
       console.error('Rewrite failed:', error);
+    } finally {
+      this.aiManager.setLoading(false);
     }
   }
   async promptStyle() {

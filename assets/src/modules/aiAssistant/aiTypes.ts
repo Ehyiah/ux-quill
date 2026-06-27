@@ -31,6 +31,8 @@ export interface AiOptions {
   api_key?: string | null;
   features?: Partial<Record<AiFeature, boolean | Record<string, unknown>>>;
   models?: Partial<Record<AiFeature, string>>;
+  debug?: boolean;
+  reasoning?: boolean;
   translate?: {
     target_languages?: string[];
     default_language?: string;

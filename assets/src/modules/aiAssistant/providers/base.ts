@@ -1,4 +1,4 @@
-import type { AiProvider, AiFeature, RewriteStyle, SummaryFormat, GrammarSuggestion, SemanticResult } from '../aiTypes';
+import type { AiProvider, AiFeature, RewriteStyle, SummaryFormat, GrammarSuggestion, SemanticResult } from '../aiTypes.js';
 
 export abstract class BaseAiProvider implements AiProvider {
   abstract readonly name: string;

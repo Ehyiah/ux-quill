@@ -1,5 +1,5 @@
-import type { AiManager } from '../aiManager';
-import type { AiFeature, AiFeatureInterface, GrammarSuggestion } from '../aiTypes';
+import type { AiManager } from '../aiManager.js';
+import type { AiFeature, AiFeatureInterface, GrammarSuggestion } from '../aiTypes.js';
 
 export class GrammarFeature implements AiFeatureInterface {
   readonly name: AiFeature = 'grammar';
@@ -22,6 +22,7 @@ export class GrammarFeature implements AiFeatureInterface {
     const provider = this.aiManager.getProvider();
 
     try {
+      this.aiManager.setLoading(true);
       const suggestions = await provider.correct(fullText);
 
       if (suggestions.length === 0) return;
@@ -29,6 +30,8 @@ export class GrammarFeature implements AiFeatureInterface {
       this.applySuggestions(suggestions);
     } catch (error) {
       console.error('Grammar check failed:', error);
+    } finally {
+      this.aiManager.setLoading(false);
     }
   }
 

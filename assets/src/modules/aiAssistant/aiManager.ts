@@ -1,21 +1,39 @@
-import type { AiOptions, AiFeature, AiProvider, AiProgressEvent } from './aiTypes';
-import { TransformersProvider } from './providers/transformers';
+import type { AiOptions, AiFeature, AiProvider, AiProgressEvent } from './aiTypes.js';
+import { TransformersProvider } from './providers/transformers.js';
+import { ApiProvider } from './providers/api.js';
 
 type ProgressCallback = (event: AiProgressEvent) => void;
+type LoadingCallback = (loading: boolean) => void;
 
 export class AiManager {
   private provider: AiProvider | null = null;
   private options: AiOptions;
   private progressCallbacks: ProgressCallback[] = [];
+  private loadingCallbacks: LoadingCallback[] = [];
 
   constructor(options: AiOptions) {
     this.options = options;
+  }
+
+  onLoadingChange(callback: LoadingCallback): void {
+    this.loadingCallbacks.push(callback);
+  }
+
+  setLoading(loading: boolean): void {
+    this.loadingCallbacks.forEach((cb) => cb(loading));
   }
 
   async initialize(): Promise<void> {
     const providerName = this.options.provider || 'transformers';
 
     switch (providerName) {
+      case 'api':
+        this.provider = new ApiProvider({
+          models: this.options.models,
+          debug: this.options.debug,
+          reasoning: this.options.reasoning,
+        });
+        break;
       case 'transformers':
         this.provider = new TransformersProvider();
         break;

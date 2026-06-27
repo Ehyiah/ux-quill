@@ -1,5 +1,5 @@
-import type { AiManager } from '../aiManager';
-import type { AiFeature, AiFeatureInterface } from '../aiTypes';
+import type { AiManager } from '../aiManager.js';
+import type { AiFeature, AiFeatureInterface } from '../aiTypes.js';
 
 interface TocEntry {
   level: number;

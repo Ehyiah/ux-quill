@@ -1,3 +1,4 @@
+import { expandWordSelection } from "../utils/wordSelection.js";
 export class TranslateFeature {
   constructor(quill, aiManager) {
     this.name = 'translate';
@@ -14,22 +15,27 @@ export class TranslateFeature {
     if (!selection || selection.length === 0) {
       return;
     }
-    const selectedText = quill.getText(selection.index, selection.length).trim();
+    const fullText = quill.getText();
+    const wordRange = expandWordSelection(fullText, selection.index, selection.length);
+    const selectedText = quill.getText(wordRange.index, wordRange.length).trim();
     if (!selectedText) return;
     const targetLang = await this.promptLanguage();
     if (!targetLang) return;
     const provider = this.aiManager.getProvider();
     try {
+      this.aiManager.setLoading(true);
       const translated = await provider.translate(selectedText, targetLang);
       quill.updateContents([{
-        retain: selection.index
+        retain: wordRange.index
       }, {
-        delete: selection.length
+        delete: wordRange.length
       }, {
         insert: translated
       }]);
     } catch (error) {
       console.error('Translation failed:', error);
+    } finally {
+      this.aiManager.setLoading(false);
     }
   }
   async promptLanguage() {

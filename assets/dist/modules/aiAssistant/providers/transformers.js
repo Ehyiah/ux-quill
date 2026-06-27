@@ -1,5 +1,5 @@
-import { pipeline } from '@xenova/transformers';
-import { BaseAiProvider } from "./base";
+import { pipeline } from '@huggingface/transformers';
+import { BaseAiProvider } from "./base.js";
 const LANGUAGE_MAP = {
   fr: 'French',
   en: 'English',
@@ -75,7 +75,7 @@ export class TransformersProvider extends BaseAiProvider {
     }
     if (!this.loaders.has(key)) {
       this.loaders.set(key, pipeline(config.task, config.model, {
-        // @ts-expect-error - progress_callback is valid in @xenova/transformers
+        // @ts-expect-error - progress_callback is valid in @huggingface/transformers
         progress_callback: progress => {
           if (progress.status === 'progress' && typeof progress.progress === 'number') {
             this.modelProgress.set(key, Math.round(progress.progress * 100));

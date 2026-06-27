@@ -47,7 +47,7 @@ Example of how to use modules:
 | **HtmlEditModule** | NO | The HtmlEditModule allow to edit the raw html. see details on repository [site](https://github.com/benwinding/quill-html-edit-button) | htmlEditButton | array | https://github.com/benwinding/quill-html-edit-button | see ``Ehyiah\QuillJsBundle\DTO\Modules\htmlEditButton`` | There is currently a conflict with tableField. Don't use both of them at the same time as the table inserted via the htmlEdit module will not be displayed |
 | **ReadTimeModule** | NO | The ReadTimeModule add an indication on how many minutes it will take to a person to read what your write inside the WYSIWYG editor | readingTime | array | ``wpm``, ``label``, ``suffix``, ``readTimeOk``, ``readTimeMedium``, ``target`` | ['wpm' => '200', 'label' => 'Reading time: ', 'suffix' => ' min read', 'readTimeOk' => '2', 'readTimeMedium' => '5'] |
 | **STTModule** | NO | The Speech-to-Text module enables voice dictation using the Web Speech API. Allows users to dictate text directly into the editor with real-time audio visualization | speechToText | array | ``language``, ``continuous``, ``visualizer``, ``waveformColor``, ``histogramColor``, ``debug``, ``buttonTitleStart``, ``buttonTitleStop``, ``titleInactive``, ``titleStarting``, ``titleActive`` | see ``Ehyiah\QuillJsBundle\DTO\Modules\STTModule`` |
-| **AiAssistantModule** | NO | AI-powered writing assistant — reformulation, traduction, correction grammaticale, génération de contenu, résumé, analyse sémantique et sommaire automatique. Aucune clé API requise, fonctionne entièrement dans le navigateur. ([Guide complet](/guide/modules/ai-assistant)) | aiAssistant | array | ``features``, ``translate``, ``toc`` | — |
+| **AiAssistantModule** | NO | AI-powered writing assistant — reformulation, traduction, correction grammaticale, génération de contenu, résumé, analyse sémantique et sommaire automatique. Supporte un provider API (recommandé, via backend proxy) ou un provider local (transformers.js, dormant). ([Guide complet](/guide/modules/ai-assistant)) | aiAssistant | array | ``provider``, ``features``, ``models``, ``translate``, ``toc`` | — |
 
 ## ReadTimeModule
 
@@ -349,7 +349,11 @@ public function buildForm(FormBuilderInterface $builder, array $options)
 
 ## AiAssistantModule
 
-The AiAssistantModule adds an AI-powered writing assistant to the editor. It provides seven features — reformulation, translation, grammar correction, content generation, summarization, semantic analysis, and automatic table of contents — all running **entirely in-browser** without any API key.
+The AiAssistantModule adds an AI-powered writing assistant to the editor. It provides seven features — reformulation, translation, grammar correction, content generation, summarization, semantic analysis, and automatic table of contents.
+
+The module supports two providers:
+- **`api`** (recommended) — routes AI requests through a backend PHP controller that calls an OpenAI-compatible API. Configure via environment variables (`QUILL_AI_API_URL`, `QUILL_AI_API_KEY`, etc.). API keys stay server-side.
+- **`transformers`** (dormant) — runs models entirely in-browser via `@huggingface/transformers`. No API key needed, but models are large (60–350 MB) with limited quality.
 
 When enabled, a star icon (<svg viewBox="0 0 18 18" width="14" height="14"><path d="M9 2 L11 7 L16 7 L12 10.5 L13.5 16 L9 12.5 L4.5 16 L6 10.5 L2 7 L7 7 Z" fill="currentColor"/></svg>) appears in the toolbar. Clicking it opens a dropdown menu listing the enabled features.
 
@@ -360,6 +364,7 @@ use Ehyiah\QuillJsBundle\DTO\Modules\AiAssistantModule;
 $builder->add('content', QuillType::class, [
     'modules' => [
         new AiAssistantModule(options: [
+            'provider' => 'api',
             'features' => ['rewrite', 'translate', 'summarize'],
         ]),
     ],

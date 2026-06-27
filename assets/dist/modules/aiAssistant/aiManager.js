@@ -1,15 +1,30 @@
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
-import { TransformersProvider } from "./providers/transformers";
+import { TransformersProvider } from "./providers/transformers.js";
+import { ApiProvider } from "./providers/api.js";
 export class AiManager {
   constructor(options) {
     this.provider = null;
     this.options = void 0;
     this.progressCallbacks = [];
+    this.loadingCallbacks = [];
     this.options = options;
+  }
+  onLoadingChange(callback) {
+    this.loadingCallbacks.push(callback);
+  }
+  setLoading(loading) {
+    this.loadingCallbacks.forEach(cb => cb(loading));
   }
   async initialize() {
     const providerName = this.options.provider || 'transformers';
     switch (providerName) {
+      case 'api':
+        this.provider = new ApiProvider({
+          models: this.options.models,
+          debug: this.options.debug,
+          reasoning: this.options.reasoning
+        });
+        break;
       case 'transformers':
         this.provider = new TransformersProvider();
         break;

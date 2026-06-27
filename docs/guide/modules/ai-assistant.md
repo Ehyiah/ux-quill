@@ -2,11 +2,18 @@
 
 The AiAssistantModule adds an AI-powered writing assistant to the Quill editor. It provides seven features — reformulation, translation, grammar correction, content generation, summarization, semantic analysis, and automatic table of contents.
 
-All features run entirely in-browser using the `@xenova/transformers` library (ONNX runtime via WebGPU/WASM). **No API key, no server, no external service** — it works out of the box.
+## Provider options
+
+The module supports two providers:
+
+| Provider | Type | Description |
+| :--- | :--- | :--- |
+| **`api`** (recommended) | Backend proxy | Routes all AI requests through a PHP controller (`/_ux/quill/ai-assistant`) which calls an OpenAI-compatible API. API keys stay server-side (environment variables). |
+| **`transformers`** | Local browser (dormant) | Runs models entirely in-browser via `@huggingface/transformers` (ONNX runtime). Models are large (60–350 MB each) and quality is limited. No API key needed. |
+
+The recommended provider is `api` — configure your AI backend via environment variables (see [API configuration](#api-provider-configuration)).
 
 When enabled, the module adds a "star" icon button (<svg viewBox="0 0 18 18" width="14" height="14"><path d="M9 2 L11 7 L16 7 L12 10.5 L13.5 16 L9 12.5 L4.5 16 L6 10.5 L2 7 L7 7 Z" fill="currentColor"/></svg>) to the toolbar. Clicking it opens a dropdown menu listing the enabled features.
-
-**Note:** Machine learning models are downloaded on first use (typically 60–350 MB per model, cached by the browser after the initial download). The editor remains fully usable while models load in the background.
 
 ## Configuration
 
@@ -19,6 +26,7 @@ use Ehyiah\QuillJsBundle\DTO\Modules\AiAssistantModule;
 $builder->add('content', QuillType::class, [
     'modules' => [
         new AiAssistantModule(options: [
+            'provider' => 'api',
             'features' => ['rewrite', 'translate', 'summarize'],
         ]),
     ],
@@ -29,7 +37,10 @@ $builder->add('content', QuillType::class, [
 
 | Option | Type | Description | Default |
 | :--- | :--- | :--- | :--- |
+| **provider** | `string` | Provider to use: `'api'` or `'transformers'` | `'transformers'` |
 | **features** | `array` | List of enabled features. See the full list below. | `[]` |
+| **models** | `array` | Per-task model overrides (see [Per-task models](#per-task-models)) | `[]` |
+| **reasoning** | `bool` | Allow the model to show chain-of-thought reasoning. Set to `false` for models like Qwen that output long reasoning before the answer. | `true` |
 | **translate** | `array` | Translation sub-options (see [Translation options](#translation-options)) | — |
 | **toc** | `array` | Table of contents sub-options (see [TOC options](#toc-options)) | — |
 
@@ -45,7 +56,54 @@ $builder->add('content', QuillType::class, [
 | `'semantic'` | Analyser le contenu | Extract keywords, topics, and reading statistics |
 | `'toc'` | Générer le sommaire | Generate a table of contents from headings |
 
-## Full example
+## API provider configuration
+
+When using `provider: 'api'`, the module sends requests to a backend PHP controller (`/_ux/quill/ai-assistant`), which forwards them to an OpenAI-compatible API. Configure the connection via environment variables:
+
+| Variable | Description | Default |
+| :--- | :--- | :--- |
+| `QUILL_AI_API_URL` | API endpoint URL | `https://api.openai.com/v1/chat/completions` |
+| `QUILL_AI_API_KEY` | API key (optional — omit for Ollama, LLM Studio) | — |
+| `QUILL_AI_MODEL` | Default model name | `gpt-4o-mini` |
+| `QUILL_AI_MAX_TOKENS` | Maximum tokens per response | `4096` |
+| `QUILL_AI_TEMPERATURE` | Generation temperature | `0.7` |
+| `QUILL_AI_TIMEOUT` | Curl timeout in seconds | `120` |
+
+> **Security note:** API keys are never exposed to the frontend. If `apiKey` or `api_key` is set in the module options, the PHP DTO throws an `InvalidArgumentException`. Always use environment variables.
+
+> **Unauthenticated endpoints:** When `QUILL_AI_API_KEY` is not set, the controller sends no `Authorization` header. This works with local endpoints like Ollama and LLM Studio.
+
+### Per-task models
+
+You can configure a different model for each task via the `models` option:
+
+```php
+new AiAssistantModule(options: [
+    'provider' => 'api',
+    'features' => ['rewrite', 'translate', 'generate'],
+    'models' => [
+        'translate' => 'gpt-4o-mini',
+        'rewrite' => 'gpt-4o',
+        'generate' => 'gpt-4o',
+    ],
+]),
+```
+
+If a task has no model override, the default model (`QUILL_AI_MODEL`) is used.
+
+## Routing
+
+The AI Assistant backend controller is registered as a service automatically, but its route needs to be imported in your Symfony application. Create a file `config/routes/ux_quill.yaml` (or add to an existing one) with the following content:
+
+```yaml
+# config/routes/ux_quill.yaml
+ux_quill_ai_assistant:
+    resource: '@QuillJsBundle/Resources/config/routes/ai_assistant.xml'
+```
+
+This imports the route `/_ux/quill/ai-assistant` (POST) which the JavaScript `ApiProvider` calls for all AI features.
+
+### Full example with API provider
 
 ```php
 use Ehyiah\QuillJsBundle\Form\QuillType;
@@ -58,6 +116,8 @@ $builder->add('content', QuillType::class, [
     ],
     'modules' => [
         new AiAssistantModule(options: [
+            'provider' => 'api',
+            'reasoning' => false,
             'features' => [
                 'rewrite',
                 'translate',
@@ -66,6 +126,10 @@ $builder->add('content', QuillType::class, [
                 'summarize',
                 'semantic',
                 'toc',
+            ],
+            'models' => [
+                'translate' => 'gpt-4o-mini',
+                'rewrite' => 'gpt-4o',
             ],
             'translate' => [
                 'target_languages' => ['fr', 'en', 'es', 'de', 'it'],
@@ -99,8 +163,6 @@ The Rewrite feature reformulates the selected text in a different style. It is u
 | **Décontracté** | Casual, conversational tone |
 | **Plus concis** | Shorter, more direct phrasing |
 | **Plus développé** | Expanded, more detailed phrasing |
-
-**Model:** `Xenova/t5-small` (text2text-generation, ~60 MB)
 
 ---
 
@@ -140,8 +202,6 @@ The Translate feature translates the selected text into a target language. The o
 | **target_languages** | `array` | Language codes displayed in the translator picker | `['fr', 'en', 'es', 'de', 'it', 'pt']` |
 | **default_language** | `string` | Pre-selected language code | `'en'` |
 
-**Model:** `Xenova/t5-small` used with a translation prompt (multilingual, ~60 MB)
-
 **Usage example:**
 
 ```php
@@ -166,8 +226,6 @@ The Grammar feature analyzes the text and automatically corrects grammar and spe
 3. Choose **Corriger la grammaire**.
 4. Corrections are applied automatically inline.
 
-**Model:** `Xenova/t5-small` used with a grammar correction prompt (~60 MB)
-
 ---
 
 ## Generate
@@ -188,8 +246,6 @@ The Generate feature creates new content from a text prompt. It is useful for wr
 | `Ctrl`/`Cmd` + `Enter` | Generate |
 | `Escape` | Cancel |
 
-**Model:** `Xenova/distilgpt2` (text-generation, ~350 MB)
-
 ---
 
 ## Summarize
@@ -204,8 +260,6 @@ The Summarize feature condenses the selected text (or the full document) into a 
    - **Paragraphe** — a flowing paragraph.
    - **Points clés** — bullet-point list.
 5. The summary is inserted at the end of the document (or after the selection).
-
-**Model:** `Xenova/t5-small` (summarization, ~60 MB)
 
 ---
 
@@ -263,5 +317,3 @@ new AiAssistantModule(options: [
     content='<h2>AI Writing Assistant Demo</h2><p>Welcome to the AI Assistant playground! <strong>Click the &#x2728; button</strong> in the toolbar and choose an action to test it on this text.</p><ul><li><strong>Rewrite</strong> &mdash; Select this sentence and try rewriting it in a different style.</li><li><strong>Translate</strong> &mdash; &ldquo;Bonjour, comment allez-vous aujourd&#x2019;hui ? J&#x2019;esp&egrave;re que tout va bien.&rdquo;</li><li><strong>Grammar</strong> &mdash; &ldquo;He go to school yesterday and she don&#x2019;t know what to do about there car.&rdquo;</li><li><strong>Summarize</strong> &mdash; Artificial intelligence (AI) is intelligence demonstrated by machines, as opposed to the natural intelligence displayed by animals and humans. AI research has been defined as the field of study of intelligent agents, which refers to any system that perceives its environment and takes actions that maximize its chance of achieving its goals.</li></ul><p><em>Tip: Select text above, then click the &#x2728; button. Or type your own content below!</em></p>'
   />
 </ClientOnly>
-
-> **Note:** The first time you use a feature, the browser will download the corresponding machine-learning model (60–350 MB, cached afterwards). The editor remains usable while the model loads.

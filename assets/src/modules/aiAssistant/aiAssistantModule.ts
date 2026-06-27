@@ -1,13 +1,13 @@
 import type Quill from 'quill';
-import { AiManager } from './aiManager';
-import type { AiFeature, AiFeatureInterface } from './aiTypes';
-import { RewriteFeature } from './features/rewriteFeature';
-import { TranslateFeature } from './features/translateFeature';
-import { GrammarFeature } from './features/grammarFeature';
-import { GenerateFeature } from './features/generateFeature';
-import { SummarizeFeature } from './features/summarizeFeature';
-import { SemanticFeature } from './features/semanticFeature';
-import { TocFeature } from './features/tocFeature';
+import { AiManager } from './aiManager.js';
+import type { AiFeature, AiFeatureInterface } from './aiTypes.js';
+import { RewriteFeature } from './features/rewriteFeature.js';
+import { TranslateFeature } from './features/translateFeature.js';
+import { GrammarFeature } from './features/grammarFeature.js';
+import { GenerateFeature } from './features/generateFeature.js';
+import { SummarizeFeature } from './features/summarizeFeature.js';
+import { SemanticFeature } from './features/semanticFeature.js';
+import { TocFeature } from './features/tocFeature.js';
 
 interface AiAssistantOptions {
   aiManager: AiManager;
@@ -155,6 +155,28 @@ function injectStyles(): void {
   z-index: 99998;
 }
 
+@keyframes aiSpinnerRotate {
+  to { transform: rotate(360deg); }
+}
+
+.ai-assistant-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 100001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,.7);
+}
+.ai-assistant-loading-spinner {
+  width: 36px;
+  height: 36px;
+  border: 4px solid #e0e0e0;
+  border-top-color: #06c;
+  border-radius: 50%;
+  animation: aiSpinnerRotate .7s linear infinite;
+}
+
 .ai-assistant-submenu {
   position: fixed;
   z-index: 100000;
@@ -290,6 +312,7 @@ export class AiAssistantModule {
   private button: HTMLElement | null = null;
   private panel: HTMLElement | null = null;
   private backdrop: HTMLElement | null = null;
+  private loadingEl: HTMLElement | null = null;
 
   constructor(quill: Quill, options: AiAssistantOptions) {
     this.quill = quill;
@@ -297,6 +320,13 @@ export class AiAssistantModule {
     injectStyles();
     this.initializeFeatures(options);
     this.addToolbarButton();
+    this.aiManager.onLoadingChange((loading) => {
+      if (loading) {
+        this.showLoading();
+      } else {
+        this.hideLoading();
+      }
+    });
   }
 
   private initializeFeatures(options: AiAssistantOptions): void {
@@ -485,6 +515,24 @@ export class AiAssistantModule {
 
     this.panel.style.left = `${left}px`;
     this.panel.style.top = `${top}px`;
+  }
+
+  private showLoading(): void {
+    if (this.loadingEl) return;
+    const el = document.createElement('div');
+    el.className = 'ai-assistant-loading';
+    const spinner = document.createElement('div');
+    spinner.className = 'ai-assistant-loading-spinner';
+    el.appendChild(spinner);
+    document.body.appendChild(el);
+    this.loadingEl = el;
+  }
+
+  private hideLoading(): void {
+    if (this.loadingEl) {
+      this.loadingEl.remove();
+      this.loadingEl = null;
+    }
   }
 
   private closePanel(): void {

@@ -1,5 +1,6 @@
-import type { AiManager } from '../aiManager';
-import type { AiFeature, AiFeatureInterface, RewriteStyle } from '../aiTypes';
+import type { AiManager } from '../aiManager.js';
+import type { AiFeature, AiFeatureInterface, RewriteStyle } from '../aiTypes.js';
+import { expandWordSelection } from '../utils/wordSelection.js';
 
 export class RewriteFeature implements AiFeatureInterface {
   readonly name: AiFeature = 'rewrite';
@@ -15,14 +16,16 @@ export class RewriteFeature implements AiFeatureInterface {
   }
 
   async trigger(): Promise<void> {
-    const quill = this.quill as { getSelection(): { index: number; length: number } | null; getText(index: number, length: number): string; updateContents(delta: { ops: Array<Record<string, unknown>> }): void; getLength(): number };
+    const quill = this.quill as { getSelection(): { index: number; length: number } | null; getText(index?: number, length?: number): string; updateContents(delta: { ops: Array<Record<string, unknown>> }): void; getLength(): number };
     const selection = quill.getSelection();
 
     if (!selection || selection.length === 0) {
       return;
     }
 
-    const selectedText = quill.getText(selection.index, selection.length).trim();
+    const fullText = quill.getText();
+    const wordRange = expandWordSelection(fullText, selection.index, selection.length);
+    const selectedText = quill.getText(wordRange.index, wordRange.length).trim();
     if (!selectedText) return;
 
     const style = await this.promptStyle();
@@ -31,15 +34,18 @@ export class RewriteFeature implements AiFeatureInterface {
     const provider = this.aiManager.getProvider();
 
     try {
+      this.aiManager.setLoading(true);
       const rewritten = await provider.rewrite(selectedText, style);
 
       quill.updateContents([
-        { retain: selection.index },
-        { delete: selection.length },
+        { retain: wordRange.index },
+        { delete: wordRange.length },
         { insert: rewritten },
       ]);
     } catch (error) {
       console.error('Rewrite failed:', error);
+    } finally {
+      this.aiManager.setLoading(false);
     }
   }
 

@@ -1,5 +1,6 @@
-import type { AiManager } from '../aiManager';
-import type { AiFeature, AiFeatureInterface } from '../aiTypes';
+import type { AiManager } from '../aiManager.js';
+import type { AiFeature, AiFeatureInterface } from '../aiTypes.js';
+import { expandWordSelection } from '../utils/wordSelection.js';
 
 export class TranslateFeature implements AiFeatureInterface {
   readonly name: AiFeature = 'translate';
@@ -15,14 +16,16 @@ export class TranslateFeature implements AiFeatureInterface {
   }
 
   async trigger(): Promise<void> {
-    const quill = this.quill as { getSelection(): { index: number; length: number } | null; getText(index: number, length: number): string; updateContents(delta: { ops: Array<Record<string, unknown>> }): void };
+    const quill = this.quill as { getSelection(): { index: number; length: number } | null; getText(index?: number, length?: number): string; updateContents(delta: { ops: Array<Record<string, unknown>> }): void };
     const selection = quill.getSelection();
 
     if (!selection || selection.length === 0) {
       return;
     }
 
-    const selectedText = quill.getText(selection.index, selection.length).trim();
+    const fullText = quill.getText();
+    const wordRange = expandWordSelection(fullText, selection.index, selection.length);
+    const selectedText = quill.getText(wordRange.index, wordRange.length).trim();
     if (!selectedText) return;
 
     const targetLang = await this.promptLanguage();
@@ -31,15 +34,18 @@ export class TranslateFeature implements AiFeatureInterface {
     const provider = this.aiManager.getProvider();
 
     try {
+      this.aiManager.setLoading(true);
       const translated = await provider.translate(selectedText, targetLang);
 
       quill.updateContents([
-        { retain: selection.index },
-        { delete: selection.length },
+        { retain: wordRange.index },
+        { delete: wordRange.length },
         { insert: translated },
       ]);
     } catch (error) {
       console.error('Translation failed:', error);
+    } finally {
+      this.aiManager.setLoading(false);
     }
   }
 
