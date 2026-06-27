@@ -44,26 +44,44 @@ export class RewriteFeature implements AiFeatureInterface {
   }
 
   private async promptStyle(): Promise<RewriteStyle | null> {
-    const styles: Array<{ value: RewriteStyle; label: string }> = [
-      { value: 'formal', label: 'Formel' },
-      { value: 'casual', label: 'Décontracté' },
-      { value: 'concise', label: 'Plus concis' },
-      { value: 'expanded', label: 'Plus développé' },
+    const styles: Array<{ value: RewriteStyle; label: string; desc: string }> = [
+      { value: 'formal', label: 'Formel', desc: 'Ton professionnel et soutenu' },
+      { value: 'casual', label: 'D\u00E9contract\u00E9', desc: 'Ton naturel et d\u00E9tendu' },
+      { value: 'concise', label: 'Plus concis', desc: 'Aller droit au but' },
+      { value: 'expanded', label: 'Plus d\u00E9velopp\u00E9', desc: 'Ajouter des d\u00E9tails et des nuances' },
     ];
 
     return new Promise((resolve) => {
       const container = document.createElement('div');
-      container.className = 'quill-ai-dropdown';
-      container.style.cssText =
-        'position:fixed;background:#fff;border:1px solid #ccc;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,0.15);z-index:9999;min-width:180px;';
+      container.className = 'ai-assistant-submenu';
+
+      const title = document.createElement('div');
+      title.className = 'ai-assistant-submenu-title';
+      title.textContent = 'Style de r\u00E9\u00E9criture';
+      container.appendChild(title);
 
       styles.forEach((s) => {
         const item = document.createElement('button');
-        item.textContent = s.label;
-        item.style.cssText =
-          'display:block;width:100%;padding:8px 16px;border:none;background:none;text-align:left;cursor:pointer;font-size:14px;';
-        item.addEventListener('mouseenter', () => { item.style.backgroundColor = '#f0f0f0'; });
-        item.addEventListener('mouseleave', () => { item.style.backgroundColor = ''; });
+        item.className = 'ai-assistant-submenu-item';
+
+        const iconMap: Record<string, string> = {
+          formal: '\uD83D\uDCDB',
+          casual: '\uD83D\uDE0A',
+          concise: '\u26A1',
+          expanded: '\uD83D\uDCD0',
+        };
+
+        const icon = document.createElement('span');
+        icon.textContent = iconMap[s.value] || '\u2728';
+        icon.style.cssText = 'flex-shrink:0;width:24px;text-align:center;font-size:16px;';
+
+        const text = document.createElement('span');
+        text.style.cssText = 'flex:1;min-width:0;';
+        text.innerHTML = `<div style="font-size:13px;font-weight:500;">${s.label}</div><div style="font-size:11px;color:#888;">${s.desc}</div>`;
+
+        item.appendChild(icon);
+        item.appendChild(text);
+
         item.addEventListener('click', () => {
           document.removeEventListener('click', outsideClick);
           container.remove();
@@ -88,8 +106,10 @@ export class RewriteFeature implements AiFeatureInterface {
 
       const rect = window.getSelection()?.getRangeAt(0)?.getBoundingClientRect();
       if (rect) {
+        const maxX = window.innerWidth - container.offsetWidth - 8;
+        const x = Math.max(8, Math.min(rect.left, maxX));
+        container.style.left = `${x}px`;
         container.style.top = `${rect.bottom + 4}px`;
-        container.style.left = `${rect.left}px`;
       } else {
         container.style.top = '50%';
         container.style.left = '50%';

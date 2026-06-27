@@ -260,6 +260,7 @@ new AiAssistantModule(options: [
   <QuillPlayground
     enabled="aiAssistant"
     placeholder="Write something and try the AI Assistant button in the toolbar…"
+    content='<h2>AI Writing Assistant Demo</h2><p>Welcome to the AI Assistant playground! <strong>Click the &#x2728; button</strong> in the toolbar and choose an action to test it on this text.</p><ul><li><strong>Rewrite</strong> &mdash; Select this sentence and try rewriting it in a different style.</li><li><strong>Translate</strong> &mdash; &ldquo;Bonjour, comment allez-vous aujourd&#x2019;hui ? J&#x2019;esp&egrave;re que tout va bien.&rdquo;</li><li><strong>Grammar</strong> &mdash; &ldquo;He go to school yesterday and she don&#x2019;t know what to do about there car.&rdquo;</li><li><strong>Summarize</strong> &mdash; Artificial intelligence (AI) is intelligence demonstrated by machines, as opposed to the natural intelligence displayed by animals and humans. AI research has been defined as the field of study of intelligent agents, which refers to any system that perceives its environment and takes actions that maximize its chance of achieving its goals.</li></ul><p><em>Tip: Select text above, then click the &#x2728; button. Or type your own content below!</em></p>'
   />
 </ClientOnly>
 

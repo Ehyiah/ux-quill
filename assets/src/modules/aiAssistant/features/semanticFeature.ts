@@ -31,30 +31,27 @@ export class SemanticFeature implements AiFeatureInterface {
 
   private showModal(result: SemanticResult): void {
     const overlay = document.createElement('div');
-    overlay.style.cssText =
-      'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.3);z-index:9998;display:flex;align-items:center;justify-content:center;';
+    overlay.className = 'ai-assistant-modal-overlay';
 
     const modal = document.createElement('div');
-    modal.style.cssText =
-      'background:#fff;border-radius:8px;padding:24px;width:450px;max-width:90vw;max-height:80vh;overflow-y:auto;box-shadow:0 4px 24px rgba(0,0,0,0.2);';
+    modal.className = 'ai-assistant-modal';
 
     const title = document.createElement('h3');
     title.textContent = 'Analyse du contenu';
-    title.style.cssText = 'margin:0 0 16px;font-size:18px;';
 
     const stats = document.createElement('div');
-    stats.style.cssText = 'margin-bottom:16px;padding:12px;background:#f5f5f5;border-radius:4px;font-size:14px;';
+    stats.style.cssText = 'margin-bottom:16px;padding:14px;background:#f7f8fa;border-radius:8px;font-size:13px;line-height:1.7;';
     stats.innerHTML = `
-      <strong>Statistiques</strong><br>
-      Mots : ${result.wordCount}<br>
+      <strong style="font-size:13px;">Statistiques</strong><br>
+      Mots : ${result.wordCount} &middot;
       Temps de lecture : ${result.readingTime} min<br>
       Sujets : ${result.topics.length > 0 ? result.topics.join(', ') : '—'}<br>
-      Mots-clés : ${result.keywords.length}
+      Mots-cl&eacute;s : ${result.keywords.length}
     `;
 
     const keywordsTitle = document.createElement('p');
     keywordsTitle.textContent = 'Mots-clés';
-    keywordsTitle.style.cssText = 'font-weight:600;margin:12px 0 8px;font-size:14px;';
+    keywordsTitle.style.cssText = 'font-weight:600;margin:14px 0 8px;font-size:13px;color:#555;';
 
     const keywordGrid = document.createElement('div');
     keywordGrid.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;';
@@ -67,25 +64,28 @@ export class SemanticFeature implements AiFeatureInterface {
       const opacity = Math.max(0.5, Math.min(1, 0.5 + (kw.frequency / maxFreq) * 0.5));
       tag.textContent = kw.word;
       tag.style.cssText =
-        `display:inline-block;padding:4px 8px;background:#e8f0fe;border-radius:4px;font-size:${size}em;opacity:${opacity};`;
+        `display:inline-block;padding:4px 10px;background:#e8f0fe;border-radius:6px;font-size:${size}em;opacity:${opacity};color:#1a1a1a;`;
       keywordGrid.appendChild(tag);
     });
 
+    const actions = document.createElement('div');
+    actions.className = 'ai-assistant-modal-actions';
+
     const closeBtn = document.createElement('button');
+    closeBtn.className = 'ai-assistant-btn-primary';
     closeBtn.textContent = 'Fermer';
-    closeBtn.style.cssText =
-      'display:block;margin-top:16px;margin-left:auto;padding:8px 24px;border:none;border-radius:4px;background:#0066cc;color:#fff;cursor:pointer;';
 
     closeBtn.addEventListener('click', () => overlay.remove());
     overlay.addEventListener('click', (e) => {
       if (e.target === overlay) overlay.remove();
     });
 
+    actions.appendChild(closeBtn);
     modal.appendChild(title);
     modal.appendChild(stats);
     modal.appendChild(keywordsTitle);
     modal.appendChild(keywordGrid);
-    modal.appendChild(closeBtn);
+    modal.appendChild(actions);
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
   }

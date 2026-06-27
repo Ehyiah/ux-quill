@@ -50,24 +50,35 @@ export class SummarizeFeature implements AiFeatureInterface {
   }
 
   private async promptFormat(): Promise<SummaryFormat | null> {
-    const options: Array<{ value: SummaryFormat; label: string }> = [
-      { value: 'paragraph', label: 'Paragraphe' },
-      { value: 'bullets', label: 'Points clés' },
+    const options: Array<{ value: SummaryFormat; label: string; desc: string; icon: string }> = [
+      { value: 'paragraph', label: 'Paragraphe', desc: 'R\u00E9sum\u00E9 r\u00E9dig\u00E9 en quelques phrases', icon: '\uD83D\uDCDD' },
+      { value: 'bullets', label: 'Points cl\u00E9s', desc: 'Liste des id\u00E9es principales', icon: '\uD83D\uDCCC' },
     ];
 
     return new Promise((resolve) => {
       const container = document.createElement('div');
-      container.className = 'quill-ai-dropdown';
-      container.style.cssText =
-        'position:fixed;background:#fff;border:1px solid #ccc;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,0.15);z-index:9999;min-width:160px;';
+      container.className = 'ai-assistant-submenu';
+
+      const title = document.createElement('div');
+      title.className = 'ai-assistant-submenu-title';
+      title.textContent = 'Format du r\u00E9sum\u00E9';
+      container.appendChild(title);
 
       options.forEach((opt) => {
         const item = document.createElement('button');
-        item.textContent = opt.label;
-        item.style.cssText =
-          'display:block;width:100%;padding:8px 16px;border:none;background:none;text-align:left;cursor:pointer;font-size:14px;';
-        item.addEventListener('mouseenter', () => { item.style.backgroundColor = '#f0f0f0'; });
-        item.addEventListener('mouseleave', () => { item.style.backgroundColor = ''; });
+        item.className = 'ai-assistant-submenu-item';
+
+        const icon = document.createElement('span');
+        icon.textContent = opt.icon;
+        icon.style.cssText = 'flex-shrink:0;width:24px;text-align:center;font-size:16px;';
+
+        const text = document.createElement('span');
+        text.style.cssText = 'flex:1;min-width:0;';
+        text.innerHTML = `<div style="font-size:13px;font-weight:500;">${opt.label}</div><div style="font-size:11px;color:#888;">${opt.desc}</div>`;
+
+        item.appendChild(icon);
+        item.appendChild(text);
+
         item.addEventListener('click', () => {
           document.removeEventListener('click', outsideClick);
           container.remove();
@@ -92,8 +103,10 @@ export class SummarizeFeature implements AiFeatureInterface {
 
       const rect = window.getSelection()?.getRangeAt(0)?.getBoundingClientRect();
       if (rect) {
+        const maxX = window.innerWidth - container.offsetWidth - 8;
+        const x = Math.max(8, Math.min(rect.left, maxX));
+        container.style.left = `${x}px`;
         container.style.top = `${rect.bottom + 4}px`;
-        container.style.left = `${rect.left}px`;
       } else {
         container.style.top = '50%';
         container.style.left = '50%';

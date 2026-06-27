@@ -61,34 +61,30 @@ export class GenerateFeature implements AiFeatureInterface {
   private async promptInput(): Promise<string | null> {
     return new Promise((resolve) => {
       const overlay = document.createElement('div');
-      overlay.style.cssText =
-        'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.3);z-index:9998;display:flex;align-items:center;justify-content:center;';
+      overlay.className = 'ai-assistant-modal-overlay';
 
       const modal = document.createElement('div');
-      modal.style.cssText =
-        'background:#fff;border-radius:8px;padding:24px;width:500px;max-width:90vw;box-shadow:0 4px 24px rgba(0,0,0,0.2);';
+      modal.className = 'ai-assistant-modal';
 
       const title = document.createElement('h3');
-      title.textContent = 'Générer du contenu';
-      title.style.cssText = 'margin:0 0 12px;font-size:18px;';
+      title.textContent = 'G\u00E9n\u00E9rer du contenu';
+
+      const desc = document.createElement('p');
+      desc.textContent = 'D\u00E9crivez ce que vous voulez g\u00E9n\u00E9rer, puis appuyez sur G\u00E9n\u00E9rer.';
 
       const textarea = document.createElement('textarea');
-      textarea.placeholder = 'Décrivez ce que vous voulez générer...';
-      textarea.style.cssText =
-        'width:100%;min-height:100px;padding:8px;border:1px solid #ccc;border-radius:4px;font-size:14px;resize:vertical;box-sizing:border-box;';
+      textarea.placeholder = 'Exemple : \u00C9cris un paragraphe sur les avantages du t\u00E9l\u00E9travail...';
 
-      const buttonRow = document.createElement('div');
-      buttonRow.style.cssText = 'display:flex;gap:8px;justify-content:flex-end;margin-top:12px;';
+      const actions = document.createElement('div');
+      actions.className = 'ai-assistant-modal-actions';
 
       const cancelBtn = document.createElement('button');
+      cancelBtn.className = 'ai-assistant-btn-secondary';
       cancelBtn.textContent = 'Annuler';
-      cancelBtn.style.cssText =
-        'padding:8px 16px;border:1px solid #ccc;border-radius:4px;background:#fff;cursor:pointer;';
 
       const submitBtn = document.createElement('button');
-      submitBtn.textContent = 'Générer';
-      submitBtn.style.cssText =
-        'padding:8px 16px;border:none;border-radius:4px;background:#0066cc;color:#fff;cursor:pointer;';
+      submitBtn.className = 'ai-assistant-btn-primary';
+      submitBtn.textContent = 'G\u00E9n\u00E9rer';
 
       cancelBtn.addEventListener('click', () => {
         overlay.remove();
@@ -110,11 +106,12 @@ export class GenerateFeature implements AiFeatureInterface {
         resolve(value || null);
       });
 
-      buttonRow.appendChild(cancelBtn);
-      buttonRow.appendChild(submitBtn);
+      actions.appendChild(cancelBtn);
+      actions.appendChild(submitBtn);
       modal.appendChild(title);
+      modal.appendChild(desc);
       modal.appendChild(textarea);
-      modal.appendChild(buttonRow);
+      modal.appendChild(actions);
       overlay.appendChild(modal);
       document.body.appendChild(overlay);
 

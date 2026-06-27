@@ -45,35 +45,48 @@ export class TranslateFeature implements AiFeatureInterface {
 
   private async promptLanguage(): Promise<string | null> {
     const languages = [
-      { code: 'fr', label: 'Français' },
-      { code: 'en', label: 'English' },
-      { code: 'es', label: 'Español' },
-      { code: 'de', label: 'Deutsch' },
-      { code: 'it', label: 'Italiano' },
-      { code: 'pt', label: 'Português' },
-      { code: 'nl', label: 'Nederlands' },
-      { code: 'pl', label: 'Polski' },
-      { code: 'ru', label: 'Русский' },
-      { code: 'zh', label: '中文' },
-      { code: 'ja', label: '日本語' },
-      { code: 'ko', label: '한국어' },
-      { code: 'ar', label: 'العربية' },
-      { code: 'hi', label: 'हिन्दी' },
+      { code: 'fr', label: 'Fran\u00E7ais', flag: '\uD83C\uDDEB\uD83C\uDDF7' },
+      { code: 'en', label: 'English', flag: '\uD83C\uDDEC\uD83C\uDDE7' },
+      { code: 'es', label: 'Espa\u00F1ol', flag: '\uD83C\uDDEA\uD83C\uDDF8' },
+      { code: 'de', label: 'Deutsch', flag: '\uD83C\uDDE9\uD83C\uDDEA' },
+      { code: 'it', label: 'Italiano', flag: '\uD83C\uDDEE\uD83C\uDDF9' },
+      { code: 'pt', label: 'Portugu\u00EAs', flag: '\uD83C\uDDF5\uD83C\uDDF9' },
+      { code: 'nl', label: 'Nederlands', flag: '\uD83C\uDDF3\uD83C\uDDF1' },
+      { code: 'pl', label: 'Polski', flag: '\uD83C\uDDF5\uD83C\uDDF1' },
+      { code: 'ru', label: '\u0420\u0443\u0441\u0441\u043A\u0438\u0439', flag: '\uD83C\uDDF7\uD83C\uDDFA' },
+      { code: 'zh', label: '\u4E2D\u6587', flag: '\uD83C\uDDE8\uD83C\uDDF3' },
+      { code: 'ja', label: '\u65E5\u672C\u8A9E', flag: '\uD83C\uDDEF\uD83C\uDDF5' },
+      { code: 'ko', label: '\uD55C\uAD6D\uC5B4', flag: '\uD83C\uDDF0\uD83C\uDDF7' },
+      { code: 'ar', label: '\u0627\u0644\u0639\u0631\u0628\u064A\u0629', flag: '\uD83C\uDDE6\uD83C\uDDEA' },
+      { code: 'hi', label: '\u0939\u093F\u0928\u094D\u0926\u0940', flag: '\uD83C\uDDEE\uD83C\uDDF3' },
     ];
 
     return new Promise((resolve) => {
       const container = document.createElement('div');
-      container.className = 'quill-ai-dropdown';
-      container.style.cssText =
-        'position:fixed;background:#fff;border:1px solid #ccc;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,0.15);z-index:9999;min-width:200px;max-height:300px;overflow-y:auto;';
+      container.className = 'ai-assistant-submenu';
+      container.style.maxHeight = '320px';
+      container.style.overflowY = 'auto';
+
+      const title = document.createElement('div');
+      title.className = 'ai-assistant-submenu-title';
+      title.textContent = 'Langue de destination';
+      container.appendChild(title);
 
       languages.forEach((lang) => {
         const item = document.createElement('button');
-        item.textContent = lang.label;
-        item.style.cssText =
-          'display:block;width:100%;padding:8px 16px;border:none;background:none;text-align:left;cursor:pointer;font-size:14px;';
-        item.addEventListener('mouseenter', () => { item.style.backgroundColor = '#f0f0f0'; });
-        item.addEventListener('mouseleave', () => { item.style.backgroundColor = ''; });
+        item.className = 'ai-assistant-submenu-item';
+
+        const icon = document.createElement('span');
+        icon.textContent = lang.flag;
+        icon.style.cssText = 'flex-shrink:0;width:24px;text-align:center;font-size:16px;';
+
+        const text = document.createElement('span');
+        text.style.cssText = 'flex:1;';
+        text.textContent = lang.label;
+
+        item.appendChild(icon);
+        item.appendChild(text);
+
         item.addEventListener('click', () => {
           document.removeEventListener('click', outsideClick);
           container.remove();
@@ -98,8 +111,10 @@ export class TranslateFeature implements AiFeatureInterface {
 
       const rect = window.getSelection()?.getRangeAt(0)?.getBoundingClientRect();
       if (rect) {
+        const maxX = window.innerWidth - container.offsetWidth - 8;
+        const x = Math.max(8, Math.min(rect.left, maxX));
+        container.style.left = `${x}px`;
         container.style.top = `${rect.bottom + 4}px`;
-        container.style.left = `${rect.left}px`;
       } else {
         container.style.top = '50%';
         container.style.left = '50%';
