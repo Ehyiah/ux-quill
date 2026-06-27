@@ -80,6 +80,29 @@ export type NotionToolbarOptions = {
     floatingToolbar?: boolean;
 }
 
+export type MapOptions = {
+    provider?: 'osm' | 'google';
+    center?: [number, number];
+    zoom?: number;
+    googleApiKey?: string | null;
+    tileUrl?: string | null;
+    height?: string;
+    scrollWheelZoom?: boolean;
+    draggable?: boolean;
+};
+
+export type MapValue = {
+    lat: number;
+    lng: number;
+    zoom: number;
+    provider: string;
+    googleApiKey?: string | null;
+    tileUrl?: string | null;
+    height?: string;
+    scrollWheelZoom?: boolean;
+    draggable?: boolean;
+};
+
 export interface ModuleInterface {
     name: string;
     options: any | ImageGalleryOptions | ReadingTimeOptions | SpeechToTextOptions | CountOptions | NotionToolbarOptions;
