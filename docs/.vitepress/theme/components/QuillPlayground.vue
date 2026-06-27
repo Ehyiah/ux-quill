@@ -179,6 +179,10 @@ const MODULE_DEFS: Record<string, ModuleDefEntry> = {
     toolbar: [],
     config: { slashModule: {} },
   },
+  map: {
+    toolbar: ['map'],
+    config: { map: { provider: 'osm', center: [48.8566, 2.3522], zoom: 13, height: '300px' } },
+  },
   link: {
     toolbar: ['link'],
     config: { linkAttributes: {} },
@@ -254,6 +258,7 @@ function buildConfig() {
         ['table-better'],
         ['divider', 'pageBreak'],
         ['imageGallery'],
+        ['map'],
       ],
       modules: {
         table: false,
@@ -308,6 +313,7 @@ function buildConfig() {
             { id: 6, value: 'Frank Castle' },
           ],
         },
+        map: { provider: 'osm', center: [48.8566, 2.3522], zoom: 13, height: '300px' },
       },
     }
   }

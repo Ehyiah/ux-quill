@@ -25,6 +25,11 @@ final class QuillContentExtension extends AbstractExtension
                 $this->renderStyles(...),
                 ['is_safe' => ['html']]
             ),
+            new TwigFunction(
+                'quill_content_scripts',
+                $this->renderScripts(...),
+                ['is_safe' => ['html']]
+            ),
         ];
     }
 
@@ -75,5 +80,24 @@ final class QuillContentExtension extends AbstractExtension
     private function link(string $url): string
     {
         return sprintf('<link rel="stylesheet" href="%s">', htmlspecialchars($url, ENT_QUOTES));
+    }
+
+    /**
+     * Emits the <script> tags required to initialize interactive Quill content (e.g. maps).
+     */
+    public function renderScripts(): string
+    {
+        if (null === $this->assetMapper) {
+            return '';
+        }
+
+        $scripts = [];
+
+        $mapInit = '@ehyiah/ux-quill/dist/map-init.js';
+        if ($this->shouldEmit($mapInit) && null !== $url = $this->assetMapper->getPublicPath($mapInit)) {
+            $scripts[] = sprintf('<script type="module" src="%s"></script>', htmlspecialchars($url, ENT_QUOTES));
+        }
+
+        return implode("\n", $scripts);
     }
 }
