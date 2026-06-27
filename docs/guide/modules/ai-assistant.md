@@ -1,5 +1,5 @@
 ---
-outline: [1, 5]
+outline: [1, 3]
 ---
 
 # AiAssistantModule
@@ -8,20 +8,32 @@ The AiAssistantModule adds an AI-powered writing assistant to the Quill editor.
 It provides seven features at the moment
 — reformulation, translation, grammar correction, content generation, summarization, semantic analysis, and automatic table of contents generation.
 
-## Provider options
+1. Choose a provider (see [Choose a provider](#choose-a-provider))
+2. Configure the module with it (see [Module configuration](#module-configuration))
+3. Configure the choosen provider
 
-The module supports two providers:
+# Choose a provider
+
+The module currently supports two types of providers:
 
 | Provider | Type | Description |
 | :--- | :--- | :--- |
 | **`api`** (recommended) | Backend proxy | Routes all AI requests through a PHP controller (`/_ux/quill/ai-assistant`) which calls an OpenAI-compatible API. API keys stay server-side (environment variables). |
-| **`transformers`** (not recommended or for testing purpose only)| Local browser (dormant) | Runs models entirely in-browser via `@huggingface/transformers` (ONNX runtime). Models are large (60–350 MB each) and quality of responses is very limited. No API key needed. |
+| **`transformers`** | Local browser (dormant) | Runs models entirely in-browser via `@huggingface/transformers` (ONNX runtime). Models are large (60–350 MB each) and quality of responses is very limited. No API key needed. |
 
-The recommended provider is `api` — configure your AI backend via environment variables (see [API configuration](#api-provider-configuration)).
+::: info
+The recommended provider is `api`, so you can have the better responses possible and call any LLM (chatGPT, claude, gemini or self-hosted)
+— configure your AI backend via environment variables (see [API configuration](#api-provider-configuration)).
+:::
+
+::: warning
+Provider **`transformers`** is not recommended or for testing purpose only, because the quality of responses is very poor.
+:::
+
 
 When enabled, the module adds a "star" icon button to the toolbar. Clicking it opens a dropdown menu listing the enabled features.
 
-## Configuration
+# Module configuration
 
 The AiAssistantModule is configured through the standard `modules` option, like all other modules:
 
@@ -62,7 +74,14 @@ $builder->add('content', QuillType::class, [
 | `'semantic'` | Analyser le contenu | Extract keywords, topics, and reading statistics |
 | `'toc'` | Générer le sommaire | Generate a table of contents from headings |
 
+# Providers configuration
+
 ## API provider configuration
+
+### Routing
+
+The AI Assistant backend controller is registered as a service automatically, but its route needs to be imported in your Symfony application. Create a file `config/routes/ux_quill.yaml` (or add to an existing one) with the following content:
+
 
 When using `provider: 'api'`, the module sends requests to a backend PHP controller (`/_ux/quill/ai-assistant`), which forwards them to an OpenAI-compatible API. Configure the connection via environment variables:
 
@@ -80,12 +99,8 @@ When using `provider: 'api'`, the module sends requests to a backend PHP control
 > **Unauthenticated endpoints:** When `QUILL_AI_API_KEY` is not set, the controller sends no `Authorization` header. This works with local endpoints like Ollama and LLM Studio.
 
 ::: warning
-You need to configure the route in order tu use `api` providers (see below).
+You need to configure the route in order tu use `api` providers.
 :::
-
-### Routing
-
-The AI Assistant backend controller is registered as a service automatically, but its route needs to be imported in your Symfony application. Create a file `config/routes/ux_quill.yaml` (or add to an existing one) with the following content:
 
 ```yaml
 # config/routes/ux_quill.yaml
@@ -153,9 +168,14 @@ $builder->add('content', QuillType::class, [
 ]);
 ```
 
+## Transformers provider configuration
+Nothing atm // TODO
+coming soon
+
+
 ---
 
-# Features
+# Available features
 
 ## Rewrite
 
@@ -292,7 +312,7 @@ The Semantic feature analyzes the document content and displays a modal with key
 
 ---
 
-## TOC
+## Table of contents
 
 The Table of Contents feature scans the editor's headings (`<h1>` through `<h6>`) and generates a bullet-point list of all headings, respecting the heading hierarchy. The list is inserted at the beginning of the document.
 
@@ -303,7 +323,7 @@ The Table of Contents feature scans the editor's headings (`<h1>` through `<h6>`
 
 **Note:** This feature works purely on DOM extraction — no model is downloaded. If the document has no headings, nothing is inserted.
 
-### TOC options
+### options
 
 | Sub-option | Type | Description | Default |
 | :--- | :--- | :--- | :--- |
