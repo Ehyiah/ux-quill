@@ -20,9 +20,11 @@ final class AiAssistantModule implements ModuleInterface
     public const MODELS_OPTION = 'models';
     public const REASONING_OPTION = 'reasoning';
     public const TEMPERATURE_OPTION = 'temperature';
+    public const UI_LANGUAGE_OPTION = 'ui_language';
     public const LABELS_OPTION = 'labels';
 
     private const ALLOWED_PROVIDERS = ['transformers', 'api', 'wllama'];
+    private const ALLOWED_LANGUAGES = ['en', 'fr', 'de', 'es'];
 
     public function __construct(
         public string $name = self::NAME,
@@ -47,6 +49,11 @@ final class AiAssistantModule implements ModuleInterface
         $provider = $merged[self::PROVIDER_OPTION] ?? null;
         if (null !== $provider && !in_array($provider, self::ALLOWED_PROVIDERS, true)) {
             throw new InvalidArgumentException(sprintf('AiAssistantModule provider must be one of: %s. Got "%s".', implode(', ', self::ALLOWED_PROVIDERS), $provider));
+        }
+
+        $uiLanguage = $merged[self::UI_LANGUAGE_OPTION] ?? null;
+        if (null !== $uiLanguage && !in_array($uiLanguage, self::ALLOWED_LANGUAGES, true)) {
+            throw new InvalidArgumentException(sprintf('AiAssistantModule ui_language must be one of: %s. Got "%s".', implode(', ', self::ALLOWED_LANGUAGES), $uiLanguage));
         }
 
         $this->rejectSensitiveKeys($merged);

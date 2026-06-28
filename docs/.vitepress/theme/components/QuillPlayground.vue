@@ -221,6 +221,7 @@ const MODULE_DEFS: Record<string, ModuleDefEntry> = {
     config: {},
     aiConfig: {
       provider: 'wllama',
+      ui_language : 'en',
       features: {
         rewrite: true,
         translate: true,

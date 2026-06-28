@@ -65,6 +65,8 @@ $builder->add('content', QuillType::class, [
 | **models** | `array` | Per-task model overrides (see [Per-task models](#per-task-models)) | `[]` |
 | **reasoning** | `bool` | Allow the model to show chain-of-thought reasoning. Set to `false` for models like Qwen that output long reasoning before the answer. | `true` |
 | **temperature** | `float` | Generation temperature (0.0 = deterministic, 1.0 = creative). Applies to all features across all providers. | `0.7` |
+| **ui_language** | `string` | UI language for all labels and buttons: `'en'`, `'fr'`, `'de'`, or `'es'` | `'en'` |
+| **labels** | `array` | Per-label overrides (see [Custom labels](#custom-labels)) | `[]` |
 | **translate** | `array` | Translation sub-options (see [Translation options](#translation-options)) | — |
 | **toc** | `array` | Table of contents sub-options (see [TOC options](#toc-options)) | — |
 
@@ -79,6 +81,80 @@ $builder->add('content', QuillType::class, [
 | `'summarize'` | Summarize | Summarize selected text or the full document |
 | `'semantic'` | Analyser le contenu | Extract keywords, topics, and reading statistics |
 | `'toc'` | Generate TOC | Generate a table of contents from headings |
+
+### UI language
+
+The module supports built-in translations for English, French, German, and Spanish. Set the `ui_language` option to switch all labels, buttons, and descriptions:
+
+```php
+new AiAssistantModule(options: [
+    'provider' => 'api',
+    'ui_language' => 'fr',
+    'features' => ['rewrite', 'translate', 'grammar'],
+]);
+```
+
+| Language | Code | Coverage |
+| :--- | :--- | :--- |
+| English | `'en'` | Full (default) |
+| French | `'fr'` | Full |
+| German | `'de'` | Full |
+| Spanish | `'es'` | Full |
+
+### Custom labels
+
+For unsupported languages or fine-grained control, use the `labels` option to override individual strings. The `labels` option takes priority over `ui_language`:
+
+```php
+new AiAssistantModule(options: [
+    'provider' => 'api',
+    'ui_language' => 'fr',
+    'labels' => [
+        'btnCancel' => 'Fermer',        // override a single label
+        'loadingModel' => 'Chargement...', // override another
+    ],
+]);
+```
+
+You can also use `labels` without `ui_language` for fully custom translations:
+
+```php
+new AiAssistantModule(options: [
+    'labels' => [
+        'featureRewrite' => 'My custom rewrite label',
+        'btnCancel' => 'Nope',
+    ],
+]);
+```
+
+Available label keys:
+
+| Key | Default (en) | Description |
+| :--- | :--- | :--- |
+| `featureRewrite` | Reformulate | Feature menu label |
+| `featureTranslate` | Translate | Feature menu label |
+| `featureGrammar` | Correct grammar | Feature menu label |
+| `featureGenerate` | Generate content | Feature menu label |
+| `featureSummarize` | Summarize | Feature menu label |
+| `featureSemantic` | Analyze content | Feature menu label |
+| `featureToc` | Generate TOC | Feature menu label |
+| `descRewrite` | Rewrite selected text in a different style | Feature menu description |
+| `descTranslate` | Translate to another language | Feature menu description |
+| `descGrammar` | Fix spelling and grammar mistakes | Feature menu description |
+| `descGenerate` | Generate text with AI | Feature menu description |
+| `descSummarize` | Summarize the content | Feature menu description |
+| `descSemantic` | Extract keywords and topics | Feature menu description |
+| `descToc` | Create a table of contents | Feature menu description |
+| `btnApply` | Apply | Review modal apply button |
+| `btnCancel` | Cancel | Cancel button |
+| `btnClose` | Close | Close button |
+| `btnGenerate` | Generate | Generate modal submit button |
+| `loadingModel` | Loading model... | Download progress text |
+| `preparing` | Preparing... | Post-download text |
+
+::: tip
+The `rewriteStyleLabel` key supports a `{style}` placeholder: `'Style: {style}'` (en) / `'Style : {style}'` (fr).
+:::
 
 # Providers configuration
 

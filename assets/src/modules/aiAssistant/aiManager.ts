@@ -1,5 +1,5 @@
 import type { AiOptions, AiFeature, AiProvider, AiLabels } from './aiTypes.js';
-import { DEFAULT_LABELS } from './aiTypes.js';
+import { DEFAULT_LABELS, LOCALES } from './aiTypes.js';
 import { ApiProvider } from './providers/api.js';
 import { TransformersProvider } from './providers/transformers.js';
 import { WllamaProvider } from './providers/wllama.js';
@@ -16,7 +16,9 @@ export class AiManager {
 
   constructor(options: AiOptions) {
     this.options = options;
-    this.labels = { ...DEFAULT_LABELS, ...options.labels };
+    const lang = options.ui_language || 'en';
+    const baseLabels = { ...DEFAULT_LABELS, ...LOCALES[lang] };
+    this.labels = { ...baseLabels, ...options.labels };
 
     switch (options.provider) {
       case 'api':
