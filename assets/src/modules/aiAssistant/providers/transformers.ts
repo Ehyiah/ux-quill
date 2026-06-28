@@ -21,11 +21,11 @@ const LANGUAGE_MAP: Record<string, string> = {
 };
 
 const MODEL_MAP: Record<string, { task: string; model: string }> = {
-  summarize: { task: 'summarization', model: 'Xenova/flan-t5-small' },
+  summarize: { task: 'summarization', model: 'Xenova/LaMini-Flan-T5-783M' },
   generate: { task: 'text-generation', model: 'Xenova/distilgpt2' },
-  grammar: { task: 'text2text-generation', model: 'Xenova/flan-t5-small' },
-  translate: { task: 'text2text-generation', model: 'Xenova/flan-t5-small' },
-  rewrite: { task: 'text2text-generation', model: 'Xenova/flan-t5-small' },
+  grammar: { task: 'text2text-generation', model: 'Xenova/LaMini-Flan-T5-783M' },
+  translate: { task: 'text2text-generation', model: 'Xenova/LaMini-Flan-T5-783M' },
+  rewrite: { task: 'text2text-generation', model: 'Xenova/LaMini-Flan-T5-783M' },
 };
 
 export class TransformersProvider extends BaseAiProvider {
@@ -36,6 +36,12 @@ export class TransformersProvider extends BaseAiProvider {
   private pipelines = new Map<string, PipelineFunction>();
   private loaders = new Map<string, PipelineLoader>();
   private modelProgress = new Map<string, number>();
+  private onProgress?: (progress: number) => void;
+
+  constructor(onProgress?: (progress: number) => void) {
+    super();
+    this.onProgress = onProgress;
+  }
 
   isAvailable(): boolean {
     return true;
@@ -68,17 +74,20 @@ export class TransformersProvider extends BaseAiProvider {
     }
 
     if (!this.loaders.has(key)) {
+      this.onProgress?.(0);
       this.loaders.set(
         key,
         getPipelineFn().then((pipeline) =>
           (pipeline as any)(config.task, config.model, {
-            quantized: false,
             progress_callback: (progress: { status: string; progress: number }) => {
-              if (progress.status === 'progress' && typeof progress.progress === 'number') {
-                this.modelProgress.set(key, Math.round(progress.progress * 100));
+              if (progress.status === 'progress_total' && typeof progress.progress === 'number') {
+                const pct = Math.round(progress.progress);
+                this.modelProgress.set(key, pct);
+                this.onProgress?.(pct);
               }
-              if (progress.status === 'done') {
+              if (progress.status === 'ready') {
                 this.modelProgress.set(key, 100);
+                this.onProgress?.(100);
               }
             },
           })
@@ -95,15 +104,17 @@ export class TransformersProvider extends BaseAiProvider {
     const pipe = await this.getPipeline('rewrite');
 
     const prefixMap: Record<RewriteStyle, string> = {
-      formal: 'formal:',
-      casual: 'casual:',
-      concise: 'concise:',
-      expanded: 'expanded:',
+      formal: 'Please rewrite the following text in a formal tone:\n',
+      casual: 'Please rewrite the following text in a casual tone:\n',
+      concise: 'Please rewrite the following text to be more concise:\n',
+      expanded: 'Please rewrite the following text to be more detailed:\n',
     };
 
-    const prompt = `${prefixMap[style]} ${text}`;
+    const prompt = `${prefixMap[style]}${text}`;
     const result = await pipe(prompt, {
-      max_new_tokens: Math.round(text.split(' ').length * 1.5) + 20,
+      max_new_tokens: Math.round(text.split(' ').length * 2) + 50,
+      temperature: 0.3,
+      do_sample: true,
     });
 
     return this.extractGeneratedText(result, prompt);
@@ -112,11 +123,13 @@ export class TransformersProvider extends BaseAiProvider {
   async translate(text: string, targetLang: string): Promise<string> {
     const pipe = await this.getPipeline('translate');
     const targetName = LANGUAGE_MAP[targetLang] || targetLang;
-    // il faudra permettre de custom la langue d'origine !!!!
-    const prompt = `translate English to ${targetName}: ${text}`;
+
+    const prompt = `Translate this from English to ${targetName}:\nEnglish: ${text}\n${targetName}:`;
 
     const result = await pipe(prompt, {
-      max_new_tokens: Math.round(text.split(' ').length * 2) + 20,
+      max_new_tokens: Math.round(text.split(' ').length * 3) + 50,
+      temperature: 0.3,
+      do_sample: true,
     });
 
     return this.extractGeneratedText(result, prompt);
@@ -124,10 +137,12 @@ export class TransformersProvider extends BaseAiProvider {
 
   async correct(text: string): Promise<GrammarSuggestion[]> {
     const pipe = await this.getPipeline('grammar');
-    const prompt = `grammar: ${text}`;
+    const prompt = `Please correct the grammar in the following text:\n${text}`;
 
     const result = await pipe(prompt, {
-      max_new_tokens: Math.round(text.split(' ').length * 1.3) + 10,
+      max_new_tokens: Math.round(text.split(' ').length * 2) + 30,
+      temperature: 0.2,
+      do_sample: true,
     });
 
     const corrected = this.extractGeneratedText(result, prompt);

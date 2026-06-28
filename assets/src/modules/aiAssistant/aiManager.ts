@@ -3,11 +3,13 @@ import { ApiProvider } from './providers/api.js';
 import { TransformersProvider } from './providers/transformers.js';
 
 type LoadingCallback = (loading: boolean) => void;
+type DownloadProgressCallback = (progress: number) => void;
 
 export class AiManager {
   private provider: AiProvider;
   private options: AiOptions;
   private loadingCallbacks: LoadingCallback[] = [];
+  private downloadProgressCallbacks: DownloadProgressCallback[] = [];
 
   constructor(options: AiOptions) {
     this.options = options;
@@ -17,7 +19,9 @@ export class AiManager {
           debug: options.debug,
           reasoning: options.reasoning,
         })
-      : new TransformersProvider();
+      : new TransformersProvider((progress: number) => {
+          this.emitDownloadProgress(progress);
+        });
   }
 
   onLoadingChange(callback: LoadingCallback): void {
@@ -26,6 +30,14 @@ export class AiManager {
 
   setLoading(loading: boolean): void {
     this.loadingCallbacks.forEach((cb) => cb(loading));
+  }
+
+  onDownloadProgress(callback: DownloadProgressCallback): void {
+    this.downloadProgressCallbacks.push(callback);
+  }
+
+  private emitDownloadProgress(progress: number): void {
+    this.downloadProgressCallbacks.forEach((cb) => cb(progress));
   }
 
   getProvider(): AiProvider {

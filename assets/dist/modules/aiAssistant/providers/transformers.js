@@ -25,7 +25,7 @@ const LANGUAGE_MAP = {
 const MODEL_MAP = {
   summarize: {
     task: 'summarization',
-    model: 'Xenova/flan-t5-small'
+    model: 'Xenova/LaMini-Flan-T5-783M'
   },
   generate: {
     task: 'text-generation',
@@ -33,26 +33,28 @@ const MODEL_MAP = {
   },
   grammar: {
     task: 'text2text-generation',
-    model: 'Xenova/flan-t5-small'
+    model: 'Xenova/LaMini-Flan-T5-783M'
   },
   translate: {
     task: 'text2text-generation',
-    model: 'Xenova/flan-t5-small'
+    model: 'Xenova/LaMini-Flan-T5-783M'
   },
   rewrite: {
     task: 'text2text-generation',
-    model: 'Xenova/flan-t5-small'
+    model: 'Xenova/LaMini-Flan-T5-783M'
   }
 };
 export class TransformersProvider extends BaseAiProvider {
-  constructor() {
-    super(...arguments);
+  constructor(onProgress) {
+    super();
     this.name = 'transformers';
     this.requiresApiKey = false;
     this.supportedFeatures = ['rewrite', 'translate', 'grammar', 'generate', 'summarize', 'semantic', 'toc'];
     this.pipelines = new Map();
     this.loaders = new Map();
     this.modelProgress = new Map();
+    this.onProgress = void 0;
+    this.onProgress = onProgress;
   }
   isAvailable() {
     return true;
@@ -80,14 +82,20 @@ export class TransformersProvider extends BaseAiProvider {
       return this.pipelines.get(key);
     }
     if (!this.loaders.has(key)) {
+      var _this$onProgress;
+      (_this$onProgress = this.onProgress) == null || _this$onProgress.call(this, 0);
       this.loaders.set(key, getPipelineFn().then(pipeline => pipeline(config.task, config.model, {
-        quantized: false,
         progress_callback: progress => {
-          if (progress.status === 'progress' && typeof progress.progress === 'number') {
-            this.modelProgress.set(key, Math.round(progress.progress * 100));
+          if (progress.status === 'progress_total' && typeof progress.progress === 'number') {
+            var _this$onProgress2;
+            const pct = Math.round(progress.progress);
+            this.modelProgress.set(key, pct);
+            (_this$onProgress2 = this.onProgress) == null || _this$onProgress2.call(this, pct);
           }
-          if (progress.status === 'done') {
+          if (progress.status === 'ready') {
+            var _this$onProgress3;
             this.modelProgress.set(key, 100);
+            (_this$onProgress3 = this.onProgress) == null || _this$onProgress3.call(this, 100);
           }
         }
       })));
@@ -99,32 +107,37 @@ export class TransformersProvider extends BaseAiProvider {
   async rewrite(text, style) {
     const pipe = await this.getPipeline('rewrite');
     const prefixMap = {
-      formal: 'formal:',
-      casual: 'casual:',
-      concise: 'concise:',
-      expanded: 'expanded:'
+      formal: 'Please rewrite the following text in a formal tone:\n',
+      casual: 'Please rewrite the following text in a casual tone:\n',
+      concise: 'Please rewrite the following text to be more concise:\n',
+      expanded: 'Please rewrite the following text to be more detailed:\n'
     };
-    const prompt = prefixMap[style] + " " + text;
+    const prompt = "" + prefixMap[style] + text;
     const result = await pipe(prompt, {
-      max_new_tokens: Math.round(text.split(' ').length * 1.5) + 20
+      max_new_tokens: Math.round(text.split(' ').length * 2) + 50,
+      temperature: 0.3,
+      do_sample: true
     });
     return this.extractGeneratedText(result, prompt);
   }
   async translate(text, targetLang) {
     const pipe = await this.getPipeline('translate');
     const targetName = LANGUAGE_MAP[targetLang] || targetLang;
-    // il faudra permettre de custom la langue d'origine !!!!
-    const prompt = "translate English to " + targetName + ": " + text;
+    const prompt = "Translate this from English to " + targetName + ":\nEnglish: " + text + "\n" + targetName + ":";
     const result = await pipe(prompt, {
-      max_new_tokens: Math.round(text.split(' ').length * 2) + 20
+      max_new_tokens: Math.round(text.split(' ').length * 3) + 50,
+      temperature: 0.3,
+      do_sample: true
     });
     return this.extractGeneratedText(result, prompt);
   }
   async correct(text) {
     const pipe = await this.getPipeline('grammar');
-    const prompt = "grammar: " + text;
+    const prompt = "Please correct the grammar in the following text:\n" + text;
     const result = await pipe(prompt, {
-      max_new_tokens: Math.round(text.split(' ').length * 1.3) + 10
+      max_new_tokens: Math.round(text.split(' ').length * 2) + 30,
+      temperature: 0.2,
+      do_sample: true
     });
     const corrected = this.extractGeneratedText(result, prompt);
     if (corrected === text || !corrected) {

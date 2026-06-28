@@ -176,6 +176,12 @@ function injectStyles(): void {
   border-radius: 50%;
   animation: aiSpinnerRotate .7s linear infinite;
 }
+.ai-assistant-loading-text {
+  margin-top: 12px;
+  color: #666;
+  font-size: 14px;
+  text-align: center;
+}
 
 .ai-assistant-submenu {
   position: fixed;
@@ -345,6 +351,16 @@ export class AiAssistantModule {
         this.showLoading();
       } else {
         this.hideLoading();
+      }
+    });
+    this.aiManager.onDownloadProgress((progress) => {
+      const el = this.loadingEl;
+      if (!el) return;
+      const textEl = el.querySelector('.ai-assistant-loading-text') as HTMLElement | null;
+      if (textEl) {
+        textEl.textContent = progress < 100
+          ? `Chargement du modèle... ${progress}%`
+          : 'Préparation...';
       }
     });
   }
@@ -541,9 +557,14 @@ export class AiAssistantModule {
     if (this.loadingEl) return;
     const el = document.createElement('div');
     el.className = 'ai-assistant-loading';
+    el.style.flexDirection = 'column';
     const spinner = document.createElement('div');
     spinner.className = 'ai-assistant-loading-spinner';
     el.appendChild(spinner);
+    const text = document.createElement('div');
+    text.className = 'ai-assistant-loading-text';
+    text.textContent = 'Chargement...';
+    el.appendChild(text);
     document.body.appendChild(el);
     this.loadingEl = el;
   }

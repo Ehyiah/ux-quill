@@ -6,18 +6,27 @@ export class AiManager {
     this.provider = void 0;
     this.options = void 0;
     this.loadingCallbacks = [];
+    this.downloadProgressCallbacks = [];
     this.options = options;
     this.provider = options.provider === 'api' ? new ApiProvider({
       models: options.models,
       debug: options.debug,
       reasoning: options.reasoning
-    }) : new TransformersProvider();
+    }) : new TransformersProvider(progress => {
+      this.emitDownloadProgress(progress);
+    });
   }
   onLoadingChange(callback) {
     this.loadingCallbacks.push(callback);
   }
   setLoading(loading) {
     this.loadingCallbacks.forEach(cb => cb(loading));
+  }
+  onDownloadProgress(callback) {
+    this.downloadProgressCallbacks.push(callback);
+  }
+  emitDownloadProgress(progress) {
+    this.downloadProgressCallbacks.forEach(cb => cb(progress));
   }
   getProvider() {
     return this.provider;
