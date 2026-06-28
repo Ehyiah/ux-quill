@@ -3,9 +3,16 @@ import type { AiFeature, AiFeatureInterface } from '../aiTypes.js';
 import { expandWordSelection } from '../utils/wordSelection.js';
 import { showReviewModal } from '../utils/reviewModal.js';
 
+const LANGUAGE_MAP: Record<string, string> = {
+  fr: 'French', en: 'English', es: 'Spanish', de: 'German',
+  it: 'Italian', pt: 'Portuguese', nl: 'Dutch', pl: 'Polish',
+  ru: 'Russian', zh: 'Chinese', ja: 'Japanese', ko: 'Korean',
+  ar: 'Arabic', hi: 'Hindi',
+};
+
 export class TranslateFeature implements AiFeatureInterface {
   readonly name: AiFeature = 'translate';
-  readonly label = 'Traduire';
+  readonly label: string;
   readonly requiresSelection = true;
 
   private quill: unknown;
@@ -14,6 +21,7 @@ export class TranslateFeature implements AiFeatureInterface {
   constructor(quill: unknown, aiManager: AiManager) {
     this.quill = quill;
     this.aiManager = aiManager;
+    this.label = aiManager.getLabels().featureTranslate;
   }
 
   async trigger(): Promise<void> {
@@ -39,12 +47,13 @@ export class TranslateFeature implements AiFeatureInterface {
       const translated = await provider.translate(selectedText, targetLang);
       this.aiManager.setLoading(false);
 
+      const labels = this.aiManager.getLabels();
       const edited = await showReviewModal({
-        title: 'Traduction',
-        description: `Traduit en ${targetLang}`,
+        title: labels.featureTranslate,
+        description: `${LANGUAGE_MAP[targetLang] || targetLang}`,
         originalText: selectedText,
         generatedText: translated,
-      });
+      }, labels);
 
       if (edited !== null) {
         quill.updateContents([
@@ -60,6 +69,7 @@ export class TranslateFeature implements AiFeatureInterface {
   }
 
   private async promptLanguage(): Promise<string | null> {
+    const labels = this.aiManager.getLabels();
     const languages = [
       { code: 'fr', label: 'Fran\u00E7ais', flag: '\uD83C\uDDEB\uD83C\uDDF7' },
       { code: 'en', label: 'English', flag: '\uD83C\uDDEC\uD83C\uDDE7' },
@@ -85,7 +95,7 @@ export class TranslateFeature implements AiFeatureInterface {
 
       const title = document.createElement('div');
       title.className = 'ai-assistant-submenu-title';
-      title.textContent = 'Langue de destination';
+      title.textContent = labels.translateTargetTitle;
       container.appendChild(title);
 
       languages.forEach((lang) => {

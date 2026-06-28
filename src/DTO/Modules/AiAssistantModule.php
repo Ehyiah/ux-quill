@@ -20,6 +20,7 @@ final class AiAssistantModule implements ModuleInterface
     public const MODELS_OPTION = 'models';
     public const REASONING_OPTION = 'reasoning';
     public const TEMPERATURE_OPTION = 'temperature';
+    public const LABELS_OPTION = 'labels';
 
     private const ALLOWED_PROVIDERS = ['transformers', 'api', 'wllama'];
 

@@ -1,12 +1,13 @@
 export class SemanticFeature {
   constructor(quill, aiManager) {
     this.name = 'semantic';
-    this.label = 'Analyser le contenu';
+    this.label = void 0;
     this.requiresSelection = false;
     this.quill = void 0;
     this.aiManager = void 0;
     this.quill = quill;
     this.aiManager = aiManager;
+    this.label = aiManager.getLabels().featureSemantic;
   }
   async trigger() {
     const quill = this.quill;
@@ -21,17 +22,18 @@ export class SemanticFeature {
     }
   }
   showModal(result) {
+    const labels = this.aiManager.getLabels();
     const overlay = document.createElement('div');
     overlay.className = 'ai-assistant-modal-overlay';
     const modal = document.createElement('div');
     modal.className = 'ai-assistant-modal';
     const title = document.createElement('h3');
-    title.textContent = 'Analyse du contenu';
+    title.textContent = labels.semanticTitle;
     const stats = document.createElement('div');
     stats.style.cssText = 'margin-bottom:16px;padding:14px;background:#f7f8fa;border-radius:8px;font-size:13px;line-height:1.7;';
-    stats.innerHTML = "\n      <strong style=\"font-size:13px;\">Statistiques</strong><br>\n      Mots : " + result.wordCount + " &middot;\n      Temps de lecture : " + result.readingTime + " min<br>\n      Sujets : " + (result.topics.length > 0 ? result.topics.join(', ') : '—') + "<br>\n      Mots-cl&eacute;s : " + result.keywords.length + "\n    ";
+    stats.innerHTML = "\n      <strong style=\"font-size:13px;\">" + labels.semanticStats + "</strong><br>\n      " + labels.semanticWords + " : " + result.wordCount + " &middot;\n      " + labels.semanticReadingTime + " : " + result.readingTime + " min<br>\n      " + labels.semanticTopics + " : " + (result.topics.length > 0 ? result.topics.join(', ') : '\u2014') + "<br>\n      " + labels.semanticKeywordsCount + " : " + result.keywords.length + "\n    ";
     const keywordsTitle = document.createElement('p');
-    keywordsTitle.textContent = 'Mots-clés';
+    keywordsTitle.textContent = labels.semanticKeywordsTitle;
     keywordsTitle.style.cssText = 'font-weight:600;margin:14px 0 8px;font-size:13px;color:#555;';
     const keywordGrid = document.createElement('div');
     keywordGrid.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;';
@@ -48,7 +50,7 @@ export class SemanticFeature {
     actions.className = 'ai-assistant-modal-actions';
     const closeBtn = document.createElement('button');
     closeBtn.className = 'ai-assistant-btn-primary';
-    closeBtn.textContent = 'Fermer';
+    closeBtn.textContent = labels.btnClose;
     closeBtn.addEventListener('click', () => overlay.remove());
     overlay.addEventListener('click', e => {
       if (e.target === overlay) overlay.remove();

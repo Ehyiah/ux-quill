@@ -1,14 +1,14 @@
-import { expandWordSelection } from "../utils/wordSelection.js";
 import { showReviewModal } from "../utils/reviewModal.js";
 export class GrammarFeature {
   constructor(quill, aiManager) {
     this.name = 'grammar';
-    this.label = 'Corriger la grammaire';
+    this.label = void 0;
     this.requiresSelection = false;
     this.quill = void 0;
     this.aiManager = void 0;
     this.quill = quill;
     this.aiManager = aiManager;
+    this.label = aiManager.getLabels().featureGrammar;
   }
   async trigger() {
     const quill = this.quill;
@@ -19,6 +19,9 @@ export class GrammarFeature {
     let replaceLength;
     if (useSelection) {
       const fullText = quill.getText();
+      const {
+        expandWordSelection
+      } = await import("../utils/wordSelection.js");
       const wordRange = expandWordSelection(fullText, selection.index, selection.length);
       text = quill.getText(wordRange.index, wordRange.length).trim();
       replaceIndex = wordRange.index;
@@ -30,6 +33,7 @@ export class GrammarFeature {
     }
     if (!text) return;
     const provider = this.aiManager.getProvider();
+    const labels = this.aiManager.getLabels();
     try {
       this.aiManager.setLoading(true);
       const suggestions = await provider.correct(text);
@@ -41,11 +45,11 @@ export class GrammarFeature {
       }
       if (correctedText === text) return;
       const edited = await showReviewModal({
-        title: 'Correction grammaticale',
-        description: 'Texte corrigé automatiquement',
+        title: labels.featureGrammar,
+        description: labels.grammarDescription,
         originalText: text,
         generatedText: correctedText
-      });
+      }, labels);
       if (edited !== null) {
         quill.updateContents([{
           retain: replaceIndex

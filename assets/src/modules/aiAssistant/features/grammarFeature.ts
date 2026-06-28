@@ -1,11 +1,10 @@
 import type { AiManager } from '../aiManager.js';
 import type { AiFeature, AiFeatureInterface } from '../aiTypes.js';
-import { expandWordSelection } from '../utils/wordSelection.js';
 import { showReviewModal } from '../utils/reviewModal.js';
 
 export class GrammarFeature implements AiFeatureInterface {
   readonly name: AiFeature = 'grammar';
-  readonly label = 'Corriger la grammaire';
+  readonly label: string;
   readonly requiresSelection = false;
 
   private quill: unknown;
@@ -14,6 +13,7 @@ export class GrammarFeature implements AiFeatureInterface {
   constructor(quill: unknown, aiManager: AiManager) {
     this.quill = quill;
     this.aiManager = aiManager;
+    this.label = aiManager.getLabels().featureGrammar;
   }
 
   async trigger(): Promise<void> {
@@ -32,6 +32,7 @@ export class GrammarFeature implements AiFeatureInterface {
 
     if (useSelection) {
       const fullText = quill.getText();
+      const { expandWordSelection } = await import('../utils/wordSelection.js');
       const wordRange = expandWordSelection(fullText, selection.index, selection.length);
       text = quill.getText(wordRange.index, wordRange.length).trim();
       replaceIndex = wordRange.index;
@@ -44,6 +45,7 @@ export class GrammarFeature implements AiFeatureInterface {
     if (!text) return;
 
     const provider = this.aiManager.getProvider();
+    const labels = this.aiManager.getLabels();
 
     try {
       this.aiManager.setLoading(true);
@@ -62,11 +64,11 @@ export class GrammarFeature implements AiFeatureInterface {
       if (correctedText === text) return;
 
       const edited = await showReviewModal({
-        title: 'Correction grammaticale',
-        description: 'Texte corrigé automatiquement',
+        title: labels.featureGrammar,
+        description: labels.grammarDescription,
         originalText: text,
         generatedText: correctedText,
-      });
+      }, labels);
 
       if (edited !== null) {
         quill.updateContents([

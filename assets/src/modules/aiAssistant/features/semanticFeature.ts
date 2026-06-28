@@ -3,7 +3,7 @@ import type { AiFeature, AiFeatureInterface, SemanticResult } from '../aiTypes.j
 
 export class SemanticFeature implements AiFeatureInterface {
   readonly name: AiFeature = 'semantic';
-  readonly label = 'Analyser le contenu';
+  readonly label: string;
   readonly requiresSelection = false;
 
   private quill: unknown;
@@ -12,6 +12,7 @@ export class SemanticFeature implements AiFeatureInterface {
   constructor(quill: unknown, aiManager: AiManager) {
     this.quill = quill;
     this.aiManager = aiManager;
+    this.label = aiManager.getLabels().featureSemantic;
   }
 
   async trigger(): Promise<void> {
@@ -30,6 +31,7 @@ export class SemanticFeature implements AiFeatureInterface {
   }
 
   private showModal(result: SemanticResult): void {
+    const labels = this.aiManager.getLabels();
     const overlay = document.createElement('div');
     overlay.className = 'ai-assistant-modal-overlay';
 
@@ -37,20 +39,20 @@ export class SemanticFeature implements AiFeatureInterface {
     modal.className = 'ai-assistant-modal';
 
     const title = document.createElement('h3');
-    title.textContent = 'Analyse du contenu';
+    title.textContent = labels.semanticTitle;
 
     const stats = document.createElement('div');
     stats.style.cssText = 'margin-bottom:16px;padding:14px;background:#f7f8fa;border-radius:8px;font-size:13px;line-height:1.7;';
     stats.innerHTML = `
-      <strong style="font-size:13px;">Statistiques</strong><br>
-      Mots : ${result.wordCount} &middot;
-      Temps de lecture : ${result.readingTime} min<br>
-      Sujets : ${result.topics.length > 0 ? result.topics.join(', ') : '—'}<br>
-      Mots-cl&eacute;s : ${result.keywords.length}
+      <strong style="font-size:13px;">${labels.semanticStats}</strong><br>
+      ${labels.semanticWords} : ${result.wordCount} &middot;
+      ${labels.semanticReadingTime} : ${result.readingTime} min<br>
+      ${labels.semanticTopics} : ${result.topics.length > 0 ? result.topics.join(', ') : '\u2014'}<br>
+      ${labels.semanticKeywordsCount} : ${result.keywords.length}
     `;
 
     const keywordsTitle = document.createElement('p');
-    keywordsTitle.textContent = 'Mots-clés';
+    keywordsTitle.textContent = labels.semanticKeywordsTitle;
     keywordsTitle.style.cssText = 'font-weight:600;margin:14px 0 8px;font-size:13px;color:#555;';
 
     const keywordGrid = document.createElement('div');
@@ -73,7 +75,7 @@ export class SemanticFeature implements AiFeatureInterface {
 
     const closeBtn = document.createElement('button');
     closeBtn.className = 'ai-assistant-btn-primary';
-    closeBtn.textContent = 'Fermer';
+    closeBtn.textContent = labels.btnClose;
 
     closeBtn.addEventListener('click', () => overlay.remove());
     overlay.addEventListener('click', (e) => {

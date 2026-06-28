@@ -9,7 +9,7 @@ interface TocEntry {
 
 export class TocFeature implements AiFeatureInterface {
   readonly name: AiFeature = 'toc';
-  readonly label = 'Générer le sommaire';
+  readonly label: string;
   readonly requiresSelection = false;
 
   private quill: unknown;
@@ -19,6 +19,7 @@ export class TocFeature implements AiFeatureInterface {
   constructor(quill: unknown, aiManager: AiManager, config: Record<string, unknown> = {}) {
     this.quill = quill;
     this.aiManager = aiManager;
+    this.label = aiManager.getLabels().featureToc;
     this.depth = (config.depth as number) || 3;
   }
 

@@ -5,7 +5,7 @@ import { showReviewModal } from '../utils/reviewModal.js';
 
 export class SummarizeFeature implements AiFeatureInterface {
   readonly name: AiFeature = 'summarize';
-  readonly label = 'Résumer';
+  readonly label: string;
   readonly requiresSelection = false;
 
   private quill: unknown;
@@ -14,6 +14,7 @@ export class SummarizeFeature implements AiFeatureInterface {
   constructor(quill: unknown, aiManager: AiManager) {
     this.quill = quill;
     this.aiManager = aiManager;
+    this.label = aiManager.getLabels().featureSummarize;
   }
 
   async trigger(): Promise<void> {
@@ -39,6 +40,7 @@ export class SummarizeFeature implements AiFeatureInterface {
     if (!format) return;
 
     const provider = this.aiManager.getProvider();
+    const labels = this.aiManager.getLabels();
 
     try {
       this.aiManager.setLoading(true);
@@ -46,14 +48,14 @@ export class SummarizeFeature implements AiFeatureInterface {
       this.aiManager.setLoading(false);
 
       const edited = await showReviewModal({
-        title: 'Résumé',
-        description: format === 'bullets' ? 'Points clés' : 'Résumé en paragraphe',
+        title: labels.summarizeResultTitle,
+        description: format === 'bullets' ? labels.summarizeResultBullets : labels.summarizeResultParagraph,
         originalText: textToSummarize,
         generatedText: summary,
-      });
+      }, labels);
 
       if (edited !== null) {
-        const prefix = format === 'bullets' ? '\n\nRésumé :\n' : '\n\nRésumé : ';
+        const prefix = format === 'bullets' ? labels.summarizePrefix : labels.summarizePrefix;
         quill.updateContents([
           { retain: insertIndex },
           { insert: `${prefix}${edited}` },
@@ -66,9 +68,10 @@ export class SummarizeFeature implements AiFeatureInterface {
   }
 
   private async promptFormat(): Promise<SummaryFormat | null> {
+    const labels = this.aiManager.getLabels();
     const options: Array<{ value: SummaryFormat; label: string; desc: string; icon: string }> = [
-      { value: 'paragraph', label: 'Paragraphe', desc: 'R\u00E9sum\u00E9 r\u00E9dig\u00E9 (s\u00E9lection ou document entier)', icon: '\uD83D\uDCDD' },
-      { value: 'bullets', label: 'Points cl\u00E9s', desc: 'Id\u00E9es principales (s\u00E9lection ou document entier)', icon: '\uD83D\uDCCC' },
+      { value: 'paragraph', label: labels.summarizeParagraph, desc: labels.summarizeParagraphDesc, icon: '\uD83D\uDCDD' },
+      { value: 'bullets', label: labels.summarizeBullets, desc: labels.summarizeBulletsDesc, icon: '\uD83D\uDCCC' },
     ];
 
     return new Promise((resolve) => {
@@ -77,7 +80,7 @@ export class SummarizeFeature implements AiFeatureInterface {
 
       const title = document.createElement('div');
       title.className = 'ai-assistant-submenu-title';
-      title.textContent = 'Format du r\u00E9sum\u00E9';
+      title.textContent = labels.summarizeFormatTitle;
       container.appendChild(title);
 
       options.forEach((opt) => {

@@ -1,14 +1,31 @@
 import { expandWordSelection } from "../utils/wordSelection.js";
 import { showReviewModal } from "../utils/reviewModal.js";
+const LANGUAGE_MAP = {
+  fr: 'French',
+  en: 'English',
+  es: 'Spanish',
+  de: 'German',
+  it: 'Italian',
+  pt: 'Portuguese',
+  nl: 'Dutch',
+  pl: 'Polish',
+  ru: 'Russian',
+  zh: 'Chinese',
+  ja: 'Japanese',
+  ko: 'Korean',
+  ar: 'Arabic',
+  hi: 'Hindi'
+};
 export class TranslateFeature {
   constructor(quill, aiManager) {
     this.name = 'translate';
-    this.label = 'Traduire';
+    this.label = void 0;
     this.requiresSelection = true;
     this.quill = void 0;
     this.aiManager = void 0;
     this.quill = quill;
     this.aiManager = aiManager;
+    this.label = aiManager.getLabels().featureTranslate;
   }
   async trigger() {
     const quill = this.quill;
@@ -27,12 +44,13 @@ export class TranslateFeature {
       this.aiManager.setLoading(true);
       const translated = await provider.translate(selectedText, targetLang);
       this.aiManager.setLoading(false);
+      const labels = this.aiManager.getLabels();
       const edited = await showReviewModal({
-        title: 'Traduction',
-        description: "Traduit en " + targetLang,
+        title: labels.featureTranslate,
+        description: "" + (LANGUAGE_MAP[targetLang] || targetLang),
         originalText: selectedText,
         generatedText: translated
-      });
+      }, labels);
       if (edited !== null) {
         quill.updateContents([{
           retain: wordRange.index
@@ -48,6 +66,7 @@ export class TranslateFeature {
     }
   }
   async promptLanguage() {
+    const labels = this.aiManager.getLabels();
     const languages = [{
       code: 'fr',
       label: 'Fran\u00E7ais',
@@ -113,7 +132,7 @@ export class TranslateFeature {
       container.style.overflowY = 'auto';
       const title = document.createElement('div');
       title.className = 'ai-assistant-submenu-title';
-      title.textContent = 'Langue de destination';
+      title.textContent = labels.translateTargetTitle;
       container.appendChild(title);
       languages.forEach(lang => {
         const item = document.createElement('button');

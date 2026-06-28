@@ -75,10 +75,10 @@ $builder->add('content', QuillType::class, [
 | `'rewrite'` | Reformuler | Rewrite selected text in a different style |
 | `'translate'` | Traduire | Translate selected text inline |
 | `'grammar'` | Corriger la grammaire | Fix grammar and spelling mistakes |
-| `'generate'` | Générer du contenu | Generate new content from a prompt (with streaming) |
-| `'summarize'` | Résumer | Summarize selected text or the full document |
+| `'generate'` | Generate content | Generate new content from a prompt (with streaming) |
+| `'summarize'` | Summarize | Summarize selected text or the full document |
 | `'semantic'` | Analyser le contenu | Extract keywords, topics, and reading statistics |
-| `'toc'` | Générer le sommaire | Generate a table of contents from headings |
+| `'toc'` | Generate TOC | Generate a table of contents from headings |
 
 # Providers configuration
 
@@ -105,7 +105,7 @@ When using `provider: 'api'`, the module sends requests to a backend PHP control
 > **Unauthenticated endpoints:** When `QUILL_AI_API_KEY` is not set, the controller sends no `Authorization` header. This works with local endpoints like Ollama and LLM Studio.
 
 ::: warning
-You need to configure the route in order tu use `api` providers.
+You need to configure the route in order to use `api` providers.
 :::
 
 ```yaml
@@ -350,17 +350,17 @@ The Rewrite feature reformulates the selected text in a different style. It is u
 **How it works:**
 1. Select the text to reformulate.
 2. Click the AI Assistant button <svg viewBox="0 0 18 18" width="14" height="14"><path d="M9 2 L11 7 L16 7 L12 10.5 L13.5 16 L9 12.5 L4.5 16 L6 10.5 L2 7 L7 7 Z" fill="currentColor"/></svg> in the toolbar.
-3. Choose **Reformuler**.
+3. Choose **Reformulate**.
 4. Select the desired style from the sub-menu.
 
 ### Available styles
 
 | Style | Effect |
 | :--- | :--- |
-| **Formel** | Professional, academic tone |
-| **Décontracté** | Casual, conversational tone |
-| **Plus concis** | Shorter, more direct phrasing |
-| **Plus développé** | Expanded, more detailed phrasing |
+| **Formal** | Professional, academic tone |
+| **Casual** | Casual, conversational tone |
+| **More concise** | Shorter, more direct phrasing |
+| **More detailed** | Expanded, more detailed phrasing |
 
 ---
 
@@ -371,19 +371,19 @@ The Translate feature translates the selected text into a target language. The o
 **How it works:**
 1. Select the text to translate.
 2. Click the AI Assistant button <svg viewBox="0 0 18 18" width="14" height="14"><path d="M9 2 L11 7 L16 7 L12 10.5 L13.5 16 L9 12.5 L4.5 16 L6 10.5 L2 7 L7 7 Z" fill="currentColor"/></svg>.
-3. Choose **Traduire**.
+3. Choose **Translate**.
 4. Select the target language from the list.
 
 ### Available languages
 
 | Code | Language |
 | :--- | :--- |
-| `fr` | Français |
+| `fr` | French |
 | `en` | English |
 | `es` | Español |
 | `de` | Deutsch |
 | `it` | Italiano |
-| `pt` | Português |
+| `pt` | Portuguese |
 | `nl` | Nederlands |
 | `pl` | Polski |
 | `ru` | Русский |
@@ -421,7 +421,7 @@ The Grammar feature analyzes the text and automatically corrects grammar and spe
 **How it works:**
 1. (Optional) Select a specific passage, or leave empty to check the full document.
 2. Click the AI Assistant button <svg viewBox="0 0 18 18" width="14" height="14"><path d="M9 2 L11 7 L16 7 L12 10.5 L13.5 16 L9 12.5 L4.5 16 L6 10.5 L2 7 L7 7 Z" fill="currentColor"/></svg>.
-3. Choose **Corriger la grammaire**.
+3. Choose **Correct grammar**.
 4. Corrections are applied automatically inline.
 
 ---
@@ -432,9 +432,9 @@ The Generate feature creates new content from a text prompt. It is useful for wr
 
 **How it works:**
 1. Click the AI Assistant button <svg viewBox="0 0 18 18" width="14" height="14"><path d="M9 2 L11 7 L16 7 L12 10.5 L13.5 16 L9 12.5 L4.5 16 L6 10.5 L2 7 L7 7 Z" fill="currentColor"/></svg>.
-2. Choose **Générer du contenu**.
+2. Choose **Generate content**.
 3. A modal dialog opens. Type your prompt (e.g., "Write an introduction about AI in healthcare").
-4. Press **Générer** (or `Ctrl`/`Cmd` + `Enter`).
+4. Press **Generate** (or `Ctrl`/`Cmd` + `Enter`).
 5. The generated text streams into the editor at the cursor position. Press `Escape` to close the modal without generating.
 
 ### Keyboard shortcuts (modal)
@@ -453,10 +453,10 @@ The Summarize feature condenses your content into a shorter version. By default 
 **How it works:**
 1. Leave **no text selected** to summarize the full document, or select a specific passage.
 2. Click the AI Assistant button <svg viewBox="0 0 18 18" width="14" height="14"><path d="M9 2 L11 7 L16 7 L12 10.5 L13.5 16 L9 12.5 L4.5 16 L6 10.5 L2 7 L7 7 Z" fill="currentColor"/></svg>.
-3. Choose **Résumer**.
+3. Choose **Summarize**.
 4. Select the output format:
    - **Paragraphe** — a flowing paragraph summary.
-   - **Points clés** — bullet-point list of main ideas.
+   - **Key points** — bullet-point list of main ideas.
 5. The summary is inserted after the selection, or at the end of the document if nothing was selected.
 
 ---
@@ -467,12 +467,12 @@ The Semantic feature analyzes the document content and displays a modal with key
 
 **How it works:**
 1. Click the AI Assistant button <svg viewBox="0 0 18 18" width="14" height="14"><path d="M9 2 L11 7 L16 7 L12 10.5 L13.5 16 L9 12.5 L4.5 16 L6 10.5 L2 7 L7 7 Z" fill="currentColor"/></svg>.
-2. Choose **Analyser le contenu**.
+2. Choose **Analyze content**.
 3. A modal displays:
    - **Word count** and **estimated reading time**
    - **Suggested topics** (auto-extracted)
    - **Keyword cloud** — the most frequent words, sized by frequency
-4. Click **Fermer** or anywhere outside the modal to close it.
+4. Click **Close** or anywhere outside the modal to close it.
 
 **Note:** This feature uses local word-frequency analysis (TF-IDF) — no model is downloaded. It works instantly on documents of any size.
 
@@ -484,7 +484,7 @@ The Table of Contents feature scans the editor's headings (`<h1>` through `<h6>`
 
 **How it works:**
 1. Click the AI Assistant button <svg viewBox="0 0 18 18" width="14" height="14"><path d="M9 2 L11 7 L16 7 L12 10.5 L13.5 16 L9 12.5 L4.5 16 L6 10.5 L2 7 L7 7 Z" fill="currentColor"/></svg>.
-2. Choose **Générer le sommaire**.
+2. Choose **Generate TOC**.
 3. A bullet-point list of all headings (respecting the configured depth) is inserted at position `0`.
 
 **Note:** This feature works purely on DOM extraction — no model is downloaded. If the document has no headings, nothing is inserted.

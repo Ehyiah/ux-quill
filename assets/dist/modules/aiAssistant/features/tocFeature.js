@@ -5,13 +5,14 @@ export class TocFeature {
       config = {};
     }
     this.name = 'toc';
-    this.label = 'Générer le sommaire';
+    this.label = void 0;
     this.requiresSelection = false;
     this.quill = void 0;
     this.aiManager = void 0;
     this.depth = void 0;
     this.quill = quill;
     this.aiManager = aiManager;
+    this.label = aiManager.getLabels().featureToc;
     this.depth = config.depth || 3;
   }
   async trigger() {

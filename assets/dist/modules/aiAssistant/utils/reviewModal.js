@@ -1,4 +1,6 @@
-export function showReviewModal(options) {
+import { DEFAULT_LABELS } from "../aiTypes.js";
+export function showReviewModal(options, labels) {
+  const l = labels || DEFAULT_LABELS;
   return new Promise(resolve => {
     const overlay = document.createElement('div');
     overlay.className = 'ai-assistant-modal-overlay';
@@ -23,10 +25,10 @@ export function showReviewModal(options) {
     actions.className = 'ai-assistant-modal-actions';
     const cancelBtn = document.createElement('button');
     cancelBtn.className = 'ai-assistant-btn-secondary';
-    cancelBtn.textContent = 'Annuler';
+    cancelBtn.textContent = l.btnCancel;
     const applyBtn = document.createElement('button');
     applyBtn.className = 'ai-assistant-btn-primary';
-    applyBtn.textContent = 'Appliquer';
+    applyBtn.textContent = l.btnApply;
     const cleanup = () => {
       overlay.remove();
     };

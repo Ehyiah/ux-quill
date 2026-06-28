@@ -1,4 +1,5 @@
-import type { AiOptions, AiFeature, AiProvider } from './aiTypes.js';
+import type { AiOptions, AiFeature, AiProvider, AiLabels } from './aiTypes.js';
+import { DEFAULT_LABELS } from './aiTypes.js';
 import { ApiProvider } from './providers/api.js';
 import { TransformersProvider } from './providers/transformers.js';
 import { WllamaProvider } from './providers/wllama.js';
@@ -9,11 +10,13 @@ type DownloadProgressCallback = (progress: number) => void;
 export class AiManager {
   private provider: AiProvider;
   private options: AiOptions;
+  private labels: AiLabels;
   private loadingCallbacks: LoadingCallback[] = [];
   private downloadProgressCallbacks: DownloadProgressCallback[] = [];
 
   constructor(options: AiOptions) {
     this.options = options;
+    this.labels = { ...DEFAULT_LABELS, ...options.labels };
 
     switch (options.provider) {
       case 'api':
@@ -60,6 +63,10 @@ export class AiManager {
 
   getProvider(): AiProvider {
     return this.provider;
+  }
+
+  getLabels(): AiLabels {
+    return this.labels;
   }
 
   isFeatureEnabled(feature: AiFeature): boolean {

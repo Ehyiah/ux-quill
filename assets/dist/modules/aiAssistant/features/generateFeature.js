@@ -2,12 +2,13 @@ import { showReviewModal } from "../utils/reviewModal.js";
 export class GenerateFeature {
   constructor(quill, aiManager) {
     this.name = 'generate';
-    this.label = 'Générer du contenu';
+    this.label = void 0;
     this.requiresSelection = false;
     this.quill = void 0;
     this.aiManager = void 0;
     this.quill = quill;
     this.aiManager = aiManager;
+    this.label = aiManager.getLabels().featureGenerate;
   }
   async trigger() {
     const prompt = await this.promptInput();
@@ -16,15 +17,16 @@ export class GenerateFeature {
     const selection = quill.getSelection();
     const insertIndex = selection ? selection.index : quill.getLength();
     const provider = this.aiManager.getProvider();
+    const labels = this.aiManager.getLabels();
     try {
       this.aiManager.setLoading(true);
       const result = await provider.generate(prompt);
       this.aiManager.setLoading(false);
       const edited = await showReviewModal({
-        title: 'Contenu généré',
-        description: 'Résultat de la génération',
+        title: labels.generateResultTitle,
+        description: labels.generateResultDesc,
         generatedText: result
-      });
+      }, labels);
       if (edited !== null) {
         quill.updateContents([{
           retain: insertIndex
@@ -38,25 +40,26 @@ export class GenerateFeature {
     }
   }
   async promptInput() {
+    const labels = this.aiManager.getLabels();
     return new Promise(resolve => {
       const overlay = document.createElement('div');
       overlay.className = 'ai-assistant-modal-overlay';
       const modal = document.createElement('div');
       modal.className = 'ai-assistant-modal';
       const title = document.createElement('h3');
-      title.textContent = 'G\u00E9n\u00E9rer du contenu';
+      title.textContent = labels.generateModalTitle;
       const desc = document.createElement('p');
-      desc.textContent = 'D\u00E9crivez ce que vous voulez g\u00E9n\u00E9rer, puis appuyez sur G\u00E9n\u00E9rer.';
+      desc.textContent = labels.generateDesc;
       const textarea = document.createElement('textarea');
-      textarea.placeholder = 'Exemple : \u00C9cris un paragraphe sur les avantages du t\u00E9l\u00E9travail...';
+      textarea.placeholder = labels.generatePlaceholder;
       const actions = document.createElement('div');
       actions.className = 'ai-assistant-modal-actions';
       const cancelBtn = document.createElement('button');
       cancelBtn.className = 'ai-assistant-btn-secondary';
-      cancelBtn.textContent = 'Annuler';
+      cancelBtn.textContent = labels.btnCancel;
       const submitBtn = document.createElement('button');
       submitBtn.className = 'ai-assistant-btn-primary';
-      submitBtn.textContent = 'G\u00E9n\u00E9rer';
+      submitBtn.textContent = labels.btnGenerate;
       cancelBtn.addEventListener('click', () => {
         overlay.remove();
         resolve(null);

@@ -3,12 +3,13 @@ import { showReviewModal } from "../utils/reviewModal.js";
 export class RewriteFeature {
   constructor(quill, aiManager) {
     this.name = 'rewrite';
-    this.label = 'Reformuler';
+    this.label = void 0;
     this.requiresSelection = true;
     this.quill = void 0;
     this.aiManager = void 0;
     this.quill = quill;
     this.aiManager = aiManager;
+    this.label = aiManager.getLabels().featureRewrite;
   }
   async trigger() {
     const quill = this.quill;
@@ -23,16 +24,17 @@ export class RewriteFeature {
     const style = await this.promptStyle();
     if (!style) return;
     const provider = this.aiManager.getProvider();
+    const labels = this.aiManager.getLabels();
     try {
       this.aiManager.setLoading(true);
       const rewritten = await provider.rewrite(selectedText, style);
       this.aiManager.setLoading(false);
       const edited = await showReviewModal({
-        title: 'Reformulation',
-        description: "Style : " + style,
+        title: labels.featureRewrite,
+        description: labels.rewriteStyleLabel.replace('{style}', style),
         originalText: selectedText,
         generatedText: rewritten
-      });
+      }, labels);
       if (edited !== null) {
         quill.updateContents([{
           retain: wordRange.index
@@ -48,22 +50,23 @@ export class RewriteFeature {
     }
   }
   async promptStyle() {
+    const labels = this.aiManager.getLabels();
     const styles = [{
       value: 'formal',
-      label: 'Formel',
-      desc: 'Ton professionnel et soutenu'
+      label: labels.rewriteFormal,
+      desc: labels.rewriteFormalDesc
     }, {
       value: 'casual',
-      label: 'D\u00E9contract\u00E9',
-      desc: 'Ton naturel et d\u00E9tendu'
+      label: labels.rewriteCasual,
+      desc: labels.rewriteCasualDesc
     }, {
       value: 'concise',
-      label: 'Plus concis',
-      desc: 'Aller droit au but'
+      label: labels.rewriteConcise,
+      desc: labels.rewriteConciseDesc
     }, {
       value: 'expanded',
-      label: 'Plus d\u00E9velopp\u00E9',
-      desc: 'Ajouter des d\u00E9tails et des nuances'
+      label: labels.rewriteExpanded,
+      desc: labels.rewriteExpandedDesc
     }];
     return new Promise(resolve => {
       var _window$getSelection;
@@ -71,7 +74,7 @@ export class RewriteFeature {
       container.className = 'ai-assistant-submenu';
       const title = document.createElement('div');
       title.className = 'ai-assistant-submenu-title';
-      title.textContent = 'Style de r\u00E9\u00E9criture';
+      title.textContent = labels.rewriteStyleTitle;
       container.appendChild(title);
       styles.forEach(s => {
         const item = document.createElement('button');

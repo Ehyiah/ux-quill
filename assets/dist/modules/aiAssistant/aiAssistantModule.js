@@ -5,47 +5,28 @@ import { GenerateFeature } from "./features/generateFeature.js";
 import { SummarizeFeature } from "./features/summarizeFeature.js";
 import { SemanticFeature } from "./features/semanticFeature.js";
 import { TocFeature } from "./features/tocFeature.js";
-const FEATURE_META = {
-  rewrite: {
-    icon: '\u270D\uFE0F',
-    desc: 'Changer le style du texte s\u00E9lectionn\u00E9',
-    group: 'edit'
-  },
-  translate: {
-    icon: '\uD83C\uDF10',
-    desc: 'Traduire dans une autre langue',
-    group: 'edit'
-  },
-  grammar: {
-    icon: '\u2714\uFE0F',
-    desc: 'Corriger les fautes d\u2019orthographe',
-    group: 'edit'
-  },
-  summarize: {
-    icon: '\uD83D\uDCDD',
-    desc: 'R\u00E9sumer le contenu',
-    group: 'create'
-  },
-  generate: {
-    icon: '\u2728',
-    desc: 'G\u00E9n\u00E9rer du texte par IA',
-    group: 'create'
-  },
-  semantic: {
-    icon: '\uD83D\uDCCA',
-    desc: 'Analyser les mots-cl\u00E9s et sujets',
-    group: 'analyze'
-  },
-  toc: {
-    icon: '\uD83D\uDCD1',
-    desc: 'Cr\u00E9er une table des mati\u00E8res',
-    group: 'analyze'
-  }
+const FEATURE_ICONS = {
+  rewrite: '\u270D\uFE0F',
+  translate: '\uD83C\uDF10',
+  grammar: '\u2714\uFE0F',
+  summarize: '\uD83D\uDCDD',
+  generate: '\u2728',
+  semantic: '\uD83D\uDCCA',
+  toc: '\uD83D\uDCD1'
+};
+const FEATURE_GROUPS = {
+  rewrite: 'edit',
+  translate: 'edit',
+  grammar: 'edit',
+  summarize: 'create',
+  generate: 'create',
+  semantic: 'analyze',
+  toc: 'analyze'
 };
 const GROUP_LABELS = {
-  edit: '\u00C9dition',
-  create: 'Cr\u00E9ation',
-  analyze: 'Analyse'
+  edit: 'Edit',
+  create: 'Create',
+  analyze: 'Analyze'
 };
 let stylesInjected = false;
 function injectStyles() {
@@ -81,7 +62,7 @@ export class AiAssistantModule {
       if (!el) return;
       const textEl = el.querySelector('.ai-assistant-loading-text');
       if (textEl) {
-        textEl.textContent = progress < 100 ? "Chargement du mod\xE8le... " + progress + "%" : 'Préparation...';
+        textEl.textContent = progress < 100 ? this.aiManager.getLabels().loadingModel + " " + progress + "%" : this.aiManager.getLabels().preparing;
       }
     });
   }
@@ -166,18 +147,27 @@ export class AiAssistantModule {
         } = _ref2;
         const item = document.createElement('button');
         item.className = 'ai-assistant-item';
-        const meta = FEATURE_META[feature.name];
         const icon = document.createElement('span');
         icon.className = 'ai-assistant-item-icon';
-        icon.textContent = (meta == null ? void 0 : meta.icon) || '\u2728';
+        icon.textContent = FEATURE_ICONS[feature.name] || '\u2728';
         const text = document.createElement('span');
         text.className = 'ai-assistant-item-text';
         const label = document.createElement('div');
         label.className = 'ai-assistant-item-label';
         label.textContent = instance.label;
+        const labels = this.aiManager.getLabels();
+        const descMap = {
+          rewrite: labels.descRewrite,
+          translate: labels.descTranslate,
+          grammar: labels.descGrammar,
+          generate: labels.descGenerate,
+          summarize: labels.descSummarize,
+          semantic: labels.descSemantic,
+          toc: labels.descToc
+        };
         const desc = document.createElement('div');
         desc.className = 'ai-assistant-item-desc';
-        desc.textContent = (meta == null ? void 0 : meta.desc) || '';
+        desc.textContent = descMap[feature.name] || '';
         text.appendChild(label);
         text.appendChild(desc);
         item.appendChild(icon);
@@ -200,8 +190,7 @@ export class AiAssistantModule {
       analyze: []
     };
     this.featureInstances.forEach(instance => {
-      const meta = FEATURE_META[instance.name];
-      const group = (meta == null ? void 0 : meta.group) || 'analyze';
+      const group = FEATURE_GROUPS[instance.name] || 'analyze';
       if (groups[group]) {
         groups[group].push({
           feature: instance,
