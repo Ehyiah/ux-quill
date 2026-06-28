@@ -196,9 +196,21 @@ bin/console importmap:require @wllama/wllama/esm/index.js
 
 ### How it works
 
-1. On first feature use, the provider downloads the GGUF model from HuggingFace (default: `Qwen/Qwen2.5-0.5B-Instruct-GGUF`, q4_k_m — ~350 MB).
+1. On first feature use, the provider downloads the GGUF model from HuggingFace (default: `Qwen/Qwen2.5-0.5B-Instruct-GGUF`, q4_k_m — ~350 MB).
 2. Download progress is shown in the loading overlay.
 3. All 7 features use `createChatCompletion()` with system/user messages.
+
+### GPU acceleration (WebGPU)
+
+Wllama automatically detects and uses **WebGPU** when available in the browser, which significantly speeds up inference. No configuration is needed — if your browser and GPU support WebGPU, it is enabled by default.
+
+- **Supported browsers:** Chrome 113+, Edge 113+, Opera 99+ (Firefox and Safari have partial/experimental support)
+- **How it works:** On startup, wllama checks `navigator.gpu`. If available, model layers are offloaded to the GPU automatically
+- **VRAM limits:** If the model is too large for your GPU's VRAM, wllama falls back to CPU automatically. No manual tuning is required
+
+::: tip
+WebGPU provides **2–5x faster inference** compared to CPU-only WASM. If you target modern browsers, wllama will use it transparently.
+:::
 
 ### Custom model
 
