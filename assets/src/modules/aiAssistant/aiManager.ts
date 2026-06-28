@@ -1,5 +1,6 @@
 import type { AiOptions, AiFeature, AiProvider } from './aiTypes.js';
 import { ApiProvider } from './providers/api.js';
+import { TransformersProvider } from './providers/transformers.js';
 
 type LoadingCallback = (loading: boolean) => void;
 
@@ -10,11 +11,13 @@ export class AiManager {
 
   constructor(options: AiOptions) {
     this.options = options;
-    this.provider = new ApiProvider({
-      models: options.models,
-      debug: options.debug,
-      reasoning: options.reasoning,
-    });
+    this.provider = options.provider === 'api'
+      ? new ApiProvider({
+          models: options.models,
+          debug: options.debug,
+          reasoning: options.reasoning,
+        })
+      : new TransformersProvider();
   }
 
   onLoadingChange(callback: LoadingCallback): void {
@@ -27,10 +30,6 @@ export class AiManager {
 
   getProvider(): AiProvider {
     return this.provider;
-  }
-
-  isFeatureSupported(feature: AiFeature): boolean {
-    return this.provider.supportedFeatures.includes(feature);
   }
 
   isFeatureEnabled(feature: AiFeature): boolean {

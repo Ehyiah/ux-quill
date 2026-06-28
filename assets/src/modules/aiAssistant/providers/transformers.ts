@@ -1,9 +1,17 @@
-import { pipeline } from '@huggingface/transformers';
 import { BaseAiProvider } from './base.js';
 import type { AiFeature, RewriteStyle, SummaryFormat, GrammarSuggestion, SemanticResult } from '../aiTypes';
 
 type PipelineFunction = (...args: unknown[]) => Promise<unknown>;
 type PipelineLoader = Promise<PipelineFunction>;
+
+let pipelinePromise: Promise<unknown> | null = null;
+
+async function getPipelineFn(): Promise<unknown> {
+  if (!pipelinePromise) {
+    pipelinePromise = import('@huggingface/transformers').then((mod) => mod.pipeline);
+  }
+  return pipelinePromise;
+}
 
 const LANGUAGE_MAP: Record<string, string> = {
   fr: 'French', en: 'English', es: 'Spanish', de: 'German',
@@ -13,11 +21,11 @@ const LANGUAGE_MAP: Record<string, string> = {
 };
 
 const MODEL_MAP: Record<string, { task: string; model: string }> = {
-  summarize: { task: 'summarization', model: 'Xenova/t5-small' },
+  summarize: { task: 'summarization', model: 'Xenova/flan-t5-small' },
   generate: { task: 'text-generation', model: 'Xenova/distilgpt2' },
-  grammar: { task: 'text2text-generation', model: 'Xenova/t5-small' },
-  translate: { task: 'text2text-generation', model: 'Xenova/t5-small' },
-  rewrite: { task: 'text2text-generation', model: 'Xenova/t5-small' },
+  grammar: { task: 'text2text-generation', model: 'Xenova/flan-t5-small' },
+  translate: { task: 'text2text-generation', model: 'Xenova/flan-t5-small' },
+  rewrite: { task: 'text2text-generation', model: 'Xenova/flan-t5-small' },
 };
 
 export class TransformersProvider extends BaseAiProvider {
@@ -30,7 +38,7 @@ export class TransformersProvider extends BaseAiProvider {
   private modelProgress = new Map<string, number>();
 
   isAvailable(): boolean {
-    return typeof pipeline === 'function';
+    return true;
   }
 
   onModelProgress(feature: AiFeature, callback: (progress: number) => void): void {
@@ -62,17 +70,19 @@ export class TransformersProvider extends BaseAiProvider {
     if (!this.loaders.has(key)) {
       this.loaders.set(
         key,
-        pipeline(config.task, config.model, {
-          // @ts-expect-error - progress_callback is valid in @huggingface/transformers
-          progress_callback: (progress: { status: string; progress: number }) => {
-            if (progress.status === 'progress' && typeof progress.progress === 'number') {
-              this.modelProgress.set(key, Math.round(progress.progress * 100));
-            }
-            if (progress.status === 'done') {
-              this.modelProgress.set(key, 100);
-            }
-          },
-        }) as PipelineLoader
+        getPipelineFn().then((pipeline) =>
+          (pipeline as any)(config.task, config.model, {
+            quantized: false,
+            progress_callback: (progress: { status: string; progress: number }) => {
+              if (progress.status === 'progress' && typeof progress.progress === 'number') {
+                this.modelProgress.set(key, Math.round(progress.progress * 100));
+              }
+              if (progress.status === 'done') {
+                this.modelProgress.set(key, 100);
+              }
+            },
+          })
+        ) as PipelineLoader
       );
     }
 

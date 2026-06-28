@@ -91,7 +91,7 @@ export class AiAssistantModule {
     Object.entries(features).forEach(_ref => {
       let [key, config] = _ref;
       const FeatureClass = featureMap[key];
-      if (FeatureClass && this.aiManager.isFeatureSupported(key)) {
+      if (FeatureClass) {
         const featureConfig = typeof config === 'object' && config !== null ? config : {};
         this.featureInstances.push(new FeatureClass(this.quill, this.aiManager, featureConfig));
       }

@@ -1,5 +1,11 @@
-import { pipeline } from '@huggingface/transformers';
 import { BaseAiProvider } from "./base.js";
+let pipelinePromise = null;
+async function getPipelineFn() {
+  if (!pipelinePromise) {
+    pipelinePromise = import('@huggingface/transformers').then(mod => mod.pipeline);
+  }
+  return pipelinePromise;
+}
 const LANGUAGE_MAP = {
   fr: 'French',
   en: 'English',
@@ -19,7 +25,7 @@ const LANGUAGE_MAP = {
 const MODEL_MAP = {
   summarize: {
     task: 'summarization',
-    model: 'Xenova/t5-small'
+    model: 'Xenova/flan-t5-small'
   },
   generate: {
     task: 'text-generation',
@@ -27,15 +33,15 @@ const MODEL_MAP = {
   },
   grammar: {
     task: 'text2text-generation',
-    model: 'Xenova/t5-small'
+    model: 'Xenova/flan-t5-small'
   },
   translate: {
     task: 'text2text-generation',
-    model: 'Xenova/t5-small'
+    model: 'Xenova/flan-t5-small'
   },
   rewrite: {
     task: 'text2text-generation',
-    model: 'Xenova/t5-small'
+    model: 'Xenova/flan-t5-small'
   }
 };
 export class TransformersProvider extends BaseAiProvider {
@@ -49,7 +55,7 @@ export class TransformersProvider extends BaseAiProvider {
     this.modelProgress = new Map();
   }
   isAvailable() {
-    return typeof pipeline === 'function';
+    return true;
   }
   onModelProgress(feature, callback) {
     var _MODEL_MAP$feature;
@@ -74,8 +80,8 @@ export class TransformersProvider extends BaseAiProvider {
       return this.pipelines.get(key);
     }
     if (!this.loaders.has(key)) {
-      this.loaders.set(key, pipeline(config.task, config.model, {
-        // @ts-expect-error - progress_callback is valid in @huggingface/transformers
+      this.loaders.set(key, getPipelineFn().then(pipeline => pipeline(config.task, config.model, {
+        quantized: false,
         progress_callback: progress => {
           if (progress.status === 'progress' && typeof progress.progress === 'number') {
             this.modelProgress.set(key, Math.round(progress.progress * 100));
@@ -84,7 +90,7 @@ export class TransformersProvider extends BaseAiProvider {
             this.modelProgress.set(key, 100);
           }
         }
-      }));
+      })));
     }
     const pipe = await this.loaders.get(key);
     this.pipelines.set(key, pipe);
