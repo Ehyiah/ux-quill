@@ -1,0 +1,268 @@
+import { BaseAiProvider } from './base.js';
+import type { AiFeature, RewriteStyle, SummaryFormat, GrammarSuggestion, SemanticResult } from '../aiTypes';
+
+type PipelineFunction = (...args: unknown[]) => Promise<unknown>;
+type PipelineLoader = Promise<PipelineFunction>;
+
+let pipelinePromise: Promise<unknown> | null = null;
+
+async function getPipelineFn(): Promise<unknown> {
+  if (!pipelinePromise) {
+    pipelinePromise = import('@huggingface/transformers').then((mod) => mod.pipeline);
+  }
+  return pipelinePromise;
+}
+
+const LANGUAGE_MAP: Record<string, string> = {
+  fr: 'French', en: 'English', es: 'Spanish', de: 'German',
+  it: 'Italian', pt: 'Portuguese', nl: 'Dutch', pl: 'Polish',
+  ru: 'Russian', zh: 'Chinese', ja: 'Japanese', ko: 'Korean',
+  ar: 'Arabic', hi: 'Hindi',
+};
+
+const MODEL_MAP: Record<string, { task: string; model: string }> = {
+  summarize: { task: 'summarization', model: 'Xenova/LaMini-Flan-T5-783M' },
+  generate: { task: 'text-generation', model: 'Xenova/distilgpt2' },
+  grammar: { task: 'text2text-generation', model: 'Xenova/LaMini-Flan-T5-783M' },
+  translate: { task: 'text2text-generation', model: 'Xenova/LaMini-Flan-T5-783M' },
+  rewrite: { task: 'text2text-generation', model: 'Xenova/LaMini-Flan-T5-783M' },
+};
+
+export class TransformersProvider extends BaseAiProvider {
+  readonly name = 'transformers';
+  readonly requiresApiKey = false;
+  readonly supportedFeatures: AiFeature[] = ['rewrite', 'translate', 'grammar', 'generate', 'summarize', 'semantic', 'toc'];
+
+  private pipelines = new Map<string, PipelineFunction>();
+  private loaders = new Map<string, PipelineLoader>();
+  private modelProgress = new Map<string, number>();
+  private onProgress?: (progress: number) => void;
+  private temperature: number;
+
+  constructor(onProgress?: (progress: number) => void, temperature?: number) {
+    super();
+    this.onProgress = onProgress;
+    this.temperature = temperature ?? 0.7;
+  }
+
+  isAvailable(): boolean {
+    return true;
+  }
+
+  onModelProgress(feature: AiFeature, callback: (progress: number) => void): void {
+    const key = MODEL_MAP[feature]?.model || feature;
+    this.modelProgress.set(key, 0);
+    const originalCallback = callback;
+
+    const interval = setInterval(() => {
+      const current = this.modelProgress.get(key) || 0;
+      originalCallback(current);
+      if (current >= 100) {
+        clearInterval(interval);
+      }
+    }, 200);
+  }
+
+  private async getPipeline(feature: AiFeature): Promise<PipelineFunction> {
+    const config = MODEL_MAP[feature];
+    if (!config) {
+      throw new Error(`No model configured for feature: ${feature}`);
+    }
+
+    const key = `${config.task}:${config.model}`;
+
+    if (this.pipelines.has(key)) {
+      return this.pipelines.get(key)!;
+    }
+
+    if (!this.loaders.has(key)) {
+      this.onProgress?.(0);
+      this.loaders.set(
+        key,
+        getPipelineFn().then((pipeline) =>
+          (pipeline as any)(config.task, config.model, {
+            progress_callback: (progress: { status: string; progress: number }) => {
+              if (progress.status === 'progress_total' && typeof progress.progress === 'number') {
+                const pct = Math.round(progress.progress);
+                this.modelProgress.set(key, pct);
+                this.onProgress?.(pct);
+              }
+              if (progress.status === 'ready') {
+                this.modelProgress.set(key, 100);
+                this.onProgress?.(100);
+              }
+            },
+          })
+        ) as PipelineLoader
+      );
+    }
+
+    const pipe = await this.loaders.get(key)!;
+    this.pipelines.set(key, pipe);
+    return pipe;
+  }
+
+  async rewrite(text: string, style: RewriteStyle): Promise<string> {
+    const pipe = await this.getPipeline('rewrite');
+
+    const prefixMap: Record<RewriteStyle, string> = {
+      formal: 'Please rewrite the following text in a formal tone:\n',
+      casual: 'Please rewrite the following text in a casual tone:\n',
+      concise: 'Please rewrite the following text to be more concise:\n',
+      expanded: 'Please rewrite the following text to be more detailed:\n',
+    };
+
+    const prompt = `${prefixMap[style]}${text}`;
+    const result = await pipe(prompt, {
+      max_new_tokens: Math.round(text.split(' ').length * 2) + 50,
+      temperature: this.temperature,
+      do_sample: true,
+    });
+
+    return this.extractGeneratedText(result, prompt);
+  }
+
+  async translate(text: string, targetLang: string): Promise<string> {
+    const pipe = await this.getPipeline('translate');
+    const targetName = LANGUAGE_MAP[targetLang] || targetLang;
+
+    const prompt = `Translate the following text to ${targetName}:\n${text}`;
+
+    const result = await pipe(prompt, {
+      max_new_tokens: Math.round(text.split(' ').length * 3) + 50,
+      temperature: this.temperature,
+      do_sample: true,
+    });
+
+    return this.extractGeneratedText(result, prompt);
+  }
+
+  async correct(text: string): Promise<GrammarSuggestion[]> {
+    const pipe = await this.getPipeline('grammar');
+    const prompt = `Correct the grammatical errors in the following text. Detect the language and preserve it:\n${text}`;
+
+    const result = await pipe(prompt, {
+      max_new_tokens: Math.round(text.split(' ').length * 2) + 30,
+      temperature: this.temperature,
+      do_sample: true,
+    });
+
+    const corrected = this.extractGeneratedText(result, prompt);
+
+    if (corrected === text || !corrected) {
+      return [];
+    }
+
+    return [
+      {
+        original: text,
+        suggestion: corrected,
+        explanation: 'Grammar correction applied',
+        offset: 0,
+        length: text.length,
+      },
+    ];
+  }
+
+  async generate(prompt: string, onStream?: (chunk: string) => void): Promise<string> {
+    const pipe = await this.getPipeline('generate');
+
+    if (onStream) {
+      const result = await pipe(prompt, {
+        max_new_tokens: 150,
+        do_sample: true,
+        temperature: this.temperature,
+        // @ts-expect-error - callback is valid
+        callback: (token: string) => {
+          onStream(token);
+        },
+      });
+
+      return this.extractGeneratedText(result, prompt);
+    }
+
+    const result = await pipe(prompt, {
+      max_new_tokens: 150,
+      do_sample: true,
+      temperature: this.temperature,
+    });
+
+    return this.extractGeneratedText(result, prompt);
+  }
+
+  async summarize(text: string, format: SummaryFormat): Promise<string> {
+    const pipe = await this.getPipeline('summarize');
+
+    const maxLength = format === 'bullets' ? 80 : 130;
+    const minLength = format === 'bullets' ? 30 : 40;
+
+    const result = await pipe(text, {
+      max_length: maxLength,
+      min_length: minLength,
+    });
+
+    const summary = this.extractGeneratedText(result);
+
+    if (format === 'bullets') {
+      return summary
+        .split('.')
+        .filter((s) => s.trim().length > 0)
+        .map((s) => `• ${s.trim()}.`)
+        .join('\n');
+    }
+
+    return summary;
+  }
+
+  async analyze(_text: string): Promise<SemanticResult> {
+    const wordCount = _text.split(/\s+/).filter(Boolean).length;
+    const words = _text.toLowerCase().match(/\b\w{3,}\b/g) || [];
+    const frequency = new Map<string, number>();
+
+    words.forEach((w) => {
+      frequency.set(w, (frequency.get(w) || 0) + 1);
+    });
+
+    const keywords = Array.from(frequency.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 20)
+      .map(([word, freq]) => ({ word, frequency: freq }));
+
+    const readingTime = Math.max(1, Math.round(wordCount / 200));
+
+    return {
+      keywords,
+      topics: this.extractTopics(keywords),
+      wordCount,
+      readingTime,
+    };
+  }
+
+  private extractTopics(keywords: Array<{ word: string; frequency: number }>): string[] {
+    return keywords
+      .filter((k) => k.frequency > 1)
+      .slice(0, 5)
+      .map((k) => k.word);
+  }
+
+  private extractGeneratedText(result: unknown, prompt?: string): string {
+    if (Array.isArray(result)) {
+      const first = result[0] as Record<string, unknown>;
+      if (first && typeof first.summary_text === 'string') {
+        return first.summary_text.trim();
+      }
+      if (first && typeof first.translation_text === 'string') {
+        return first.translation_text.trim();
+      }
+      if (first && typeof first.generated_text === 'string') {
+        let text = first.generated_text.trim();
+        if (prompt && text.startsWith(prompt)) {
+          text = text.slice(prompt.length).trim();
+        }
+        return text;
+      }
+    }
+    if (typeof result === 'string') return result;
+    return String(result || '');
+  }
+}

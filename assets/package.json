@@ -49,7 +49,8 @@
             "katex": "^0.16.9",
             "katex/dist/katex.min.css": "^0.16.9",
             "eventemitter3": "^5.0.1",
-            "lodash-es": "^4.17.21"
+            "lodash-es": "^4.17.21",
+            "@huggingface/transformers": "^4.2.0"
         }
     },
     "scripts": {
@@ -99,6 +100,8 @@
     },
     "peerDependencies": {
         "@hotwired/stimulus": "^3.0.0",
+        "@huggingface/transformers": "^4.2.0",
+        "@wllama/wllama": "^3.5.1",
         "axios": "^1.4.0",
         "eventemitter3": "^5.0.1",
         "lodash-es": "^4.17.21",
@@ -114,6 +117,8 @@
     },
     "dependencies": {
         "@hotwired/stimulus": "^3.0.0",
+        "@huggingface/transformers": "^4.2.0",
+        "@wllama/wllama": "^3.5.1",
         "axios": "^1.4.0",
         "eventemitter3": "^5.0.1",
         "lodash-es": "^4.17.21",
@@ -163,9 +168,12 @@
             "<rootDir>/tests/setup/jest.setup.ts"
         ],
         "moduleNameMapper": {
-            "\\.(css|less)$": "<rootDir>/tests/setup/__mocks__/styleMock.js",
-            "^../src/blots/image$": "<rootDir>/tests/setup/__mocks__/image.ts",
-            "^quill$": "<rootDir>/tests/setup/__mocks__/quill.ts"
+        "^(\\.{1,2}/.*)\\.js$": "$1",
+        "\\.(css|less)$": "<rootDir>/tests/setup/__mocks__/styleMock.js",
+        "^../src/blots/image$": "<rootDir>/tests/setup/__mocks__/image.ts",
+        "^quill$": "<rootDir>/tests/setup/__mocks__/quill.ts",
+            "^@huggingface/transformers$": "<rootDir>/tests/setup/__mocks__/transformers.js",
+            "^@wllama/wllama$": "<rootDir>/tests/setup/__mocks__/wllama.js"
         },
         "testMatch": [
             "<rootDir>/tests/**/*.test.ts"
@@ -178,7 +186,7 @@
             "^.+\\.tsx?$": "ts-jest"
         },
         "transformIgnorePatterns": [
-            "/node_modules/(?!quill|quill2-emoji)"
+            "/node_modules/(?!quill|quill2-emoji|@huggingface/transformers|@wllama/wllama)"
         ],
         "rootDir": ".",
         "moduleFileExtensions": [

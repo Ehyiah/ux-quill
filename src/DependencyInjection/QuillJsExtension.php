@@ -3,6 +3,8 @@
 namespace Ehyiah\QuillJsBundle\DependencyInjection;
 
 use Ehyiah\QuillJsBundle\Config\QuillConfigBuilder;
+use Ehyiah\QuillJsBundle\Controller\AiAssistantController;
+use Ehyiah\QuillJsBundle\DTO\Modules\Config\AiAssistantConfig;
 use Ehyiah\QuillJsBundle\Form\QuillAdminField;
 use Ehyiah\QuillJsBundle\Form\QuillType;
 use Ehyiah\QuillJsBundle\Twig\Components\QuillContent;
@@ -82,6 +84,22 @@ class QuillJsExtension extends Extension implements PrependExtensionInterface
                 ->setPublic(false)
             ;
         }
+
+        // Register the AI Assistant config DTO from environment variables
+        $container->setDefinition(AiAssistantConfig::class, (new Definition(AiAssistantConfig::class))
+            ->setArgument('$apiKey', '%env(default::QUILL_AI_API_KEY)%')
+            ->setArgument('$apiUrl', '%env(default::QUILL_AI_API_URL)%')
+            ->setArgument('$model', '%env(default::QUILL_AI_MODEL)%')
+            ->setArgument('$maxTokens', '%env(default::QUILL_AI_MAX_TOKENS)%')
+            ->setArgument('$temperature', '%env(default::QUILL_AI_TEMPERATURE)%')
+            ->setArgument('$timeout', '%env(default::QUILL_AI_TIMEOUT)%')
+        );
+
+        // Register the AI Assistant controller
+        $container->setDefinition(AiAssistantController::class, (new Definition(AiAssistantController::class))
+            ->setArgument('$config', new Reference(AiAssistantConfig::class))
+            ->addTag('controller.service_arguments')
+        );
     }
 
     private function isAssetMapperAvailable(ContainerBuilder $container): bool
