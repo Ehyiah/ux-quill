@@ -37,10 +37,12 @@ export class TransformersProvider extends BaseAiProvider {
   private loaders = new Map<string, PipelineLoader>();
   private modelProgress = new Map<string, number>();
   private onProgress?: (progress: number) => void;
+  private temperature: number;
 
-  constructor(onProgress?: (progress: number) => void) {
+  constructor(onProgress?: (progress: number) => void, temperature?: number) {
     super();
     this.onProgress = onProgress;
+    this.temperature = temperature ?? 0.7;
   }
 
   isAvailable(): boolean {
@@ -113,7 +115,7 @@ export class TransformersProvider extends BaseAiProvider {
     const prompt = `${prefixMap[style]}${text}`;
     const result = await pipe(prompt, {
       max_new_tokens: Math.round(text.split(' ').length * 2) + 50,
-      temperature: 0.3,
+      temperature: this.temperature,
       do_sample: true,
     });
 
@@ -128,7 +130,7 @@ export class TransformersProvider extends BaseAiProvider {
 
     const result = await pipe(prompt, {
       max_new_tokens: Math.round(text.split(' ').length * 3) + 50,
-      temperature: 0.3,
+      temperature: this.temperature,
       do_sample: true,
     });
 
@@ -141,7 +143,7 @@ export class TransformersProvider extends BaseAiProvider {
 
     const result = await pipe(prompt, {
       max_new_tokens: Math.round(text.split(' ').length * 2) + 30,
-      temperature: 0.2,
+      temperature: this.temperature,
       do_sample: true,
     });
 
@@ -169,7 +171,7 @@ export class TransformersProvider extends BaseAiProvider {
       const result = await pipe(prompt, {
         max_new_tokens: 150,
         do_sample: true,
-        temperature: 0.7,
+        temperature: this.temperature,
         // @ts-expect-error - callback is valid
         callback: (token: string) => {
           onStream(token);
@@ -182,7 +184,7 @@ export class TransformersProvider extends BaseAiProvider {
     const result = await pipe(prompt, {
       max_new_tokens: 150,
       do_sample: true,
-      temperature: 0.7,
+      temperature: this.temperature,
     });
 
     return this.extractGeneratedText(result, prompt);

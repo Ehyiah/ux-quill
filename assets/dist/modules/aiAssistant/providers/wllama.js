@@ -22,7 +22,7 @@ const LANGUAGE_MAP = {
 };
 export class WllamaProvider extends BaseAiProvider {
   constructor(options) {
-    var _options$debug;
+    var _options$debug, _options$temperature;
     if (options === void 0) {
       options = {};
     }
@@ -35,8 +35,10 @@ export class WllamaProvider extends BaseAiProvider {
     this.onProgress = void 0;
     this.modelConfig = void 0;
     this.debug = void 0;
+    this.temperature = void 0;
     this.onProgress = options.onProgress;
     this.debug = (_options$debug = options.debug) != null ? _options$debug : false;
+    this.temperature = (_options$temperature = options.temperature) != null ? _options$temperature : 0.7;
     if (options.model) {
       const parts = options.model.split('/');
       if (parts.length >= 2) {
@@ -92,7 +94,7 @@ export class WllamaProvider extends BaseAiProvider {
     (_this$onProgress3 = this.onProgress) == null || _this$onProgress3.call(this, 100);
   }
   async chat(messages, options) {
-    var _options$max_tokens, _options$temperature, _result$choices;
+    var _options$max_tokens, _options$temperature2, _result$choices;
     if (options === void 0) {
       options = {};
     }
@@ -100,7 +102,7 @@ export class WllamaProvider extends BaseAiProvider {
     const result = await this.wllamaInstance.createChatCompletion({
       messages,
       max_tokens: (_options$max_tokens = options.max_tokens) != null ? _options$max_tokens : 256,
-      temperature: (_options$temperature = options.temperature) != null ? _options$temperature : 0.7
+      temperature: (_options$temperature2 = options.temperature) != null ? _options$temperature2 : this.temperature
     });
     const content = (result == null || (_result$choices = result.choices) == null || (_result$choices = _result$choices[0]) == null || (_result$choices = _result$choices.message) == null ? void 0 : _result$choices.content) || '';
     return content.trim();
@@ -118,9 +120,7 @@ export class WllamaProvider extends BaseAiProvider {
     }, {
       role: 'user',
       content: "Rewrite this:\n" + text
-    }], {
-      temperature: 0.3
-    });
+    }]);
   }
   async translate(text, targetLang) {
     const targetName = LANGUAGE_MAP[targetLang] || targetLang;
@@ -130,9 +130,7 @@ export class WllamaProvider extends BaseAiProvider {
     }, {
       role: 'user',
       content: "Translate the following text to " + targetName + ". Detect the source language automatically:\n" + text
-    }], {
-      temperature: 0.3
-    });
+    }]);
   }
   async correct(text) {
     const result = await this.chat([{
@@ -141,9 +139,7 @@ export class WllamaProvider extends BaseAiProvider {
     }, {
       role: 'user',
       content: "Correct the grammatical errors in the following text. Detect the language and preserve it:\n" + text
-    }], {
-      temperature: 0.2
-    });
+    }]);
     if (!result || result === text) return [];
     return [{
       original: text,
@@ -161,7 +157,6 @@ export class WllamaProvider extends BaseAiProvider {
       role: 'user',
       content: prompt
     }], {
-      temperature: 0.7,
       max_tokens: 200
     });
   }
@@ -173,9 +168,7 @@ export class WllamaProvider extends BaseAiProvider {
     }, {
       role: 'user',
       content: instruction + "\n" + text
-    }], {
-      temperature: 0.3
-    });
+    }]);
     if (format === 'bullets' && !result.startsWith('\u2022') && !result.startsWith('-')) {
       return result.split('.').filter(s => s.trim().length > 0).map(s => "\u2022 " + s.trim() + ".").join('\n');
     }

@@ -42,6 +42,12 @@ export class ApiProvider extends BaseAiProvider {
     if (this.options.reasoning === false) {
       payload.reasoning = false;
     }
+    if (this.options.temperature !== undefined) {
+      payload.temperature = this.options.temperature;
+    }
+    if (this.options.temperature !== undefined) {
+      payload.temperature = this.options.temperature;
+    }
     const start = performance.now();
     const response = await fetch(API_ENDPOINT, {
       method: 'POST',

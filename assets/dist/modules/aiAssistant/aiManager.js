@@ -15,13 +15,15 @@ export class AiManager {
         this.provider = new ApiProvider({
           models: options.models,
           debug: options.debug,
-          reasoning: options.reasoning
+          reasoning: options.reasoning,
+          temperature: options.temperature
         });
         break;
       case 'wllama':
         this.provider = new WllamaProvider({
           model: (_options$models = options.models) == null ? void 0 : _options$models.translate,
           debug: options.debug,
+          temperature: options.temperature,
           onProgress: progress => {
             this.emitDownloadProgress(progress);
           }
@@ -30,7 +32,7 @@ export class AiManager {
       default:
         this.provider = new TransformersProvider(progress => {
           this.emitDownloadProgress(progress);
-        });
+        }, options.temperature);
         break;
     }
   }

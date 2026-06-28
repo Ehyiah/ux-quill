@@ -45,7 +45,7 @@ const MODEL_MAP = {
   }
 };
 export class TransformersProvider extends BaseAiProvider {
-  constructor(onProgress) {
+  constructor(onProgress, temperature) {
     super();
     this.name = 'transformers';
     this.requiresApiKey = false;
@@ -54,7 +54,9 @@ export class TransformersProvider extends BaseAiProvider {
     this.loaders = new Map();
     this.modelProgress = new Map();
     this.onProgress = void 0;
+    this.temperature = void 0;
     this.onProgress = onProgress;
+    this.temperature = temperature != null ? temperature : 0.7;
   }
   isAvailable() {
     return true;
@@ -115,7 +117,7 @@ export class TransformersProvider extends BaseAiProvider {
     const prompt = "" + prefixMap[style] + text;
     const result = await pipe(prompt, {
       max_new_tokens: Math.round(text.split(' ').length * 2) + 50,
-      temperature: 0.3,
+      temperature: this.temperature,
       do_sample: true
     });
     return this.extractGeneratedText(result, prompt);
@@ -126,7 +128,7 @@ export class TransformersProvider extends BaseAiProvider {
     const prompt = "Translate the following text to " + targetName + ":\n" + text;
     const result = await pipe(prompt, {
       max_new_tokens: Math.round(text.split(' ').length * 3) + 50,
-      temperature: 0.3,
+      temperature: this.temperature,
       do_sample: true
     });
     return this.extractGeneratedText(result, prompt);
@@ -136,7 +138,7 @@ export class TransformersProvider extends BaseAiProvider {
     const prompt = "Correct the grammatical errors in the following text. Detect the language and preserve it:\n" + text;
     const result = await pipe(prompt, {
       max_new_tokens: Math.round(text.split(' ').length * 2) + 30,
-      temperature: 0.2,
+      temperature: this.temperature,
       do_sample: true
     });
     const corrected = this.extractGeneratedText(result, prompt);
@@ -157,7 +159,7 @@ export class TransformersProvider extends BaseAiProvider {
       const result = await pipe(prompt, {
         max_new_tokens: 150,
         do_sample: true,
-        temperature: 0.7,
+        temperature: this.temperature,
         // @ts-expect-error - callback is valid
         callback: token => {
           onStream(token);
@@ -168,7 +170,7 @@ export class TransformersProvider extends BaseAiProvider {
     const result = await pipe(prompt, {
       max_new_tokens: 150,
       do_sample: true,
-      temperature: 0.7
+      temperature: this.temperature
     });
     return this.extractGeneratedText(result, prompt);
   }

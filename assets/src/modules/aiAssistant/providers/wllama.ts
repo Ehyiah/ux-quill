@@ -28,11 +28,13 @@ export class WllamaProvider extends BaseAiProvider {
   private onProgress?: (progress: number) => void;
   private modelConfig: WllamaModelConfig;
   private debug: boolean;
+  private temperature: number;
 
-  constructor(options: { model?: string; debug?: boolean; onProgress?: (progress: number) => void } = {}) {
+  constructor(options: { model?: string; debug?: boolean; temperature?: number; onProgress?: (progress: number) => void } = {}) {
     super();
     this.onProgress = options.onProgress;
     this.debug = options.debug ?? false;
+    this.temperature = options.temperature ?? 0.7;
 
     if (options.model) {
       const parts = options.model.split('/');
@@ -103,7 +105,7 @@ export class WllamaProvider extends BaseAiProvider {
     const result = await this.wllamaInstance.createChatCompletion({
       messages,
       max_tokens: options.max_tokens ?? 256,
-      temperature: options.temperature ?? 0.7,
+      temperature: options.temperature ?? this.temperature,
     });
 
     const content = result?.choices?.[0]?.message?.content || '';
@@ -121,7 +123,7 @@ export class WllamaProvider extends BaseAiProvider {
     return this.chat([
       { role: 'system', content: `You rewrite text in a ${styleDesc[style]} tone.` },
       { role: 'user', content: `Rewrite this:\n${text}` },
-    ], { temperature: 0.3 });
+    ]);
   }
 
   async translate(text: string, targetLang: string): Promise<string> {
@@ -130,14 +132,14 @@ export class WllamaProvider extends BaseAiProvider {
     return this.chat([
       { role: 'system', content: 'You are a professional translator. Respond with ONLY the translation, no explanations or notes.' },
       { role: 'user', content: `Translate the following text to ${targetName}. Detect the source language automatically:\n${text}` },
-    ], { temperature: 0.3 });
+    ]);
   }
 
   async correct(text: string): Promise<GrammarSuggestion[]> {
     const result = await this.chat([
       { role: 'system', content: 'You are a grammar expert. Correct all grammatical errors. Preserve the original meaning and style. Respond with ONLY the corrected text, no explanations.' },
       { role: 'user', content: `Correct the grammatical errors in the following text. Detect the language and preserve it:\n${text}` },
-    ], { temperature: 0.2 });
+    ]);
 
     if (!result || result === text) return [];
 
@@ -154,7 +156,7 @@ export class WllamaProvider extends BaseAiProvider {
     return this.chat([
       { role: 'system', content: 'You are a helpful writing assistant.' },
       { role: 'user', content: prompt },
-    ], { temperature: 0.7, max_tokens: 200 });
+    ], { max_tokens: 200 });
   }
 
   async summarize(text: string, format: SummaryFormat): Promise<string> {
@@ -165,7 +167,7 @@ export class WllamaProvider extends BaseAiProvider {
     const result = await this.chat([
       { role: 'system', content: 'You are a summarizer.' },
       { role: 'user', content: `${instruction}\n${text}` },
-    ], { temperature: 0.3 });
+    ]);
 
     if (format === 'bullets' && !result.startsWith('\u2022') && !result.startsWith('-')) {
       return result

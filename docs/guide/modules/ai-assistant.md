@@ -64,6 +64,7 @@ $builder->add('content', QuillType::class, [
 | **features** | `array` | List of enabled features. See the full list below. | `[]` |
 | **models** | `array` | Per-task model overrides (see [Per-task models](#per-task-models)) | `[]` |
 | **reasoning** | `bool` | Allow the model to show chain-of-thought reasoning. Set to `false` for models like Qwen that output long reasoning before the answer. | `true` |
+| **temperature** | `float` | Generation temperature (0.0 = deterministic, 1.0 = creative). Applies to all features across all providers. | `0.7` |
 | **translate** | `array` | Translation sub-options (see [Translation options](#translation-options)) | — |
 | **toc** | `array` | Table of contents sub-options (see [TOC options](#toc-options)) | — |
 

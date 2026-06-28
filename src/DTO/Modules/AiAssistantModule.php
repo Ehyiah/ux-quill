@@ -19,6 +19,7 @@ final class AiAssistantModule implements ModuleInterface
     public const PROVIDER_OPTION = 'provider';
     public const MODELS_OPTION = 'models';
     public const REASONING_OPTION = 'reasoning';
+    public const TEMPERATURE_OPTION = 'temperature';
 
     private const ALLOWED_PROVIDERS = ['transformers', 'api', 'wllama'];
 
@@ -29,6 +30,7 @@ final class AiAssistantModule implements ModuleInterface
         $defaults = [
             self::PROVIDER_OPTION => 'transformers',
             self::REASONING_OPTION => true,
+            self::TEMPERATURE_OPTION => 0.7,
             'features' => [],
             'translate' => [
                 'target_languages' => ['fr', 'en', 'es', 'de', 'it', 'pt'],

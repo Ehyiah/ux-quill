@@ -7,6 +7,7 @@ interface ApiProviderOptions {
   models?: Partial<Record<AiFeature, string>>;
   debug?: boolean;
   reasoning?: boolean;
+  temperature?: number;
 }
 
 export class ApiProvider extends BaseAiProvider {
@@ -47,6 +48,14 @@ export class ApiProvider extends BaseAiProvider {
 
     if (this.options.reasoning === false) {
       payload.reasoning = false;
+    }
+
+    if (this.options.temperature !== undefined) {
+      payload.temperature = this.options.temperature;
+    }
+
+    if (this.options.temperature !== undefined) {
+      payload.temperature = this.options.temperature;
     }
 
     const start = performance.now();

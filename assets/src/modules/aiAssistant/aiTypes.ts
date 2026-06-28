@@ -35,6 +35,7 @@ export interface AiOptions {
   models?: Partial<Record<AiFeature, string>>;
   debug?: boolean;
   reasoning?: boolean;
+  temperature?: number;
   translate?: {
     target_languages?: string[];
     default_language?: string;

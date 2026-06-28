@@ -21,12 +21,14 @@ export class AiManager {
           models: options.models,
           debug: options.debug,
           reasoning: options.reasoning,
+          temperature: options.temperature,
         });
         break;
       case 'wllama':
         this.provider = new WllamaProvider({
           model: options.models?.translate,
           debug: options.debug,
+          temperature: options.temperature,
           onProgress: (progress: number) => {
             this.emitDownloadProgress(progress);
           },
@@ -35,7 +37,7 @@ export class AiManager {
       default:
         this.provider = new TransformersProvider((progress: number) => {
           this.emitDownloadProgress(progress);
-        });
+        }, options.temperature);
         break;
     }
   }
