@@ -1,6 +1,7 @@
 import type { AiOptions, AiFeature, AiProvider } from './aiTypes.js';
 import { ApiProvider } from './providers/api.js';
 import { TransformersProvider } from './providers/transformers.js';
+import { WllamaProvider } from './providers/wllama.js';
 
 type LoadingCallback = (loading: boolean) => void;
 type DownloadProgressCallback = (progress: number) => void;
@@ -13,15 +14,30 @@ export class AiManager {
 
   constructor(options: AiOptions) {
     this.options = options;
-    this.provider = options.provider === 'api'
-      ? new ApiProvider({
+
+    switch (options.provider) {
+      case 'api':
+        this.provider = new ApiProvider({
           models: options.models,
           debug: options.debug,
           reasoning: options.reasoning,
-        })
-      : new TransformersProvider((progress: number) => {
+        });
+        break;
+      case 'wllama':
+        this.provider = new WllamaProvider({
+          model: options.models?.translate,
+          debug: options.debug,
+          onProgress: (progress: number) => {
+            this.emitDownloadProgress(progress);
+          },
+        });
+        break;
+      default:
+        this.provider = new TransformersProvider((progress: number) => {
           this.emitDownloadProgress(progress);
         });
+        break;
+    }
   }
 
   onLoadingChange(callback: LoadingCallback): void {

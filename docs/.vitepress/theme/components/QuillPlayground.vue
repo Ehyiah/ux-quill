@@ -220,7 +220,7 @@ const MODULE_DEFS: Record<string, ModuleDefEntry> = {
     toolbar: [],
     config: {},
     aiConfig: {
-      provider: 'transformers',
+      provider: 'wllama',
       features: {
         rewrite: true,
         translate: true,

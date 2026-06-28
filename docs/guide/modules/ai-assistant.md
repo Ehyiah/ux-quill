@@ -14,20 +14,25 @@ It provides seven features at the moment
 
 # Choose a provider
 
-The module currently supports two types of providers:
+The module currently supports three types of providers:
 
 | Provider | Type | Description |
 | :--- | :--- | :--- |
 | **`api`** (recommended) | Backend proxy | Routes all AI requests through a PHP controller (`/_ux/quill/ai-assistant`) which calls an OpenAI-compatible API. API keys stay server-side (environment variables). |
-| **`transformers`** | Local browser (dormant) | Runs models entirely in-browser via `@huggingface/transformers` (ONNX runtime). Models are large (60–350 MB each) and quality of responses is very limited. No API key needed. |
+| **`wllama`** | Local browser (GGUF) | Runs models entirely in-browser via `@wllama/wllama` (llama.cpp WASM). Supports 160K+ GGUF models from HuggingFace. No API key needed. Default model: `Qwen/Qwen2.5-0.5B-Instruct-GGUF` (~350 MB Q4). |
+| **`transformers`** | Local browser (ONNX) | Runs models entirely in-browser via `@huggingface/transformers` (ONNX runtime). Models are large (60–350 MB each) and quality of responses is very limited. No API key needed. |
 
 ::: info
 The recommended provider is `api`, so you can have the better responses possible and call any LLM (chatGPT, claude, gemini or self-hosted)
 — configure your AI backend via environment variables (see [API configuration](#api-provider-configuration)).
 :::
 
+::: tip
+Provider **`wllama`** is a great option for fully offline usage. It runs llama.cpp compiled to WebAssembly in any browser (no WebGPU required) and supports instruction-tuned GGUF models. See [Wllama provider configuration](#wllama-provider-configuration) for setup and recommended models.
+:::
+
 ::: warning
-Provider **`transformers`** is not recommended or for testing purpose only, because the quality of responses is very poor.
+Providers **`transformers`** and **`wllama`** are not recommended or for testing purpose only, because the quality of responses is quite poor, and will depend on the user computer power.
 :::
 
 
@@ -55,7 +60,7 @@ $builder->add('content', QuillType::class, [
 
 | Option | Type | Description | Default |
 | :--- | :--- | :--- | :--- |
-| **provider** | `string` | Provider to use: `'api'` or `'transformers'` | `'transformers'` |
+| **provider** | `string` | Provider to use: `'api'`, `'wllama'`, or `'transformers'` | `'transformers'` |
 | **features** | `array` | List of enabled features. See the full list below. | `[]` |
 | **models** | `array` | Per-task model overrides (see [Per-task models](#per-task-models)) | `[]` |
 | **reasoning** | `bool` | Allow the model to show chain-of-thought reasoning. Set to `false` for models like Qwen that output long reasoning before the answer. | `true` |
@@ -167,6 +172,104 @@ $builder->add('content', QuillType::class, [
     ],
 ]);
 ```
+
+## Wllama provider configuration
+
+Provider `wllama` runs GGUF models entirely in-browser using [@wllama/wllama](https://github.com/ngxson/wllama) (llama.cpp compiled to WebAssembly).
+It works in all modern browsers without WebGPU.
+
+### Installation
+
+::: warning
+There is a problem with the package.json in wllama vendor. So you need to require it manually on your project, because AssetMapper can not find the correct main file.
+:::
+
+The consuming app must install `@wllama/wllama`:
+
+```bash
+# With npm/yarn (Webpack Encore)
+yarn add @wllama/wllama
+
+# With Symfony importmap (use the explicit CDN path)
+bin/console importmap:require @wllama/wllama/esm/index.js
+```
+
+### How it works
+
+1. On first feature use, the provider downloads the GGUF model from HuggingFace (default: `Qwen/Qwen2.5-0.5B-Instruct-GGUF`, q4_k_m — ~350 MB).
+2. Download progress is shown in the loading overlay.
+3. All 7 features use `createChatCompletion()` with system/user messages.
+
+### Custom model
+
+You can override the default model by setting the `translate` model (the provider uses this as its single model config — all features share the same loaded model):
+
+```php
+new AiAssistantModule(options: [
+    'provider' => 'wllama',
+    'models' => [
+        'translate' => 'Qwen/Qwen2.5-1.5B-Instruct-GGUF/qwen2.5-1.5b-instruct-q4_k_m.gguf',
+    ],
+]),
+```
+
+The `models.translate` value uses the format `HUGGINGFACE_REPO/FILENAME.gguf`. The model is downloaded once from HuggingFace Hub on first feature use, then cached in the browser.
+
+### How to find GGUF models on HuggingFace
+
+1. Go to [huggingface.co/models](https://huggingface.co/models)
+2. Search for a model name and filter by tag **`gguf`**
+3. Browse the **Files** tab of a model repository to see available `.gguf` files
+
+**Example — finding Qwen2.5 models:**
+1. Search `Qwen2.5-Instruct` on [huggingface.co/models](https://huggingface.co/models)
+2. Click on a repo like [Qwen/Qwen2.5-1.5B-Instruct-GGUF](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF)
+3. Go to the **Files and versions** tab
+4. Pick a `.gguf` file (see quantization guide below)
+
+The config value is then: `HUGGINGFACE_REPO/FILENAME`, e.g.:
+```
+Qwen/Qwen2.5-1.5B-Instruct-GGUF/qwen2.5-1.5b-instruct-q4_k_m.gguf
+```
+
+### Understanding quantization (GGUF file names)
+
+GGUF files are named with their quantization method, which determines the trade-off between **file size**, **RAM usage**, and **quality**:
+
+| Quantization | Quality | Size | Best for |
+| :--- | :--- | :--- | :--- |
+| `Q2_K` | ★★☆☆☆ | Smallest | Very constrained devices |
+| `Q3_K_M` | ★★★☆☆ | Small | Low-memory devices |
+| `Q4_K_M` | ★★★★☆ | Medium | **Recommended** — best balance |
+| `Q5_K_M` | ★★★★★ | Medium-large | Quality-focused setups |
+| `Q6_K` | ★★★★★ | Large | Near-lossless |
+| `Q8_0` | ★★★★★ | Largest | Maximum quality (rarely needed) |
+
+**Rule of thumb:** Choose `Q4_K_M` unless you have a specific reason not to. It gives the best balance of quality, file size, and RAM usage.
+
+### Single model for all features
+
+::: info
+The wllama provider loads **one model** in the browser and reuses it for all features (rewrite, translate, grammar, etc.). This is by design — loading a GGUF model involves a multi-hundred-MB download and significant memory, so switching models per-feature is not practical.
+:::
+
+### Recommended GGUF models
+
+| Model | Repo / File pattern | Size (Q4) | RAM | Quality | Notes |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Qwen2.5-0.5B-Instruct** | `Qwen/Qwen2.5-0.5B-Instruct-GGUF` | ~350 MB | 512 MB | ★★★★☆ | Best quality/size ratio, recommended default |
+| **SmolLM2-360M-Instruct** | `HuggingFaceTB/SmolLM2-360M-Instruct-GGUF` | ~250 MB | 384 MB | ★★★☆☆ | Very lightweight, good for simple translations |
+| **TinyLlama-1.1B-Chat** | `TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF` | ~700 MB | 1 GB | ★★★★☆ | Good general-purpose model |
+| **Llama-3.2-1B-Instruct** | `bartowski/Llama-3.2-1B-Instruct-GGUF` | ~700 MB | 1 GB | ★★★★☆ | Excellent instruction following |
+| **Qwen2.5-1.5B-Instruct** | `Qwen/Qwen2.5-1.5B-Instruct-GGUF` | ~900 MB | 1.5 GB | ★★★★★ | Best quality under 2 GB |
+| **SmolLM2-1.7B-Instruct** | `HuggingFaceTB/SmolLM2-1.7B-Instruct-GGUF` | ~1 GB | 1.5 GB | ★★★★☆ | Good mid-range option |
+| **Gemma-2-2B-it** | `bartowski/Gemma-2-2B-it-GGUF` | ~1.3 GB | 2 GB | ★★★★★ | Best quality, heavier |
+| **Phi-3-mini-4k-instruct** | `bartowski/Phi-3-mini-4k-instruct-GGUF` | ~2 GB | 3 GB | ★★★★★ | Powerful but needs more RAM |
+| **Zephyr-3B** | `TheBloke/zephyr-3B-beta-GGUF` | ~1.8 GB | 3 GB | ★★★★☆ | Good compromise |
+
+::: tip
+Browse more GGUF models on HuggingFace: [huggingface.co/models?tags=gguf](https://huggingface.co/models?tags=gguf)
+:::
 
 ## Transformers provider configuration
 Nothing atm // TODO

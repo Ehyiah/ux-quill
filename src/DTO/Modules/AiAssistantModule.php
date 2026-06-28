@@ -20,7 +20,7 @@ final class AiAssistantModule implements ModuleInterface
     public const MODELS_OPTION = 'models';
     public const REASONING_OPTION = 'reasoning';
 
-    private const ALLOWED_PROVIDERS = ['transformers', 'api'];
+    private const ALLOWED_PROVIDERS = ['transformers', 'api', 'wllama'];
 
     public function __construct(
         public string $name = self::NAME,

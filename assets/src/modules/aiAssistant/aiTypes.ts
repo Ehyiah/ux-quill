@@ -26,8 +26,10 @@ export interface SemanticResult {
   readingTime: number;
 }
 
+export type AiProviderType = 'api' | 'transformers' | 'wllama';
+
 export interface AiOptions {
-  provider?: string;
+  provider?: AiProviderType;
   api_key?: string | null;
   features?: Partial<Record<AiFeature, boolean | Record<string, unknown>>>;
   models?: Partial<Record<AiFeature, string>>;

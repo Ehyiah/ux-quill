@@ -101,6 +101,7 @@
     "peerDependencies": {
         "@hotwired/stimulus": "^3.0.0",
         "@huggingface/transformers": "^4.2.0",
+        "@wllama/wllama": "^3.5.1",
         "axios": "^1.4.0",
         "eventemitter3": "^5.0.1",
         "lodash-es": "^4.17.21",
@@ -117,6 +118,7 @@
     "dependencies": {
         "@hotwired/stimulus": "^3.0.0",
         "@huggingface/transformers": "^4.2.0",
+        "@wllama/wllama": "^3.5.1",
         "axios": "^1.4.0",
         "eventemitter3": "^5.0.1",
         "lodash-es": "^4.17.21",
@@ -170,7 +172,8 @@
         "\\.(css|less)$": "<rootDir>/tests/setup/__mocks__/styleMock.js",
         "^../src/blots/image$": "<rootDir>/tests/setup/__mocks__/image.ts",
         "^quill$": "<rootDir>/tests/setup/__mocks__/quill.ts",
-        "^@huggingface/transformers$": "<rootDir>/tests/setup/__mocks__/transformers.js"
+            "^@huggingface/transformers$": "<rootDir>/tests/setup/__mocks__/transformers.js",
+            "^@wllama/wllama$": "<rootDir>/tests/setup/__mocks__/wllama.js"
         },
         "testMatch": [
             "<rootDir>/tests/**/*.test.ts"
@@ -183,7 +186,7 @@
             "^.+\\.tsx?$": "ts-jest"
         },
         "transformIgnorePatterns": [
-            "/node_modules/(?!quill|quill2-emoji|@huggingface/transformers)"
+            "/node_modules/(?!quill|quill2-emoji|@huggingface/transformers|@wllama/wllama)"
         ],
         "rootDir": ".",
         "moduleFileExtensions": [
