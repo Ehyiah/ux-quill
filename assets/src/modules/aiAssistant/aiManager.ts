@@ -1,17 +1,20 @@
-import type { AiOptions, AiFeature, AiProvider, AiProgressEvent } from './aiTypes.js';
+import type { AiOptions, AiFeature, AiProvider } from './aiTypes.js';
 import { ApiProvider } from './providers/api.js';
 
-type ProgressCallback = (event: AiProgressEvent) => void;
 type LoadingCallback = (loading: boolean) => void;
 
 export class AiManager {
-  private provider: AiProvider | null = null;
+  private provider: AiProvider;
   private options: AiOptions;
-  private progressCallbacks: ProgressCallback[] = [];
   private loadingCallbacks: LoadingCallback[] = [];
 
   constructor(options: AiOptions) {
     this.options = options;
+    this.provider = new ApiProvider({
+      models: options.models,
+      debug: options.debug,
+      reasoning: options.reasoning,
+    });
   }
 
   onLoadingChange(callback: LoadingCallback): void {
@@ -22,45 +25,12 @@ export class AiManager {
     this.loadingCallbacks.forEach((cb) => cb(loading));
   }
 
-  async initialize(): Promise<void> {
-    const providerName = this.options.provider || 'transformers';
-
-    switch (providerName) {
-      case 'api':
-        this.provider = new ApiProvider({
-          models: this.options.models,
-          debug: this.options.debug,
-          reasoning: this.options.reasoning,
-        });
-        break;
-      case 'transformers': {
-        const { TransformersProvider } = await import('./providers/transformers.js');
-        this.provider = new TransformersProvider();
-        break;
-      }
-      default: {
-        const { TransformersProvider } = await import('./providers/transformers.js');
-        this.provider = new TransformersProvider();
-      }
-    }
-
-    this.notifyProgress({
-      feature: 'rewrite',
-      status: 'ready',
-      progress: 100,
-      message: `Provider ${this.provider.name} initialized`,
-    });
-  }
-
   getProvider(): AiProvider {
-    if (!this.provider) {
-      throw new Error('AiManager not initialized. Call initialize() first.');
-    }
     return this.provider;
   }
 
   isFeatureSupported(feature: AiFeature): boolean {
-    return this.getProvider().supportedFeatures.includes(feature);
+    return this.provider.supportedFeatures.includes(feature);
   }
 
   isFeatureEnabled(feature: AiFeature): boolean {
@@ -76,13 +46,5 @@ export class AiManager {
       return { ...value } as Record<string, unknown>;
     }
     return {};
-  }
-
-  onProgress(callback: ProgressCallback): void {
-    this.progressCallbacks.push(callback);
-  }
-
-  private notifyProgress(event: AiProgressEvent): void {
-    this.progressCallbacks.forEach((cb) => cb(event));
   }
 }

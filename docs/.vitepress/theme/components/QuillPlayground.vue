@@ -379,7 +379,6 @@ async function initEditor() {
   if (modules._aiConfig) {
     const { AiManager } = await import('../../../../assets/src/modules/aiAssistant/aiManager.ts')
     const aiManager = new AiManager(modules._aiConfig)
-    aiManager.initialize()
     modules.aiAssistant = {
       aiManager,
       features: modules._aiConfig.features,

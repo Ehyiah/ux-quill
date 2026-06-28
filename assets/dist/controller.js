@@ -117,7 +117,6 @@ export default class _Class extends Controller {
       features,
       debug: !!raw.debug
     });
-    aiManager.initialize();
     options.modules.aiAssistant = {
       aiManager,
       features
