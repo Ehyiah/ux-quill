@@ -1,6 +1,7 @@
 import type { AiManager } from '../aiManager.js';
 import type { AiFeature, AiFeatureInterface } from '../aiTypes.js';
 import { expandWordSelection } from '../utils/wordSelection.js';
+import { showReviewModal } from '../utils/reviewModal.js';
 
 export class TranslateFeature implements AiFeatureInterface {
   readonly name: AiFeature = 'translate';
@@ -36,16 +37,25 @@ export class TranslateFeature implements AiFeatureInterface {
     try {
       this.aiManager.setLoading(true);
       const translated = await provider.translate(selectedText, targetLang);
-
-      quill.updateContents([
-        { retain: wordRange.index },
-        { delete: wordRange.length },
-        { insert: translated },
-      ]);
-    } catch (error) {
-      console.error('Translation failed:', error);
-    } finally {
       this.aiManager.setLoading(false);
+
+      const edited = await showReviewModal({
+        title: 'Traduction',
+        description: `Traduit en ${targetLang}`,
+        originalText: selectedText,
+        generatedText: translated,
+      });
+
+      if (edited !== null) {
+        quill.updateContents([
+          { retain: wordRange.index },
+          { delete: wordRange.length },
+          { insert: edited },
+        ]);
+      }
+    } catch (error) {
+      this.aiManager.setLoading(false);
+      console.error('Translation failed:', error);
     }
   }
 

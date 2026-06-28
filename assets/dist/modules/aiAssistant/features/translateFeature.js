@@ -1,4 +1,5 @@
 import { expandWordSelection } from "../utils/wordSelection.js";
+import { showReviewModal } from "../utils/reviewModal.js";
 export class TranslateFeature {
   constructor(quill, aiManager) {
     this.name = 'translate';
@@ -25,17 +26,25 @@ export class TranslateFeature {
     try {
       this.aiManager.setLoading(true);
       const translated = await provider.translate(selectedText, targetLang);
-      quill.updateContents([{
-        retain: wordRange.index
-      }, {
-        delete: wordRange.length
-      }, {
-        insert: translated
-      }]);
-    } catch (error) {
-      console.error('Translation failed:', error);
-    } finally {
       this.aiManager.setLoading(false);
+      const edited = await showReviewModal({
+        title: 'Traduction',
+        description: "Traduit en " + targetLang,
+        originalText: selectedText,
+        generatedText: translated
+      });
+      if (edited !== null) {
+        quill.updateContents([{
+          retain: wordRange.index
+        }, {
+          delete: wordRange.length
+        }, {
+          insert: edited
+        }]);
+      }
+    } catch (error) {
+      this.aiManager.setLoading(false);
+      console.error('Translation failed:', error);
     }
   }
   async promptLanguage() {

@@ -1,6 +1,7 @@
 import type { AiManager } from '../aiManager.js';
 import type { AiFeature, AiFeatureInterface, RewriteStyle } from '../aiTypes.js';
 import { expandWordSelection } from '../utils/wordSelection.js';
+import { showReviewModal } from '../utils/reviewModal.js';
 
 export class RewriteFeature implements AiFeatureInterface {
   readonly name: AiFeature = 'rewrite';
@@ -36,16 +37,25 @@ export class RewriteFeature implements AiFeatureInterface {
     try {
       this.aiManager.setLoading(true);
       const rewritten = await provider.rewrite(selectedText, style);
-
-      quill.updateContents([
-        { retain: wordRange.index },
-        { delete: wordRange.length },
-        { insert: rewritten },
-      ]);
-    } catch (error) {
-      console.error('Rewrite failed:', error);
-    } finally {
       this.aiManager.setLoading(false);
+
+      const edited = await showReviewModal({
+        title: 'Reformulation',
+        description: `Style : ${style}`,
+        originalText: selectedText,
+        generatedText: rewritten,
+      });
+
+      if (edited !== null) {
+        quill.updateContents([
+          { retain: wordRange.index },
+          { delete: wordRange.length },
+          { insert: edited },
+        ]);
+      }
+    } catch (error) {
+      this.aiManager.setLoading(false);
+      console.error('Rewrite failed:', error);
     }
   }
 

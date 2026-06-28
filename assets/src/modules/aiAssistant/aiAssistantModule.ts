@@ -232,12 +232,20 @@ function injectStyles(): void {
   background: #fff;
   border-radius: 12px;
   padding: 24px;
-  width: 480px;
-  max-width: 90vw;
-  max-height: 80vh;
+  width: 620px;
+  max-width: 94vw;
+  max-height: 88vh;
   overflow-y: auto;
   box-shadow: 0 12px 48px rgba(0,0,0,.2);
   animation: aiPanelIn .15s ease-out;
+  box-sizing: border-box;
+}
+@media (max-width: 680px) {
+  .ai-assistant-modal {
+    width: 96vw;
+    padding: 16px;
+    border-radius: 8px;
+  }
 }
 .ai-assistant-modal h3 {
   margin: 0 0 4px;
@@ -250,9 +258,21 @@ function injectStyles(): void {
   font-size: 13px;
   color: #888;
 }
+.ai-assistant-review-original {
+  background: #f7f8fa;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 12px;
+  max-height: 160px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
 .ai-assistant-modal textarea {
   width: 100%;
-  min-height: 100px;
+  min-height: 200px;
   padding: 10px 12px;
   border: 1px solid #d9d9d9;
   border-radius: 8px;

@@ -1,4 +1,5 @@
 import { expandWordSelection } from "../utils/wordSelection.js";
+import { showReviewModal } from "../utils/reviewModal.js";
 export class RewriteFeature {
   constructor(quill, aiManager) {
     this.name = 'rewrite';
@@ -25,17 +26,25 @@ export class RewriteFeature {
     try {
       this.aiManager.setLoading(true);
       const rewritten = await provider.rewrite(selectedText, style);
-      quill.updateContents([{
-        retain: wordRange.index
-      }, {
-        delete: wordRange.length
-      }, {
-        insert: rewritten
-      }]);
-    } catch (error) {
-      console.error('Rewrite failed:', error);
-    } finally {
       this.aiManager.setLoading(false);
+      const edited = await showReviewModal({
+        title: 'Reformulation',
+        description: "Style : " + style,
+        originalText: selectedText,
+        generatedText: rewritten
+      });
+      if (edited !== null) {
+        quill.updateContents([{
+          retain: wordRange.index
+        }, {
+          delete: wordRange.length
+        }, {
+          insert: edited
+        }]);
+      }
+    } catch (error) {
+      this.aiManager.setLoading(false);
+      console.error('Rewrite failed:', error);
     }
   }
   async promptStyle() {

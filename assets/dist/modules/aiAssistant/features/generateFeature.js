@@ -1,3 +1,4 @@
+import { showReviewModal } from "../utils/reviewModal.js";
 export class GenerateFeature {
   constructor(quill, aiManager) {
     this.name = 'generate';
@@ -15,68 +16,25 @@ export class GenerateFeature {
     const selection = quill.getSelection();
     const insertIndex = selection ? selection.index : quill.getLength();
     const provider = this.aiManager.getProvider();
-    const loadingText = '...';
-    quill.updateContents([{
-      retain: insertIndex
-    }, {
-      insert: loadingText
-    }]);
     try {
-      let accumulated = '';
-      let hasReceivedChunk = false;
-      let firstChunk = true;
-      const result = await provider.generate(prompt, chunk => {
-        hasReceivedChunk = true;
-        accumulated += chunk;
-        if (firstChunk) {
-          firstChunk = false;
-          quill.updateContents([{
-            retain: insertIndex
-          }, {
-            delete: loadingText.length
-          }, {
-            insert: accumulated
-          }]);
-        } else {
-          quill.updateContents([{
-            retain: insertIndex + accumulated.length - chunk.length
-          }, {
-            insert: chunk
-          }]);
-        }
+      this.aiManager.setLoading(true);
+      const result = await provider.generate(prompt);
+      this.aiManager.setLoading(false);
+      const edited = await showReviewModal({
+        title: 'Contenu généré',
+        description: 'Résultat de la génération',
+        generatedText: result
       });
-      if (!hasReceivedChunk) {
-        const finalText = typeof result === 'string' ? result : '';
-        if (finalText) {
-          quill.updateContents([{
-            retain: insertIndex
-          }, {
-            delete: loadingText.length
-          }, {
-            insert: finalText
-          }]);
-          quill.updateContents([{
-            retain: insertIndex + finalText.length
-          }, {
-            insert: '\n'
-          }]);
-        }
-      } else if (accumulated) {
+      if (edited !== null) {
         quill.updateContents([{
-          retain: insertIndex + accumulated.length
+          retain: insertIndex
         }, {
-          insert: '\n'
+          insert: edited + '\n'
         }]);
       }
     } catch (error) {
+      this.aiManager.setLoading(false);
       console.error('Generation failed:', error);
-      quill.updateContents([{
-        retain: insertIndex
-      }, {
-        delete: loadingText.length
-      }, {
-        insert: '[Generation failed]'
-      }]);
     }
   }
   async promptInput() {

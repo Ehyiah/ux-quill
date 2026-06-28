@@ -1,5 +1,6 @@
 import type { AiManager } from '../aiManager.js';
 import type { AiFeature, AiFeatureInterface } from '../aiTypes.js';
+import { showReviewModal } from '../utils/reviewModal.js';
 
 export class GenerateFeature implements AiFeatureInterface {
   readonly name: AiFeature = 'generate';
@@ -18,70 +19,31 @@ export class GenerateFeature implements AiFeatureInterface {
     const prompt = await this.promptInput();
     if (!prompt) return;
 
-    const quill = this.quill as { getSelection(): { index: number; length: number } | null; getLength(): number; updateContents(delta: { ops: Array<Record<string, unknown>> }): void; getText(): string };
+    const quill = this.quill as { getSelection(): { index: number; length: number } | null; getLength(): number; updateContents(delta: { ops: Array<Record<string, unknown>> }): void };
     const selection = quill.getSelection();
     const insertIndex = selection ? selection.index : quill.getLength();
     const provider = this.aiManager.getProvider();
 
-    const loadingText = '...';
-    quill.updateContents([
-      { retain: insertIndex },
-      { insert: loadingText },
-    ]);
-
     try {
-      let accumulated = '';
-      let hasReceivedChunk = false;
-      let firstChunk = true;
+      this.aiManager.setLoading(true);
+      const result = await provider.generate(prompt);
+      this.aiManager.setLoading(false);
 
-      const result = await provider.generate(prompt, (chunk: string) => {
-        hasReceivedChunk = true;
-        accumulated += chunk;
-
-        if (firstChunk) {
-          firstChunk = false;
-
-          quill.updateContents([
-            { retain: insertIndex },
-            { delete: loadingText.length },
-            { insert: accumulated },
-          ]);
-        } else {
-          quill.updateContents([
-            { retain: insertIndex + accumulated.length - chunk.length },
-            { insert: chunk },
-          ]);
-        }
+      const edited = await showReviewModal({
+        title: 'Contenu généré',
+        description: 'Résultat de la génération',
+        generatedText: result,
       });
 
-      if (!hasReceivedChunk) {
-        const finalText = typeof result === 'string' ? result : '';
-        if (finalText) {
-          quill.updateContents([
-            { retain: insertIndex },
-            { delete: loadingText.length },
-            { insert: finalText },
-          ]);
-
-          quill.updateContents([
-            { retain: insertIndex + finalText.length },
-            { insert: '\n' },
-          ]);
-        }
-      } else if (accumulated) {
+      if (edited !== null) {
         quill.updateContents([
-          { retain: insertIndex + accumulated.length },
-          { insert: '\n' },
+          { retain: insertIndex },
+          { insert: edited + '\n' },
         ]);
       }
     } catch (error) {
+      this.aiManager.setLoading(false);
       console.error('Generation failed:', error);
-
-      quill.updateContents([
-        { retain: insertIndex },
-        { delete: loadingText.length },
-        { insert: '[Generation failed]' },
-      ]);
     }
   }
 

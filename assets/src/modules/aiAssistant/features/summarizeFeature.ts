@@ -1,6 +1,7 @@
 import type { AiManager } from '../aiManager.js';
 import type { AiFeature, AiFeatureInterface, SummaryFormat } from '../aiTypes.js';
 import { expandWordSelection } from '../utils/wordSelection.js';
+import { showReviewModal } from '../utils/reviewModal.js';
 
 export class SummarizeFeature implements AiFeatureInterface {
   readonly name: AiFeature = 'summarize';
@@ -42,16 +43,25 @@ export class SummarizeFeature implements AiFeatureInterface {
     try {
       this.aiManager.setLoading(true);
       const summary = await provider.summarize(textToSummarize, format);
-
-      const prefix = format === 'bullets' ? '\n\nRésumé :\n' : '\n\nRésumé : ';
-      quill.updateContents([
-        { retain: insertIndex },
-        { insert: `${prefix}${summary}` },
-      ]);
-    } catch (error) {
-      console.error('Summarization failed:', error);
-    } finally {
       this.aiManager.setLoading(false);
+
+      const edited = await showReviewModal({
+        title: 'Résumé',
+        description: format === 'bullets' ? 'Points clés' : 'Résumé en paragraphe',
+        originalText: textToSummarize,
+        generatedText: summary,
+      });
+
+      if (edited !== null) {
+        const prefix = format === 'bullets' ? '\n\nRésumé :\n' : '\n\nRésumé : ';
+        quill.updateContents([
+          { retain: insertIndex },
+          { insert: `${prefix}${edited}` },
+        ]);
+      }
+    } catch (error) {
+      this.aiManager.setLoading(false);
+      console.error('Summarization failed:', error);
     }
   }
 
