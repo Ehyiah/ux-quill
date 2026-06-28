@@ -13,6 +13,7 @@
     "docs:preview": "vitepress preview"
   },
   "dependencies": {
+    "@huggingface/transformers": "^4.2.0",
     "axios": "^1.4.0",
     "eventemitter3": "^5.0.1",
     "highlight.js": "^11.9.0",
@@ -21,7 +22,6 @@
     "quill": "2.0.3",
     "quill-delta": "^5.1.0",
     "quill-html-edit-button": "^3.0.0",
-    "@huggingface/transformers": "^4.2.0",
     "quill-resize-image": "^1.0.5",
     "quill-table-better": "^1.2.1",
     "quill-toggle-fullscreen-button": "^0.1.4",

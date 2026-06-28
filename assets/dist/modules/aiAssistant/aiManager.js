@@ -1,5 +1,4 @@
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
-import { TransformersProvider } from "./providers/transformers.js";
 import { ApiProvider } from "./providers/api.js";
 export class AiManager {
   constructor(options) {
@@ -26,10 +25,20 @@ export class AiManager {
         });
         break;
       case 'transformers':
-        this.provider = new TransformersProvider();
-        break;
+        {
+          const {
+            TransformersProvider
+          } = await import("./providers/transformers.js");
+          this.provider = new TransformersProvider();
+          break;
+        }
       default:
-        this.provider = new TransformersProvider();
+        {
+          const {
+            TransformersProvider
+          } = await import("./providers/transformers.js");
+          this.provider = new TransformersProvider();
+        }
     }
     this.notifyProgress({
       feature: 'rewrite',

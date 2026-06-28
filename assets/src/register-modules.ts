@@ -83,6 +83,9 @@ Quill.register('modules/gridBorders', GridBorders);
 import {PlaceholderModule} from './modules/placeHolderModule/placeHolderModule.ts';
 Quill.register('modules/placeholder', PlaceholderModule);
 
+import TocBlot from './blots/toc.ts';
+Quill.register(TocBlot);
+
 import {AiAssistantModule} from './modules/aiAssistant/aiAssistantModule.ts';
 Quill.register('modules/aiAssistant', AiAssistantModule);
 

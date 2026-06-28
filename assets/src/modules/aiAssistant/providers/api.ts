@@ -12,7 +12,7 @@ interface ApiProviderOptions {
 export class ApiProvider extends BaseAiProvider {
   readonly name = 'api';
   readonly requiresApiKey = false;
-  readonly supportedFeatures: AiFeature[] = ['rewrite', 'translate', 'grammar', 'generate', 'summarize'];
+  readonly supportedFeatures: AiFeature[] = ['rewrite', 'translate', 'grammar', 'generate', 'summarize', 'semantic', 'toc'];
 
   private options: ApiProviderOptions;
 
@@ -105,8 +105,6 @@ export class ApiProvider extends BaseAiProvider {
   }
 
   async generate(prompt: string, _onStream?: (chunk: string) => void): Promise<string> {
-    // streaming not yet supported for API provider
-    void _onStream;
     return this.callApi('generate', prompt);
   }
 

@@ -1,5 +1,4 @@
 import type { AiOptions, AiFeature, AiProvider, AiProgressEvent } from './aiTypes.js';
-import { TransformersProvider } from './providers/transformers.js';
 import { ApiProvider } from './providers/api.js';
 
 type ProgressCallback = (event: AiProgressEvent) => void;
@@ -34,11 +33,15 @@ export class AiManager {
           reasoning: this.options.reasoning,
         });
         break;
-      case 'transformers':
+      case 'transformers': {
+        const { TransformersProvider } = await import('./providers/transformers.js');
         this.provider = new TransformersProvider();
         break;
-      default:
+      }
+      default: {
+        const { TransformersProvider } = await import('./providers/transformers.js');
         this.provider = new TransformersProvider();
+      }
     }
 
     this.notifyProgress({

@@ -4,7 +4,7 @@ import type { AiFeature, AiFeatureInterface } from '../aiTypes.js';
 interface TocEntry {
   level: number;
   text: string;
-  index: number;
+  id: string;
 }
 
 export class TocFeature implements AiFeatureInterface {
@@ -23,44 +23,58 @@ export class TocFeature implements AiFeatureInterface {
   }
 
   async trigger(): Promise<void> {
-    const quill = this.quill as { getContents(): { ops: Array<Record<string, unknown>> }; getLength(): number; updateContents(delta: { ops: Array<Record<string, unknown>> }): void; getText(): string; scroll: { domNode: HTMLElement } };
-    const entries = this.extractHeaders(quill);
+    const quill = this.quill as {
+      getContents(start?: number, length?: number): { ops: Array<Record<string, unknown>> };
+      getLength(): number;
+      insertEmbed(index: number, type: string, value: unknown, source: string): void;
+      updateContents(delta: { ops: Array<Record<string, unknown>> }): void;
+      getText(): string;
+      scroll: { domNode: HTMLElement };
+    };
 
-    if (entries.length === 0) return;
+    const raw = this.extractHeaders(quill);
+    if (raw.length === 0) return;
 
-    const tocHtml = this.buildTocHtml(entries);
-    const insertIndex = 0;
+    const entries: TocEntry[] = raw.map((h) => ({
+      ...h,
+      id: this.generateId(h.text),
+    }));
 
+    const headers = quill.scroll.domNode.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    entries.forEach((entry, i) => {
+      if (headers[i]) {
+        (headers[i] as HTMLElement).id = entry.id;
+      }
+    });
+
+    const first = quill.getContents(0, 1).ops?.[0]?.insert;
+    if (first && typeof first === 'object' && 'toc' in first) {
+      quill.updateContents([{ delete: 1 }]);
+    }
+
+    quill.insertEmbed(0, 'toc', entries, 'user');
     quill.updateContents([
-      { retain: insertIndex },
-      { insert: tocHtml, attributes: { list: 'bullet' } },
+      { retain: 1 },
+      { insert: '\n' },
     ]);
   }
 
-  private extractHeaders(quill: { scroll: { domNode: HTMLElement } }): TocEntry[] {
+  private extractHeaders(quill: { scroll: { domNode: HTMLElement } }): Array<{ level: number; text: string }> {
     const headers = quill.scroll.domNode.querySelectorAll('h1, h2, h3, h4, h5, h6');
-    const entries: TocEntry[] = [];
+    const entries: Array<{ level: number; text: string }> = [];
 
     headers.forEach((h) => {
       const level = parseInt(h.tagName.substring(1), 10);
       if (level <= this.depth) {
-        entries.push({
-          level,
-          text: h.textContent || '',
-          index: charIndex,
-        });
+        entries.push({ level, text: h.textContent || '' });
       }
     });
 
     return entries;
   }
 
-  private buildTocHtml(entries: TocEntry[]): string {
-    return entries
-      .map((e) => {
-        const indent = '  '.repeat(e.level - 1);
-        return `${indent}• ${e.text}`;
-      })
-      .join('\n');
+  private generateId(text: string): string {
+    const slug = text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    return `${slug}-${Math.random().toString(36).substring(2, 7)}`;
   }
 }

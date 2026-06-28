@@ -9,7 +9,7 @@ export class ApiProvider extends BaseAiProvider {
     super();
     this.name = 'api';
     this.requiresApiKey = false;
-    this.supportedFeatures = ['rewrite', 'translate', 'grammar', 'generate', 'summarize'];
+    this.supportedFeatures = ['rewrite', 'translate', 'grammar', 'generate', 'summarize', 'semantic', 'toc'];
     this.options = void 0;
     this.options = options;
   }
@@ -93,8 +93,6 @@ export class ApiProvider extends BaseAiProvider {
     }];
   }
   async generate(prompt, _onStream) {
-    // streaming not yet supported for API provider
-    void _onStream;
     return this.callApi('generate', prompt);
   }
   async summarize(text, format) {

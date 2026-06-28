@@ -57,6 +57,8 @@ import GridBorders from "./modules/gridBorders.js";
 Quill.register('modules/gridBorders', GridBorders);
 import { PlaceholderModule } from "./modules/placeHolderModule/placeHolderModule.js";
 Quill.register('modules/placeholder', PlaceholderModule);
+import TocBlot from "./blots/toc.js";
+Quill.register(TocBlot);
 import { AiAssistantModule } from "./modules/aiAssistant/aiAssistantModule.js";
 Quill.register('modules/aiAssistant', AiAssistantModule);
 icons['aiAssistant'] = '<svg viewBox="0 0 18 18"><path d="M9 2 L11 7 L16 7 L12 10.5 L13.5 16 L9 12.5 L4.5 16 L6 10.5 L2 7 L7 7 Z" class="ql-fill" fill="currentColor"/></svg>';

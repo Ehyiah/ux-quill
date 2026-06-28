@@ -282,16 +282,16 @@ The Generate feature creates new content from a text prompt. It is useful for wr
 
 ## Summarize
 
-The Summarize feature condenses the selected text (or the full document) into a shorter summary. Choose between a flowing paragraph or bullet points.
+The Summarize feature condenses your content into a shorter version. By default it works on the **entire document** — if you only want to summarize a specific passage, select it first.
 
 **How it works:**
-1. (Optional) Select a specific passage to summarize. If nothing is selected, the whole document is used.
+1. Leave **no text selected** to summarize the full document, or select a specific passage.
 2. Click the AI Assistant button <svg viewBox="0 0 18 18" width="14" height="14"><path d="M9 2 L11 7 L16 7 L12 10.5 L13.5 16 L9 12.5 L4.5 16 L6 10.5 L2 7 L7 7 Z" fill="currentColor"/></svg>.
 3. Choose **Résumer**.
 4. Select the output format:
-   - **Paragraphe** — a flowing paragraph.
-   - **Points clés** — bullet-point list.
-5. The summary is inserted at the end of the document (or after the selection).
+   - **Paragraphe** — a flowing paragraph summary.
+   - **Points clés** — bullet-point list of main ideas.
+5. The summary is inserted after the selection, or at the end of the document if nothing was selected.
 
 ---
 

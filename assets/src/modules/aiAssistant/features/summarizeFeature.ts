@@ -57,8 +57,8 @@ export class SummarizeFeature implements AiFeatureInterface {
 
   private async promptFormat(): Promise<SummaryFormat | null> {
     const options: Array<{ value: SummaryFormat; label: string; desc: string; icon: string }> = [
-      { value: 'paragraph', label: 'Paragraphe', desc: 'R\u00E9sum\u00E9 r\u00E9dig\u00E9 en quelques phrases', icon: '\uD83D\uDCDD' },
-      { value: 'bullets', label: 'Points cl\u00E9s', desc: 'Liste des id\u00E9es principales', icon: '\uD83D\uDCCC' },
+      { value: 'paragraph', label: 'Paragraphe', desc: 'R\u00E9sum\u00E9 r\u00E9dig\u00E9 (s\u00E9lection ou document entier)', icon: '\uD83D\uDCDD' },
+      { value: 'bullets', label: 'Points cl\u00E9s', desc: 'Id\u00E9es principales (s\u00E9lection ou document entier)', icon: '\uD83D\uDCCC' },
     ];
 
     return new Promise((resolve) => {

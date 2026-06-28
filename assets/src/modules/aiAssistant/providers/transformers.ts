@@ -23,7 +23,7 @@ const MODEL_MAP: Record<string, { task: string; model: string }> = {
 export class TransformersProvider extends BaseAiProvider {
   readonly name = 'transformers';
   readonly requiresApiKey = false;
-  readonly supportedFeatures: AiFeature[] = ['rewrite', 'translate', 'grammar', 'generate', 'summarize'];
+  readonly supportedFeatures: AiFeature[] = ['rewrite', 'translate', 'grammar', 'generate', 'summarize', 'semantic', 'toc'];
 
   private pipelines = new Map<string, PipelineFunction>();
   private loaders = new Map<string, PipelineLoader>();

@@ -149,7 +149,7 @@ class AiAssistantController
     private function buildGenerateMessages(string $text): array
     {
         return [
-            ['role' => 'system', 'content' => 'You are a helpful writing assistant. Generate content based on the user\'s request. Be creative and relevant.'],
+            ['role' => 'system', 'content' => 'You are a content generator. Fulfill the user\'s request directly. Respond with ONLY the generated content, no explanations, no options, no greetings, no notes.'],
             ['role' => 'user', 'content' => $text],
         ];
     }

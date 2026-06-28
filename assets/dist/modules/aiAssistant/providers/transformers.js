@@ -43,7 +43,7 @@ export class TransformersProvider extends BaseAiProvider {
     super(...arguments);
     this.name = 'transformers';
     this.requiresApiKey = false;
-    this.supportedFeatures = ['rewrite', 'translate', 'grammar', 'generate', 'summarize'];
+    this.supportedFeatures = ['rewrite', 'translate', 'grammar', 'generate', 'summarize', 'semantic', 'toc'];
     this.pipelines = new Map();
     this.loaders = new Map();
     this.modelProgress = new Map();

@@ -23,23 +23,51 @@ export class GenerateFeature {
     }]);
     try {
       let accumulated = '';
-      await provider.generate(prompt, chunk => {
+      let hasReceivedChunk = false;
+      let firstChunk = true;
+      const result = await provider.generate(prompt, chunk => {
+        hasReceivedChunk = true;
         accumulated += chunk;
-        quill.updateContents([{
-          retain: insertIndex
-        }, {
-          delete: loadingText.length
-        }, {
-          insert: accumulated
-        }]);
+        if (firstChunk) {
+          firstChunk = false;
+          quill.updateContents([{
+            retain: insertIndex
+          }, {
+            delete: loadingText.length
+          }, {
+            insert: accumulated
+          }]);
+        } else {
+          quill.updateContents([{
+            retain: insertIndex + accumulated.length - chunk.length
+          }, {
+            insert: chunk
+          }]);
+        }
       });
-      quill.updateContents([{
-        retain: insertIndex
-      }, {
-        delete: loadingText.length
-      }, {
-        insert: accumulated
-      }]);
+      if (!hasReceivedChunk) {
+        const finalText = typeof result === 'string' ? result : '';
+        if (finalText) {
+          quill.updateContents([{
+            retain: insertIndex
+          }, {
+            delete: loadingText.length
+          }, {
+            insert: finalText
+          }]);
+          quill.updateContents([{
+            retain: insertIndex + finalText.length
+          }, {
+            insert: '\n'
+          }]);
+        }
+      } else if (accumulated) {
+        quill.updateContents([{
+          retain: insertIndex + accumulated.length
+        }, {
+          insert: '\n'
+        }]);
+      }
     } catch (error) {
       console.error('Generation failed:', error);
       quill.updateContents([{
