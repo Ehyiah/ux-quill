@@ -123,7 +123,7 @@ export class TransformersProvider extends BaseAiProvider {
   async translate(text, targetLang) {
     const pipe = await this.getPipeline('translate');
     const targetName = LANGUAGE_MAP[targetLang] || targetLang;
-    const prompt = "Translate this from English to " + targetName + ":\nEnglish: " + text + "\n" + targetName + ":";
+    const prompt = "Translate the following text to " + targetName + ":\n" + text;
     const result = await pipe(prompt, {
       max_new_tokens: Math.round(text.split(' ').length * 3) + 50,
       temperature: 0.3,
@@ -133,7 +133,7 @@ export class TransformersProvider extends BaseAiProvider {
   }
   async correct(text) {
     const pipe = await this.getPipeline('grammar');
-    const prompt = "Please correct the grammar in the following text:\n" + text;
+    const prompt = "Correct the grammatical errors in the following text. Detect the language and preserve it:\n" + text;
     const result = await pipe(prompt, {
       max_new_tokens: Math.round(text.split(' ').length * 2) + 30,
       temperature: 0.2,

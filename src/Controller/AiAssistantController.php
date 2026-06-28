@@ -106,7 +106,7 @@ class AiAssistantController
 
         return [
             ['role' => 'system', 'content' => 'You are a professional translator. Translate the user\'s text accurately. Respond with ONLY the translation, no explanations or notes.'],
-            ['role' => 'user', 'content' => sprintf("Translate this from English to %s:\n%s", $targetLang, $text)],
+            ['role' => 'user', 'content' => sprintf("Translate the following text to %s. Detect the source language automatically:\n%s", $targetLang, $text)],
         ];
     }
 
@@ -139,7 +139,7 @@ class AiAssistantController
     {
         return [
             ['role' => 'system', 'content' => 'You are a grammar expert. Correct all grammatical errors in the user\'s text. Preserve the original meaning and style. Respond with ONLY the corrected text, no explanations.'],
-            ['role' => 'user', 'content' => sprintf("Correct the grammatical errors in this text:\n%s", $text)],
+            ['role' => 'user', 'content' => sprintf("Correct the grammatical errors in the following text. Detect the language and preserve it:\n%s", $text)],
         ];
     }
 

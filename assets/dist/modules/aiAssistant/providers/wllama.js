@@ -126,10 +126,10 @@ export class WllamaProvider extends BaseAiProvider {
     const targetName = LANGUAGE_MAP[targetLang] || targetLang;
     return this.chat([{
       role: 'system',
-      content: 'You are a translator.'
+      content: 'You are a professional translator. Respond with ONLY the translation, no explanations or notes.'
     }, {
       role: 'user',
-      content: "Translate to " + targetName + ":\n" + text
+      content: "Translate the following text to " + targetName + ". Detect the source language automatically:\n" + text
     }], {
       temperature: 0.3
     });
@@ -137,10 +137,10 @@ export class WllamaProvider extends BaseAiProvider {
   async correct(text) {
     const result = await this.chat([{
       role: 'system',
-      content: 'You correct grammar.'
+      content: 'You are a grammar expert. Correct all grammatical errors. Preserve the original meaning and style. Respond with ONLY the corrected text, no explanations.'
     }, {
       role: 'user',
-      content: "Correct the grammar:\n" + text
+      content: "Correct the grammatical errors in the following text. Detect the language and preserve it:\n" + text
     }], {
       temperature: 0.2
     });

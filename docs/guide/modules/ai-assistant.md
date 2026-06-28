@@ -268,12 +268,62 @@ The wllama provider loads **one model** in the browser and reuses it for all fea
 | **Zephyr-3B** | `TheBloke/zephyr-3B-beta-GGUF` | ~1.8 GB | 3 GB | ★★★★☆ | Good compromise |
 
 ::: tip
-Browse more GGUF models on HuggingFace: [huggingface.co/models?tags=gguf](https://huggingface.co/models?tags=gguf)
+Browse more GGUF models on HuggingFace: [huggingface.co/models?library=gguf](https://huggingface.co/models?library=gguf)
 :::
 
 ## Transformers provider configuration
-Nothing atm // TODO
-coming soon
+
+Provider `transformers` runs ONNX models entirely in-browser using [@huggingface/transformers](https://github.com/huggingface/transformers.js). Models are downloaded from HuggingFace Hub on first use and cached in the browser.
+
+### How it works
+
+1. On first feature use, the provider downloads the ONNX model from HuggingFace.
+2. Download progress is shown in the loading overlay.
+3. Models are cached in the browser's CacheStorage for offline use.
+4. The `semantic` and `toc` features use local analysis (no model download).
+
+### Default models
+
+The following ONNX models are used per feature:
+
+| Feature | Model | Task | Size |
+| :--- | :--- | :--- | :--- |
+| **rewrite** | `Xenova/LaMini-Flan-T5-783M` | text2text-generation | ~800 MB |
+| **translate** | `Xenova/LaMini-Flan-T5-783M` | text2text-generation | ~800 MB |
+| **grammar** | `Xenova/LaMini-Flan-T5-783M` | text2text-generation | ~800 MB |
+| **summarize** | `Xenova/LaMini-Flan-T5-783M` | summarization | ~800 MB |
+| **generate** | `Xenova/distilgpt2` | text-generation | ~250 MB |
+| **semantic** | *(none)* | Local TF-IDF analysis | — |
+| **toc** | *(none)* | DOM heading extraction | — |
+
+::: info
+Several features share the same model (`Xenova/LaMini-Flan-T5-783M`), so it is downloaded only once. The total download for all features is approximately **1 GB**.
+:::
+
+### How to find ONNX models on HuggingFace
+
+1. Go to [huggingface.co/models](https://huggingface.co/models)
+2. Filter by tag **`onnx`** and a task tag (e.g., `text-generation`, `summarization`, `text2text-generation`)
+3. Models exported by the HuggingFace community (especially from the `Xenova` namespace) are pre-optimized for browser use via `@huggingface/transformers`
+
+::: tip
+Browse ONNX models on HuggingFace: [huggingface.co/models?library=onnx](https://huggingface.co/models?library=onnx)
+:::
+
+### Limitations
+
+::: warning
+The transformers provider is **not recommended for production use**:
+- Models are small and produce lower quality responses compared to `api` or even `wllama`
+- Large model downloads (~1 GB) on first use can be slow
+- Inference depends on the user's device CPU power
+:::
+
+Currently, models are hardcoded in the provider and cannot be configured via the `models` option. For customizable models, use the [`wllama` provider](#wllama-provider-configuration) or the [`api` provider](#api-provider-configuration).
+
+::: tip
+For most use cases, the `api` provider (recommended) or `wllama` provider will give better results. The `transformers` provider is primarily intended for development and testing.
+:::
 
 
 ---
