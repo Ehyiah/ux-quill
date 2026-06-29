@@ -5,11 +5,15 @@ import { ToolbarCustomizer } from "./ui/toolbarCustomizer.js";
 import { handleUploadResponse, uploadStrategies } from "./upload-utils.js";
 import "./register-modules.js";
 import QuillTableBetter from 'quill-table-better';
-import ImageFigure from "./blots/imageFigure.js";
+import { Mention } from "./modules/mention.js";
 
 // Register custom ImageFigure blot to override default image
+import ImageFigure from "./blots/imageFigure.js";
 Quill.register(ImageFigure, true);
-import { Mention } from "./modules/mention.js";
+
+// Register custom VideoFigure blot to override default image
+import VideoFigure from "./blots/videoFigure.js";
+Quill.register('formats/video', VideoFigure, true);
 export default class _Class extends Controller {
   constructor() {
     super(...arguments);

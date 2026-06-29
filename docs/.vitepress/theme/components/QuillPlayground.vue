@@ -61,6 +61,10 @@ const MODULE_DEFS: Record<string, ModuleDefEntry> = {
     toolbar: ['image'],
     config: { imageSelection: {}, resize: {} },
   },
+  videoSelection: {
+    toolbar: ['video'],
+    config: { videoSelection: {} },
+  },
   table: {
     toolbar: ['table-better'],
     config: { table: false, 'table-better': { toolbarTable: true } },
@@ -286,6 +290,7 @@ function buildConfig() {
         slashModule: {},
         pasteSanitizer: { plainText: false },
         imageSelection: {},
+        videoSelection: {},
         nodeMover: {
           borderColor: null,
           dropIndicatorColor: '#ff0000',

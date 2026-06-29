@@ -57,3 +57,5 @@ import GridBorders from "./modules/gridBorders.js";
 Quill.register('modules/gridBorders', GridBorders);
 import { PlaceholderModule } from "./modules/placeHolderModule/placeHolderModule.js";
 Quill.register('modules/placeholder', PlaceholderModule);
+import VideoSelection from "./modules/videoSelection.js";
+Quill.register('modules/videoSelection', VideoSelection);
