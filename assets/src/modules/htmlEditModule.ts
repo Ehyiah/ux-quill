@@ -50,11 +50,15 @@ function preserveNewlinesPTags(input: string): string {
 }
 
 function fixTagSpaceOpenTag(input: string): string {
-  return input.replace(/(<(?!\/)[\w=\."'\s]*>) /g, '$1')
+  return input.replace(/(<(?!\/)[^>]*>) /g, '$1')
 }
 
 function fixTagSpaceCloseTag(input: string): string {
   return input.replace(/ (<\/[\w]+>)/g, '$1')
+}
+
+function removeWhitespaceBetweenTags(input: string): string {
+  return input.replace(/>\s+</g, '><')
 }
 
 function compose<T>(functions: Array<(input: T) => T>, input: T): T {
@@ -67,6 +71,7 @@ function outputHTMLParser(inputHtmlFromQuillPopup: string): string {
       convertMultipleSpacesToSingle,
       fixTagSpaceOpenTag,
       fixTagSpaceCloseTag,
+      removeWhitespaceBetweenTags,
       preserveNewlinesBr,
       preserveNewlinesPTags,
     ],
@@ -271,3 +276,6 @@ export class HtmlEditButton {
 }
 
 export default HtmlEditButton
+
+// Exported for testing
+export { outputHTMLParser, formatHTMLStringIndentation, removeWhitespaceBetweenTags }

@@ -35,16 +35,19 @@ function preserveNewlinesPTags(input) {
   return input.replace(/<p><\/p>/g, '<p> </p>');
 }
 function fixTagSpaceOpenTag(input) {
-  return input.replace(/(<(?!\/)[\w=\."'\s]*>) /g, '$1');
+  return input.replace(/(<(?!\/)[^>]*>) /g, '$1');
 }
 function fixTagSpaceCloseTag(input) {
   return input.replace(/ (<\/[\w]+>)/g, '$1');
+}
+function removeWhitespaceBetweenTags(input) {
+  return input.replace(/>\s+</g, '><');
 }
 function compose(functions, input) {
   return functions.reduce((acc, cur) => cur(acc), input);
 }
 function outputHTMLParser(inputHtmlFromQuillPopup) {
-  return compose([convertMultipleSpacesToSingle, fixTagSpaceOpenTag, fixTagSpaceCloseTag, preserveNewlinesBr, preserveNewlinesPTags], inputHtmlFromQuillPopup);
+  return compose([convertMultipleSpacesToSingle, fixTagSpaceOpenTag, fixTagSpaceCloseTag, removeWhitespaceBetweenTags, preserveNewlinesBr, preserveNewlinesPTags], inputHtmlFromQuillPopup);
 }
 function formatHTMLStringIndentation(code) {
   let stripWhiteSpaces = true;
@@ -207,3 +210,6 @@ export class HtmlEditButton {
   }
 }
 export default HtmlEditButton;
+
+// Exported for testing
+export { outputHTMLParser, formatHTMLStringIndentation, removeWhitespaceBetweenTags };
