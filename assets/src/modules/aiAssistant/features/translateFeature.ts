@@ -25,15 +25,18 @@ export class TranslateFeature implements AiFeatureInterface {
   }
 
   async trigger(): Promise<void> {
-    const quill = this.quill as { getSelection(): { index: number; length: number } | null; getText(index?: number, length?: number): string; updateContents(delta: { ops: Array<Record<string, unknown>> }): void };
+    const quill = this.quill as { getSelection(): { index: number; length: number } | null; getText(index?: number, length?: number): string; updateContents(delta: { ops: Array<Record<string, unknown>> }): void; getLength(): number };
     const selection = quill.getSelection();
 
     if (!selection || selection.length === 0) {
       return;
     }
 
-    const fullText = quill.getText();
-    const wordRange = expandWordSelection(fullText, selection.index, selection.length);
+    const getChar = (i: number) => {
+      if (i < 0 || i >= quill.getLength()) return '';
+      return quill.getText(i, 1) || '';
+    };
+    const wordRange = expandWordSelection(getChar, selection.index, selection.length);
     const selectedText = quill.getText(wordRange.index, wordRange.length).trim();
     if (!selectedText) return;
 

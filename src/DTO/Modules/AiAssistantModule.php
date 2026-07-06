@@ -15,6 +15,7 @@ final class AiAssistantModule implements ModuleInterface
     public const FEATURE_SUMMARIZE = 'summarize';
     public const FEATURE_SEMANTIC = 'semantic';
     public const FEATURE_TOC = 'toc';
+    public const FEATURE_SYNONYM = 'synonym';
 
     public const PROVIDER_OPTION = 'provider';
     public const MODELS_OPTION = 'models';
@@ -41,6 +42,9 @@ final class AiAssistantModule implements ModuleInterface
             ],
             'toc' => [
                 'depth' => 3,
+            ],
+            'synonym' => [
+                'count' => 5,
             ],
         ];
 

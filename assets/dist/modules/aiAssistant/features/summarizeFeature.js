@@ -17,8 +17,11 @@ export class SummarizeFeature {
     let textToSummarize;
     let insertIndex;
     if (selection && selection.length > 0) {
-      const fullText = quill.getText();
-      const wordRange = expandWordSelection(fullText, selection.index, selection.length);
+      const getChar = i => {
+        if (i < 0 || i >= quill.getLength()) return '';
+        return quill.getText(i, 1) || '';
+      };
+      const wordRange = expandWordSelection(getChar, selection.index, selection.length);
       textToSummarize = quill.getText(wordRange.index, wordRange.length).trim();
       insertIndex = wordRange.index + wordRange.length;
     } else {

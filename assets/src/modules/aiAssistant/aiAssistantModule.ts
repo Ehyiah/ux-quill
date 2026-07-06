@@ -8,6 +8,7 @@ import { GenerateFeature } from './features/generateFeature.js';
 import { SummarizeFeature } from './features/summarizeFeature.js';
 import { SemanticFeature } from './features/semanticFeature.js';
 import { TocFeature } from './features/tocFeature.js';
+import { SynonymFeature } from './features/synonymFeature.js';
 
 interface AiAssistantOptions {
   aiManager: AiManager;
@@ -28,6 +29,7 @@ const FEATURE_ICONS: Record<AiFeature, string> = {
   generate: '\u2728',
   semantic: '\uD83D\uDCCA',
   toc: '\uD83D\uDCD1',
+  synonym: '\uD83D\uDD04',
 };
 
 const FEATURE_GROUPS: Record<AiFeature, 'edit' | 'create' | 'analyze'> = {
@@ -38,6 +40,7 @@ const FEATURE_GROUPS: Record<AiFeature, 'edit' | 'create' | 'analyze'> = {
   generate: 'create',
   semantic: 'analyze',
   toc: 'analyze',
+  synonym: 'edit',
 };
 
 const GROUP_LABELS: Record<string, string> = {
@@ -349,6 +352,7 @@ export class AiAssistantModule {
   private panel: HTMLElement | null = null;
   private backdrop: HTMLElement | null = null;
   private loadingEl: HTMLElement | null = null;
+  private panelSelection: { index: number; length: number } | null = null;
 
   constructor(quill: Quill, options: AiAssistantOptions) {
     this.quill = quill;
@@ -385,6 +389,7 @@ export class AiAssistantModule {
       summarize: SummarizeFeature,
       semantic: SemanticFeature,
       toc: TocFeature,
+      synonym: SynonymFeature,
     };
 
     Object.entries(features).forEach(([key, config]) => {
@@ -442,6 +447,7 @@ export class AiAssistantModule {
   }
 
   private showPanel(): void {
+    this.panelSelection = this.quill.getSelection() || null;
     this.backdrop = document.createElement('div');
     this.backdrop.className = 'ai-assistant-backdrop';
     this.backdrop.addEventListener('click', () => this.closePanel());
@@ -493,6 +499,7 @@ export class AiAssistantModule {
           summarize: labels.descSummarize,
           semantic: labels.descSemantic,
           toc: labels.descToc,
+          synonym: labels.descSynonym,
         };
 
         const desc = document.createElement('div');
@@ -504,9 +511,12 @@ export class AiAssistantModule {
         item.appendChild(icon);
         item.appendChild(text);
 
-        item.addEventListener('click', (e) => {
-          e.stopPropagation();
+        item.addEventListener('mousedown', (e) => {
+          e.preventDefault();
           this.closePanel();
+          if (this.panelSelection) {
+            this.quill.setSelection(this.panelSelection.index, this.panelSelection.length, 'api');
+          }
           instance.trigger();
         });
 
@@ -595,6 +605,7 @@ export class AiAssistantModule {
   }
 
   private closePanel(): void {
+    this.panelSelection = null;
     if (this.panel) {
       this.panel.remove();
       this.panel = null;

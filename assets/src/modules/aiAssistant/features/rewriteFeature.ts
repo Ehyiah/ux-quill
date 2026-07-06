@@ -25,8 +25,11 @@ export class RewriteFeature implements AiFeatureInterface {
       return;
     }
 
-    const fullText = quill.getText();
-    const wordRange = expandWordSelection(fullText, selection.index, selection.length);
+    const getChar = (i: number) => {
+      if (i < 0 || i >= quill.getLength()) return '';
+      return quill.getText(i, 1) || '';
+    };
+    const wordRange = expandWordSelection(getChar, selection.index, selection.length);
     const selectedText = quill.getText(wordRange.index, wordRange.length).trim();
     if (!selectedText) return;
 

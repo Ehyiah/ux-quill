@@ -13,7 +13,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[AsController]
 class AiAssistantController
 {
-    private const FEATURES = ['rewrite', 'translate', 'grammar', 'generate', 'summarize'];
+    private const FEATURES = ['rewrite', 'translate', 'grammar', 'generate', 'summarize', 'synonym'];
 
     public function __construct(
         private readonly AiAssistantConfig $config,
@@ -84,6 +84,7 @@ class AiAssistantController
             'grammar' => $this->buildGrammarMessages($text),
             'generate' => $this->buildGenerateMessages($text),
             'summarize' => $this->buildSummarizeMessages($text, $payload),
+            'synonym' => $this->buildSynonymMessages($text, $payload),
             default => throw new InvalidArgumentException(sprintf('Unknown feature "%s".', $feature)),
         };
 
@@ -167,6 +168,24 @@ class AiAssistantController
         return [
             ['role' => 'system', 'content' => 'You are a professional summarizer. Summarize the key points concisely and accurately.'],
             ['role' => 'user', 'content' => sprintf("Summarize this text as %s:\n%s", $formatInst, $text)],
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     *
+     * @return array<int, array{role: string, content: string}>
+     */
+    private function buildSynonymMessages(string $text, array $payload): array
+    {
+        $count = $payload['count'] ?? 5;
+        if (!is_int($count) || $count < 1 || $count > 20) {
+            $count = 5;
+        }
+
+        return [
+            ['role' => 'system', 'content' => 'You are a lexicography assistant. Respond ONLY with a valid JSON array of synonym objects in format [{"word": "...", "score": 0.0-1.0}]. Sort by relevance (highest score first). No explanations, no notes.'],
+            ['role' => 'user', 'content' => sprintf('Find up to %d synonyms for the word "%s". Detect the language automatically. Respond only with the JSON array.', $count, $text)],
         ];
     }
 

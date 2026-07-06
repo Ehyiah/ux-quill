@@ -1,5 +1,5 @@
 import { BaseAiProvider } from './base.js';
-import type { AiFeature, RewriteStyle, SummaryFormat, GrammarSuggestion, SemanticResult } from '../aiTypes';
+import type { AiFeature, RewriteStyle, SummaryFormat, GrammarSuggestion, SemanticResult, SynonymResult } from '../aiTypes';
 
 interface WllamaModelConfig {
   repo: string;
@@ -21,7 +21,7 @@ const LANGUAGE_MAP: Record<string, string> = {
 export class WllamaProvider extends BaseAiProvider {
   readonly name = 'wllama';
   readonly requiresApiKey = false;
-  readonly supportedFeatures: AiFeature[] = ['rewrite', 'translate', 'grammar', 'generate', 'summarize', 'semantic', 'toc'];
+  readonly supportedFeatures: AiFeature[] = ['rewrite', 'translate', 'grammar', 'generate', 'summarize', 'semantic', 'toc', 'synonym'];
 
   private wllamaInstance: any = null;
   private loadPromise: Promise<void> | null = null;
@@ -209,5 +209,37 @@ export class WllamaProvider extends BaseAiProvider {
       .filter((k) => k.frequency > 1)
       .slice(0, 5)
       .map((k) => k.word);
+  }
+
+  async findSynonyms(word: string, count: number): Promise<SynonymResult[]> {
+    const result = await this.chat([
+      { role: 'system', content: 'You are a lexicography assistant. Respond ONLY with a valid JSON array of synonym objects in format [{"word": "...", "score": 0.0-1.0}]. Sort by relevance. No explanations.' },
+      { role: 'user', content: `Find up to ${count} synonyms for the word "${word}". Detect the language automatically. Respond only with the JSON array.` },
+    ], { max_tokens: 300, temperature: 0.3 });
+
+    try {
+      const cleaned = result.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+      const parsed = JSON.parse(cleaned);
+
+      if (!Array.isArray(parsed)) {
+        return [];
+      }
+
+      return parsed.map((item: unknown) => {
+        if (typeof item === 'string') {
+          return { word: item };
+        }
+        if (typeof item === 'object' && item !== null) {
+          const obj = item as Record<string, unknown>;
+          return {
+            word: String(obj.word || obj[0] || ''),
+            score: typeof obj.score === 'number' ? obj.score : undefined,
+          };
+        }
+        return { word: '' };
+      }).filter((s: SynonymResult) => s.word.length > 0);
+    } catch {
+      return [];
+    }
   }
 }

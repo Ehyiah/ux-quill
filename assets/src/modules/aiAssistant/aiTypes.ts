@@ -5,7 +5,8 @@ export type AiFeature =
   | 'generate'
   | 'summarize'
   | 'semantic'
-  | 'toc';
+  | 'toc'
+  | 'synonym';
 
 export type RewriteStyle = 'formal' | 'casual' | 'concise' | 'expanded';
 
@@ -26,6 +27,11 @@ export interface SemanticResult {
   readingTime: number;
 }
 
+export interface SynonymResult {
+  word: string;
+  score?: number;
+}
+
 export type AiProviderType = 'api' | 'transformers' | 'wllama';
 
 export type UiLanguage = 'en' | 'fr' | 'de' | 'es';
@@ -38,6 +44,7 @@ export interface AiLabels {
   featureSummarize: string;
   featureSemantic: string;
   featureToc: string;
+  featureSynonym: string;
 
   descRewrite: string;
   descTranslate: string;
@@ -46,6 +53,7 @@ export interface AiLabels {
   descSummarize: string;
   descSemantic: string;
   descToc: string;
+  descSynonym: string;
 
   rewriteStyleTitle: string;
   rewriteFormal: string;
@@ -88,6 +96,10 @@ export interface AiLabels {
   semanticKeywordsCount: string;
   semanticKeywordsTitle: string;
 
+  synonymTitle: string;
+  synonymNoResults: string;
+  synonymClickToReplace: string;
+
   btnApply: string;
   btnCancel: string;
   btnClose: string;
@@ -104,6 +116,7 @@ export const DEFAULT_LABELS: AiLabels = {
   featureSummarize: 'Summarize',
   featureSemantic: 'Analyze content',
   featureToc: 'Generate TOC',
+  featureSynonym: 'Find synonym',
 
   descRewrite: 'Rewrite selected text in a different style',
   descTranslate: 'Translate to another language',
@@ -112,6 +125,7 @@ export const DEFAULT_LABELS: AiLabels = {
   descSummarize: 'Summarize the content',
   descSemantic: 'Extract keywords and topics',
   descToc: 'Create a table of contents',
+  descSynonym: 'Find synonyms for the selected word',
 
   rewriteStyleTitle: 'Rewriting style',
   rewriteFormal: 'Formal',
@@ -154,6 +168,10 @@ export const DEFAULT_LABELS: AiLabels = {
   semanticKeywordsCount: 'Keywords',
   semanticKeywordsTitle: 'Keywords',
 
+  synonymTitle: 'Synonyms',
+  synonymNoResults: 'No synonyms found',
+  synonymClickToReplace: 'Click to replace',
+
   btnApply: 'Apply',
   btnCancel: 'Cancel',
   btnClose: 'Close',
@@ -172,6 +190,7 @@ export const LOCALES: Record<UiLanguage, Partial<AiLabels>> = {
     featureSummarize: 'R\u00E9sumer',
     featureSemantic: 'Analyser le contenu',
     featureToc: 'G\u00E9n\u00E9rer le sommaire',
+    featureSynonym: 'Trouver un synonyme',
     descRewrite: 'Changer le style du texte s\u00E9lectionn\u00E9',
     descTranslate: 'Traduire dans une autre langue',
     descGrammar: 'Corriger les fautes d\u2019orthographe',
@@ -179,6 +198,7 @@ export const LOCALES: Record<UiLanguage, Partial<AiLabels>> = {
     descSummarize: 'R\u00E9sumer le contenu',
     descSemantic: 'Analyser les mots-cl\u00E9s et sujets',
     descToc: 'Cr\u00E9er une table des mati\u00E8res',
+    descSynonym: 'Trouver des synonymes du mot s\u00E9lectionn\u00E9',
     rewriteStyleTitle: 'Style de r\u00E9\u00E9criture',
     rewriteFormal: 'Formel',
     rewriteFormalDesc: 'Ton professionnel et soutenu',
@@ -214,6 +234,9 @@ export const LOCALES: Record<UiLanguage, Partial<AiLabels>> = {
     semanticTopics: 'Sujets',
     semanticKeywordsCount: 'Mots-cl\u00E9s',
     semanticKeywordsTitle: 'Mots-cl\u00E9s',
+    synonymTitle: 'Synonymes',
+    synonymNoResults: 'Aucun synonyme trouv\u00E9',
+    synonymClickToReplace: 'Cliquer pour remplacer',
     btnApply: 'Appliquer',
     btnCancel: 'Annuler',
     btnClose: 'Fermer',
@@ -229,6 +252,7 @@ export const LOCALES: Record<UiLanguage, Partial<AiLabels>> = {
     featureSummarize: 'Zusammenfassen',
     featureSemantic: 'Inhalt analysieren',
     featureToc: 'Inhaltsverzeichnis erstellen',
+    featureSynonym: 'Synonym finden',
     descRewrite: 'Ausgew\u00E4hlten Text in einem anderen Stil umformulieren',
     descTranslate: 'In eine andere Sprache \u00FCbersetzen',
     descGrammar: 'Rechtschreib- und Grammatikfehler korrigieren',
@@ -236,6 +260,7 @@ export const LOCALES: Record<UiLanguage, Partial<AiLabels>> = {
     descSummarize: 'Den Inhalt zusammenfassen',
     descSemantic: 'Schl\u00FCsselw\u00F6rter und Themen extrahieren',
     descToc: 'Inhaltsverzeichnis erstellen',
+    descSynonym: 'Synonyme f\u00FCr das ausgew\u00E4hlte Wort finden',
     rewriteStyleTitle: 'Umformulierungsstil',
     rewriteFormal: 'Formell',
     rewriteFormalDesc: 'Professioneller und akademischer Ton',
@@ -271,6 +296,9 @@ export const LOCALES: Record<UiLanguage, Partial<AiLabels>> = {
     semanticTopics: 'Themen',
     semanticKeywordsCount: 'Schl\u00FCsselw\u00F6rter',
     semanticKeywordsTitle: 'Schl\u00FCsselw\u00F6rter',
+    synonymTitle: 'Synonyme',
+    synonymNoResults: 'Keine Synonyme gefunden',
+    synonymClickToReplace: 'Zum Ersetzen klicken',
     btnApply: 'Anwenden',
     btnCancel: 'Abbrechen',
     btnClose: 'Schlie\u00DFen',
@@ -286,6 +314,7 @@ export const LOCALES: Record<UiLanguage, Partial<AiLabels>> = {
     featureSummarize: 'Resumir',
     featureSemantic: 'Analizar contenido',
     featureToc: 'Generar \u00EDndice',
+    featureSynonym: 'Buscar sin\u00F3nimo',
     descRewrite: 'Reformular el texto seleccionado en un estilo diferente',
     descTranslate: 'Traducir a otro idioma',
     descGrammar: 'Corregir errores ortogr\u00E1ficos y gramaticales',
@@ -293,6 +322,7 @@ export const LOCALES: Record<UiLanguage, Partial<AiLabels>> = {
     descSummarize: 'Resumir el contenido',
     descSemantic: 'Extraer palabras clave y temas',
     descToc: 'Crear una tabla de contenidos',
+    descSynonym: 'Buscar sin\u00F3nimos de la palabra seleccionada',
     rewriteStyleTitle: 'Estilo de reescritura',
     rewriteFormal: 'Formal',
     rewriteFormalDesc: 'Tono profesional y acad\u00E9mico',
@@ -328,6 +358,9 @@ export const LOCALES: Record<UiLanguage, Partial<AiLabels>> = {
     semanticTopics: 'Temas',
     semanticKeywordsCount: 'Palabras clave',
     semanticKeywordsTitle: 'Palabras clave',
+    synonymTitle: 'Sin\u00F3nimos',
+    synonymNoResults: 'No se encontraron sin\u00F3nimos',
+    synonymClickToReplace: 'Haz clic para reemplazar',
     btnApply: 'Aplicar',
     btnCancel: 'Cancelar',
     btnClose: 'Cerrar',
@@ -354,6 +387,9 @@ export interface AiOptions {
   toc?: {
     depth?: number;
   };
+  synonym?: {
+    count?: number;
+  };
 }
 
 export interface AiProgressEvent {
@@ -375,6 +411,7 @@ export interface AiProvider {
   generate(prompt: string, onStream?: (chunk: string) => void): Promise<string>;
   summarize(text: string, format: SummaryFormat): Promise<string>;
   analyze(text: string): Promise<SemanticResult>;
+  findSynonyms(word: string, count: number): Promise<SynonymResult[]>;
 }
 
 export interface AiFeatureInterface {

@@ -1,5 +1,5 @@
 import { BaseAiProvider } from './base.js';
-import type { AiFeature, RewriteStyle, SummaryFormat, GrammarSuggestion, SemanticResult } from '../aiTypes.js';
+import type { AiFeature, RewriteStyle, SummaryFormat, GrammarSuggestion, SemanticResult, SynonymResult } from '../aiTypes.js';
 
 const API_ENDPOINT = '/_ux/quill/ai-assistant';
 
@@ -13,7 +13,7 @@ interface ApiProviderOptions {
 export class ApiProvider extends BaseAiProvider {
   readonly name = 'api';
   readonly requiresApiKey = false;
-  readonly supportedFeatures: AiFeature[] = ['rewrite', 'translate', 'grammar', 'generate', 'summarize', 'semantic', 'toc'];
+  readonly supportedFeatures: AiFeature[] = ['rewrite', 'translate', 'grammar', 'generate', 'summarize', 'semantic', 'toc', 'synonym'];
 
   private options: ApiProviderOptions;
 
@@ -160,5 +160,34 @@ export class ApiProvider extends BaseAiProvider {
       .filter((k) => k.frequency > 1)
       .slice(0, 5)
       .map((k) => k.word);
+  }
+
+  async findSynonyms(word: string, count: number): Promise<SynonymResult[]> {
+    const result = await this.callApi('synonym', word, { count });
+
+    try {
+      const cleaned = result.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+      const parsed = JSON.parse(cleaned);
+
+      if (!Array.isArray(parsed)) {
+        return [];
+      }
+
+      return parsed.map((item: unknown) => {
+        if (typeof item === 'string') {
+          return { word: item };
+        }
+        if (typeof item === 'object' && item !== null) {
+          const obj = item as Record<string, unknown>;
+          return {
+            word: String(obj.word || obj[0] || ''),
+            score: typeof obj.score === 'number' ? obj.score : undefined,
+          };
+        }
+        return { word: '' };
+      }).filter((s: SynonymResult) => s.word.length > 0);
+    } catch {
+      return [];
+    }
   }
 }

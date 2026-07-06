@@ -49,7 +49,7 @@ export class TransformersProvider extends BaseAiProvider {
     super();
     this.name = 'transformers';
     this.requiresApiKey = false;
-    this.supportedFeatures = ['rewrite', 'translate', 'grammar', 'generate', 'summarize', 'semantic', 'toc'];
+    this.supportedFeatures = ['rewrite', 'translate', 'grammar', 'generate', 'summarize', 'semantic', 'toc', 'synonym'];
     this.pipelines = new Map();
     this.loaders = new Map();
     this.modelProgress = new Map();
@@ -212,6 +212,9 @@ export class TransformersProvider extends BaseAiProvider {
   }
   extractTopics(keywords) {
     return keywords.filter(k => k.frequency > 1).slice(0, 5).map(k => k.word);
+  }
+  async findSynonyms(_word, _count) {
+    return [];
   }
   extractGeneratedText(result, prompt) {
     if (Array.isArray(result)) {

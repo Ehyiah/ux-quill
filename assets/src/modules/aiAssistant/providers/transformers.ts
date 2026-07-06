@@ -1,5 +1,5 @@
 import { BaseAiProvider } from './base.js';
-import type { AiFeature, RewriteStyle, SummaryFormat, GrammarSuggestion, SemanticResult } from '../aiTypes';
+import type { AiFeature, RewriteStyle, SummaryFormat, GrammarSuggestion, SemanticResult, SynonymResult } from '../aiTypes';
 
 type PipelineFunction = (...args: unknown[]) => Promise<unknown>;
 type PipelineLoader = Promise<PipelineFunction>;
@@ -31,7 +31,7 @@ const MODEL_MAP: Record<string, { task: string; model: string }> = {
 export class TransformersProvider extends BaseAiProvider {
   readonly name = 'transformers';
   readonly requiresApiKey = false;
-  readonly supportedFeatures: AiFeature[] = ['rewrite', 'translate', 'grammar', 'generate', 'summarize', 'semantic', 'toc'];
+  readonly supportedFeatures: AiFeature[] = ['rewrite', 'translate', 'grammar', 'generate', 'summarize', 'semantic', 'toc', 'synonym'];
 
   private pipelines = new Map<string, PipelineFunction>();
   private loaders = new Map<string, PipelineLoader>();
@@ -243,6 +243,10 @@ export class TransformersProvider extends BaseAiProvider {
       .filter((k) => k.frequency > 1)
       .slice(0, 5)
       .map((k) => k.word);
+  }
+
+  async findSynonyms(_word: string, _count: number): Promise<SynonymResult[]> {
+    return [];
   }
 
   private extractGeneratedText(result: unknown, prompt?: string): string {

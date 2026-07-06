@@ -5,6 +5,7 @@ import { GenerateFeature } from "./features/generateFeature.js";
 import { SummarizeFeature } from "./features/summarizeFeature.js";
 import { SemanticFeature } from "./features/semanticFeature.js";
 import { TocFeature } from "./features/tocFeature.js";
+import { SynonymFeature } from "./features/synonymFeature.js";
 const FEATURE_ICONS = {
   rewrite: '\u270D\uFE0F',
   translate: '\uD83C\uDF10',
@@ -12,7 +13,8 @@ const FEATURE_ICONS = {
   summarize: '\uD83D\uDCDD',
   generate: '\u2728',
   semantic: '\uD83D\uDCCA',
-  toc: '\uD83D\uDCD1'
+  toc: '\uD83D\uDCD1',
+  synonym: '\uD83D\uDD04'
 };
 const FEATURE_GROUPS = {
   rewrite: 'edit',
@@ -21,7 +23,8 @@ const FEATURE_GROUPS = {
   summarize: 'create',
   generate: 'create',
   semantic: 'analyze',
-  toc: 'analyze'
+  toc: 'analyze',
+  synonym: 'edit'
 };
 const GROUP_LABELS = {
   edit: 'Edit',
@@ -45,6 +48,7 @@ export class AiAssistantModule {
     this.panel = null;
     this.backdrop = null;
     this.loadingEl = null;
+    this.panelSelection = null;
     this.quill = quill;
     this.aiManager = options.aiManager;
     injectStyles();
@@ -75,7 +79,8 @@ export class AiAssistantModule {
       generate: GenerateFeature,
       summarize: SummarizeFeature,
       semantic: SemanticFeature,
-      toc: TocFeature
+      toc: TocFeature,
+      synonym: SynonymFeature
     };
     Object.entries(features).forEach(_ref => {
       let [key, config] = _ref;
@@ -118,6 +123,7 @@ export class AiAssistantModule {
     this.showPanel();
   }
   showPanel() {
+    this.panelSelection = this.quill.getSelection() || null;
     this.backdrop = document.createElement('div');
     this.backdrop.className = 'ai-assistant-backdrop';
     this.backdrop.addEventListener('click', () => this.closePanel());
@@ -163,7 +169,8 @@ export class AiAssistantModule {
           generate: labels.descGenerate,
           summarize: labels.descSummarize,
           semantic: labels.descSemantic,
-          toc: labels.descToc
+          toc: labels.descToc,
+          synonym: labels.descSynonym
         };
         const desc = document.createElement('div');
         desc.className = 'ai-assistant-item-desc';
@@ -172,9 +179,12 @@ export class AiAssistantModule {
         text.appendChild(desc);
         item.appendChild(icon);
         item.appendChild(text);
-        item.addEventListener('click', e => {
-          e.stopPropagation();
+        item.addEventListener('mousedown', e => {
+          e.preventDefault();
           this.closePanel();
+          if (this.panelSelection) {
+            this.quill.setSelection(this.panelSelection.index, this.panelSelection.length, 'api');
+          }
           instance.trigger();
         });
         this.panel.appendChild(item);
@@ -254,6 +264,7 @@ export class AiAssistantModule {
     }
   }
   closePanel() {
+    this.panelSelection = null;
     if (this.panel) {
       this.panel.remove();
       this.panel = null;

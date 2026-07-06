@@ -1,4 +1,4 @@
-import type { AiProvider, AiFeature, RewriteStyle, SummaryFormat, GrammarSuggestion, SemanticResult } from '../aiTypes.js';
+import type { AiProvider, AiFeature, RewriteStyle, SummaryFormat, GrammarSuggestion, SemanticResult, SynonymResult } from '../aiTypes.js';
 
 export abstract class BaseAiProvider implements AiProvider {
   abstract readonly name: string;
@@ -12,4 +12,5 @@ export abstract class BaseAiProvider implements AiProvider {
   abstract generate(prompt: string, onStream?: (chunk: string) => void): Promise<string>;
   abstract summarize(text: string, format: SummaryFormat): Promise<string>;
   abstract analyze(text: string): Promise<SemanticResult>;
+  abstract findSynonyms(word: string, count: number): Promise<SynonymResult[]>;
 }

@@ -18,11 +18,14 @@ export class GrammarFeature {
     let replaceIndex;
     let replaceLength;
     if (useSelection) {
-      const fullText = quill.getText();
+      const getChar = i => {
+        if (i < 0 || i >= quill.getLength()) return '';
+        return quill.getText(i, 1) || '';
+      };
       const {
         expandWordSelection
       } = await import("../utils/wordSelection.js");
-      const wordRange = expandWordSelection(fullText, selection.index, selection.length);
+      const wordRange = expandWordSelection(getChar, selection.index, selection.length);
       text = quill.getText(wordRange.index, wordRange.length).trim();
       replaceIndex = wordRange.index;
       replaceLength = wordRange.length;

@@ -29,7 +29,7 @@ export class WllamaProvider extends BaseAiProvider {
     super();
     this.name = 'wllama';
     this.requiresApiKey = false;
-    this.supportedFeatures = ['rewrite', 'translate', 'grammar', 'generate', 'summarize', 'semantic', 'toc'];
+    this.supportedFeatures = ['rewrite', 'translate', 'grammar', 'generate', 'summarize', 'semantic', 'toc', 'synonym'];
     this.wllamaInstance = null;
     this.loadPromise = null;
     this.onProgress = void 0;
@@ -198,5 +198,43 @@ export class WllamaProvider extends BaseAiProvider {
   }
   extractTopics(keywords) {
     return keywords.filter(k => k.frequency > 1).slice(0, 5).map(k => k.word);
+  }
+  async findSynonyms(word, count) {
+    const result = await this.chat([{
+      role: 'system',
+      content: 'You are a lexicography assistant. Respond ONLY with a valid JSON array of synonym objects in format [{"word": "...", "score": 0.0-1.0}]. Sort by relevance. No explanations.'
+    }, {
+      role: 'user',
+      content: "Find up to " + count + " synonyms for the word \"" + word + "\". Detect the language automatically. Respond only with the JSON array."
+    }], {
+      max_tokens: 300,
+      temperature: 0.3
+    });
+    try {
+      const cleaned = result.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+      const parsed = JSON.parse(cleaned);
+      if (!Array.isArray(parsed)) {
+        return [];
+      }
+      return parsed.map(item => {
+        if (typeof item === 'string') {
+          return {
+            word: item
+          };
+        }
+        if (typeof item === 'object' && item !== null) {
+          const obj = item;
+          return {
+            word: String(obj.word || obj[0] || ''),
+            score: typeof obj.score === 'number' ? obj.score : undefined
+          };
+        }
+        return {
+          word: ''
+        };
+      }).filter(s => s.word.length > 0);
+    } catch (_unused2) {
+      return [];
+    }
   }
 }

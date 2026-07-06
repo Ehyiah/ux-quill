@@ -9,7 +9,7 @@ export class ApiProvider extends BaseAiProvider {
     super();
     this.name = 'api';
     this.requiresApiKey = false;
-    this.supportedFeatures = ['rewrite', 'translate', 'grammar', 'generate', 'summarize', 'semantic', 'toc'];
+    this.supportedFeatures = ['rewrite', 'translate', 'grammar', 'generate', 'summarize', 'semantic', 'toc', 'synonym'];
     this.options = void 0;
     this.options = options;
   }
@@ -134,5 +134,36 @@ export class ApiProvider extends BaseAiProvider {
   }
   extractTopics(keywords) {
     return keywords.filter(k => k.frequency > 1).slice(0, 5).map(k => k.word);
+  }
+  async findSynonyms(word, count) {
+    const result = await this.callApi('synonym', word, {
+      count
+    });
+    try {
+      const cleaned = result.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+      const parsed = JSON.parse(cleaned);
+      if (!Array.isArray(parsed)) {
+        return [];
+      }
+      return parsed.map(item => {
+        if (typeof item === 'string') {
+          return {
+            word: item
+          };
+        }
+        if (typeof item === 'object' && item !== null) {
+          const obj = item;
+          return {
+            word: String(obj.word || obj[0] || ''),
+            score: typeof obj.score === 'number' ? obj.score : undefined
+          };
+        }
+        return {
+          word: ''
+        };
+      }).filter(s => s.word.length > 0);
+    } catch (_unused) {
+      return [];
+    }
   }
 }

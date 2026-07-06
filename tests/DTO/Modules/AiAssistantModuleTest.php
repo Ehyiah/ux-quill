@@ -20,6 +20,7 @@ final class AiAssistantModuleTest extends TestCase
         $this->assertEquals([], $module->options['features']);
         $this->assertEquals(['fr', 'en', 'es', 'de', 'it', 'pt'], $module->options['translate']['target_languages']);
         $this->assertEquals(3, $module->options['toc']['depth']);
+        $this->assertEquals(5, $module->options['synonym']['count']);
     }
 
     /**
@@ -36,10 +37,14 @@ final class AiAssistantModuleTest extends TestCase
             'toc' => [
                 'depth' => 2,
             ],
+            'synonym' => [
+                'count' => 10,
+            ],
         ]);
         $this->assertEquals(['rewrite', 'translate'], $module->options['features']);
         $this->assertEquals(['fr', 'en', 'de'], $module->options['translate']['target_languages']);
         $this->assertEquals('de', $module->options['translate']['default_language']);
         $this->assertEquals(2, $module->options['toc']['depth']);
+        $this->assertEquals(10, $module->options['synonym']['count']);
     }
 }
