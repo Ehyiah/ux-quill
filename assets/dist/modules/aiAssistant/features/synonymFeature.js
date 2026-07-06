@@ -23,7 +23,7 @@ export class SynonymFeature {
     const isWordChar = ch => {
       if (!ch) return false;
       const code = ch.charCodeAt(0);
-      return code >= 65 && code <= 90 || code >= 97 && code <= 122 || code >= 48 && code <= 57 || code >= 192 && code <= 450 || code >= 0x0300 && code <= 0x036F || ch === "'" || ch === '\u2019' || ch === '-';
+      return code >= 65 && code <= 90 || code >= 97 && code <= 122 || code >= 48 && code <= 57 || code >= 192 && code <= 450 || code >= 0x0300 && code <= 0x036F || ch === '\'' || ch === '\u2019' || ch === '-';
     };
     const isWhitespace = ch => !ch || ch === ' ' || ch === '\t' || ch === '\n' || ch === '\r' || ch === '\u00A0' || ch === '\u200B';
     const getChar = i => {

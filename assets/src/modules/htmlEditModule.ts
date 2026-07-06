@@ -80,8 +80,8 @@ function outputHTMLParser(inputHtmlFromQuillPopup: string): string {
 }
 
 function formatHTMLStringIndentation(code: string): string {
-  let stripWhiteSpaces = true
-  let stripEmptyLines = true
+  const stripWhiteSpaces = true
+  const stripEmptyLines = true
   const whitespace = '  '
   let currentIndent = 0
   const newlineChar = '\n'

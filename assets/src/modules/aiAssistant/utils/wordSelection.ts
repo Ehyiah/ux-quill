@@ -71,7 +71,7 @@ function isWordChar(ch: string): boolean {
     (code >= 48 && code <= 57) ||
     (code >= 192 && code <= 450) ||
     (code >= 0x0300 && code <= 0x036F) ||
-    ch === "'" ||
+    ch === '\'' ||
     ch === '\u2019' ||
     ch === '-'
   );
