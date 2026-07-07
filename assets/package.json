@@ -29,11 +29,11 @@
         },
         "importmap": {
             "@hotwired/stimulus": "^3.0.0",
+            "quill": "2.0.3",
             "quill2-emoji": "^0.1.2",
             "quill2-emoji/dist/style.css": "^0.1.2",
-            "quill": "2.0.3",
-            "quill-delta": "^5.1.0",
             "fast-diff": "1.3.0",
+            "quill-delta": "^5.1.0",
             "quill-resize-image": "^1.0.5",
             "quill/dist/quill.snow.css": "2.0.3",
             "quill/dist/quill.bubble.css": "2.0.3",
