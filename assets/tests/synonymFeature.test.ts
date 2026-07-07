@@ -9,6 +9,10 @@ describe('SynonymFeature', () => {
   let feature: SynonymFeature;
   let mockContent = '';
 
+  afterEach(() => {
+    document.querySelectorAll('.ai-assistant-submenu').forEach(el => el.remove());
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -89,7 +93,8 @@ describe('SynonymFeature', () => {
       expect(popup?.textContent).toContain('globe');
       expect(popup?.textContent).toContain('earth');
 
-      document.body.click();
+      const items = document.querySelectorAll('.ai-assistant-submenu-item');
+      (items[0] as HTMLElement).click();
       await triggerPromise;
 
       expect(mockAiManager.setLoading).toHaveBeenCalledWith(true);
@@ -111,7 +116,7 @@ describe('SynonymFeature', () => {
       expect(popup).not.toBeNull();
       expect(popup?.textContent).toContain('No synonyms found');
 
-      document.body.click();
+      document.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
 
 it('should replace only the word when synonym is clicked', async () => {
