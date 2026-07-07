@@ -59,6 +59,7 @@ function injectStyles(): void {
 .ai-assistant-wrapper {
   position: relative;
   display: inline-block;
+  vertical-align: middle;
 }
 
 .ai-assistant-btn {
@@ -76,7 +77,7 @@ function injectStyles(): void {
   transition: background .15s, color .15s;
 }
 .ai-assistant-btn:hover { background: #e6e6e6; color: #06c; }
-.ai-assistant-btn svg { width: 18px; height: 18px; display: block; }
+div.ai-assistant-wrapper .ai-assistant-btn svg { width: 18px; height: 18px; display: block; float: none; }
 
 .ai-assistant-panel {
   position: fixed;

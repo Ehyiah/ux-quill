@@ -106,6 +106,7 @@ export class WllamaProvider extends BaseAiProvider {
       messages,
       max_tokens: options.max_tokens ?? 256,
       temperature: options.temperature ?? this.temperature,
+      chat_template_kwargs: { add_generation_prompt: true },
     });
 
     const content = result?.choices?.[0]?.message?.content || '';

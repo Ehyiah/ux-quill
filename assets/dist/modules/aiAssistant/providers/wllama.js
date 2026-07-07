@@ -102,7 +102,10 @@ export class WllamaProvider extends BaseAiProvider {
     const result = await this.wllamaInstance.createChatCompletion({
       messages,
       max_tokens: (_options$max_tokens = options.max_tokens) != null ? _options$max_tokens : 256,
-      temperature: (_options$temperature2 = options.temperature) != null ? _options$temperature2 : this.temperature
+      temperature: (_options$temperature2 = options.temperature) != null ? _options$temperature2 : this.temperature,
+      chat_template_kwargs: {
+        add_generation_prompt: true
+      }
     });
     const content = (result == null || (_result$choices = result.choices) == null || (_result$choices = _result$choices[0]) == null || (_result$choices = _result$choices.message) == null ? void 0 : _result$choices.content) || '';
     return content.trim();
