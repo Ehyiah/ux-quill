@@ -17,7 +17,7 @@ export class SummarizeFeature implements AiFeatureInterface {
     this.label = aiManager.getLabels().featureSummarize;
   }
 
-  async trigger(): Promise<void> {
+  async trigger(anchorRect?: DOMRect): Promise<void> {
     const quill = this.quill as { getSelection(): { index: number; length: number } | null; getText(index: number, length: number): string; getLength(): number; updateContents(delta: { ops: Array<Record<string, unknown>> }): void };
     const selection = quill.getSelection();
 
@@ -39,7 +39,7 @@ export class SummarizeFeature implements AiFeatureInterface {
 
     if (!textToSummarize) return;
 
-    const format = await this.promptFormat();
+    const format = await this.promptFormat(anchorRect);
     if (!format) return;
 
     const provider = this.aiManager.getProvider();
@@ -70,7 +70,7 @@ export class SummarizeFeature implements AiFeatureInterface {
     }
   }
 
-  private async promptFormat(): Promise<SummaryFormat | null> {
+  private async promptFormat(anchorRect?: DOMRect): Promise<SummaryFormat | null> {
     const labels = this.aiManager.getLabels();
     const options: Array<{ value: SummaryFormat; label: string; desc: string; icon: string }> = [
       { value: 'paragraph', label: labels.summarizeParagraph, desc: labels.summarizeParagraphDesc, icon: '\uD83D\uDCDD' },
@@ -123,12 +123,12 @@ export class SummarizeFeature implements AiFeatureInterface {
 
       document.body.appendChild(container);
 
-      const rect = window.getSelection()?.getRangeAt(0)?.getBoundingClientRect();
-      if (rect) {
+      const refRect = anchorRect || window.getSelection()?.getRangeAt(0)?.getBoundingClientRect();
+      if (refRect) {
         const maxX = window.innerWidth - container.offsetWidth - 8;
-        const x = Math.max(8, Math.min(rect.left, maxX));
+        const x = Math.max(8, Math.min(refRect.left, maxX));
         container.style.left = `${x}px`;
-        container.style.top = `${rect.bottom + 4}px`;
+        container.style.top = `${refRect.bottom + 4}px`;
       } else {
         container.style.top = '50%';
         container.style.left = '50%';

@@ -514,11 +514,12 @@ export class AiAssistantModule {
 
         item.addEventListener('mousedown', (e) => {
           e.preventDefault();
+          const btnRect = this.button?.getBoundingClientRect();
           this.closePanel();
           if (this.panelSelection) {
             this.quill.setSelection(this.panelSelection.index, this.panelSelection.length, 'api');
           }
-          instance.trigger();
+          instance.trigger(btnRect);
         });
 
         this.panel!.appendChild(item);

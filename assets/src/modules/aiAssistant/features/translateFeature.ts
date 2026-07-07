@@ -24,7 +24,7 @@ export class TranslateFeature implements AiFeatureInterface {
     this.label = aiManager.getLabels().featureTranslate;
   }
 
-  async trigger(): Promise<void> {
+  async trigger(anchorRect?: DOMRect): Promise<void> {
     const quill = this.quill as { getSelection(): { index: number; length: number } | null; getText(index?: number, length?: number): string; updateContents(delta: { ops: Array<Record<string, unknown>> }): void; getLength(): number };
     const selection = quill.getSelection();
 
@@ -40,7 +40,7 @@ export class TranslateFeature implements AiFeatureInterface {
     const selectedText = quill.getText(wordRange.index, wordRange.length).trim();
     if (!selectedText) return;
 
-    const targetLang = await this.promptLanguage();
+    const targetLang = await this.promptLanguage(anchorRect);
     if (!targetLang) return;
 
     const provider = this.aiManager.getProvider();
@@ -71,7 +71,7 @@ export class TranslateFeature implements AiFeatureInterface {
     }
   }
 
-  private async promptLanguage(): Promise<string | null> {
+  private async promptLanguage(anchorRect?: DOMRect): Promise<string | null> {
     const labels = this.aiManager.getLabels();
     const languages = [
       { code: 'fr', label: 'Fran\u00E7ais', flag: '\uD83C\uDDEB\uD83C\uDDF7' },
@@ -138,12 +138,12 @@ export class TranslateFeature implements AiFeatureInterface {
 
       document.body.appendChild(container);
 
-      const rect = window.getSelection()?.getRangeAt(0)?.getBoundingClientRect();
-      if (rect) {
+      const refRect = anchorRect || window.getSelection()?.getRangeAt(0)?.getBoundingClientRect();
+      if (refRect) {
         const maxX = window.innerWidth - container.offsetWidth - 8;
-        const x = Math.max(8, Math.min(rect.left, maxX));
+        const x = Math.max(8, Math.min(refRect.left, maxX));
         container.style.left = `${x}px`;
-        container.style.top = `${rect.bottom + 4}px`;
+        container.style.top = `${refRect.bottom + 4}px`;
       } else {
         container.style.top = '50%';
         container.style.left = '50%';

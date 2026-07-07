@@ -180,12 +180,14 @@ export class AiAssistantModule {
         item.appendChild(icon);
         item.appendChild(text);
         item.addEventListener('mousedown', e => {
+          var _this$button;
           e.preventDefault();
+          const btnRect = (_this$button = this.button) == null ? void 0 : _this$button.getBoundingClientRect();
           this.closePanel();
           if (this.panelSelection) {
             this.quill.setSelection(this.panelSelection.index, this.panelSelection.length, 'api');
           }
-          instance.trigger();
+          instance.trigger(btnRect);
         });
         this.panel.appendChild(item);
       });

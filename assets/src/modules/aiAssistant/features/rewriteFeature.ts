@@ -17,7 +17,7 @@ export class RewriteFeature implements AiFeatureInterface {
     this.label = aiManager.getLabels().featureRewrite;
   }
 
-  async trigger(): Promise<void> {
+  async trigger(anchorRect?: DOMRect): Promise<void> {
     const quill = this.quill as { getSelection(): { index: number; length: number } | null; getText(index?: number, length?: number): string; updateContents(delta: { ops: Array<Record<string, unknown>> }): void; getLength(): number };
     const selection = quill.getSelection();
 
@@ -33,7 +33,7 @@ export class RewriteFeature implements AiFeatureInterface {
     const selectedText = quill.getText(wordRange.index, wordRange.length).trim();
     if (!selectedText) return;
 
-    const style = await this.promptStyle();
+    const style = await this.promptStyle(anchorRect);
     if (!style) return;
 
     const provider = this.aiManager.getProvider();
@@ -64,7 +64,7 @@ export class RewriteFeature implements AiFeatureInterface {
     }
   }
 
-  private async promptStyle(): Promise<RewriteStyle | null> {
+  private async promptStyle(anchorRect?: DOMRect): Promise<RewriteStyle | null> {
     const labels = this.aiManager.getLabels();
     const styles: Array<{ value: RewriteStyle; label: string; desc: string }> = [
       { value: 'formal', label: labels.rewriteFormal, desc: labels.rewriteFormalDesc },
@@ -126,12 +126,12 @@ export class RewriteFeature implements AiFeatureInterface {
 
       document.body.appendChild(container);
 
-      const rect = window.getSelection()?.getRangeAt(0)?.getBoundingClientRect();
-      if (rect) {
+      const refRect = anchorRect || window.getSelection()?.getRangeAt(0)?.getBoundingClientRect();
+      if (refRect) {
         const maxX = window.innerWidth - container.offsetWidth - 8;
-        const x = Math.max(8, Math.min(rect.left, maxX));
+        const x = Math.max(8, Math.min(refRect.left, maxX));
         container.style.left = `${x}px`;
-        container.style.top = `${rect.bottom + 4}px`;
+        container.style.top = `${refRect.bottom + 4}px`;
       } else {
         container.style.top = '50%';
         container.style.left = '50%';

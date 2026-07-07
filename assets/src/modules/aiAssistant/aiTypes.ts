@@ -419,5 +419,5 @@ export interface AiFeatureInterface {
   readonly label: string;
   readonly requiresSelection: boolean;
 
-  trigger(): Promise<void>;
+  trigger(anchorRect?: DOMRect): Promise<void>;
 }

@@ -11,7 +11,7 @@ export class SummarizeFeature {
     this.aiManager = aiManager;
     this.label = aiManager.getLabels().featureSummarize;
   }
-  async trigger() {
+  async trigger(anchorRect) {
     const quill = this.quill;
     const selection = quill.getSelection();
     let textToSummarize;
@@ -29,7 +29,7 @@ export class SummarizeFeature {
       insertIndex = quill.getLength();
     }
     if (!textToSummarize) return;
-    const format = await this.promptFormat();
+    const format = await this.promptFormat(anchorRect);
     if (!format) return;
     const provider = this.aiManager.getProvider();
     const labels = this.aiManager.getLabels();
@@ -56,7 +56,7 @@ export class SummarizeFeature {
       console.error('Summarization failed:', error);
     }
   }
-  async promptFormat() {
+  async promptFormat(anchorRect) {
     const labels = this.aiManager.getLabels();
     const options = [{
       value: 'paragraph',
@@ -106,12 +106,12 @@ export class SummarizeFeature {
         document.addEventListener('click', outsideClick);
       }, 0);
       document.body.appendChild(container);
-      const rect = (_window$getSelection = window.getSelection()) == null || (_window$getSelection = _window$getSelection.getRangeAt(0)) == null ? void 0 : _window$getSelection.getBoundingClientRect();
-      if (rect) {
+      const refRect = anchorRect || ((_window$getSelection = window.getSelection()) == null || (_window$getSelection = _window$getSelection.getRangeAt(0)) == null ? void 0 : _window$getSelection.getBoundingClientRect());
+      if (refRect) {
         const maxX = window.innerWidth - container.offsetWidth - 8;
-        const x = Math.max(8, Math.min(rect.left, maxX));
+        const x = Math.max(8, Math.min(refRect.left, maxX));
         container.style.left = x + "px";
-        container.style.top = rect.bottom + 4 + "px";
+        container.style.top = refRect.bottom + 4 + "px";
       } else {
         container.style.top = '50%';
         container.style.left = '50%';
