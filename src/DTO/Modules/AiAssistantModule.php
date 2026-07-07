@@ -22,9 +22,18 @@ final class AiAssistantModule implements ModuleInterface
     public const TEMPERATURE_OPTION = 'temperature';
     public const UI_LANGUAGE_OPTION = 'ui_language';
     public const LABELS_OPTION = 'labels';
+    public const KEYBOARD_SHORTCUT_OPTION = 'keyboardShortcut';
 
     private const ALLOWED_PROVIDERS = ['transformers', 'api', 'wllama'];
     private const ALLOWED_LANGUAGES = ['en', 'fr', 'de', 'es'];
+
+    private const DEFAULT_KEYBOARD_SHORTCUT = [
+        'key' => 'Space',
+        'ctrlKey' => true,
+        'shiftKey' => false,
+        'altKey' => false,
+        'metaKey' => false,
+    ];
 
     public function __construct(
         public string $name = self::NAME,
@@ -45,6 +54,7 @@ final class AiAssistantModule implements ModuleInterface
             'synonym' => [
                 'count' => 5,
             ],
+            self::KEYBOARD_SHORTCUT_OPTION => self::DEFAULT_KEYBOARD_SHORTCUT,
         ];
 
         $merged = array_merge($defaults, $options);
@@ -57,6 +67,24 @@ final class AiAssistantModule implements ModuleInterface
         $uiLanguage = $merged[self::UI_LANGUAGE_OPTION] ?? null;
         if (null !== $uiLanguage && !in_array($uiLanguage, self::ALLOWED_LANGUAGES, true)) {
             throw new InvalidArgumentException(sprintf('AiAssistantModule ui_language must be one of: %s. Got "%s".', implode(', ', self::ALLOWED_LANGUAGES), $uiLanguage));
+        }
+
+        $keyboardShortcut = $merged[self::KEYBOARD_SHORTCUT_OPTION] ?? null;
+        if (false === $keyboardShortcut) {
+            $merged[self::KEYBOARD_SHORTCUT_OPTION] = false;
+        } else {
+            if (!is_array($keyboardShortcut)) {
+                throw new InvalidArgumentException('AiAssistantModule keyboardShortcut must be an array or false.');
+            }
+            if (!array_key_exists('key', $keyboardShortcut) || !is_string($keyboardShortcut['key']) || '' === $keyboardShortcut['key']) {
+                throw new InvalidArgumentException('AiAssistantModule keyboardShortcut must contain a non-empty string "key".');
+            }
+            foreach (['ctrlKey', 'shiftKey', 'altKey', 'metaKey'] as $modifier) {
+                if (array_key_exists($modifier, $keyboardShortcut) && !is_bool($keyboardShortcut[$modifier])) {
+                    throw new InvalidArgumentException(sprintf('AiAssistantModule keyboardShortcut "%s" must be a boolean.', $modifier));
+                }
+            }
+            $merged[self::KEYBOARD_SHORTCUT_OPTION] = array_merge(self::DEFAULT_KEYBOARD_SHORTCUT, $keyboardShortcut);
         }
 
         $this->rejectSensitiveKeys($merged);

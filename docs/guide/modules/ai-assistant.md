@@ -5,8 +5,8 @@ outline: [1, 3]
 # AiAssistantModule
 
 The AiAssistantModule adds an AI-powered writing assistant to the Quill editor.
-It provides seven features at the moment
-— reformulation, translation, grammar correction, content generation, summarization, semantic analysis, and automatic table of contents generation.
+It provides six features at the moment
+— reformulation, translation, grammar correction, content generation, summarization, and automatic table of contents generation.
 
 1. Choose a provider (see [Choose a provider](#choose-a-provider))
 2. Configure the module with it (see [Module configuration](#module-configuration))
@@ -65,10 +65,48 @@ $builder->add('content', QuillType::class, [
 | **models** | `array` | Per-task model overrides (see [Per-task models](#per-task-models)) | `[]` |
 | **reasoning** | `bool` | Allow the model to show chain-of-thought reasoning. Set to `false` for models like Qwen that output long reasoning before the answer. | `true` |
 | **temperature** | `float` | Generation temperature (0.0 = deterministic, 1.0 = creative). Applies to all features across all providers. | `0.7` |
+| **keyboardShortcut** | `array\|false` | Shortcut to open the AI menu from the editor. `false` disables it. | `['key' => 'Space', 'ctrlKey' => true]` |
 | **ui_language** | `string` | UI language for all labels and buttons: `'en'`, `'fr'`, `'de'`, or `'es'` | `'en'` |
 | **labels** | `array` | Per-label overrides (see [Custom labels](#custom-labels)) | `[]` |
 | **translate** | `array` | Translation sub-options (see [Translation options](#translation-options)) | — |
 | **toc** | `array` | Table of contents sub-options (see [TOC options](#toc-options)) | — |
+
+### Keyboard shortcut
+
+By default, pressing `Ctrl + Space` inside the editor opens the AI Assistant menu just below the current selection or cursor.
+
+You can customize or disable the shortcut via the `keyboardShortcut` option:
+
+```php
+use Ehyiah\QuillJsBundle\DTO\Modules\AiAssistantModule;
+
+new AiAssistantModule(options: [
+    'keyboardShortcut' => ['key' => 'j', 'ctrlKey' => true, 'shiftKey' => true],
+]),
+
+// or disable it entirely
+new AiAssistantModule(options: [
+    'keyboardShortcut' => false,
+]),
+```
+
+The shortcut object accepts the following keys:
+
+| Key | Type | Description | Default |
+| :--- | :--- | :--- | :--- |
+| **key** | `string` | Key name. Use `'Space'` for the space bar, or any other key like `'j'`, `'Enter'`, etc. | required |
+| **ctrlKey** | `bool` | Require `Ctrl` to be pressed. | `false` |
+| **shiftKey** | `bool` | Require `Shift` to be pressed. | `false` |
+| **altKey** | `bool` | Require `Alt`/`Option` to be pressed. | `false` |
+| **metaKey** | `bool` | Require `Meta`/`Cmd` to be pressed. | `false` |
+
+::: tip
+The shortcut only works when the editor has focus.
+:::
+
+::: info AI Assistant button in the inline toolbar
+When the [InlineToolbarModule](/guide/modules/inline-toolbar) is also enabled, the AI Assistant star button is automatically added to the floating toolbar. You can disable this with the `autoAddAiAssistantButton` option or fully customize the `buttons` list. See the [InlineToolbarModule options](/guide/modules/inline-toolbar#options).
+:::
 
 ### Available features
 
@@ -79,7 +117,6 @@ $builder->add('content', QuillType::class, [
 | `'grammar'` | Corriger la grammaire | Fix grammar and spelling mistakes |
 | `'generate'` | Generate content | Generate new content from a prompt (with streaming) |
 | `'summarize'` | Summarize | Summarize selected text or the full document |
-| `'semantic'` | Analyser le contenu | Extract keywords, topics, and reading statistics |
 | `'toc'` | Generate TOC | Generate a table of contents from headings |
 
 ### UI language
@@ -136,14 +173,12 @@ Available label keys:
 | `featureGrammar` | Correct grammar | Feature menu label |
 | `featureGenerate` | Generate content | Feature menu label |
 | `featureSummarize` | Summarize | Feature menu label |
-| `featureSemantic` | Analyze content | Feature menu label |
 | `featureToc` | Generate TOC | Feature menu label |
 | `descRewrite` | Rewrite selected text in a different style | Feature menu description |
 | `descTranslate` | Translate to another language | Feature menu description |
 | `descGrammar` | Fix spelling and grammar mistakes | Feature menu description |
 | `descGenerate` | Generate text with AI | Feature menu description |
 | `descSummarize` | Summarize the content | Feature menu description |
-| `descSemantic` | Extract keywords and topics | Feature menu description |
 | `descToc` | Create a table of contents | Feature menu description |
 | `btnApply` | Apply | Review modal apply button |
 | `btnCancel` | Cancel | Cancel button |
@@ -231,7 +266,6 @@ $builder->add('content', QuillType::class, [
                 'grammar',
                 'generate',
                 'summarize',
-                'semantic',
                 'toc',
             ],
             'models' => [
@@ -369,7 +403,7 @@ Provider `transformers` runs ONNX models entirely in-browser using [@huggingface
 1. On first feature use, the provider downloads the ONNX model from HuggingFace.
 2. Download progress is shown in the loading overlay.
 3. Models are cached in the browser's CacheStorage for offline use.
-4. The `semantic` and `toc` features use local analysis (no model download).
+4. The `toc` feature uses local DOM extraction (no model download).
 
 ### Default models
 
@@ -382,7 +416,6 @@ The following ONNX models are used per feature:
 | **grammar** | `Xenova/LaMini-Flan-T5-783M` | text2text-generation | ~800 MB |
 | **summarize** | `Xenova/LaMini-Flan-T5-783M` | summarization | ~800 MB |
 | **generate** | `Xenova/distilgpt2` | text-generation | ~250 MB |
-| **semantic** | *(none)* | Local TF-IDF analysis | — |
 | **toc** | *(none)* | DOM heading extraction | — |
 
 ::: info
@@ -534,23 +567,6 @@ The Summarize feature condenses your content into a shorter version. By default 
    - **Paragraphe** — a flowing paragraph summary.
    - **Key points** — bullet-point list of main ideas.
 5. The summary is inserted after the selection, or at the end of the document if nothing was selected.
-
----
-
-## Semantic
-
-The Semantic feature analyzes the document content and displays a modal with keyword frequency, suggested topics, word count, and estimated reading time. No text selection is required — it always works on the full document.
-
-**How it works:**
-1. Click the AI Assistant button <svg viewBox="0 0 18 18" width="14" height="14"><path d="M9 2 L11 7 L16 7 L12 10.5 L13.5 16 L9 12.5 L4.5 16 L6 10.5 L2 7 L7 7 Z" fill="currentColor"/></svg>.
-2. Choose **Analyze content**.
-3. A modal displays:
-   - **Word count** and **estimated reading time**
-   - **Suggested topics** (auto-extracted)
-   - **Keyword cloud** — the most frequent words, sized by frequency
-4. Click **Close** or anywhere outside the modal to close it.
-
-**Note:** This feature uses local word-frequency analysis (TF-IDF) — no model is downloaded. It works instantly on documents of any size.
 
 ---
 

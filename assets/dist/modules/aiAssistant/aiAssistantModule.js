@@ -46,11 +46,20 @@ export class AiAssistantModule {
     this.backdrop = null;
     this.loadingEl = null;
     this.panelSelection = null;
+    this.panelAnchorRect = void 0;
     this.quill = quill;
     this.aiManager = options.aiManager;
     injectStyles();
     this.initializeFeatures(options);
     this.addToolbarButton();
+    const keyboardShortcut = options.keyboardShortcut !== undefined ? options.keyboardShortcut : {
+      key: 'Space',
+      ctrlKey: true,
+      shiftKey: false,
+      altKey: false,
+      metaKey: false
+    };
+    this.bindKeyboardShortcut(keyboardShortcut);
     this.aiManager.onLoadingChange(loading => {
       if (loading) {
         this.showLoading();
@@ -111,11 +120,51 @@ export class AiAssistantModule {
       toolbar.container.appendChild(wrapper);
     }
   }
+  bindKeyboardShortcut(shortcut) {
+    if (!shortcut) return;
+    const key = shortcut.key === 'Space' ? ' ' : shortcut.key;
+    const expectCtrl = !!shortcut.ctrlKey;
+    const expectShift = !!shortcut.shiftKey;
+    const expectAlt = !!shortcut.altKey;
+    const expectMeta = !!shortcut.metaKey;
+    this.quill.root.addEventListener('keydown', event => {
+      if (event.key !== key) return;
+      if (event.ctrlKey !== expectCtrl) return;
+      if (event.shiftKey !== expectShift) return;
+      if (event.altKey !== expectAlt) return;
+      if (event.metaKey !== expectMeta) return;
+      event.preventDefault();
+      event.stopPropagation();
+      this.openPanel(this.getSelectionAnchorRect());
+    });
+  }
+  getSelectionAnchorRect() {
+    const selection = this.quill.getSelection();
+    if (!selection) return undefined;
+    const bounds = this.quill.getBounds(selection.index, selection.length);
+    if (!bounds) return undefined;
+    const containerRect = this.quill.container.getBoundingClientRect();
+    return {
+      left: containerRect.left + bounds.left,
+      top: containerRect.top + bounds.top,
+      bottom: containerRect.top + bounds.top + bounds.height,
+      right: containerRect.left + bounds.left + bounds.width,
+      width: bounds.width,
+      height: bounds.height,
+      x: containerRect.left + bounds.left,
+      y: containerRect.top + bounds.top,
+      toJSON: () => ({})
+    };
+  }
   togglePanel() {
     if (this.panel) {
       this.closePanel();
       return;
     }
+    this.openPanel();
+  }
+  openPanel(anchorRect) {
+    this.panelAnchorRect = anchorRect;
     this.showPanel();
   }
   showPanel() {
@@ -218,8 +267,10 @@ export class AiAssistantModule {
     return result;
   }
   positionPanel() {
-    if (!this.panel || !this.button) return;
-    const btnRect = this.button.getBoundingClientRect();
+    var _this$button2;
+    if (!this.panel) return;
+    const btnRect = this.panelAnchorRect || ((_this$button2 = this.button) == null ? void 0 : _this$button2.getBoundingClientRect());
+    if (!btnRect) return;
     const panelWidth = this.panel.offsetWidth;
     const panelHeight = this.panel.offsetHeight;
     let left = btnRect.left;
@@ -262,6 +313,7 @@ export class AiAssistantModule {
   }
   closePanel() {
     this.panelSelection = null;
+    this.panelAnchorRect = undefined;
     if (this.panel) {
       this.panel.remove();
       this.panel = null;

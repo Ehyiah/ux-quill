@@ -12,6 +12,7 @@ import { SynonymFeature } from './features/synonymFeature.js';
 interface AiAssistantOptions {
   aiManager: AiManager;
   features?: Partial<Record<AiFeature, boolean | Record<string, unknown>>>;
+  keyboardShortcut?: { key: string; ctrlKey?: boolean; shiftKey?: boolean; altKey?: boolean; metaKey?: boolean } | false;
 }
 
 interface FeatureMeta {
@@ -351,6 +352,7 @@ export class AiAssistantModule {
   private backdrop: HTMLElement | null = null;
   private loadingEl: HTMLElement | null = null;
   private panelSelection: { index: number; length: number } | null = null;
+  private panelAnchorRect: DOMRect | undefined;
 
   constructor(quill: Quill, options: AiAssistantOptions) {
     this.quill = quill;
@@ -358,6 +360,10 @@ export class AiAssistantModule {
     injectStyles();
     this.initializeFeatures(options);
     this.addToolbarButton();
+    const keyboardShortcut = options.keyboardShortcut !== undefined
+      ? options.keyboardShortcut
+      : { key: 'Space', ctrlKey: true, shiftKey: false, altKey: false, metaKey: false };
+    this.bindKeyboardShortcut(keyboardShortcut);
     this.aiManager.onLoadingChange((loading) => {
       if (loading) {
         this.showLoading();
@@ -434,12 +440,61 @@ export class AiAssistantModule {
     }
   }
 
+  private bindKeyboardShortcut(shortcut: AiAssistantOptions['keyboardShortcut']): void {
+    if (!shortcut) return;
+
+    const key = shortcut.key === 'Space' ? ' ' : shortcut.key;
+    const expectCtrl = !!shortcut.ctrlKey;
+    const expectShift = !!shortcut.shiftKey;
+    const expectAlt = !!shortcut.altKey;
+    const expectMeta = !!shortcut.metaKey;
+
+    this.quill.root.addEventListener('keydown', (event: KeyboardEvent) => {
+      if (event.key !== key) return;
+      if (event.ctrlKey !== expectCtrl) return;
+      if (event.shiftKey !== expectShift) return;
+      if (event.altKey !== expectAlt) return;
+      if (event.metaKey !== expectMeta) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      this.openPanel(this.getSelectionAnchorRect());
+    });
+  }
+
+  private getSelectionAnchorRect(): DOMRect | undefined {
+    const selection = this.quill.getSelection();
+    if (!selection) return undefined;
+
+    const bounds = this.quill.getBounds(selection.index, selection.length);
+    if (!bounds) return undefined;
+
+    const containerRect = this.quill.container.getBoundingClientRect();
+
+    return {
+      left: containerRect.left + bounds.left,
+      top: containerRect.top + bounds.top,
+      bottom: containerRect.top + bounds.top + bounds.height,
+      right: containerRect.left + bounds.left + bounds.width,
+      width: bounds.width,
+      height: bounds.height,
+      x: containerRect.left + bounds.left,
+      y: containerRect.top + bounds.top,
+      toJSON: () => ({}),
+    } as DOMRect;
+  }
+
   private togglePanel(): void {
     if (this.panel) {
       this.closePanel();
       return;
     }
 
+    this.openPanel();
+  }
+
+  openPanel(anchorRect?: DOMRect): void {
+    this.panelAnchorRect = anchorRect;
     this.showPanel();
   }
 
@@ -550,9 +605,10 @@ export class AiAssistantModule {
   }
 
   private positionPanel(): void {
-    if (!this.panel || !this.button) return;
+    if (!this.panel) return;
 
-    const btnRect = this.button.getBoundingClientRect();
+    const btnRect = this.panelAnchorRect || this.button?.getBoundingClientRect();
+    if (!btnRect) return;
 
     const panelWidth = this.panel.offsetWidth;
     const panelHeight = this.panel.offsetHeight;
@@ -603,6 +659,7 @@ export class AiAssistantModule {
 
   private closePanel(): void {
     this.panelSelection = null;
+    this.panelAnchorRect = undefined;
     if (this.panel) {
       this.panel.remove();
       this.panel = null;

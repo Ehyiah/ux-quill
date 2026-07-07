@@ -349,13 +349,14 @@ public function buildForm(FormBuilderInterface $builder, array $options)
 
 ## AiAssistantModule
 
-The AiAssistantModule adds an AI-powered writing assistant to the editor. It provides seven features — reformulation, translation, grammar correction, content generation, summarization, semantic analysis, and automatic table of contents.
+The AiAssistantModule adds an AI-powered writing assistant to the editor. It provides six features — reformulation, translation, grammar correction, content generation, summarization, and automatic table of contents.
 
-The module supports two providers:
+The module supports three providers:
 - **`api`** (recommended) — routes AI requests through a backend PHP controller that calls an OpenAI-compatible API. Configure via environment variables (`QUILL_AI_API_URL`, `QUILL_AI_API_KEY`, etc.). API keys stay server-side.
-- **`transformers`** (dormant) — runs models entirely in-browser via `@huggingface/transformers`. No API key needed, but models are large (60–350 MB) with limited quality.
+- **`wllama`** — runs GGUF models entirely in-browser via `@wllama/wllama` (llama.cpp WASM). No API key needed.
+- **`transformers`** (dormant) — runs models entirely in-browser via `@huggingface/transformers`. No API key needed, but models are large (60–350 MB) with limited quality.
 
-When enabled, a star icon (<svg viewBox="0 0 18 18" width="14" height="14"><path d="M9 2 L11 7 L16 7 L12 10.5 L13.5 16 L9 12.5 L4.5 16 L6 10.5 L2 7 L7 7 Z" fill="currentColor"/></svg>) appears in the toolbar. Clicking it opens a dropdown menu listing the enabled features.
+When enabled, a star icon (<svg viewBox="0 0 18 18" width="14" height="14"><path d="M9 2 L11 7 L16 7 L12 10.5 L13.5 16 L9 12.5 L4.5 16 L6 10.5 L2 7 L7 7 Z" fill="currentColor"/></svg>) appears in the toolbar. Clicking it opens a dropdown menu listing the enabled features. You can also open this menu with the default keyboard shortcut `Ctrl + Space` (configurable, see [AiAssistantModule](/guide/modules/ai-assistant)).
 
 ```php
 use Ehyiah\QuillJsBundle\Form\QuillType;
@@ -380,7 +381,6 @@ $builder->add('content', QuillType::class, [
 | `'grammar'` | Corriger la grammaire | Automatic grammar and spelling correction |
 | `'generate'` | Générer du contenu | Generate content from a prompt with streaming |
 | `'summarize'` | Résumer | Summarize text as a paragraph or bullet points |
-| `'semantic'` | Analyser le contenu | Keywords, topics, word count, reading time |
 | `'toc'` | Générer le sommaire | Auto table of contents from headings (h1‑h6) |
 
 For detailed documentation of each feature, see the [AiAssistantModule](/guide/modules/ai-assistant) page.

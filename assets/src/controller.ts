@@ -1,7 +1,7 @@
 import { Controller } from '@hotwired/stimulus';
 import Quill from 'quill';
 import * as Options from 'quill/core/quill';
-import type { ExtraOptions, ModuleOptions } from './types.d.ts';
+import type { AiKeyboardShortcut, ExtraOptions, ModuleOptions } from './types.d.ts';
 import mergeModules from './modules.ts';
 import { ToolbarCustomizer } from './ui/toolbarCustomizer.ts';
 import { handleUploadResponse, uploadStrategies } from './upload-utils.ts';
@@ -167,7 +167,30 @@ export default class extends Controller {
             debug: !!raw.debug,
         });
 
-        options.modules.aiAssistant = { aiManager, features };
+        const keyboardShortcut: AiKeyboardShortcut | false = raw.keyboardShortcut !== undefined
+            ? raw.keyboardShortcut as AiKeyboardShortcut | false
+            : { key: 'Space', ctrlKey: true, shiftKey: false, altKey: false, metaKey: false };
+
+        options.modules.aiAssistant = { aiManager, features, keyboardShortcut };
+
+        this.addAiAssistantToInlineToolbar(options);
+    }
+
+    private addAiAssistantToInlineToolbar(options: Options): void {
+        const inlineToolbar = options.modules.inlineToolbar;
+        if (!inlineToolbar || typeof inlineToolbar !== 'object') {
+            return;
+        }
+
+        const autoAdd = inlineToolbar.autoAddAiAssistantButton ?? true;
+        if (!autoAdd) {
+            return;
+        }
+
+        const buttons = Array.isArray(inlineToolbar.buttons) ? inlineToolbar.buttons : ['bold', 'italic', 'underline', 'strike'];
+        if (!buttons.includes('aiAssistant')) {
+            inlineToolbar.buttons = [...buttons, 'aiAssistant'];
+        }
     }
 
     private initializeQuill(options: Options, unprocessedIcons): void {

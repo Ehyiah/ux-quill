@@ -16,11 +16,20 @@ export type ExtraOptions = {
     };
 }
 
+export type AiKeyboardShortcut = {
+    key: string;
+    ctrlKey?: boolean;
+    shiftKey?: boolean;
+    altKey?: boolean;
+    metaKey?: boolean;
+};
+
 export type AiOptions = {
     provider?: string;
     api_key?: string | null;
     features?: Partial<Record<string, boolean | Record<string, unknown>>>;
     models?: Partial<Record<string, string>>;
+    keyboardShortcut?: AiKeyboardShortcut | false;
     translate?: {
         target_languages?: string[];
         default_language?: string;

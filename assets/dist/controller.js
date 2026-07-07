@@ -117,10 +117,34 @@ export default class _Class extends Controller {
       features,
       debug: !!raw.debug
     });
+    const keyboardShortcut = raw.keyboardShortcut !== undefined ? raw.keyboardShortcut : {
+      key: 'Space',
+      ctrlKey: true,
+      shiftKey: false,
+      altKey: false,
+      metaKey: false
+    };
     options.modules.aiAssistant = {
       aiManager,
-      features
+      features,
+      keyboardShortcut
     };
+    this.addAiAssistantToInlineToolbar(options);
+  }
+  addAiAssistantToInlineToolbar(options) {
+    var _inlineToolbar$autoAd;
+    const inlineToolbar = options.modules.inlineToolbar;
+    if (!inlineToolbar || typeof inlineToolbar !== 'object') {
+      return;
+    }
+    const autoAdd = (_inlineToolbar$autoAd = inlineToolbar.autoAddAiAssistantButton) != null ? _inlineToolbar$autoAd : true;
+    if (!autoAdd) {
+      return;
+    }
+    const buttons = Array.isArray(inlineToolbar.buttons) ? inlineToolbar.buttons : ['bold', 'italic', 'underline', 'strike'];
+    if (!buttons.includes('aiAssistant')) {
+      inlineToolbar.buttons = [...buttons, 'aiAssistant'];
+    }
   }
   initializeQuill(options, unprocessedIcons) {
     const quill = new Quill(this.editorContainerTarget, options);
