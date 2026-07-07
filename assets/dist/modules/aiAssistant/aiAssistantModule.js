@@ -3,7 +3,6 @@ import { TranslateFeature } from "./features/translateFeature.js";
 import { GrammarFeature } from "./features/grammarFeature.js";
 import { GenerateFeature } from "./features/generateFeature.js";
 import { SummarizeFeature } from "./features/summarizeFeature.js";
-import { SemanticFeature } from "./features/semanticFeature.js";
 import { TocFeature } from "./features/tocFeature.js";
 import { SynonymFeature } from "./features/synonymFeature.js";
 const FEATURE_ICONS = {
@@ -12,7 +11,6 @@ const FEATURE_ICONS = {
   grammar: '\u2714\uFE0F',
   summarize: '\uD83D\uDCDD',
   generate: '\u2728',
-  semantic: '\uD83D\uDCCA',
   toc: '\uD83D\uDCD1',
   synonym: '\uD83D\uDD04'
 };
@@ -22,7 +20,6 @@ const FEATURE_GROUPS = {
   grammar: 'edit',
   summarize: 'create',
   generate: 'create',
-  semantic: 'analyze',
   toc: 'analyze',
   synonym: 'edit'
 };
@@ -78,7 +75,6 @@ export class AiAssistantModule {
       grammar: GrammarFeature,
       generate: GenerateFeature,
       summarize: SummarizeFeature,
-      semantic: SemanticFeature,
       toc: TocFeature,
       synonym: SynonymFeature
     };
@@ -168,7 +164,6 @@ export class AiAssistantModule {
           grammar: labels.descGrammar,
           generate: labels.descGenerate,
           summarize: labels.descSummarize,
-          semantic: labels.descSemantic,
           toc: labels.descToc,
           synonym: labels.descSynonym
         };

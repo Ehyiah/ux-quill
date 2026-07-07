@@ -13,7 +13,6 @@ final class AiAssistantModule implements ModuleInterface
     public const FEATURE_GRAMMAR = 'grammar';
     public const FEATURE_GENERATE = 'generate';
     public const FEATURE_SUMMARIZE = 'summarize';
-    public const FEATURE_SEMANTIC = 'semantic';
     public const FEATURE_TOC = 'toc';
     public const FEATURE_SYNONYM = 'synonym';
 

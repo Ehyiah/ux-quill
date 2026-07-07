@@ -27,7 +27,6 @@ describe('SynonymFeature', () => {
       correct: jest.fn(),
       generate: jest.fn(),
       summarize: jest.fn(),
-      analyze: jest.fn(),
     };
 
     mockAiManager = {

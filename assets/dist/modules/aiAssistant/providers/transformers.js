@@ -49,7 +49,7 @@ export class TransformersProvider extends BaseAiProvider {
     super();
     this.name = 'transformers';
     this.requiresApiKey = false;
-    this.supportedFeatures = ['rewrite', 'translate', 'grammar', 'generate', 'summarize', 'semantic', 'toc', 'synonym'];
+    this.supportedFeatures = ['rewrite', 'translate', 'grammar', 'generate', 'summarize', 'toc', 'synonym'];
     this.pipelines = new Map();
     this.loaders = new Map();
     this.modelProgress = new Map();
@@ -187,31 +187,6 @@ export class TransformersProvider extends BaseAiProvider {
       return summary.split('.').filter(s => s.trim().length > 0).map(s => "\u2022 " + s.trim() + ".").join('\n');
     }
     return summary;
-  }
-  async analyze(_text) {
-    const wordCount = _text.split(/\s+/).filter(Boolean).length;
-    const words = _text.toLowerCase().match(/\b\w{3,}\b/g) || [];
-    const frequency = new Map();
-    words.forEach(w => {
-      frequency.set(w, (frequency.get(w) || 0) + 1);
-    });
-    const keywords = Array.from(frequency.entries()).sort((a, b) => b[1] - a[1]).slice(0, 20).map(_ref => {
-      let [word, freq] = _ref;
-      return {
-        word,
-        frequency: freq
-      };
-    });
-    const readingTime = Math.max(1, Math.round(wordCount / 200));
-    return {
-      keywords,
-      topics: this.extractTopics(keywords),
-      wordCount,
-      readingTime
-    };
-  }
-  extractTopics(keywords) {
-    return keywords.filter(k => k.frequency > 1).slice(0, 5).map(k => k.word);
   }
   async findSynonyms(_word, _count) {
     return [];

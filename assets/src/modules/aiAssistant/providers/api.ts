@@ -1,5 +1,5 @@
 import { BaseAiProvider } from './base.js';
-import type { AiFeature, RewriteStyle, SummaryFormat, GrammarSuggestion, SemanticResult, SynonymResult } from '../aiTypes.js';
+import type { AiFeature, RewriteStyle, SummaryFormat, GrammarSuggestion, SynonymResult } from '../aiTypes.js';
 
 const API_ENDPOINT = '/_ux/quill/ai-assistant';
 
@@ -13,7 +13,7 @@ interface ApiProviderOptions {
 export class ApiProvider extends BaseAiProvider {
   readonly name = 'api';
   readonly requiresApiKey = false;
-  readonly supportedFeatures: AiFeature[] = ['rewrite', 'translate', 'grammar', 'generate', 'summarize', 'semantic', 'toc', 'synonym'];
+  readonly supportedFeatures: AiFeature[] = ['rewrite', 'translate', 'grammar', 'generate', 'summarize', 'toc', 'synonym'];
 
   private options: ApiProviderOptions;
 
@@ -129,37 +129,6 @@ export class ApiProvider extends BaseAiProvider {
     }
 
     return result;
-  }
-
-  async analyze(_text: string): Promise<SemanticResult> {
-    const wordCount = _text.split(/\s+/).filter(Boolean).length;
-    const words = _text.toLowerCase().match(/\b\w{3,}\b/g) || [];
-    const frequency = new Map<string, number>();
-
-    words.forEach((w) => {
-      frequency.set(w, (frequency.get(w) || 0) + 1);
-    });
-
-    const keywords = Array.from(frequency.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 20)
-      .map(([word, freq]) => ({ word, frequency: freq }));
-
-    const readingTime = Math.max(1, Math.round(wordCount / 200));
-
-    return {
-      keywords,
-      topics: this.extractTopics(keywords),
-      wordCount,
-      readingTime,
-    };
-  }
-
-  private extractTopics(keywords: Array<{ word: string; frequency: number }>): string[] {
-    return keywords
-      .filter((k) => k.frequency > 1)
-      .slice(0, 5)
-      .map((k) => k.word);
   }
 
   async findSynonyms(word: string, count: number): Promise<SynonymResult[]> {

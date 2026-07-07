@@ -4,7 +4,6 @@ export type AiFeature =
   | 'grammar'
   | 'generate'
   | 'summarize'
-  | 'semantic'
   | 'toc'
   | 'synonym';
 
@@ -18,13 +17,6 @@ export interface GrammarSuggestion {
   explanation?: string;
   offset: number;
   length: number;
-}
-
-export interface SemanticResult {
-  keywords: Array<{ word: string; frequency: number }>;
-  topics: string[];
-  wordCount: number;
-  readingTime: number;
 }
 
 export interface SynonymResult {
@@ -42,7 +34,6 @@ export interface AiLabels {
   featureGrammar: string;
   featureGenerate: string;
   featureSummarize: string;
-  featureSemantic: string;
   featureToc: string;
   featureSynonym: string;
 
@@ -51,7 +42,6 @@ export interface AiLabels {
   descGrammar: string;
   descGenerate: string;
   descSummarize: string;
-  descSemantic: string;
   descToc: string;
   descSynonym: string;
 
@@ -88,14 +78,6 @@ export interface AiLabels {
   summarizeResultParagraph: string;
   summarizePrefix: string;
 
-  semanticTitle: string;
-  semanticStats: string;
-  semanticWords: string;
-  semanticReadingTime: string;
-  semanticTopics: string;
-  semanticKeywordsCount: string;
-  semanticKeywordsTitle: string;
-
   synonymTitle: string;
   synonymNoResults: string;
   synonymClickToReplace: string;
@@ -114,7 +96,6 @@ export const DEFAULT_LABELS: AiLabels = {
   featureGrammar: 'Correct grammar',
   featureGenerate: 'Generate content',
   featureSummarize: 'Summarize',
-  featureSemantic: 'Analyze content',
   featureToc: 'Generate TOC',
   featureSynonym: 'Find synonym',
 
@@ -123,7 +104,6 @@ export const DEFAULT_LABELS: AiLabels = {
   descGrammar: 'Fix spelling and grammar mistakes',
   descGenerate: 'Generate text with AI',
   descSummarize: 'Summarize the content',
-  descSemantic: 'Extract keywords and topics',
   descToc: 'Create a table of contents',
   descSynonym: 'Find synonyms for the selected word',
 
@@ -160,14 +140,6 @@ export const DEFAULT_LABELS: AiLabels = {
   summarizeResultParagraph: 'Paragraph summary',
   summarizePrefix: '\n\nSummary:\n',
 
-  semanticTitle: 'Content analysis',
-  semanticStats: 'Statistics',
-  semanticWords: 'Words',
-  semanticReadingTime: 'Reading time',
-  semanticTopics: 'Topics',
-  semanticKeywordsCount: 'Keywords',
-  semanticKeywordsTitle: 'Keywords',
-
   synonymTitle: 'Synonyms',
   synonymNoResults: 'No synonyms found',
   synonymClickToReplace: 'Click to replace',
@@ -188,7 +160,6 @@ export const LOCALES: Record<UiLanguage, Partial<AiLabels>> = {
     featureGrammar: 'Corriger la grammaire',
     featureGenerate: 'G\u00E9n\u00E9rer du contenu',
     featureSummarize: 'R\u00E9sumer',
-    featureSemantic: 'Analyser le contenu',
     featureToc: 'G\u00E9n\u00E9rer le sommaire',
     featureSynonym: 'Trouver un synonyme',
     descRewrite: 'Changer le style du texte s\u00E9lectionn\u00E9',
@@ -196,7 +167,6 @@ export const LOCALES: Record<UiLanguage, Partial<AiLabels>> = {
     descGrammar: 'Corriger les fautes d\u2019orthographe',
     descGenerate: 'G\u00E9n\u00E9rer du texte par IA',
     descSummarize: 'R\u00E9sumer le contenu',
-    descSemantic: 'Analyser les mots-cl\u00E9s et sujets',
     descToc: 'Cr\u00E9er une table des mati\u00E8res',
     descSynonym: 'Trouver des synonymes du mot s\u00E9lectionn\u00E9',
     rewriteStyleTitle: 'Style de r\u00E9\u00E9criture',
@@ -227,13 +197,6 @@ export const LOCALES: Record<UiLanguage, Partial<AiLabels>> = {
     summarizeResultBullets: 'Points cl\u00E9s',
     summarizeResultParagraph: 'R\u00E9sum\u00E9 en paragraphe',
     summarizePrefix: '\n\nR\u00E9sum\u00E9 :\n',
-    semanticTitle: 'Analyse du contenu',
-    semanticStats: 'Statistiques',
-    semanticWords: 'Mots',
-    semanticReadingTime: 'Temps de lecture',
-    semanticTopics: 'Sujets',
-    semanticKeywordsCount: 'Mots-cl\u00E9s',
-    semanticKeywordsTitle: 'Mots-cl\u00E9s',
     synonymTitle: 'Synonymes',
     synonymNoResults: 'Aucun synonyme trouv\u00E9',
     synonymClickToReplace: 'Cliquer pour remplacer',
@@ -250,7 +213,6 @@ export const LOCALES: Record<UiLanguage, Partial<AiLabels>> = {
     featureGrammar: 'Grammatik korrigieren',
     featureGenerate: 'Inhalt generieren',
     featureSummarize: 'Zusammenfassen',
-    featureSemantic: 'Inhalt analysieren',
     featureToc: 'Inhaltsverzeichnis erstellen',
     featureSynonym: 'Synonym finden',
     descRewrite: 'Ausgew\u00E4hlten Text in einem anderen Stil umformulieren',
@@ -258,7 +220,6 @@ export const LOCALES: Record<UiLanguage, Partial<AiLabels>> = {
     descGrammar: 'Rechtschreib- und Grammatikfehler korrigieren',
     descGenerate: 'Text mit KI generieren',
     descSummarize: 'Den Inhalt zusammenfassen',
-    descSemantic: 'Schl\u00FCsselw\u00F6rter und Themen extrahieren',
     descToc: 'Inhaltsverzeichnis erstellen',
     descSynonym: 'Synonyme f\u00FCr das ausgew\u00E4hlte Wort finden',
     rewriteStyleTitle: 'Umformulierungsstil',
@@ -289,13 +250,6 @@ export const LOCALES: Record<UiLanguage, Partial<AiLabels>> = {
     summarizeResultBullets: 'Hauptpunkte',
     summarizeResultParagraph: 'Absatz-Zusammenfassung',
     summarizePrefix: '\n\nZusammenfassung:\n',
-    semanticTitle: 'Inhaltsanalyse',
-    semanticStats: 'Statistiken',
-    semanticWords: 'W\u00F6rter',
-    semanticReadingTime: 'Lesezeit',
-    semanticTopics: 'Themen',
-    semanticKeywordsCount: 'Schl\u00FCsselw\u00F6rter',
-    semanticKeywordsTitle: 'Schl\u00FCsselw\u00F6rter',
     synonymTitle: 'Synonyme',
     synonymNoResults: 'Keine Synonyme gefunden',
     synonymClickToReplace: 'Zum Ersetzen klicken',
@@ -312,7 +266,6 @@ export const LOCALES: Record<UiLanguage, Partial<AiLabels>> = {
     featureGrammar: 'Corregir gram\u00E1tica',
     featureGenerate: 'Generar contenido',
     featureSummarize: 'Resumir',
-    featureSemantic: 'Analizar contenido',
     featureToc: 'Generar \u00EDndice',
     featureSynonym: 'Buscar sin\u00F3nimo',
     descRewrite: 'Reformular el texto seleccionado en un estilo diferente',
@@ -320,7 +273,6 @@ export const LOCALES: Record<UiLanguage, Partial<AiLabels>> = {
     descGrammar: 'Corregir errores ortogr\u00E1ficos y gramaticales',
     descGenerate: 'Generar texto con IA',
     descSummarize: 'Resumir el contenido',
-    descSemantic: 'Extraer palabras clave y temas',
     descToc: 'Crear una tabla de contenidos',
     descSynonym: 'Buscar sin\u00F3nimos de la palabra seleccionada',
     rewriteStyleTitle: 'Estilo de reescritura',
@@ -351,13 +303,6 @@ export const LOCALES: Record<UiLanguage, Partial<AiLabels>> = {
     summarizeResultBullets: 'Puntos clave',
     summarizeResultParagraph: 'Resumen en p\u00E1rrafo',
     summarizePrefix: '\n\nResumen:\n',
-    semanticTitle: 'An\u00E1lisis de contenido',
-    semanticStats: 'Estad\u00EDsticas',
-    semanticWords: 'Palabras',
-    semanticReadingTime: 'Tiempo de lectura',
-    semanticTopics: 'Temas',
-    semanticKeywordsCount: 'Palabras clave',
-    semanticKeywordsTitle: 'Palabras clave',
     synonymTitle: 'Sin\u00F3nimos',
     synonymNoResults: 'No se encontraron sin\u00F3nimos',
     synonymClickToReplace: 'Haz clic para reemplazar',
@@ -410,7 +355,6 @@ export interface AiProvider {
   correct(text: string): Promise<GrammarSuggestion[]>;
   generate(prompt: string, onStream?: (chunk: string) => void): Promise<string>;
   summarize(text: string, format: SummaryFormat): Promise<string>;
-  analyze(text: string): Promise<SemanticResult>;
   findSynonyms(word: string, count: number): Promise<SynonymResult[]>;
 }
 
