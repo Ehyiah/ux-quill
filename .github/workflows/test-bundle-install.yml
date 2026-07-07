@@ -68,9 +68,24 @@ jobs:
             - name: Installation du bundle QuillJs
               working-directory: test-project-${{ matrix.php-version }}-${{ matrix.symfony-version }}
               run: |
-                  # Installer notre bundle depuis le dépôt local
                   composer config repositories.local '{"type": "path", "url": "../", "options": {"symlink": true}}'
-                  composer require ehyiah/ux-quill:@dev
+                  
+                  # Retry loop to handle transient failures (jsDelivr API rate-limiting, network glitches)
+                  for i in {1..3}; do
+                    # Clean up from any previous failed attempt
+                    if [ $i -gt 1 ]; then
+                      composer remove ehyiah/ux-quill:@dev 2>/dev/null || true
+                      rm -f composer.lock
+                    fi
+                    composer require ehyiah/ux-quill:@dev && { echo "✅ Bundle installé avec succès"; break; }
+                    if [ $i -lt 3 ]; then
+                      echo "⚠️ Tentative $i/3 échouée. Nouvelle tentative dans 5 secondes..."
+                      sleep 5
+                    else
+                      echo "❌ Installation échouée après 3 tentatives"
+                      exit 1
+                    fi
+                  done
                   
                   # Vérifier que le bundle est correctement installé dans composer.json
                   cat composer.json | grep ehyiah/ux-quill
