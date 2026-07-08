@@ -42,6 +42,7 @@ class VideoFigure extends BlockEmbed {
         iframe.style.width = '100%';
         iframe.style.height = 'auto';
         iframe.style.aspectRatio = '16 / 9';
+        iframe.style.pointerEvents = 'none';
 
         if (typeof value === 'object') {
             if (value.title) iframe.setAttribute('title', value.title);
