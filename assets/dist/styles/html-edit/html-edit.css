@@ -1,0 +1,111 @@
+.ql-html-overlayContainer {
+  background: rgba(0, 0, 0, 0.5);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(2px);
+}
+
+.ql-html-popupContainer {
+  background: #fff;
+  position: relative;
+  width: min(92vw, 1200px);
+  max-height: 85vh;
+  border-radius: 0.75rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: ql-html-fadeIn 0.2s ease-out;
+}
+
+@keyframes ql-html-fadeIn {
+  from { opacity: 0; transform: translateY(-10px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.ql-html-textContainer {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(1rem, 3vw, 2rem);
+  gap: clamp(0.5rem, 1.5vw, 1rem);
+}
+
+.ql-html-textArea {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  height: 55vh;
+  overflow: hidden;
+}
+
+.ql-html-textArea .ql-editor {
+  overflow-y: scroll;
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+  font-size: clamp(0.8125rem, 1.4vw, 0.9375rem);
+  line-height: 1.6;
+  tab-size: 2;
+}
+
+.ql-html-textArea .ql-syntax {
+  word-break: break-all;
+  white-space: pre-wrap;
+}
+
+.ql-html-popupTitle {
+  margin: 0;
+  font-size: clamp(0.875rem, 2vw, 1.125rem);
+  font-weight: 600;
+  color: #1a1a1a;
+  letter-spacing: -0.01em;
+}
+
+.ql-html-buttonGroup {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.625rem;
+  padding-top: 0.25rem;
+}
+
+.ql-html-buttonGroup button {
+  padding: 0.5rem clamp(0.75rem, 2vw, 1.5rem);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+  outline: none;
+}
+
+.ql-html-buttonCancel {
+  background: #f1f3f5;
+  color: #495057;
+}
+
+.ql-html-buttonCancel:hover {
+  background: #e9ecef;
+  color: #212529;
+}
+
+.ql-html-buttonOk {
+  background: #228be6;
+  color: #fff;
+}
+
+.ql-html-buttonOk:hover {
+  background: #1c7ed6;
+}
+
+.ql-html-buttonOk:active {
+  background: #1971c2;
+}
