@@ -37,7 +37,9 @@ export class Mention {
       this.hideList();
       return;
     }
-    const [line, offset] = this.quill.getLine(selection.index);
+    const _this$quill$getLine = this.quill.getLine(selection.index),
+      line = _this$quill$getLine[0],
+      offset = _this$quill$getLine[1];
     if (!line) {
       this.hideList();
       return;

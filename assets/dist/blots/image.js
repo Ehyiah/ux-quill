@@ -14,10 +14,9 @@ class LoadingImage extends InlineBlot {
     this.cache = {};
   }
   static value(domNode) {
-    const {
-      src,
-      custom
-    } = domNode.dataset;
+    const _domNode$dataset = domNode.dataset,
+      src = _domNode$dataset.src,
+      custom = _domNode$dataset.custom;
     return {
       src,
       custom
