@@ -1,6 +1,6 @@
 <?php
 
-namespace DTO\Fields\Block;
+namespace Ehyiah\QuillJsBundle\Tests\DTO\Fields\Block;
 
 use Ehyiah\QuillJsBundle\DTO\Fields\BlockField\FontField;
 use PHPUnit\Framework\TestCase;

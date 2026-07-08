@@ -36,13 +36,15 @@ Example of how to use modules:
 | **DividerModule** | YES | Add a horizontal separator (`<hr>`) support and toolbar button | divider | array | [] | [] |
 | **PageBreakModule** | YES | Add a page break support for print (`page-break-after: always`) | pageBreak | array | `label` | ['label' => 'Page Break'] |
 | **MentionModule** | NO | Add support for mentions (`@user`, `#tag`) with static or remote data. | mention | array | `trigger`, `data`, `remote_url`, `min_chars`, `max_results` | see documentation |
+| **InlineToolbarModule** | NO | Enable a floating inline toolbar that appears on text selection (Bold, Italic, etc.). | inlineToolbar | array | `buttons` via `options` | ['buttons' => ['bold', 'italic', 'underline', 'strike']] |
+| **SlashModule** | NO | Enable a slash command menu (type `/` to insert blocks). | slashModule | array | — | [] |
 | **AutosaveModule** | NO | Automatically saves content to `localStorage` to prevent data loss. | autosave | array | `interval`, `restore_type`, `key_suffix` | see documentation |
 | **PasteSanitizerModule** | NO | Clean or strip HTML when pasting content from external sources. | pasteSanitizer | array | `plain_text`, `remove_styles`, `remove_classes` | see documentation |
 | **MarkdownModule** | NO | Enable Markdown-like shortcuts during typing (e.g. `# ` for H1, `* ` for list) | markdown | array | [] | [] |
 | **DragAndDropModule** | YES | Enable internal drag and drop of elements like images and videos inside the editor. | dragAndDrop | array | [] | [] |
 | **LinkAttributesModule** | YES | Add support for `target` and `rel` attributes on links. | linkAttributes | array | [] | [] |
 | **FullScreenModule** | NO | Add a FullScreen button to the toolbar [site](https://github.com/qvarts/quill-toggle-fullscreen-button) | toggleFullscreen | array | `buttonTitle`, `buttonHTML` check https://github.com/qvarts/quill-toggle-fullscreen-button?tab=readme-ov-file#api | see ``Ehyiah\QuillJsBundle\DTO\Modules\FullScreenModule`` |
-| **HtmlEditModule** | NO | The HtmlEditModule allow to edit the raw html. see details on repository [site](https://github.com/benwinding/quill-html-edit-button) | htmlEditButton | array | https://github.com/benwinding/quill-html-edit-button | see ``Ehyiah\QuillJsBundle\DTO\Modules\htmlEditButton`` | There is currently a conflict with tableField. Don't use both of them at the same time as the table inserted via the htmlEdit module will not be displayed |
+| **HtmlEditModule** | NO | The HtmlEditModule allow to edit the raw html. This module is now bundled directly into this package (replaces the external `quill-html-edit-button`). | htmlEditButton | array | see class | see ``Ehyiah\QuillJsBundle\DTO\Modules\htmlEditButton`` | There is currently a conflict with tableField. Don't use both of them at the same time as the table inserted via the htmlEdit module will not be displayed |
 | **ReadTimeModule** | NO | The ReadTimeModule add an indication on how many minutes it will take to a person to read what your write inside the WYSIWYG editor | readingTime | array | ``wpm``, ``label``, ``suffix``, ``readTimeOk``, ``readTimeMedium``, ``target`` | ['wpm' => '200', 'label' => 'Reading time: ', 'suffix' => ' min read', 'readTimeOk' => '2', 'readTimeMedium' => '5'] |
 | **STTModule** | NO | The Speech-to-Text module enables voice dictation using the Web Speech API. Allows users to dictate text directly into the editor with real-time audio visualization | speechToText | array | ``language``, ``continuous``, ``visualizer``, ``waveformColor``, ``histogramColor``, ``debug``, ``buttonTitleStart``, ``buttonTitleStop``, ``titleInactive``, ``titleStarting``, ``titleActive`` | see ``Ehyiah\QuillJsBundle\DTO\Modules\STTModule`` |
 
@@ -102,6 +104,36 @@ This module adds support for page breaks. It displays a visual indicator in the 
     new PageBreakModule([
         'label' => 'Saut de page',
     ]),
+],
+```
+
+## InlineToolbarModule
+
+This module provides a floating inline toolbar that appears on text selection for quick formatting (Bold, Italic, etc.).
+
+**Options:**
+- **buttons**: Array of formatting buttons to display (default: `['bold', 'italic', 'underline', 'strike']`).
+
+**Usage example:**
+
+```php
+'modules' => [
+    new InlineToolbarModule(),
+],
+```
+
+## SlashModule
+
+This module provides a block selection menu that appears when you type `/` at the beginning of a line or after a space.
+
+**Options:**
+_(none currently)_
+
+**Usage example:**
+
+```php
+'modules' => [
+    new SlashModule(),
 ],
 ```
 

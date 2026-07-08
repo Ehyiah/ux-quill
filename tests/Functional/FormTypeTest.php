@@ -2,6 +2,7 @@
 
 namespace Ehyiah\QuillJsBundle\Tests\Functional;
 
+use Ehyiah\QuillJsBundle\Config\QuillConfigBuilder;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\BoldField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\CodeBlockField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ImageField;
@@ -17,7 +18,7 @@ use Symfony\Component\Form\Forms;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
- * @coversNothing
+ * @coversDefaultClass \Ehyiah\QuillJsBundle\Form\QuillType
  */
 final class FormTypeTest extends TestCase
 {
@@ -28,13 +29,18 @@ final class FormTypeTest extends TestCase
         parent::setUp();
 
         $translator = $this->createMock(TranslatorInterface::class);
+        $configBuilder = new QuillConfigBuilder($translator);
 
         $this->formFactory = Forms::createFormFactoryBuilder()
-            ->addType(new QuillType($translator))
+            ->addType(new QuillType($configBuilder))
             ->getFormFactory()
         ;
     }
 
+    /**
+     * @covers ::buildView
+     * @covers ::configureOptions
+     */
     public function testCreateBasicQuillForm(): void
     {
         $form = $this->formFactory->createBuilder()
@@ -56,6 +62,10 @@ final class FormTypeTest extends TestCase
         $this->assertTrue(in_array('quill', $contentView->vars['block_prefixes'], true));
     }
 
+    /**
+     * @covers ::buildView
+     * @covers ::configureOptions
+     */
     public function testCreateQuillFormWithCustomOptions(): void
     {
         $customOptions = [
@@ -105,6 +115,9 @@ final class FormTypeTest extends TestCase
         $this->assertContains(SyntaxModule::NAME, $moduleNames);
     }
 
+    /**
+     * @covers ::buildView
+     */
     public function testImageFieldIncludesSelectionModule(): void
     {
         $customOptions = [
@@ -127,6 +140,10 @@ final class FormTypeTest extends TestCase
         $this->assertContains(\Ehyiah\QuillJsBundle\DTO\Modules\ImageSelectionModule::NAME, $moduleNames);
     }
 
+    /**
+     * @covers ::buildView
+     * @covers ::configureOptions
+     */
     public function testFormSubmission(): void
     {
         $form = $this->formFactory->createBuilder()

@@ -75,6 +75,11 @@ export type CountOptions = {
     characters_container?: string;
 }
 
+export type NotionToolbarOptions = {
+    slashMenu?: boolean;
+    floatingToolbar?: boolean;
+}
+
 export type LayoutPreset = {
     cols: number;
     ratios: string[];
@@ -88,7 +93,7 @@ export type LayoutOptions = {
 
 export interface ModuleInterface {
     name: string;
-    options: any | ImageGalleryOptions | ReadingTimeOptions | SpeechToTextOptions | CountOptions | LayoutOptions;
+    options: any | ImageGalleryOptions | ReadingTimeOptions | SpeechToTextOptions | CountOptions | NotionToolbarOptions | LayoutOptions;
 }
 
 export type ModuleOptions = ModuleInterface[];

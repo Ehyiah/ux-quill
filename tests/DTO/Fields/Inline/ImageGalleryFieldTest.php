@@ -7,10 +7,14 @@ use Ehyiah\QuillJsBundle\DTO\Modules\ImageGalleryModule;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @coversNothing
+ * @coversDefaultClass \Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ImageGalleryField
  */
 class ImageGalleryFieldTest extends TestCase
 {
+    /**
+     * @covers ::getOption
+     * @covers ::importModules
+     */
     public function testField(): void
     {
         $field = new ImageGalleryField();

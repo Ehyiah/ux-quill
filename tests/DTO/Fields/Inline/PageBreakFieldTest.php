@@ -7,10 +7,14 @@ use Ehyiah\QuillJsBundle\DTO\Modules\PageBreakModule;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @coversNothing
+ * @coversDefaultClass \Ehyiah\QuillJsBundle\DTO\Fields\InlineField\PageBreakField
  */
 class PageBreakFieldTest extends TestCase
 {
+    /**
+     * @covers ::getOption
+     * @covers ::importModules
+     */
     public function testPageBreakField(): void
     {
         $field = new PageBreakField();

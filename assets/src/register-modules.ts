@@ -18,8 +18,8 @@ Quill.register('modules/counter', Counter);
 import QuillToggleFullscreenButton from 'quill-toggle-fullscreen-button';
 Quill.register('modules/toggleFullscreen', QuillToggleFullscreenButton);
 
-import htmlEditButton from 'quill-html-edit-button';
-Quill.register('modules/htmlEditButton', htmlEditButton.default || htmlEditButton);
+import { HtmlEditButton } from './modules/htmlEditModule.ts';
+Quill.register('modules/htmlEditButton', HtmlEditButton);
 
 import ReadingTime from './modules/readtimeModule.ts';
 Quill.register('modules/readingTime', ReadingTime);
@@ -44,6 +44,12 @@ Quill.register('modules/linkAttributes', LinkAttributes);
 
 import {Autosave} from './modules/autosave.ts';
 Quill.register('modules/autosave', Autosave);
+
+import InlineToolbar from './modules/inlineToolbar.ts';
+Quill.register('modules/inlineToolbar', InlineToolbar);
+
+import SlashModule from './modules/slashModule.ts';
+Quill.register('modules/slashModule', SlashModule);
 
 import {PasteSanitizer} from './modules/pasteSanitizer.ts';
 Quill.register('modules/pasteSanitizer', PasteSanitizer);
@@ -74,3 +80,9 @@ window.katex = katex;
 
 import ImageGalleryModule from './modules/gallery/gallery-module.ts'
 Quill.register('modules/imageGallery', ImageGalleryModule.default || ImageGalleryModule);
+
+import GridBorders from './modules/gridBorders.ts';
+Quill.register('modules/gridBorders', GridBorders);
+
+import {PlaceholderModule} from './modules/placeHolderModule/placeHolderModule.ts';
+Quill.register('modules/placeholder', PlaceholderModule);

@@ -6,7 +6,7 @@ use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillFieldModuleInterface;
 use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillInlineFieldInterface;
 use Ehyiah\QuillJsBundle\DTO\Modules\LinkAttributesModule;
 
-class LinkField implements QuillInlineFieldInterface, QuillFieldModuleInterface
+final class LinkField implements QuillInlineFieldInterface, QuillFieldModuleInterface
 {
     public function getOption(): string
     {

@@ -2,7 +2,7 @@
 
 namespace Ehyiah\QuillJsBundle\DTO\Modules;
 
-class SmartLinksModule implements ModuleInterface
+final class SmartLinksModule implements ModuleInterface
 {
     public const NAME = 'smartLinks';
 

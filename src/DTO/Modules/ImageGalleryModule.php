@@ -4,7 +4,7 @@ namespace Ehyiah\QuillJsBundle\DTO\Modules;
 
 use InvalidArgumentException;
 
-class ImageGalleryModule implements ModuleInterface
+final class ImageGalleryModule implements ModuleInterface
 {
     public const NAME = 'imageGallery';
 

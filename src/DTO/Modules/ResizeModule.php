@@ -20,6 +20,8 @@ final class ResizeModule implements ModuleInterface
         public string $name = self::NAME,
         public $options = [],
     ) {
+        @trigger_error(sprintf('Class "%s" is deprecated since ux-quill 3.0, use ImageSelectionModule instead.', self::class), E_USER_DEPRECATED);
+
         if (!is_array($this->options)) {
             return;
         }

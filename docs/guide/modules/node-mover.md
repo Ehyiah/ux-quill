@@ -1,26 +1,21 @@
 # NodeMover Module
 
-**Auto-imported: YES** (Always active by default)
+**Auto-imported: YES** (Always loaded — see table below)
 
-The `NodeMoverModule` is a powerful tool designed to make content reordering intuitive and fluid.
-Unlike standard modules that only handle specific elements, this module provides a universal interface to move any block-level element (paragraphs, headings, images, lists, etc.) within the editor.
+The `NodeMoverModule` adds a floating toolbar and drag handle to every block element in the editor, enabling users to **reorder**, **duplicate**, and **delete** blocks with a single click.
 
 This module is **automatically enabled** in every Quill editor instance. To disable it, you must explicitly set `active => false` in your configuration.
 
 ## Features
 
-- **Universal Movement**: Works on all types of content blocks.
-- **Multi-Selection Support**: Select multiple paragraphs and move them as a single cohesive unit.
-- **Gutter Interface**: A discreet toolbar appears in the editor gutter when content is selected.
-- **Precise Controls**: Move blocks up or down one by one using dedicated buttons.
-- **Smart Drag & Drop**: Drag your selection to a new location with a live drop indicator showing exactly where it will land.
-- **Quick Selection Duplication**: A duplicate icon to instantly clone the selected blocks.
-- **No-Merge Logic**: Ensures that dropping a block between others never accidentally merges or breaks your HTML structure.
-- **Quick Delete**: A trash icon to instantly remove the selected blocks.
+- **Drag & Drop**: Grab the 6-dot handle to drag any block to a new position.
+- **Move Up/Down**: Click the arrow buttons on the floating toolbar to reorder blocks.
+- **Duplicate**: Create a copy of any block or selection.
+- **Delete**: Remove blocks with a single click.
+- **Multi-block Selection**: Select multiple blocks at once (hold Shift + click or drag-select) to move, duplicate, or delete them together.
+- **Visual Overlay**: A highlighted border appears around the selected block(s).
 
-## Installation
-
-This module is **optional** and must be explicitly enabled in your `FormType`.
+## Configuration
 
 ```php
 use Ehyiah\QuillJsBundle\DTO\Modules\NodeMoverModule;
@@ -29,31 +24,48 @@ use Ehyiah\QuillJsBundle\Form\QuillType;
 $builder->add('content', QuillType::class, [
     'modules' => [
         new NodeMoverModule([
-            'borderColor' => '#007bff',        // Optional: customize the selection frame color
-            'dropIndicatorColor' => '#ff0000' // Optional: customize the drop line color
+            'active' => true,
+            'borderColor' => '#007bff',
+            'dropIndicatorColor' => '#ff0000',
+            'duplicate' => true,
         ]),
     ],
 ]);
+```
+
+Minimal usage (auto-loaded with defaults):
+
+```php
+new NodeMoverModule(),
 ```
 
 ## Configuration Options
 
 | Option | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
-| `active` | `bool` | `true` | Set to `false` to disable the module entirely (since it is enabled by default). |
-| `borderColor` | `string` | `#007bff` | The color of the selection outline. (null by default) |
-| `dropIndicatorColor` | `string` | `#ff0000` | The color of the horizontal line indicating where the content will be dropped. |
-| `duplicate` | `bool` | `true` | Set to `false` to disable the duplicate button in the toolbar. |
+| `active` | `bool` | `true` | If `true`, the module is active immediately when the editor loads. |
+| `borderColor` | `string`\|`null` | `null` | Color of the selection overlay border. `null` = no border without explicit config. |
+| `dropIndicatorColor` | `string` | `'#ff0000'` | Color of the drop indicator line when dragging. |
+| `duplicate` | `bool` | `true` | If `true`, adds a duplicate button to the floating toolbar. |
 
 ## User Experience
 
-1. **Selection**: Click inside a block or highlight multiple blocks with your mouse. A colored frame will appear around the selection.
-2. **Toolbar**: A small vertical toolbar will appear to the left of the selection.
-3. **Moving**:
-    - Click **Up/Down** arrows for precise block-by-block movement.
-    - Grab the **Move** icon (six dots) to drag the selection. A horizontal line will indicate the insertion point.
-4. **Auto-Hide**: The mover interface automatically disappears when you start typing to ensure a distraction-free writing experience.
+1. **Selection**: Click any block (paragraph, heading, image, etc.) to select it. A blue overlay border highlights the selection, and the floating toolbar appears to the left.
+2. **Reorder**: Click the ▲ and ▼ buttons to move the selected block up or down.
+3. **Drag**: Grab the 6-dot handle and drag the block to a new position. A red line indicates where the block will land.
+4. **Duplicate**: Click the copy icon to duplicate the selected block.
+5. **Delete**: Click the ✕ button to remove the selected block.
 
-::: tip PRO TIP
-When dragging, the colored line will "snap" between paragraphs. If you drag back over the original selection, the line will disappear to indicate that no move will occur if dropped there.
-:::
+## Try it live
+
+<script setup>
+const nodeMoverContent = '<h1>Move Me</h1><p>Hover over any block to see the move toolbar on the left. Use the arrows to reorder, grab the 6-dot handle to drag, or click the copy and delete buttons.</p><h2>Second Block</h2><p>Try moving this heading above the first one using the up arrow in the toolbar.</p><img src="https://picsum.photos/seed/move/800/400" alt="Sample image"><p>You can also select multiple blocks by dragging across them, then move or delete them all at once.</p>'
+</script>
+
+<ClientOnly>
+  <QuillPlayground
+    enabled="headers,nodeMover"
+    placeholder="Click any block to see the move toolbar…"
+    :content="nodeMoverContent"
+  />
+</ClientOnly>

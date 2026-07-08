@@ -2,38 +2,45 @@
 
 Try all the features of Symfony UX Quill in this interactive editor.
 
-## Active modules
-
-| Module | What to try |
-|--------|-------------|
-| **Bold, Italic, Underline, Strike** | Standard text formatting |
-| **Headers** | Heading levels 1–6 |
-| **Lists** | Ordered, bullet, and check lists |
-| **Alignment** | Left, center, right, justify |
-| **Colors & Fonts** | Text color, background, font family, size |
-| **Script** | Subscript / superscript |
-| **Blockquote, Code Block** | Block quote with syntax highlighting |
-| **Formula** | Mathematical formulas (KaTeX) |
-| **Image, Video, Link** | Insert media and links |
-| **Table** | Advanced tables with cell merging (quill-table-better) |
-| **Emoji** | Emoji picker (quill2-emoji) |
-| **Divider** | Horizontal rule |
-| **Page Break** | Visual page break indicator |
-| **Image Gallery** | Browse, search, and upload images |
-| **Image Selection** | Resize, align, caption images |
-| **Fullscreen** | Toggle fullscreen editing |
-| **HTML Edit** | View and edit raw HTML |
-| **Undo / Redo** | History management |
-| **Mention** | Type `@` to mention someone |
-| **Smart Links** | Paste a URL to auto-convert to a link |
-| **Link Attributes** | Edit `target` and `rel` on links |
-| **Autosave** | Auto-saves every 30s |
-| **Counter** | Word count |
-| **Reading Time** | Estimated reading time |
-| **Node Mover** | Drag blocks to reorder |
-| **Paste Sanitizer** | Clean pasted content |
-| **Speech To Text** | Voice dictation |
-
 <ClientOnly>
   <QuillPlayground />
 </ClientOnly>
+
+## Active modules
+
+| Feature | Toolbar / Module | Options passed in the playground |
+|---------|-----------------|----------------------------------|
+| **Headers** | `header` | `[1, 2, 3, 4, 5, 6, false]` |
+| **Bold, Italic, Underline, Strike** | `bold`, `italic`, `underline`, `strike` | — |
+| **Lists** (ordered, bullet, check) | `list` | `ordered`, `bullet`, `check` |
+| **Indent** | `indent` | `-1`, `+1` |
+| **Alignment** | `align` | `[]` (all directions) |
+| **Blockquote** | `blockquote` | — |
+| **Code Block** | `code-block` | — |
+| **Syntax Highlighting** | `syntax` (module) | `true` |
+| **Formula** | `formula` | — |
+| **Subscript / Superscript** | `script` | `sub`, `super` |
+| **Text Color** | `color` | `[]` (all colors) |
+| **Background Color** | `background` | `[]` (all colors) |
+| **Clean formatting** | `clean` | — |
+| **Link** | `link` | — |
+| **Image** | `image` | — |
+| **Video** | `video` | — |
+| **Table** | `table-better` (module) | `{ toolbarTable: true }` |
+| **Emoji** | `emoji` (module: `emoji-toolbar`) | `{}` |
+| **Divider** | `divider` (module) | `{}` |
+| **Page Break** | `pageBreak` (module) | `{}` |
+| **Image Gallery** | `imageGallery` (module) | `{ listEndpoint, searchEndpoint, uploadEndpoint, messages }` |
+| **Image Selection** | `imageSelection` (module) | `{}` |
+| **Fullscreen** | `toggleFullscreen` (module) | `{}` |
+| **HTML Edit** | `htmlEditButton` (module) | `{}` |
+| **Mention** | `mention` (module) | `{ trigger: '@', data: 6 users }` available autocomplete choices : Alice Johnson, Bob Smith, Charlie Brown, Diana Prince, Eve Wilson, Frank Castle  |
+| **Smart Links** | `smartLinks` (module) | `{ linkRegex: '/https?:\\\\/\\\\/[^\\\\s]+/' }` |
+| **Link Attributes** | `linkAttributes` (module) | `{}` |
+| **Autosave** | `autosave` (module) | `{ key: 'playground-demo', interval: 30000 }` |
+| **Counter** | `counter` (module) | `{ words: true, words_container: 'playground-counter' }` |
+| **Reading Time** | `readingTime` (module) | `{ target: '#playground-reading-time', wpm: 200 }` |
+| **Node Mover** | `nodeMover` (module) | `{borderColor: null, dropIndicatorColor: '#ff0000', duplicate: true}` |
+| **Paste Sanitizer** | `pasteSanitizer` (module) | `{ plainText: false }` |
+| **Speech To Text** | `speechToText` (module) | `{ language: 'en-US' }` |
+| **Markdown** | `markdown` (module) | `true` |

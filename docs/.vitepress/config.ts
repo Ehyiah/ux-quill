@@ -79,9 +79,13 @@ export default defineConfig({
                   { text: 'Markdown', link: '/guide/modules/markdown' },
                   { text: 'Mention', link: '/guide/modules/mention' },
                   { text: 'NodeMover', link: '/guide/modules/node-mover' },
+                  { text: 'Inline Toolbar', link: '/guide/modules/inline-toolbar' },
+                  { text: 'Slash Module', link: '/guide/modules/slash-module' },
                   { text: 'Paste Sanitizer', link: '/guide/modules/paste-sanitizer' },
+                  { text: 'Placeholder', link: '/guide/modules/placeholder' },
                   { text: 'ReadTime', link: '/guide/modules/read-time' },
                   { text: 'SmartLinks', link: '/guide/modules/smart-links' },
+                  { text: 'Grid Borders', link: '/guide/modules/grid-borders' },
                   { text: 'Speech To Text', link: '/guide/modules/stt' },
                   { text: 'Other Modules', link: '/guide/modules/others' }
                 ]
