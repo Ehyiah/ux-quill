@@ -177,6 +177,7 @@ final class QuillGroup implements QuillGroupInterface
             new CodeBlockField(),
             new TableField(),
             new CleanField(),
+            new LayoutField(),
         ];
     }
 }
