@@ -1,5 +1,6 @@
 import { Controller } from '@hotwired/stimulus';
 import Quill from 'quill';
+import Delta from 'quill-delta';
 import * as Options from 'quill/core/quill';
 import type { ExtraOptions, ModuleOptions } from './types.d.ts';
 import mergeModules from './modules.ts';
@@ -9,6 +10,7 @@ import { handleUploadResponse, uploadStrategies } from './upload-utils.ts';
 import './register-modules.ts';
 import QuillTableBetter from 'quill-table-better';
 import ImageFigure from './blots/imageFigure.ts';
+import LayoutBlot from './blots/layout.ts';
 
 // Register custom ImageFigure blot to override default image
 Quill.register(ImageFigure, true);
@@ -159,11 +161,22 @@ export default class extends Controller {
     }
 
     private setupContentSync(quill: Quill) {
-        // set initial content as a delta for better compatibility and allow table-module to work
-        const initialData = quill.clipboard.convert({ html: this.inputTarget.value })
-        this.dispatchEvent('hydrate:before', initialData);
-        quill.updateContents(initialData);
-        this.dispatchEvent('hydrate:after', quill);
+        // Clipboard matchers — used by autosave restore and paste
+        quill.clipboard.addMatcher('.ql-layout', (node: Element, _delta: any, _scroll: any) => {
+            const value = LayoutBlot.value(node as HTMLElement);
+            return new Delta().insert({ layout: value });
+        });
+
+        const savedHtml = this.inputTarget.value;
+        if (savedHtml) {
+            this.dispatchEvent('hydrate:before', savedHtml);
+            quill.setContents(new Delta(), 'silent');
+            quill.root.innerHTML = savedHtml;
+            quill.scroll.build();
+            quill.scroll.optimize();
+            quill.root.classList.toggle('ql-blank', quill.editor.isBlank());
+            this.dispatchEvent('hydrate:after', quill);
+        }
 
         quill.on('text-change', () => {
             const quillContent = this.extraOptionsValue?.use_semantic_html

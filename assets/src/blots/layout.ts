@@ -1,6 +1,14 @@
 import Quill from 'quill';
 
+const ContainerBlot = Quill.import('blots/container');
+const BlockBlot = Quill.import('blots/block');
 const BlockEmbed = Quill.import('blots/block/embed');
+
+// In Quill 2.0, ContainerBlot extends ParentBlot extends ShadowBlot.
+// Skip ParentBlot.optimize — it calls enforceAllowedChildren() and
+// auto-removes empty blots. Go two levels up to ShadowBlot.optimize.
+const parentBlotProto = Object.getPrototypeOf(ContainerBlot.prototype);
+const shadowBlotProto = Object.getPrototypeOf(parentBlotProto);
 
 export type LayoutValue = {
     cols: number;
@@ -8,32 +16,46 @@ export type LayoutValue = {
     columns: string[];
 };
 
-class LayoutBlot extends BlockEmbed {
+class LayoutColumnBlot extends ContainerBlot {
+    static blotName = 'layout-column';
+    static tagName = 'div';
+    static className = 'ql-layout-col';
+
+    static allowedChildren = [BlockBlot, BlockEmbed, ContainerBlot];
+
+    optimize(context: Record<string, any>): void {
+        shadowBlotProto.optimize.call(this, context);
+    }
+}
+
+class LayoutBlot extends ContainerBlot {
     static blotName = 'layout';
     static tagName = 'div';
     static className = 'ql-layout';
+    static allowedChildren = [LayoutColumnBlot];
 
     static create(value: LayoutValue): HTMLElement {
         const node = super.create();
-        node.classList.add('ql-layout');
 
         node.dataset.cols = String(value.cols);
         node.dataset.ratios = value.ratios.join('|');
         node.style.display = 'grid';
         node.style.gridTemplateColumns = value.ratios.join(' ');
         node.style.gap = '16px';
-        node.contentEditable = 'false';
 
         for (let i = 0; i < value.cols; i++) {
             const col = document.createElement('div');
             col.className = 'ql-layout-col';
-            col.contentEditable = 'true';
             col.dataset.colIndex = String(i);
             col.innerHTML = value.columns[i] || '<p><br></p>';
             node.appendChild(col);
         }
 
         return node;
+    }
+
+    optimize(context: Record<string, any>): void {
+        shadowBlotProto.optimize.call(this, context);
     }
 
     static value(node: HTMLElement): LayoutValue {
@@ -46,4 +68,5 @@ class LayoutBlot extends BlockEmbed {
     }
 }
 
+export { LayoutColumnBlot };
 export default LayoutBlot;

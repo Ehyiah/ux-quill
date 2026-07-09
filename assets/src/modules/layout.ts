@@ -1,8 +1,9 @@
 import Quill from 'quill';
-import LayoutBlot from '../blots/layout.ts';
+import LayoutBlot, { LayoutColumnBlot } from '../blots/layout.ts';
 import type { LayoutValue } from '../blots/layout.ts';
 
 Quill.register(LayoutBlot);
+Quill.register(LayoutColumnBlot);
 
 export type LayoutPreset = {
     cols: number;
@@ -25,13 +26,10 @@ const DEFAULT_OPTIONS: LayoutOptions = {
     allow_wrap: true,
 };
 
-const BLOCK_TAGS = ['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'UL', 'OL', 'LI', 'BLOCKQUOTE', 'FIGURE', 'HR', 'PRE', 'DIV'];
-
 export class Layout {
     private quill: Quill;
     private options: LayoutOptions;
     private dropdownEl: HTMLDivElement | null = null;
-    private observers: MutationObserver[] = [];
 
     constructor(quill: Quill, userOptions: Partial<LayoutOptions> = {}) {
         this.quill = quill;
@@ -39,7 +37,7 @@ export class Layout {
 
         this.injectStyles();
         this.setupToolbarHandler();
-        this.setupKeyboardNav();
+        this.setupTabNavigation();
     }
 
     private injectStyles(): void {
@@ -95,9 +93,6 @@ export class Layout {
             .ql-layout-picker button:hover {
                 background: #e8f0fe;
             }
-            .ql-layout-picker button:active {
-                background: #d2e3fc;
-            }
         `;
         document.head.appendChild(style);
     }
@@ -113,9 +108,7 @@ export class Layout {
         const range = this.quill.getSelection(true);
         if (!range) return;
 
-        const hasSelection = range.length > 0;
-
-        if (hasSelection && this.options.allow_wrap) {
+        if (range.length > 0 && this.options.allow_wrap) {
             this.showPresetPicker((preset) => {
                 this.wrapSelection(range, preset);
             });
@@ -163,7 +156,6 @@ export class Layout {
 
         document.body.appendChild(dropdown);
 
-        // Position the dropdown below the toolbar button
         if (referenceEl) {
             const rect = referenceEl.getBoundingClientRect();
             dropdown.style.top = `${rect.bottom + 4}px`;
@@ -173,7 +165,6 @@ export class Layout {
             dropdown.style.left = '0';
         }
 
-        // Close on click outside
         setTimeout(() => {
             document.addEventListener('click', this.onOutsideClick, { once: true });
         }, 0);
@@ -198,8 +189,6 @@ export class Layout {
         };
 
         this.quill.insertEmbed(index, 'layout', value, 'user');
-        this.quill.setSelection(index + 1, 'api');
-        this.setupColumnSync();
     }
 
     private wrapSelection(range: { index: number; length: number }, preset: LayoutPreset): void {
@@ -216,8 +205,6 @@ export class Layout {
         };
 
         this.quill.insertEmbed(range.index, 'layout', value, 'user');
-        this.quill.setSelection(range.index + 1, 'api');
-        this.setupColumnSync();
     }
 
     private convertDeltaToHtml(delta: any): string {
@@ -230,12 +217,7 @@ export class Layout {
         const temp = document.createElement('div');
         temp.innerHTML = html;
 
-        const blocks: Element[] = [];
-        for (const child of temp.children) {
-            if (BLOCK_TAGS.includes(child.tagName)) {
-                blocks.push(child);
-            }
-        }
+        const blocks = Array.from(temp.children) as HTMLElement[];
 
         if (blocks.length === 0) {
             const result = Array(cols).fill('<p><br></p>');
@@ -243,12 +225,10 @@ export class Layout {
             return result;
         }
 
-        // Round-robin distribution
         const columns: string[] = Array(cols).fill('');
 
-        // If fewer blocks than columns, put all in column 0
         if (blocks.length < cols) {
-            columns[0] = blocks.map(b => b.outerHTML).join('');
+            columns[0] = blocks.map((b) => b.outerHTML).join('');
             for (let i = 1; i < cols; i++) {
                 columns[i] = '<p><br></p>';
             }
@@ -256,11 +236,9 @@ export class Layout {
         }
 
         for (let i = 0; i < blocks.length; i++) {
-            const colIdx = i % cols;
-            columns[colIdx] += blocks[i].outerHTML;
+            columns[i % cols] += blocks[i].outerHTML;
         }
 
-        // Ensure each column has at least a paragraph
         for (let i = 0; i < cols; i++) {
             if (!columns[i] || columns[i].trim() === '') {
                 columns[i] = '<p><br></p>';
@@ -270,64 +248,27 @@ export class Layout {
         return columns;
     }
 
-    private setupKeyboardNav(): void {
-        this.quill.root.addEventListener('keydown', this.onKeyDown.bind(this), { capture: true });
+    private setupTabNavigation(): void {
+        this.quill.root.addEventListener('keydown', this.onTabKey.bind(this), { capture: true });
     }
 
-    private onKeyDown(e: KeyboardEvent): void {
+    private onTabKey(e: KeyboardEvent): void {
+        if (e.key !== 'Tab') return;
+
         const activeCol = this.getActiveColumn();
         if (!activeCol) return;
+
+        e.preventDefault();
 
         const cols = this.getAllColumns();
         if (cols.length === 0) return;
 
         const currentIndex = Array.from(cols).indexOf(activeCol);
+        const nextIndex = e.shiftKey
+            ? (currentIndex - 1 + cols.length) % cols.length
+            : (currentIndex + 1) % cols.length;
 
-        switch (e.key) {
-            case 'Tab': {
-                e.preventDefault();
-                const nextIndex = e.shiftKey
-                    ? (currentIndex - 1 + cols.length) % cols.length
-                    : (currentIndex + 1) % cols.length;
-                this.focusColumn(cols[nextIndex] as HTMLElement);
-                break;
-            }
-            case 'ArrowUp': {
-                const sel = window.getSelection();
-                if (sel && sel.rangeCount > 0) {
-                    const range = sel.getRangeAt(0);
-                    const isAtStart = range.startOffset === 0 && range.collapsed;
-                    if (isAtStart && currentIndex > 0) {
-                        e.preventDefault();
-                        this.focusColumnEnd(cols[currentIndex - 1] as HTMLElement);
-                    }
-                }
-                break;
-            }
-            case 'ArrowDown': {
-                const sel = window.getSelection();
-                if (sel && sel.rangeCount > 0) {
-                    const range = sel.getRangeAt(0);
-                    const isAtEnd = this.isAtEndOfColumn(activeCol, range);
-                    if (isAtEnd && currentIndex < cols.length - 1) {
-                        e.preventDefault();
-                        this.focusColumnStart(cols[currentIndex + 1] as HTMLElement);
-                    }
-                }
-                break;
-            }
-            case 'Enter': {
-                e.preventDefault();
-                e.stopPropagation();
-
-                if (e.shiftKey) {
-                    this.insertLineBreak();
-                } else {
-                    this.insertNewParagraph();
-                }
-                break;
-            }
-        }
+        this.focusColumn(cols[nextIndex] as HTMLElement);
     }
 
     private getActiveColumn(): HTMLElement | null {
@@ -358,145 +299,5 @@ export class Layout {
             sel.removeAllRanges();
             sel.addRange(range);
         }
-    }
-
-    private focusColumnEnd(col: HTMLElement): void {
-        col.focus();
-        const range = document.createRange();
-        range.selectNodeContents(col);
-        range.collapse(false);
-        const sel = window.getSelection();
-        if (sel) {
-            sel.removeAllRanges();
-            sel.addRange(range);
-        }
-    }
-
-    private focusColumnStart(col: HTMLElement): void {
-        col.focus();
-        const range = document.createRange();
-        range.setStart(col, 0);
-        range.collapse(true);
-        const sel = window.getSelection();
-        if (sel) {
-            sel.removeAllRanges();
-            sel.addRange(range);
-        }
-    }
-
-    private isAtEndOfColumn(col: HTMLElement, range: Range): boolean {
-        const lastChild = col.lastChild;
-        if (!lastChild) return true;
-
-        const colLength = col.textContent?.length || 0;
-        return range.startOffset >= colLength - 1 || range.startContainer === lastChild;
-    }
-
-    private insertLineBreak(): void {
-        const sel = window.getSelection();
-        if (!sel || !sel.rangeCount) return;
-
-        const range = sel.getRangeAt(0);
-        range.deleteContents();
-
-        const br = document.createElement('br');
-        range.insertNode(br);
-
-        range.setStartAfter(br);
-        range.collapse(true);
-        sel.removeAllRanges();
-        sel.addRange(range);
-    }
-
-    private insertNewParagraph(): void {
-        const sel = window.getSelection();
-        if (!sel || !sel.rangeCount) return;
-
-        const range = sel.getRangeAt(0);
-
-        // Find the current block (closest <p> or the column itself)
-        let block: Node | null = range.commonAncestorContainer;
-        while (block && block.nodeType === Node.TEXT_NODE) {
-            block = block.parentNode;
-        }
-        while (block && block instanceof HTMLElement && block.tagName !== 'P' && block.tagName !== 'DIV') {
-            if (block.classList.contains('ql-layout-col')) break;
-            block = block.parentNode;
-        }
-
-        if (!block || !(block instanceof HTMLElement)) {
-            // Fallback: just insert a <br>
-            this.insertLineBreak();
-            return;
-        }
-
-        // Split text node at cursor if needed
-        if (range.startContainer.nodeType === Node.TEXT_NODE && range.startOffset > 0) {
-            const textNode = range.startContainer;
-            const splitText = textNode.splitText(range.startOffset);
-            range.setStart(splitText, 0);
-            range.collapse(true);
-        }
-
-        const newP = document.createElement('p');
-        const br = document.createElement('br');
-        newP.appendChild(br);
-
-        if (block.parentNode) {
-            block.parentNode.insertBefore(newP, block.nextSibling);
-        }
-
-        // Move cursor to new paragraph
-        const newRange = document.createRange();
-        newRange.setStart(newP, 0);
-        newRange.collapse(true);
-        sel.removeAllRanges();
-        sel.addRange(newRange);
-    }
-
-    private setupColumnSync(): void {
-        this.observers.forEach(obs => obs.disconnect());
-        this.observers = [];
-
-        const layouts = this.quill.root.querySelectorAll('.ql-layout');
-        layouts.forEach((layout) => {
-            const cols = layout.querySelectorAll('.ql-layout-col');
-            cols.forEach((col) => {
-                const observer = new MutationObserver(
-                    this.debounce(() => this.syncLayoutContent(), 100)
-                );
-                observer.observe(col, {
-                    childList: true,
-                    subtree: true,
-                    characterData: true,
-                });
-                this.observers.push(observer);
-            });
-        });
-    }
-
-    private debounce(fn: () => void, delay: number): () => void {
-        let timer: ReturnType<typeof setTimeout>;
-        return () => {
-            clearTimeout(timer);
-            timer = setTimeout(fn, delay);
-        };
-    }
-
-    private syncLayoutContent(): void {
-        const root = this.quill.root;
-        const container = root.closest('[data-controller]');
-        if (!container) return;
-
-        const input = container.querySelector('[data-ehyiah--ux-quill--quill-target="input"]') as HTMLInputElement | null;
-        if (!input) return;
-
-        input.value = root.innerHTML;
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-        input.dispatchEvent(new Event('change', { bubbles: true }));
-    }
-
-    refreshSync(): void {
-        this.setupColumnSync();
     }
 }

@@ -2,7 +2,7 @@
 
 **Auto-imported module:** `LayoutModule` (automatically loaded when this field is used) — see the [module documentation](/guide/modules/layout) for details.
 
-The `LayoutField` adds a multi-column layout button to the toolbar. Clicking it opens a preset picker where users can choose between column arrangements (50/50, 30/70, 70/30, 3 columns). Selecting a preset inserts a grid-based multi-column section at the cursor position.
+The `LayoutField` adds a multi-column layout button to the toolbar. Clicking it opens a preset picker where users can choose between column default arrangements (50/50, 30/70, 70/30, 3 columns). Selecting a preset inserts a grid-based multi-column section at the cursor position.
 
 **QuillJS name:** `layout`
 

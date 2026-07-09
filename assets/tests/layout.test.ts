@@ -12,7 +12,6 @@ describe('LayoutBlot', () => {
             const node = LayoutBlot.create(value);
 
             expect(node.classList.contains('ql-layout')).toBe(true);
-            expect(node.contentEditable).toBe('false');
             expect(node.style.display).toBe('grid');
             expect(node.style.gridTemplateColumns).toBe('1fr 1fr');
             expect(node.dataset.cols).toBe('2');
@@ -30,21 +29,6 @@ describe('LayoutBlot', () => {
             const cols = node.querySelectorAll('.ql-layout-col');
 
             expect(cols.length).toBe(3);
-        });
-
-        it('should set contenteditable on each column', () => {
-            const value = {
-                cols: 2,
-                ratios: ['1fr', '1fr'],
-                columns: ['<p>X</p>', '<p>Y</p>'],
-            };
-
-            const node = LayoutBlot.create(value);
-            const cols = node.querySelectorAll('.ql-layout-col');
-
-            cols.forEach((col) => {
-                expect((col as HTMLElement).contentEditable).toBe('true');
-            });
         });
 
         it('should fill empty columns with a default paragraph', () => {

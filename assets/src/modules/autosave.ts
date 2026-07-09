@@ -1,4 +1,5 @@
 import Quill from 'quill';
+import Delta from 'quill-delta';
 
 type AutosaveOptions = {
     interval: number;
@@ -43,34 +44,29 @@ export class Autosave {
         const savedData = localStorage.getItem(this.storageKey);
 
         if (savedData) {
-            try {
-                const savedDelta = JSON.parse(savedData);
-                const currentContents = this.quill.getContents();
+            // Migration: old delta format (JSON) — clear it
+            if (savedData.startsWith('{"ops":')) {
+                this.clear();
+            } else {
+                const currentHtml = this.quill.root.innerHTML;
 
-                // Compare Deltas instead of HTML
-                if (JSON.stringify(savedDelta) === JSON.stringify(currentContents)) {
+                if (savedData === currentHtml) {
                     this.clear();
                     return;
                 }
 
-                // Check if current editor is effectively empty
                 const currentText = this.quill.getText().trim();
-                const isCurrentEmpty = currentText === '' && currentContents.ops?.length <= 1;
+                const isCurrentEmpty = currentText === '';
 
                 if (this.options.restore_type === 'auto' && isCurrentEmpty) {
-                    this.restore(savedDelta);
+                    this.restore(savedData);
                 } else {
-                    this.showRestoreNotification(savedDelta);
+                    this.showRestoreNotification(savedData);
                 }
-            } catch (e) {
-                // If parsing fails, it's probably old HTML data, clear it
-                this.clear();
             }
         }
 
-        this.quill.on('text-change', (delta, oldDelta, source) => {
-            if (source !== 'user') return;
-
+        this.quill.on('text-change', () => {
             if (this.saveTimeout) clearTimeout(this.saveTimeout);
             this.saveTimeout = setTimeout(() => this.save(), this.options.interval);
         });
@@ -91,20 +87,22 @@ export class Autosave {
     }
 
     private save(): void {
-        const contents = this.quill.getContents();
+        const html = this.quill.root.innerHTML;
         const text = this.quill.getText().trim();
 
-        if (text === '' && contents.ops?.length <= 1) {
+        if (text === '') {
             this.clear();
             return;
         }
-        localStorage.setItem(this.storageKey, JSON.stringify(contents));
+        localStorage.setItem(this.storageKey, html);
     }
 
-    private restore(contents: any): void {
-        this.quill.setContents(contents, 'api');
-        // Important: tell Quill that content has changed to trigger Stimulus sync
-        this.quill.update();
+    private restore(html: string): void {
+        this.quill.setContents(new Delta(), 'silent');
+        this.quill.root.innerHTML = html;
+        this.quill.scroll.build();
+        this.quill.scroll.optimize();
+        this.quill.root.classList.toggle('ql-blank', this.quill.editor.isBlank());
     }
 
     private clear(): void {

@@ -68,41 +68,7 @@ $builder->add('content', QuillType::class, [
 
 ## Rendering layouts on the frontend
 
-Layout CSS is included in `quill-content.css`, which is loaded by `quill_content_styles()` by default:
-
-```twig
-{{ quill_content_styles() }}
-<twig:QuillContent value="{{ article.content }}" />
-```
-
-The CSS handles the grid layout and responsive stacking on mobile.
-
-> **Without the Twig component**: `quill_content_styles()` loads the CSS — you can keep using it. The missing piece is the `.ql-editor` wrapper that `<twig:QuillContent>` adds around the HTML. The built-in CSS targets `.ql-editor .ql-layout`, so without that wrapper the styles won't match.
->
-> Two options:
->
-> 1. **Keep using `quill_content_styles()`** and wrap your content in `<div class="ql-editor">{{ content|raw }}</div>` yourself.
->
-> 2. **Write your own CSS** without the `.ql-editor` prefix:
->
-> ```css
-> .ql-layout {
->     display: grid;
->     gap: 16px;
->     margin: 1em 0;
-> }
-> .ql-layout-col {
->     min-width: 0;
->     padding: 8px;
-> }
-> @media (max-width: 640px) {
->     .ql-layout {
->         grid-template-columns: 1fr !important;
->     }
-> }
-> ```
->
-> Column ratios are stored in the `data-ratios` attribute on `.ql-layout` (pipe-separated, e.g. `1fr|1fr`).
+See [dedicaded section to custom rendering](/guide/usage.html#explaining-the-css-layers)
 
 ## Behavior
 
