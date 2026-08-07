@@ -5,11 +5,15 @@ import { ToolbarCustomizer } from "./ui/toolbarCustomizer.js";
 import { handleUploadResponse, uploadStrategies } from "./upload-utils.js";
 import "./register-modules.js";
 import QuillTableBetter from 'quill-table-better';
-import ImageFigure from "./blots/imageFigure.js";
+import { Mention } from "./modules/mention.js";
 
 // Register custom ImageFigure blot to override default image
+import ImageFigure from "./blots/imageFigure.js";
 Quill.register(ImageFigure, true);
-import { Mention } from "./modules/mention.js";
+
+// Register custom VideoFigure blot to override default image
+import VideoFigure from "./blots/videoFigure.js";
+Quill.register('formats/video', VideoFigure, true);
 export default class _Class extends Controller {
   constructor() {
     super(...arguments);
@@ -40,12 +44,11 @@ export default class _Class extends Controller {
     document.querySelectorAll('[class*="table-better-menu"]').forEach(el => el.remove());
   }
   buildQuillOptions() {
-    const {
-      debug,
-      placeholder,
-      theme,
-      style
-    } = this.extraOptionsValue;
+    const _this$extraOptionsVal = this.extraOptionsValue,
+      debug = _this$extraOptionsVal.debug,
+      placeholder = _this$extraOptionsVal.placeholder,
+      theme = _this$extraOptionsVal.theme,
+      style = _this$extraOptionsVal.style;
     const readOnly = this.extraOptionsValue.read_only;
     const enabledModules = {
       'toolbar': this.toolbarOptionsValue
@@ -120,8 +123,8 @@ export default class _Class extends Controller {
     quill.updateContents(initialData);
     this.dispatchEvent('hydrate:after', quill);
     quill.on('text-change', () => {
-      var _this$extraOptionsVal;
-      const quillContent = (_this$extraOptionsVal = this.extraOptionsValue) != null && _this$extraOptionsVal.use_semantic_html ? quill.getSemanticHTML() : quill.root.innerHTML;
+      var _this$extraOptionsVal2;
+      const quillContent = (_this$extraOptionsVal2 = this.extraOptionsValue) != null && _this$extraOptionsVal2.use_semantic_html ? quill.getSemanticHTML() : quill.root.innerHTML;
       const inputContent = this.inputTarget;
       inputContent.value = quillContent;
       this.bubbles(inputContent);

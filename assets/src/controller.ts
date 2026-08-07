@@ -8,11 +8,15 @@ import { handleUploadResponse, uploadStrategies } from './upload-utils.ts';
 
 import './register-modules.ts';
 import QuillTableBetter from 'quill-table-better';
-import ImageFigure from './blots/imageFigure.ts';
+import {Mention} from './modules/mention.ts';
 
 // Register custom ImageFigure blot to override default image
+import ImageFigure from './blots/imageFigure.ts';
 Quill.register(ImageFigure, true);
-import {Mention} from './modules/mention.ts';
+
+// Register custom VideoFigure blot to override default image
+import VideoFigure from './blots/videoFigure.ts';
+Quill.register('formats/video', VideoFigure, true);
 
 interface DOMNode extends HTMLElement {
     getAttribute(name: string): string | null;
