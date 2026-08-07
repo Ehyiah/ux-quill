@@ -2,7 +2,7 @@ import Quill from 'quill';
 const BlockEmbed = Quill.import('blots/block/embed');
 class MapBlot extends BlockEmbed {
   static create(value) {
-    var _value$lat, _value$lng, _value$zoom, _value$provider, _value$height;
+    var _value$lat, _value$lng, _value$zoom, _value$provider, _value$height, _value$width;
     const node = super.create();
     node.setAttribute('contenteditable', 'false');
     const lat = (_value$lat = value == null ? void 0 : value.lat) != null ? _value$lat : 48.8566;
@@ -25,7 +25,7 @@ class MapBlot extends BlockEmbed {
       node.setAttribute('data-tile-url', value.tileUrl);
     }
     node.style.height = height;
-    node.style.width = '100%';
+    node.style.width = (_value$width = value == null ? void 0 : value.width) != null ? _value$width : '100%';
     node.style.borderRadius = '4px';
     node.style.overflow = 'hidden';
     node.style.position = 'relative';
@@ -51,9 +51,58 @@ class MapBlot extends BlockEmbed {
       googleApiKey: node.getAttribute('data-google-api-key') || null,
       tileUrl: node.getAttribute('data-tile-url') || null,
       height: node.style.height || '300px',
+      width: node.style.width || '100%',
       scrollWheelZoom: node.getAttribute('data-scroll-wheel-zoom') !== 'false',
       draggable: node.getAttribute('data-draggable') !== 'false'
     };
+  }
+  static formats(node) {
+    const formats = {};
+    const style = node.getAttribute('style');
+    if (style) {
+      formats.style = style;
+    }
+    const align = node.getAttribute('align');
+    if (align) {
+      formats.align = align;
+    }
+    if (node.style.width) {
+      formats.width = node.style.width;
+    }
+    return formats;
+  }
+  format(name, value) {
+    if (name === 'align') {
+      if (value === 'right') {
+        this.domNode.style.float = 'right';
+        this.domNode.style.margin = '';
+        this.domNode.setAttribute('align', 'right');
+      } else if (value === 'center') {
+        this.domNode.style.float = 'none';
+        this.domNode.style.margin = '0 auto';
+        this.domNode.setAttribute('align', 'center');
+      } else if (value === 'leftBlock') {
+        this.domNode.style.float = 'left';
+        this.domNode.style.margin = '0 10px 10px 0';
+        this.domNode.setAttribute('align', 'left');
+      } else {
+        this.domNode.style.float = 'none';
+        this.domNode.style.margin = '';
+        this.domNode.setAttribute('align', 'left');
+      }
+    } else if (name === 'style') {
+      this.domNode.setAttribute('style', value);
+      this.domNode.style.position = 'relative';
+      this.domNode.style.overflow = 'hidden';
+    } else if (name === 'width') {
+      if (value) {
+        this.domNode.style.width = value;
+      } else {
+        this.domNode.style.width = '100%';
+      }
+    } else {
+      super.format(name, value);
+    }
   }
 }
 MapBlot.blotName = 'map';

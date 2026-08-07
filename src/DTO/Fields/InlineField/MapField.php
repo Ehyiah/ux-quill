@@ -5,6 +5,7 @@ namespace Ehyiah\QuillJsBundle\DTO\Fields\InlineField;
 use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillFieldModuleInterface;
 use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillInlineFieldInterface;
 use Ehyiah\QuillJsBundle\DTO\Modules\MapModule;
+use Ehyiah\QuillJsBundle\DTO\Modules\MapSelectionModule;
 
 final class MapField implements QuillInlineFieldInterface, QuillFieldModuleInterface
 {
@@ -15,6 +16,6 @@ final class MapField implements QuillInlineFieldInterface, QuillFieldModuleInter
 
     public static function importModules(): array
     {
-        return [MapModule::class];
+        return [MapModule::class, MapSelectionModule::class];
     }
 }

@@ -1,7 +1,12 @@
 import { injectLeafletStyles } from "./map-utils.js";
 export default class MapModal {
-  constructor(module) {
+  constructor(module, options) {
+    var _options$lat, _options$lng;
+    if (options === void 0) {
+      options = {};
+    }
     this.module = void 0;
+    this.options = void 0;
     this.container = null;
     this.map = null;
     this.marker = null;
@@ -15,9 +20,10 @@ export default class MapModal {
       }
     };
     this.module = module;
+    this.options = options;
     const center = module.getMapOptions().center || [48.8566, 2.3522];
-    this.selectedLat = center[0];
-    this.selectedLng = center[1];
+    this.selectedLat = (_options$lat = options.lat) != null ? _options$lat : center[0];
+    this.selectedLng = (_options$lng = options.lng) != null ? _options$lng : center[1];
   }
   async open() {
     this.injectStyles();
@@ -48,16 +54,21 @@ export default class MapModal {
     document.head.appendChild(style);
   }
   renderModal() {
+    var _this$options$title, _this$options$confirm;
     this.container = document.createElement('div');
     this.container.className = 'quill-map-modal';
-    this.container.innerHTML = "\n            <div class=\"quill-map-window\">\n                <div class=\"quill-map-header\">\n                    <h3>Choose map location</h3>\n                    <button class=\"quill-map-close\" title=\"Close\" aria-label=\"Close\">\n                        <svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n                            <line x1=\"18\" y1=\"6\" x2=\"6\" y2=\"18\"></line>\n                            <line x1=\"6\" y1=\"6\" x2=\"18\" y2=\"18\"></line>\n                        </svg>\n                    </button>\n                </div>\n                <div class=\"quill-map-search\">\n                    <input type=\"text\" class=\"quill-map-search-input\" placeholder=\"Search for a location...\" />\n                    <div class=\"quill-map-search-results\" style=\"display:none\"></div>\n                </div>\n                <div class=\"quill-map-preview\" id=\"quill-map-preview\"></div>\n                <div class=\"quill-map-footer\">\n                    <span class=\"quill-map-coords\">" + this.selectedLat.toFixed(5) + ", " + this.selectedLng.toFixed(5) + "</span>\n                    <button class=\"quill-map-confirm\">Insert Map</button>\n                </div>\n            </div>\n        ";
+    this.container.innerHTML = "\n            <div class=\"quill-map-window\">\n                <div class=\"quill-map-header\">\n                    <h3>" + ((_this$options$title = this.options.title) != null ? _this$options$title : 'Choose map location') + "</h3>\n                    <button class=\"quill-map-close\" title=\"Close\" aria-label=\"Close\">\n                        <svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n                            <line x1=\"18\" y1=\"6\" x2=\"6\" y2=\"18\"></line>\n                            <line x1=\"6\" y1=\"6\" x2=\"18\" y2=\"18\"></line>\n                        </svg>\n                    </button>\n                </div>\n                <div class=\"quill-map-search\">\n                    <input type=\"text\" class=\"quill-map-search-input\" placeholder=\"Search for a location...\" />\n                    <div class=\"quill-map-search-results\" style=\"display:none\"></div>\n                </div>\n                <div class=\"quill-map-preview\" id=\"quill-map-preview\"></div>\n                <div class=\"quill-map-footer\">\n                    <span class=\"quill-map-coords\">" + this.selectedLat.toFixed(5) + ", " + this.selectedLng.toFixed(5) + "</span>\n                    <button class=\"quill-map-confirm\">" + ((_this$options$confirm = this.options.confirmLabel) != null ? _this$options$confirm : 'Insert Map') + "</button>\n                </div>\n            </div>\n        ";
     document.body.appendChild(this.container);
     this.container.querySelector('.quill-map-close').addEventListener('click', () => this.close());
     this.container.addEventListener('click', e => {
       if (e.target === this.container) this.close();
     });
     this.container.querySelector('.quill-map-confirm').addEventListener('click', () => {
-      this.module.insertMap(this.selectedLat, this.selectedLng);
+      if (this.options.onConfirm) {
+        this.options.onConfirm(this.selectedLat, this.selectedLng);
+      } else {
+        this.module.insertMap(this.selectedLat, this.selectedLng);
+      }
       this.close();
     });
     const searchInput = this.container.querySelector('.quill-map-search-input');

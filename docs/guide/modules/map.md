@@ -85,6 +85,18 @@ new MapModule(options: [
 - **Click outside the map** to deactivate it (prevents accidental interaction while editing text)
 - **Drag the marker** to adjust the position — the coordinates are saved automatically
 
+### Map selection toolbar
+
+Selecting an inserted map shows a floating toolbar (provided by the `mapSelection` module, enabled by default when a `MapField` is present):
+
+- **¶+ / +¶** — insert an empty paragraph before or after the map
+- **Size (25% / 50% / 75% / 100% + custom)** — set the map width (like the image/video module)
+- **Align left / center / right** — aligns the map within the content, like the image module
+- **Edit location** — re-opens the location picker pre-filled with the map's current position
+- **Delete** — removes the map from the editor
+
+> **Note:** alignment has a visible effect only when the map width is below 100%.
+
 ## CSS Customization
 
 The map container uses the class `.ql-map`. You can customize it with CSS:

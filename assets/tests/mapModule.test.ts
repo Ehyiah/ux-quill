@@ -10,6 +10,7 @@ jest.mock('quill', () => {
         insertEmbed: jest.fn(),
         insertText: jest.fn(),
         setSelection: jest.fn(),
+        update: jest.fn(),
         on: jest.fn(),
     };
 
@@ -50,6 +51,11 @@ jest.mock('../src/modules/map-modal.ts', () => {
         })),
     };
 });
+
+jest.mock('../src/modules/map-utils.ts', () => ({
+    loadScript: jest.fn().mockResolvedValue(undefined),
+    injectLeafletStyles: jest.fn().mockResolvedValue(undefined),
+}));
 
 import { MapModule } from '../src/modules/mapModule';
 
@@ -216,9 +222,221 @@ describe('MapModule', () => {
                 googleApiKey: null,
                 tileUrl: null,
                 height: '300px',
+                width: '100%',
                 scrollWheelZoom: true,
                 draggable: true,
             });
+        });
+
+        it('should read align and style formats from DOM node', async () => {
+            const { default: MapBlot } = await import('../src/blots/map');
+            const node = document.createElement('div');
+            node.setAttribute('align', 'center');
+            node.setAttribute('style', 'float: none; margin: 0 auto;');
+
+            expect(MapBlot.formats(node)).toEqual({
+                style: 'float: none; margin: 0 auto;',
+                align: 'center',
+            });
+        });
+
+        it('should apply align format to the node', async () => {
+            const { default: MapBlot } = await import('../src/blots/map');
+            const node = MapBlot.create({ lat: 1, lng: 2 });
+
+            MapBlot.prototype.format.call({ domNode: node }, 'align', 'center');
+
+            expect(node.getAttribute('align')).toBe('center');
+            expect(node.style.float).toBe('none');
+            expect(node.style.margin).toBe('0px auto');
+        });
+
+        it('should apply float align format and keep layout styles on style format', async () => {
+            const { default: MapBlot } = await import('../src/blots/map');
+            const node = MapBlot.create({ lat: 1, lng: 2 });
+
+            MapBlot.prototype.format.call({ domNode: node }, 'align', 'leftBlock');
+            expect(node.getAttribute('align')).toBe('left');
+            expect(node.style.float).toBe('left');
+
+            MapBlot.prototype.format.call({ domNode: node }, 'style', 'float: right;');
+            expect(node.style.float).toBe('right');
+            expect(node.style.position).toBe('relative');
+            expect(node.style.overflow).toBe('hidden');
+        });
+
+        it('should apply width format to the node', async () => {
+            const { default: MapBlot } = await import('../src/blots/map');
+            const node = MapBlot.create({ lat: 1, lng: 2 });
+
+            MapBlot.prototype.format.call({ domNode: node }, 'width', '50%');
+            expect(node.style.width).toBe('50%');
+
+            MapBlot.prototype.format.call({ domNode: node }, 'width', '320px');
+            expect(node.style.width).toBe('320px');
+        });
+
+        it('should expose width format', async () => {
+            const { default: MapBlot } = await import('../src/blots/map');
+            const node = MapBlot.create({ lat: 1, lng: 2 });
+            node.style.width = '75%';
+
+            expect(MapBlot.formats(node)).toEqual(expect.objectContaining({ width: '75%' }));
+        });
+    });
+
+    describe('editMapLocation', () => {
+        it('should open the modal pre-filled with the map location', () => {
+            const module = new MapModule(mockQuill, {});
+            const container = document.createElement('div');
+            container.setAttribute('data-lat', '48.8584');
+            container.setAttribute('data-lng', '2.2945');
+            container.setAttribute('data-zoom', '13');
+            container.setAttribute('data-provider', 'osm');
+
+            const MapModalMock = require('../src/modules/map-modal.ts').default;
+
+            module.editMapLocation(container);
+
+            expect(MapModalMock).toHaveBeenCalledWith(
+                module,
+                expect.objectContaining({
+                    lat: 48.8584,
+                    lng: 2.2945,
+                    title: 'Edit map location',
+                    confirmLabel: 'Update Map',
+                    onConfirm: expect.any(Function),
+                })
+            );
+        });
+
+        it('should update the container when the confirm callback runs', () => {
+            const module = new MapModule(mockQuill, {});
+            const container = document.createElement('div');
+            container.setAttribute('data-lat', '48.8584');
+            container.setAttribute('data-lng', '2.2945');
+            container.setAttribute('data-zoom', '13');
+            container.setAttribute('data-provider', 'osm');
+
+            const MapModalMock = require('../src/modules/map-modal.ts').default;
+            let onConfirm: ((lat: number, lng: number) => void) | null = null;
+            (MapModalMock as jest.Mock).mockImplementation((_module, options) => {
+                onConfirm = options.onConfirm;
+                return { open: jest.fn() };
+            });
+
+            module.editMapLocation(container);
+            onConfirm?.(48.8584, 2.2945);
+
+            expect(container.getAttribute('data-lat')).toBe('48.8584');
+            expect(container.getAttribute('data-lng')).toBe('2.2945');
+            expect(mockQuill.update).toHaveBeenCalledWith('api');
+        });
+    });
+
+    describe('updateMapLocation', () => {
+        it('should update data attributes and persist via quill.update', () => {
+            const module = new MapModule(mockQuill, {});
+            const container = document.createElement('div');
+
+            module.updateMapLocation(container, 10.5, -20.25);
+
+            expect(container.getAttribute('data-lat')).toBe('10.5');
+            expect(container.getAttribute('data-lng')).toBe('-20.25');
+            expect(mockQuill.update).toHaveBeenCalledWith('api');
+        });
+
+        it('should move the live leaflet marker when an instance exists', async () => {
+            const module = new MapModule(mockQuill, {});
+            const container = document.createElement('div');
+
+            const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+            await (module as any).initOsmMap(container, {
+                lat: 1,
+                lng: 2,
+                zoom: 13,
+                provider: 'osm',
+                googleApiKey: null,
+                tileUrl: null,
+                height: '300px',
+                scrollWheelZoom: true,
+                draggable: true,
+            });
+
+            expect(errorSpy).not.toHaveBeenCalled();
+            errorSpy.mockRestore();
+
+            const L = await import('leaflet');
+            expect(typeof (L as any).map).toBe('function');
+
+            module.updateMapLocation(container, 5, 6);
+            expect((L as any).map().setView).toHaveBeenCalledWith([5, 6]);
+            expect((L as any).marker().setLatLng).toHaveBeenCalledWith([5, 6]);
+            expect(container.getAttribute('data-lat')).toBe('5');
+        });
+    });
+
+    describe('setupContainerInteraction', () => {
+        const rect = {
+            left: 0,
+            top: 0,
+            right: 100,
+            bottom: 100,
+            width: 100,
+            height: 100,
+            x: 0,
+            y: 0,
+            toJSON: () => ({}),
+        } as DOMRect;
+
+        it('should activate the map and prevent default when clicking inside', () => {
+            const module = new MapModule(mockQuill, {});
+            const container = document.createElement('div');
+            container.getBoundingClientRect = () => rect;
+            const mapDiv = document.createElement('div');
+            const map = { invalidateSize: jest.fn() };
+            document.body.appendChild(container);
+
+            (module as any).setupContainerInteraction(container, mapDiv, map, 'leaflet');
+
+            const event = new MouseEvent('mousedown', {
+                clientX: 50,
+                clientY: 50,
+                bubbles: true,
+                cancelable: true,
+            });
+            const preventDefault = jest.spyOn(event, 'preventDefault');
+            document.dispatchEvent(event);
+
+            expect(preventDefault).toHaveBeenCalled();
+            expect(container.style.pointerEvents).toBe('auto');
+            expect(mapDiv.style.pointerEvents).toBe('auto');
+            expect(map.invalidateSize).toHaveBeenCalled();
+
+            document.body.removeChild(container);
+        });
+
+        it('should deactivate the map when clicking outside', () => {
+            const module = new MapModule(mockQuill, {});
+            const container = document.createElement('div');
+            container.getBoundingClientRect = () => rect;
+            const mapDiv = document.createElement('div');
+            document.body.appendChild(container);
+
+            (module as any).setupContainerInteraction(container, mapDiv, {}, 'leaflet');
+
+            const event = new MouseEvent('mousedown', {
+                clientX: 200,
+                clientY: 200,
+                bubbles: true,
+                cancelable: true,
+            });
+            document.dispatchEvent(event);
+
+            expect(container.style.pointerEvents).toBe('none');
+            expect(mapDiv.style.pointerEvents).toBe('none');
+
+            document.body.removeChild(container);
         });
     });
 });

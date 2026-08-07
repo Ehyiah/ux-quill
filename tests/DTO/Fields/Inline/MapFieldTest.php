@@ -4,6 +4,7 @@ namespace Ehyiah\QuillJsBundle\Tests\DTO\Fields\Inline;
 
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\MapField;
 use Ehyiah\QuillJsBundle\DTO\Modules\MapModule;
+use Ehyiah\QuillJsBundle\DTO\Modules\MapSelectionModule;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -19,6 +20,6 @@ final class MapFieldTest extends TestCase
     {
         $field = new MapField();
         $this->assertEquals('map', $field->getOption());
-        $this->assertEquals([MapModule::class], MapField::importModules());
+        $this->assertEquals([MapModule::class, MapSelectionModule::class], MapField::importModules());
     }
 }

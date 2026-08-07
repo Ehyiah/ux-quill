@@ -35,7 +35,7 @@ class MapBlot extends BlockEmbed {
         }
 
         node.style.height = height;
-        node.style.width = '100%';
+        node.style.width = value?.width ?? '100%';
         node.style.borderRadius = '4px';
         node.style.overflow = 'hidden';
         node.style.position = 'relative';
@@ -64,9 +64,60 @@ class MapBlot extends BlockEmbed {
             googleApiKey: node.getAttribute('data-google-api-key') || null,
             tileUrl: node.getAttribute('data-tile-url') || null,
             height: node.style.height || '300px',
+            width: node.style.width || '100%',
             scrollWheelZoom: node.getAttribute('data-scroll-wheel-zoom') !== 'false',
             draggable: node.getAttribute('data-draggable') !== 'false',
         };
+    }
+
+    static formats(node: HTMLElement) {
+        const formats: Record<string, any> = {};
+        const style = node.getAttribute('style');
+        if (style) {
+            formats.style = style;
+        }
+        const align = node.getAttribute('align');
+        if (align) {
+            formats.align = align;
+        }
+        if (node.style.width) {
+            formats.width = node.style.width;
+        }
+        return formats;
+    }
+
+    format(name: string, value: any) {
+        if (name === 'align') {
+            if (value === 'right') {
+                this.domNode.style.float = 'right';
+                this.domNode.style.margin = '';
+                this.domNode.setAttribute('align', 'right');
+            } else if (value === 'center') {
+                this.domNode.style.float = 'none';
+                this.domNode.style.margin = '0 auto';
+                this.domNode.setAttribute('align', 'center');
+            } else if (value === 'leftBlock') {
+                this.domNode.style.float = 'left';
+                this.domNode.style.margin = '0 10px 10px 0';
+                this.domNode.setAttribute('align', 'left');
+            } else {
+                this.domNode.style.float = 'none';
+                this.domNode.style.margin = '';
+                this.domNode.setAttribute('align', 'left');
+            }
+        } else if (name === 'style') {
+            this.domNode.setAttribute('style', value);
+            this.domNode.style.position = 'relative';
+            this.domNode.style.overflow = 'hidden';
+        } else if (name === 'width') {
+            if (value) {
+                this.domNode.style.width = value;
+            } else {
+                this.domNode.style.width = '100%';
+            }
+        } else {
+            super.format(name, value);
+        }
     }
 }
 

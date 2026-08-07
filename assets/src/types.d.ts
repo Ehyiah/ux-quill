@@ -99,6 +99,7 @@ export type MapValue = {
     googleApiKey?: string | null;
     tileUrl?: string | null;
     height?: string;
+    width?: string;
     scrollWheelZoom?: boolean;
     draggable?: boolean;
 };

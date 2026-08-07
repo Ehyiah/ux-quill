@@ -70,6 +70,38 @@ export class MapModule {
         this.quill.setSelection(range.index + 2, 'api');
     }
 
+    public editMapLocation(container: HTMLElement): void {
+        const value = MapBlot.value(container);
+        const modal = new MapModal(this, {
+            lat: value.lat,
+            lng: value.lng,
+            title: 'Edit map location',
+            confirmLabel: 'Update Map',
+            onConfirm: (lat, lng) => {
+                this.updateMapLocation(container, lat, lng);
+            },
+        });
+        modal.open();
+    }
+
+    public updateMapLocation(container: HTMLElement, lat: number, lng: number): void {
+        container.setAttribute('data-lat', String(lat));
+        container.setAttribute('data-lng', String(lng));
+
+        const instance = MAPS_INSTANCES.get(container);
+        if (instance) {
+            if (instance.library === 'leaflet') {
+                instance.map.setView([lat, lng]);
+                instance.marker.setLatLng([lat, lng]);
+            } else if (instance.library === 'google') {
+                instance.map.setCenter({ lat, lng });
+                instance.marker.setPosition({ lat, lng });
+            }
+        }
+
+        this.quill.update('api');
+    }
+
     private observeEditor(): void {
         const editor = this.quill.root;
         this.observer = new MutationObserver((mutations) => {
@@ -146,6 +178,7 @@ export class MapModule {
                     const pos = marker.getLatLng();
                     container.setAttribute('data-lat', String(pos.lat));
                     container.setAttribute('data-lng', String(pos.lng));
+                    this.quill.update('api');
                 });
             }
 
@@ -193,6 +226,7 @@ export class MapModule {
                     const pos = marker.getPosition();
                     container.setAttribute('data-lat', String(pos.lat()));
                     container.setAttribute('data-lng', String(pos.lng()));
+                    this.quill.update('api');
                 });
             }
 
@@ -226,21 +260,34 @@ export class MapModule {
             mapDiv.style.pointerEvents = 'none';
         };
 
-        container.addEventListener('mousedown', activate);
-        container.addEventListener('touchstart', activate);
+        const handlePointerDown = (e: MouseEvent | TouchEvent) => {
+            const clientX = e instanceof MouseEvent ? e.clientX : e.touches[0]?.clientX;
+            const clientY = e instanceof MouseEvent ? e.clientY : e.touches[0]?.clientY;
+            if (clientX === undefined || clientY === undefined) return;
 
-        const handleOutsideClick = (e: MouseEvent) => {
-            if (!container.contains(e.target as Node)) {
+            const rect = container.getBoundingClientRect();
+            const isInside =
+                clientX >= rect.left &&
+                clientX <= rect.right &&
+                clientY >= rect.top &&
+                clientY <= rect.bottom;
+
+            if (isInside) {
+                e.preventDefault();
+                activate();
+            } else {
                 deactivate();
             }
         };
 
-        document.addEventListener('mousedown', handleOutsideClick);
+        document.addEventListener('mousedown', handlePointerDown);
+        document.addEventListener('touchstart', handlePointerDown, { passive: false });
 
         const instance = MAPS_INSTANCES.get(container);
         if (instance) {
             instance.cleanup = () => {
-                document.removeEventListener('mousedown', handleOutsideClick);
+                document.removeEventListener('mousedown', handlePointerDown);
+                document.removeEventListener('touchstart', handlePointerDown);
             };
         }
 

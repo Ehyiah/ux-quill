@@ -17,6 +17,8 @@ import ReadingTime from "./modules/readtimeModule.js";
 Quill.register('modules/readingTime', ReadingTime);
 import ImageSelection from "./modules/imageSelection.js";
 Quill.register('modules/imageSelection', ImageSelection);
+import MapSelection from "./modules/mapSelection.js";
+Quill.register('modules/mapSelection', MapSelection);
 import NodeMover from "./modules/nodeMover.js";
 Quill.register('modules/nodeMover', NodeMover);
 import { Divider } from "./modules/divider.js";

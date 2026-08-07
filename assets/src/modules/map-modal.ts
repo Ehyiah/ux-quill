@@ -7,8 +7,17 @@ type NominatimResult = {
     display_name: string;
 };
 
+export type MapModalOptions = {
+    lat?: number;
+    lng?: number;
+    title?: string;
+    confirmLabel?: string;
+    onConfirm?: (lat: number, lng: number) => void;
+};
+
 export default class MapModal {
     private module: MapModule;
+    private options: MapModalOptions;
     private container: HTMLDivElement | null = null;
     private map: any = null;
     private marker: any = null;
@@ -16,11 +25,12 @@ export default class MapModal {
     private selectedLng: number;
     private searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
-    constructor(module: MapModule) {
+    constructor(module: MapModule, options: MapModalOptions = {}) {
         this.module = module;
+        this.options = options;
         const center = module.getMapOptions().center || [48.8566, 2.3522];
-        this.selectedLat = center[0];
-        this.selectedLng = center[1];
+        this.selectedLat = options.lat ?? center[0];
+        this.selectedLng = options.lng ?? center[1];
     }
 
     async open(): Promise<void> {
@@ -79,7 +89,7 @@ export default class MapModal {
         this.container.innerHTML = `
             <div class="quill-map-window">
                 <div class="quill-map-header">
-                    <h3>Choose map location</h3>
+                    <h3>${this.options.title ?? 'Choose map location'}</h3>
                     <button class="quill-map-close" title="Close" aria-label="Close">
                         <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -94,7 +104,7 @@ export default class MapModal {
                 <div class="quill-map-preview" id="quill-map-preview"></div>
                 <div class="quill-map-footer">
                     <span class="quill-map-coords">${this.selectedLat.toFixed(5)}, ${this.selectedLng.toFixed(5)}</span>
-                    <button class="quill-map-confirm">Insert Map</button>
+                    <button class="quill-map-confirm">${this.options.confirmLabel ?? 'Insert Map'}</button>
                 </div>
             </div>
         `;
@@ -107,7 +117,11 @@ export default class MapModal {
         });
 
         this.container.querySelector('.quill-map-confirm')!.addEventListener('click', () => {
-            this.module.insertMap(this.selectedLat, this.selectedLng);
+            if (this.options.onConfirm) {
+                this.options.onConfirm(this.selectedLat, this.selectedLng);
+            } else {
+                this.module.insertMap(this.selectedLat, this.selectedLng);
+            }
             this.close();
         });
 

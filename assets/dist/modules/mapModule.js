@@ -56,6 +56,40 @@ export class MapModule {
     this.quill.insertText(range.index + 1, '\n', 'api');
     this.quill.setSelection(range.index + 2, 'api');
   }
+  editMapLocation(container) {
+    const value = MapBlot.value(container);
+    const modal = new MapModal(this, {
+      lat: value.lat,
+      lng: value.lng,
+      title: 'Edit map location',
+      confirmLabel: 'Update Map',
+      onConfirm: (lat, lng) => {
+        this.updateMapLocation(container, lat, lng);
+      }
+    });
+    modal.open();
+  }
+  updateMapLocation(container, lat, lng) {
+    container.setAttribute('data-lat', String(lat));
+    container.setAttribute('data-lng', String(lng));
+    const instance = MAPS_INSTANCES.get(container);
+    if (instance) {
+      if (instance.library === 'leaflet') {
+        instance.map.setView([lat, lng]);
+        instance.marker.setLatLng([lat, lng]);
+      } else if (instance.library === 'google') {
+        instance.map.setCenter({
+          lat,
+          lng
+        });
+        instance.marker.setPosition({
+          lat,
+          lng
+        });
+      }
+    }
+    this.quill.update('api');
+  }
   observeEditor() {
     const editor = this.quill.root;
     this.observer = new MutationObserver(mutations => {
@@ -124,6 +158,7 @@ export class MapModule {
           const pos = marker.getLatLng();
           container.setAttribute('data-lat', String(pos.lat));
           container.setAttribute('data-lng', String(pos.lng));
+          this.quill.update('api');
         });
       }
       MAPS_INSTANCES.set(container, {
@@ -170,6 +205,7 @@ export class MapModule {
           const pos = marker.getPosition();
           container.setAttribute('data-lat', String(pos.lat()));
           container.setAttribute('data-lng', String(pos.lng()));
+          this.quill.update('api');
         });
       }
       MAPS_INSTANCES.set(container, {
@@ -197,18 +233,29 @@ export class MapModule {
       container.style.pointerEvents = 'none';
       mapDiv.style.pointerEvents = 'none';
     };
-    container.addEventListener('mousedown', activate);
-    container.addEventListener('touchstart', activate);
-    const handleOutsideClick = e => {
-      if (!container.contains(e.target)) {
+    const handlePointerDown = e => {
+      var _e$touches$, _e$touches$2;
+      const clientX = e instanceof MouseEvent ? e.clientX : (_e$touches$ = e.touches[0]) == null ? void 0 : _e$touches$.clientX;
+      const clientY = e instanceof MouseEvent ? e.clientY : (_e$touches$2 = e.touches[0]) == null ? void 0 : _e$touches$2.clientY;
+      if (clientX === undefined || clientY === undefined) return;
+      const rect = container.getBoundingClientRect();
+      const isInside = clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom;
+      if (isInside) {
+        e.preventDefault();
+        activate();
+      } else {
         deactivate();
       }
     };
-    document.addEventListener('mousedown', handleOutsideClick);
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('touchstart', handlePointerDown, {
+      passive: false
+    });
     const instance = MAPS_INSTANCES.get(container);
     if (instance) {
       instance.cleanup = () => {
-        document.removeEventListener('mousedown', handleOutsideClick);
+        document.removeEventListener('mousedown', handlePointerDown);
+        document.removeEventListener('touchstart', handlePointerDown);
       };
     }
     deactivate();
