@@ -1,4 +1,8 @@
 import { defineConfig } from 'vitepress'
+import { fileURLToPath } from 'url'
+import path from 'path'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
   title: "Symfony UX Quill",
@@ -8,6 +12,9 @@ export default defineConfig({
   vite: {
     resolve: {
       dedupe: ['quill'],
+      alias: {
+        '@wllama/wllama': path.resolve(__dirname, '../node_modules/@wllama/wllama/esm/index.js'),
+      },
     },
   },
   themeConfig: {
@@ -86,6 +93,7 @@ export default defineConfig({
                   { text: 'SmartLinks', link: '/guide/modules/smart-links' },
                   { text: 'Grid Borders', link: '/guide/modules/grid-borders' },
                   { text: 'Speech To Text', link: '/guide/modules/stt' },
+                  { text: 'AI Assistant', link: '/guide/modules/ai-assistant' },
                   { text: 'Other Modules', link: '/guide/modules/others' }
                 ]
               },

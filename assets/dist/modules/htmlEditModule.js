@@ -50,8 +50,8 @@ function outputHTMLParser(inputHtmlFromQuillPopup) {
   return compose([convertMultipleSpacesToSingle, fixTagSpaceOpenTag, fixTagSpaceCloseTag, removeWhitespaceBetweenTags, preserveNewlinesBr, preserveNewlinesPTags], inputHtmlFromQuillPopup);
 }
 function formatHTMLStringIndentation(code) {
-  let stripWhiteSpaces = true;
-  let stripEmptyLines = true;
+  const stripWhiteSpaces = true;
+  const stripEmptyLines = true;
   const whitespace = '  ';
   let currentIndent = 0;
   const newlineChar = '\n';

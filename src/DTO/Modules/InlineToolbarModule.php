@@ -9,9 +9,12 @@ final class InlineToolbarModule implements ModuleInterface
 {
     public const NAME = 'inlineToolbar';
 
+    public const AUTO_ADD_AI_ASSISTANT_BUTTON_OPTION = 'autoAddAiAssistantButton';
+
     /**
      * @param array{
      *     buttons?: string[],
+     *     autoAddAiAssistantButton?: bool,
      * } $options
      */
     public function __construct(
@@ -20,6 +23,7 @@ final class InlineToolbarModule implements ModuleInterface
     ) {
         $this->options = array_merge([
             'buttons' => ['bold', 'italic', 'underline', 'strike'],
+            self::AUTO_ADD_AI_ASSISTANT_BUTTON_OPTION => true,
         ], $this->options);
     }
 }

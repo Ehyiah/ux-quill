@@ -15,6 +15,10 @@ const BUTTON_CONFIG = {
   strike: {
     icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4H9a3 3 0 0 0-2.83 2"></path><path d="M14 12H4"></path><path d="M7 12h10a3 3 0 0 1 0 6H9a3 3 0 0 1-2.83-2"></path><path d="M14 20h7"></path></svg>',
     title: 'Strikethrough'
+  },
+  aiAssistant: {
+    icon: '<svg width="14" height="14" viewBox="0 0 18 18"><path d="M9 2 L11 7 L16 7 L12 10.5 L13.5 16 L9 12.5 L4.5 16 L6 10.5 L2 7 L7 7 Z" fill="currentColor"/></svg>',
+    title: 'AI Assistant'
   }
 };
 export default class InlineToolbar {
@@ -110,16 +114,28 @@ export default class InlineToolbar {
       btn.innerHTML = f.icon;
       btn.title = f.title;
       btn.type = 'button';
-      btn.onmousedown = e => {
-        e.preventDefault();
-        e.stopPropagation();
-        const range = this.lastRange || this.quill.getSelection();
-        if (!range) return;
-        const current = this.quill.getFormat(range);
-        this.quill.format(f.name, !current[f.name]);
-        this.updateButtonStates();
-      };
-      btn.dataset.format = f.name;
+      if (f.name === 'aiAssistant') {
+        btn.onmousedown = e => {
+          e.preventDefault();
+          e.stopPropagation();
+          const aiAssistant = this.quill.getModule('aiAssistant');
+          if (aiAssistant) {
+            const btnRect = btn.getBoundingClientRect();
+            aiAssistant.openPanel(btnRect);
+          }
+        };
+      } else {
+        btn.onmousedown = e => {
+          e.preventDefault();
+          e.stopPropagation();
+          const range = this.lastRange || this.quill.getSelection();
+          if (!range) return;
+          const current = this.quill.getFormat(range);
+          this.quill.format(f.name, !current[f.name]);
+          this.updateButtonStates();
+        };
+        btn.dataset.format = f.name;
+      }
       this.toolbar.appendChild(btn);
     });
     this.quill.container.appendChild(this.toolbar);

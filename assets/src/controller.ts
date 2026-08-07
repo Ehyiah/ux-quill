@@ -1,10 +1,11 @@
 import { Controller } from '@hotwired/stimulus';
 import Quill from 'quill';
 import * as Options from 'quill/core/quill';
-import type { ExtraOptions, ModuleOptions } from './types.d.ts';
+import type { AiKeyboardShortcut, ExtraOptions, ModuleOptions } from './types.d.ts';
 import mergeModules from './modules.ts';
 import { ToolbarCustomizer } from './ui/toolbarCustomizer.ts';
 import { handleUploadResponse, uploadStrategies } from './upload-utils.ts';
+import { AiManager } from './modules/aiAssistant/aiManager.ts';
 
 import './register-modules.ts';
 import QuillTableBetter from 'quill-table-better';
@@ -26,6 +27,7 @@ export default class extends Controller {
     declare readonly extraOptionsValue: ExtraOptions;
     declare readonly toolbarOptionsValue: HTMLDivElement;
     declare readonly modulesOptionsValue: ModuleOptions;
+
     static values = {
         toolbarOptions: {
             type: Array,
@@ -38,7 +40,7 @@ export default class extends Controller {
         modulesOptions: {
             type: Array,
             default: [],
-        }
+        },
     }
 
     private quillInstance: Quill | null = null;
@@ -55,6 +57,7 @@ export default class extends Controller {
         this.setupQuillStyles(options);
         this.setupUploadHandler(options);
         this.setupEditorHeight();
+        this.setupAiAssistant(options);
 
         this.dispatchEvent('options', options);
 
@@ -149,6 +152,48 @@ export default class extends Controller {
         const height = this.extraOptionsValue.height;
         if (height !== null) {
             this.editorContainerTarget.style.height = height;
+        }
+    }
+
+    private setupAiAssistant(options: Options): void {
+        const raw = options.modules.aiAssistant;
+        if (!raw || !Array.isArray(raw.features) || raw.features.length === 0) {
+            return;
+        }
+
+        const features: Record<string, boolean> = {};
+        raw.features.forEach((f: string) => { features[f] = true; });
+
+        const aiManager = new AiManager({
+            provider: raw.provider || 'transformers',
+            models: raw.models || undefined,
+            features,
+            debug: !!raw.debug,
+        });
+
+        const keyboardShortcut: AiKeyboardShortcut | false = raw.keyboardShortcut !== undefined
+            ? raw.keyboardShortcut as AiKeyboardShortcut | false
+            : { key: 'Space', ctrlKey: true, shiftKey: false, altKey: false, metaKey: false };
+
+        options.modules.aiAssistant = { aiManager, features, keyboardShortcut };
+
+        this.addAiAssistantToInlineToolbar(options);
+    }
+
+    private addAiAssistantToInlineToolbar(options: Options): void {
+        const inlineToolbar = options.modules.inlineToolbar;
+        if (!inlineToolbar || typeof inlineToolbar !== 'object') {
+            return;
+        }
+
+        const autoAdd = inlineToolbar.autoAddAiAssistantButton ?? true;
+        if (!autoAdd) {
+            return;
+        }
+
+        const buttons = Array.isArray(inlineToolbar.buttons) ? inlineToolbar.buttons : ['bold', 'italic', 'underline', 'strike'];
+        if (!buttons.includes('aiAssistant')) {
+            inlineToolbar.buttons = [...buttons, 'aiAssistant'];
         }
     }
 
