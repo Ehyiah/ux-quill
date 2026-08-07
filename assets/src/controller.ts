@@ -71,6 +71,10 @@ export default class extends Controller {
         if (this.quillInstance) {
             this.quillInstance = null;
         }
+
+        this.element?.querySelectorAll('.ql-toolbar, .quill-counter-container').forEach(el => el.remove());
+        this.editorContainerTarget && (this.editorContainerTarget.innerHTML = '');
+        document.querySelectorAll('[class*="table-better-menu"]').forEach(el => el.remove());
     }
 
     private buildQuillOptions(): Options {

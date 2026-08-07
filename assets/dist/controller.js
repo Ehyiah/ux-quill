@@ -35,9 +35,13 @@ export default class _Class extends Controller {
     this.initializeQuill(options, unprocessedIcons);
   }
   disconnect() {
+    var _this$element;
     if (this.quillInstance) {
       this.quillInstance = null;
     }
+    (_this$element = this.element) == null || _this$element.querySelectorAll('.ql-toolbar, .quill-counter-container').forEach(el => el.remove());
+    this.editorContainerTarget && (this.editorContainerTarget.innerHTML = '');
+    document.querySelectorAll('[class*="table-better-menu"]').forEach(el => el.remove());
   }
   buildQuillOptions() {
     const _this$extraOptionsVal = this.extraOptionsValue,
