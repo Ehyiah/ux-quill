@@ -23,8 +23,6 @@
                     "highlight.js/styles/atom-one-dark.css": true,
                     "katex/dist/katex.min.css": true,
                     "@ehyiah/ux-quill/dist/styles/html-edit/html-edit.css": true,
-                    "@ehyiah/ux-quill/dist/styles/gallery/gallery.css": true
-                    "quill-html-edit-button/src/styles.css": true,
                     "@ehyiah/ux-quill/dist/styles/gallery/gallery.css": true,
                     "@ehyiah/ux-quill/dist/styles/map-modal.css": true
                 }
