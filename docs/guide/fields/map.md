@@ -36,9 +36,15 @@ use Ehyiah\QuillJsBundle\DTO\Modules\MapModule;
         'height' => '400px',
         'scrollWheelZoom' => true,
         'draggable' => true,
+        'marker' => [              // custom marker (see module docs for all options)
+            'iconUrl' => 'https://example.com/my-pin.png',
+            'iconSize' => [40, 40],
+        ],
     ]),
 ],
 ```
+
+See the [module documentation](/guide/modules/map#custom-marker) for the full list of marker options (`iconRetinaUrl`, `shadowUrl`, `iconAnchor`, `popupAnchor`, `shadowSize`, `label`). Marker options apply to newly inserted maps — existing maps keep their default marker.
 
 ## Google Maps Provider
 

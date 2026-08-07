@@ -28,6 +28,49 @@ Requires a valid Google Maps JavaScript API key. See [Google Maps documentation]
 | `height` | `string` | `'300px'` | Map container height (any CSS unit) |
 | `scrollWheelZoom` | `bool` | `true` | Allow zooming with mouse scroll wheel |
 | `draggable` | `bool` | `true` | Allow dragging the marker to reposition |
+| `marker` | `array\|null` | `null` | Custom marker options (see below) |
+| `debug` | `bool` | `false` | Log the received options, inserted value and marker in the browser console (editor only) |
+
+### Custom marker
+
+The `marker` option lets you customize the map marker for both providers (Leaflet/OSM and Google Maps). It is applied everywhere: the editor, the location picker modal and the final rendered maps.
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `iconUrl` | `string\|null` | `null` | Custom marker image URL (Leaflet `iconUrl` / Google `url`) |
+| `iconRetinaUrl` | `string\|null` | `null` | Retina version of the icon (Leaflet only) |
+| `shadowUrl` | `string\|null` | `null` | Shadow image URL (Leaflet only) |
+| `iconSize` | `array\|null` | `[25, 41]` | Icon size as `[width, height]` |
+| `iconAnchor` | `array\|null` | `[12, 41]` | Anchor point as `[x, y]` |
+| `popupAnchor` | `array\|null` | `[1, -34]` | Popup offset (Leaflet only) |
+| `shadowSize` | `array\|null` | `[41, 41]` | Shadow size (Leaflet only) |
+| `label` | `string\|null` | `null` | Label on the marker. Without `iconUrl`, renders a colored round pin with the label (Leaflet) |
+
+> If `label` is provided without `iconUrl`, a round pin is rendered (Leaflet). On Google Maps, a custom `iconUrl` requires a `scaledSize` — if omitted, `[25, 41]` is used automatically.
+
+> **Note:** the `marker` option only applies to maps **inserted after** it is configured. The marker options are stored on the embed at insertion time (the `data-marker` attribute on the `.ql-map` element). Maps already present in the editor or in saved content keep their current (default) marker. To apply a custom marker to an existing map, delete it and re-insert it.
+
+```php
+new MapModule(options: [
+    'marker' => [
+        'iconUrl' => 'https://example.com/my-pin.png',
+        'iconSize' => [40, 40],
+        'iconAnchor' => [20, 40],
+        'label' => 'A',
+    ],
+]),
+```
+
+To debug the marker (or any map option) in the editor, enable `debug` — the options received from PHP, the inserted value and the marker passed to the renderer are printed to the browser console:
+
+```php
+new MapModule(options: [
+    'debug' => true,
+    'marker' => [
+        'iconUrl' => 'https://example.com/my-pin.png',
+    ],
+]),
+```
 
 ## Usage Example
 

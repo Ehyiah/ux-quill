@@ -24,6 +24,9 @@ class MapBlot extends BlockEmbed {
     if (value != null && value.tileUrl) {
       node.setAttribute('data-tile-url', value.tileUrl);
     }
+    if (value != null && value.marker) {
+      node.setAttribute('data-marker', JSON.stringify(value.marker));
+    }
     node.style.height = height;
     node.style.width = (_value$width = value == null ? void 0 : value.width) != null ? _value$width : '100%';
     node.style.borderRadius = '4px';
@@ -43,6 +46,15 @@ class MapBlot extends BlockEmbed {
     return node;
   }
   static value(node) {
+    let marker = null;
+    const markerAttr = node.getAttribute('data-marker');
+    if (markerAttr) {
+      try {
+        marker = JSON.parse(markerAttr);
+      } catch (_unused) {
+        marker = null;
+      }
+    }
     return {
       lat: parseFloat(node.getAttribute('data-lat') || '48.8566'),
       lng: parseFloat(node.getAttribute('data-lng') || '2.3522'),
@@ -53,7 +65,8 @@ class MapBlot extends BlockEmbed {
       height: node.style.height || '300px',
       width: node.style.width || '100%',
       scrollWheelZoom: node.getAttribute('data-scroll-wheel-zoom') !== 'false',
-      draggable: node.getAttribute('data-draggable') !== 'false'
+      draggable: node.getAttribute('data-draggable') !== 'false',
+      marker
     };
   }
   static formats(node) {

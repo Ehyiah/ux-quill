@@ -1,15 +1,18 @@
+function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 import Quill from 'quill';
 import MapBlot from "../blots/map.js";
 import MapModal from "./map-modal.js";
-import { loadScript, injectLeafletStyles } from "./map-utils.js";
+import { loadScript, injectLeafletStyles, buildLeafletIcon, buildGoogleMarkerOptions } from "./map-utils.js";
 Quill.register(MapBlot);
 const MAPS_INSTANCES = new WeakMap();
 export class MapModule {
   constructor(quill, options) {
     this.quill = void 0;
     this.options = void 0;
+    this.debug = false;
     this.observer = null;
     this.quill = quill;
+    this.debug = options.debug === true;
     this.options = {
       provider: options.provider || 'osm',
       center: options.center || [48.8566, 2.3522],
@@ -18,8 +21,12 @@ export class MapModule {
       tileUrl: options.tileUrl || null,
       height: options.height || '300px',
       scrollWheelZoom: options.scrollWheelZoom !== false,
-      draggable: options.draggable !== false
+      draggable: options.draggable !== false,
+      marker: options.marker || null
     };
+    if (this.debug) {
+      console.log('[mapModule] resolved options:', this.options);
+    }
     this.addToolbarHandler();
     this.observeEditor();
     this.initExistingMaps();
@@ -50,8 +57,12 @@ export class MapModule {
       tileUrl: this.options.tileUrl,
       height: this.options.height,
       scrollWheelZoom: this.options.scrollWheelZoom,
-      draggable: this.options.draggable
+      draggable: this.options.draggable,
+      marker: this.options.marker
     };
+    if (this.debug) {
+      console.log('[mapModule] mapValue inserted:', mapValue);
+    }
     this.quill.insertEmbed(range.index, 'map', mapValue, 'user');
     this.quill.insertText(range.index + 1, '\n', 'api');
     this.quill.setSelection(range.index + 2, 'api');
@@ -115,6 +126,9 @@ export class MapModule {
   initMapForContainer(container) {
     if (MAPS_INSTANCES.has(container)) return;
     const value = MapBlot.value(container);
+    if (this.debug) {
+      console.log('[mapModule] value from DOM:', value);
+    }
     const placeholder = container.querySelector('.ql-map-placeholder');
     if (placeholder) placeholder.remove();
     if (value.provider === 'google' && value.googleApiKey) {
@@ -127,15 +141,7 @@ export class MapModule {
     try {
       await injectLeafletStyles();
       const L = await import('leaflet');
-      const markerIcon = new L.Icon({
-        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41]
-      });
+      const markerIcon = buildLeafletIcon(L, value.marker);
       const mapDiv = document.createElement('div');
       mapDiv.style.width = '100%';
       mapDiv.style.height = '100%';
@@ -195,11 +201,11 @@ export class MapModule {
         mapTypeControl: false,
         streetViewControl: false
       });
-      const marker = new window.google.maps.Marker({
+      const marker = new window.google.maps.Marker(_extends({
         position: center,
         map,
         draggable: value.draggable
-      });
+      }, buildGoogleMarkerOptions(value.marker)));
       if (value.draggable) {
         marker.addListener('dragend', () => {
           const pos = marker.getPosition();

@@ -14,6 +14,8 @@ final class MapModule implements ModuleInterface
     public const HEIGHT_OPTION = 'height';
     public const SCROLL_WHEEL_ZOOM_OPTION = 'scrollWheelZoom';
     public const DRAGGABLE_OPTION = 'draggable';
+    public const MARKER_OPTION = 'marker';
+    public const DEBUG_OPTION = 'debug';
 
     /**
      * @param array{
@@ -25,6 +27,17 @@ final class MapModule implements ModuleInterface
      *     height?: string,
      *     scrollWheelZoom?: bool,
      *     draggable?: bool,
+     *     marker?: array{
+     *         iconUrl?: string|null,
+     *         iconRetinaUrl?: string|null,
+     *         shadowUrl?: string|null,
+     *         iconSize?: array{0: int, 1: int}|null,
+     *         iconAnchor?: array{0: int, 1: int}|null,
+     *         popupAnchor?: array{0: int, 1: int}|null,
+     *         shadowSize?: array{0: int, 1: int}|null,
+     *         label?: string|null,
+     *     }|null,
+     *     debug?: bool,
      * } $options
      */
     public function __construct(
@@ -40,6 +53,8 @@ final class MapModule implements ModuleInterface
             self::HEIGHT_OPTION => '300px',
             self::SCROLL_WHEEL_ZOOM_OPTION => true,
             self::DRAGGABLE_OPTION => true,
+            self::MARKER_OPTION => null,
+            self::DEBUG_OPTION => false,
         ], $this->options);
     }
 }

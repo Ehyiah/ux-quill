@@ -2,7 +2,7 @@ import Quill from 'quill';
 import MapBlot from '../blots/map.ts';
 import MapModal from './map-modal.ts';
 import type { MapOptions, MapValue } from '../types.d.ts';
-import { loadScript, injectLeafletStyles } from './map-utils.ts';
+import { loadScript, injectLeafletStyles, buildLeafletIcon, buildGoogleMarkerOptions } from './map-utils.ts';
 
 Quill.register(MapBlot);
 
@@ -11,10 +11,12 @@ const MAPS_INSTANCES = new WeakMap<HTMLElement, any>();
 export class MapModule {
     private quill: Quill;
     private options: MapOptions;
+    private debug = false;
     private observer: MutationObserver | null = null;
 
     constructor(quill: Quill, options: MapOptions) {
         this.quill = quill;
+        this.debug = options.debug === true;
         this.options = {
             provider: options.provider || 'osm',
             center: options.center || [48.8566, 2.3522],
@@ -24,7 +26,12 @@ export class MapModule {
             height: options.height || '300px',
             scrollWheelZoom: options.scrollWheelZoom !== false,
             draggable: options.draggable !== false,
+            marker: options.marker || null,
         };
+
+        if (this.debug) {
+            console.log('[mapModule] resolved options:', this.options);
+        }
 
         this.addToolbarHandler();
         this.observeEditor();
@@ -63,7 +70,12 @@ export class MapModule {
             height: this.options.height,
             scrollWheelZoom: this.options.scrollWheelZoom,
             draggable: this.options.draggable,
+            marker: this.options.marker,
         };
+
+        if (this.debug) {
+            console.log('[mapModule] mapValue inserted:', mapValue);
+        }
 
         this.quill.insertEmbed(range.index, 'map', mapValue, 'user');
         this.quill.insertText(range.index + 1, '\n', 'api');
@@ -127,6 +139,9 @@ export class MapModule {
         if (MAPS_INSTANCES.has(container)) return;
 
         const value: MapValue = MapBlot.value(container);
+        if (this.debug) {
+            console.log('[mapModule] value from DOM:', value);
+        }
         const placeholder = container.querySelector('.ql-map-placeholder');
         if (placeholder) placeholder.remove();
 
@@ -142,15 +157,7 @@ export class MapModule {
             await injectLeafletStyles();
             const L = await import('leaflet');
 
-            const markerIcon = new (L as any).Icon({
-                iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-                iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-                shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-                iconSize: [25, 41],
-                iconAnchor: [12, 41],
-                popupAnchor: [1, -34],
-                shadowSize: [41, 41],
-            });
+            const markerIcon = buildLeafletIcon(L, value.marker);
 
             const mapDiv = document.createElement('div');
             mapDiv.style.width = '100%';
@@ -219,6 +226,7 @@ export class MapModule {
                 position: center,
                 map,
                 draggable: value.draggable,
+                ...buildGoogleMarkerOptions(value.marker),
             });
 
             if (value.draggable) {

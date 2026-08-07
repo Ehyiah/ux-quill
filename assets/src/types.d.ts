@@ -80,6 +80,17 @@ export type NotionToolbarOptions = {
     floatingToolbar?: boolean;
 }
 
+export type MapMarkerOptions = {
+    iconUrl?: string | null;
+    iconRetinaUrl?: string | null;
+    shadowUrl?: string | null;
+    iconSize?: [number, number] | null;
+    iconAnchor?: [number, number] | null;
+    popupAnchor?: [number, number] | null;
+    shadowSize?: [number, number] | null;
+    label?: string | null;
+};
+
 export type MapOptions = {
     provider?: 'osm' | 'google';
     center?: [number, number];
@@ -89,6 +100,8 @@ export type MapOptions = {
     height?: string;
     scrollWheelZoom?: boolean;
     draggable?: boolean;
+    marker?: MapMarkerOptions | null;
+    debug?: boolean;
 };
 
 export type MapValue = {
@@ -102,6 +115,7 @@ export type MapValue = {
     width?: string;
     scrollWheelZoom?: boolean;
     draggable?: boolean;
+    marker?: MapMarkerOptions | null;
 };
 
 export interface ModuleInterface {

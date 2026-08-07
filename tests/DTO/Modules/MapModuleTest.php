@@ -26,6 +26,52 @@ final class MapModuleTest extends TestCase
         $this->assertEquals('300px', $module->options[MapModule::HEIGHT_OPTION]);
         $this->assertTrue($module->options[MapModule::SCROLL_WHEEL_ZOOM_OPTION]);
         $this->assertTrue($module->options[MapModule::DRAGGABLE_OPTION]);
+        $this->assertNull($module->options[MapModule::MARKER_OPTION]);
+        $this->assertFalse($module->options[MapModule::DEBUG_OPTION]);
+    }
+
+    /**
+     * @covers ::__construct
+     */
+    public function testCustomMarkerOption(): void
+    {
+        $module = new MapModule('map', [
+            MapModule::MARKER_OPTION => [
+                'iconUrl' => 'https://example.com/pin.svg',
+                'iconSize' => [40, 40],
+                'iconAnchor' => [20, 40],
+                'label' => 'A',
+            ],
+        ]);
+
+        $this->assertEquals('https://example.com/pin.svg', $module->options[MapModule::MARKER_OPTION]['iconUrl']);
+        $this->assertEquals([40, 40], $module->options[MapModule::MARKER_OPTION]['iconSize']);
+        $this->assertEquals([20, 40], $module->options[MapModule::MARKER_OPTION]['iconAnchor']);
+        $this->assertEquals('A', $module->options[MapModule::MARKER_OPTION]['label']);
+    }
+
+    /**
+     * @covers ::__construct
+     */
+    public function testDebugOption(): void
+    {
+        $module = new MapModule('map', [
+            MapModule::DEBUG_OPTION => true,
+        ]);
+
+        $this->assertTrue($module->options[MapModule::DEBUG_OPTION]);
+    }
+
+    /**
+     * @covers ::__construct
+     */
+    public function testNullMarkerOption(): void
+    {
+        $module = new MapModule('map', [
+            MapModule::MARKER_OPTION => null,
+        ]);
+
+        $this->assertNull($module->options[MapModule::MARKER_OPTION]);
     }
 
     /**

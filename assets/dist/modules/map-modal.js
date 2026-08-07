@@ -1,4 +1,4 @@
-import { injectLeafletStyles } from "./map-utils.js";
+import { injectLeafletStyles, buildLeafletIcon } from "./map-utils.js";
 export default class MapModal {
   constructor(module, options) {
     var _options$lat, _options$lng;
@@ -89,15 +89,7 @@ export default class MapModal {
     try {
       await injectLeafletStyles();
       const L = await import('leaflet');
-      const markerIcon = new L.Icon({
-        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41]
-      });
+      const markerIcon = buildLeafletIcon(L, this.module.getMapOptions().marker);
       this.map = L.map(previewEl, {
         center: [this.selectedLat, this.selectedLng],
         zoom: 13,

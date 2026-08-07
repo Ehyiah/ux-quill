@@ -55,6 +55,8 @@ jest.mock('../src/modules/map-modal.ts', () => {
 jest.mock('../src/modules/map-utils.ts', () => ({
     loadScript: jest.fn().mockResolvedValue(undefined),
     injectLeafletStyles: jest.fn().mockResolvedValue(undefined),
+    buildLeafletIcon: jest.fn((L: any, marker: any) => (L.Icon ? new L.Icon({ iconUrl: 'mock' }) : { mock: true })),
+    buildGoogleMarkerOptions: jest.fn(() => ({})),
 }));
 
 import { MapModule } from '../src/modules/mapModule';
@@ -88,6 +90,33 @@ describe('MapModule', () => {
             expect(() => {
                 new MapModule(mockQuill, {});
             }).not.toThrow();
+        });
+
+        it('should log received options when debug is enabled', () => {
+            const logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+            try {
+                new MapModule(mockQuill, { debug: true, marker: { iconUrl: 'https://example.com/pin.png' } });
+                expect(logSpy).toHaveBeenCalledWith(
+                    '[mapModule] options received:',
+                    expect.objectContaining({ debug: true, marker: { iconUrl: 'https://example.com/pin.png' } }),
+                );
+                expect(logSpy).toHaveBeenCalledWith(
+                    '[mapModule] resolved options:',
+                    expect.objectContaining({ marker: { iconUrl: 'https://example.com/pin.png' } }),
+                );
+            } finally {
+                logSpy.mockRestore();
+            }
+        });
+
+        it('should not log options when debug is disabled', () => {
+            const logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+            try {
+                new MapModule(mockQuill, {});
+                expect(logSpy).not.toHaveBeenCalled();
+            } finally {
+                logSpy.mockRestore();
+            }
         });
 
         it('should set up MutationObserver on quill root', () => {
@@ -225,7 +254,46 @@ describe('MapModule', () => {
                 width: '100%',
                 scrollWheelZoom: true,
                 draggable: true,
+                marker: null,
             });
+        });
+
+        it('should serialize marker options to data-marker attribute', async () => {
+            const { default: MapBlot } = await import('../src/blots/map');
+            const node = MapBlot.create({
+                lat: 48.8566,
+                lng: 2.3522,
+                marker: { iconUrl: 'https://example.com/pin.svg', iconSize: [40, 40], label: 'A' },
+            });
+
+            expect(node.getAttribute('data-marker')).toBe(
+                JSON.stringify({ iconUrl: 'https://example.com/pin.svg', iconSize: [40, 40], label: 'A' }),
+            );
+        });
+
+        it('should not serialize data-marker when marker is absent', async () => {
+            const { default: MapBlot } = await import('../src/blots/map');
+            const node = MapBlot.create({ lat: 1, lng: 2 });
+
+            expect(node.hasAttribute('data-marker')).toBe(false);
+        });
+
+        it('should parse data-marker attribute into marker options', async () => {
+            const { default: MapBlot } = await import('../src/blots/map');
+            const node = document.createElement('div');
+            node.setAttribute('data-marker', JSON.stringify({ iconUrl: 'https://example.com/pin.svg', iconSize: [40, 40] }));
+
+            const value = MapBlot.value(node);
+            expect(value.marker).toEqual({ iconUrl: 'https://example.com/pin.svg', iconSize: [40, 40] });
+        });
+
+        it('should fall back to null marker when data-marker is invalid JSON', async () => {
+            const { default: MapBlot } = await import('../src/blots/map');
+            const node = document.createElement('div');
+            node.setAttribute('data-marker', '{invalid json');
+
+            const value = MapBlot.value(node);
+            expect(value.marker).toBeNull();
         });
 
         it('should read align and style formats from DOM node', async () => {

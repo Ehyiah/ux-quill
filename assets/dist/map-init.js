@@ -1,7 +1,14 @@
-import { injectLeafletStyles, loadScript } from "./modules/map-utils.js";
-const LEAFLET_MARKER_ICON = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png';
-const LEAFLET_MARKER_ICON_2X = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png';
-const LEAFLET_MARKER_SHADOW = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png';
+function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
+import { injectLeafletStyles, loadScript, buildLeafletIcon, buildGoogleMarkerOptions } from "./modules/map-utils.js";
+function readMarker(container) {
+  const attr = container.getAttribute('data-marker');
+  if (!attr) return null;
+  try {
+    return JSON.parse(attr);
+  } catch (_unused) {
+    return null;
+  }
+}
 async function initMap(container) {
   const lat = parseFloat(container.getAttribute('data-lat') || '48.8566');
   const lng = parseFloat(container.getAttribute('data-lng') || '2.3522');
@@ -11,18 +18,19 @@ async function initMap(container) {
   const placeholder = container.querySelector('.ql-map-placeholder');
   if (placeholder) placeholder.remove();
   const provider = container.getAttribute('data-provider') || 'osm';
+  const marker = readMarker(container);
   if (provider === 'google') {
     const apiKey = container.getAttribute('data-google-api-key');
     if (!apiKey) {
       showError(container, 'Google Maps API key is required');
       return;
     }
-    await initGoogleMap(container, lat, lng, zoom, apiKey);
+    await initGoogleMap(container, lat, lng, zoom, apiKey, marker);
   } else {
-    await initOsmMap(container, lat, lng, zoom, tileUrl, height);
+    await initOsmMap(container, lat, lng, zoom, tileUrl, height, marker);
   }
 }
-async function initOsmMap(container, lat, lng, zoom, tileUrl, height) {
+async function initOsmMap(container, lat, lng, zoom, tileUrl, height, marker) {
   try {
     await injectLeafletStyles();
     const L = await import('leaflet');
@@ -38,15 +46,7 @@ async function initOsmMap(container, lat, lng, zoom, tileUrl, height) {
     L.tileLayer(tileUrl, {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
-    const markerIcon = new L.Icon({
-      iconUrl: LEAFLET_MARKER_ICON,
-      iconRetinaUrl: LEAFLET_MARKER_ICON_2X,
-      shadowUrl: LEAFLET_MARKER_SHADOW,
-      iconSize: [25, 41],
-      iconAnchor: [12, 41],
-      popupAnchor: [1, -34],
-      shadowSize: [41, 41]
-    });
+    const markerIcon = buildLeafletIcon(L, marker);
     L.marker([lat, lng], {
       icon: markerIcon
     }).addTo(map);
@@ -56,7 +56,7 @@ async function initOsmMap(container, lat, lng, zoom, tileUrl, height) {
     showError(container, 'Failed to load map');
   }
 }
-async function initGoogleMap(container, lat, lng, zoom, apiKey) {
+async function initGoogleMap(container, lat, lng, zoom, apiKey, marker) {
   try {
     await loadScript("https://maps.googleapis.com/maps/api/js?key=" + apiKey);
     const mapDiv = document.createElement('div');
@@ -73,13 +73,13 @@ async function initGoogleMap(container, lat, lng, zoom, apiKey) {
       mapTypeControl: false,
       streetViewControl: false
     });
-    new window.google.maps.Marker({
+    new window.google.maps.Marker(_extends({
       position: {
         lat,
         lng
       },
       map
-    });
+    }, buildGoogleMarkerOptions(marker)));
   } catch (error) {
     console.error('Failed to initialize Google Map:', error);
     showError(container, 'Failed to load Google Maps');
