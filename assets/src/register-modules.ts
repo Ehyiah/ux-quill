@@ -18,8 +18,8 @@ Quill.register('modules/counter', Counter);
 import QuillToggleFullscreenButton from 'quill-toggle-fullscreen-button';
 Quill.register('modules/toggleFullscreen', QuillToggleFullscreenButton);
 
-import htmlEditButton from 'quill-html-edit-button';
-Quill.register('modules/htmlEditButton', htmlEditButton.default || htmlEditButton);
+import { HtmlEditButton } from './modules/htmlEditModule.ts';
+Quill.register('modules/htmlEditButton', HtmlEditButton);
 
 import ReadingTime from './modules/readtimeModule.ts';
 Quill.register('modules/readingTime', ReadingTime);
@@ -83,6 +83,9 @@ Quill.register('modules/gridBorders', GridBorders);
 
 import {PlaceholderModule} from './modules/placeHolderModule/placeHolderModule.ts';
 Quill.register('modules/placeholder', PlaceholderModule);
+
+import VideoSelection from './modules/videoSelection.ts';
+Quill.register('modules/videoSelection', VideoSelection);
 
 import {MapModule} from './modules/mapModule.ts';
 Quill.register('modules/map', MapModule);

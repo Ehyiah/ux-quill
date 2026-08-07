@@ -53,6 +53,7 @@ export default defineConfig({
               { text: 'Headers', link: '/guide/fields/headers' },
               { text: 'Image', link: '/guide/fields/image' },
               { text: 'Image Gallery', link: '/guide/fields/image-gallery' },
+              { text: 'Video', link: '/guide/fields/video' },
               { text: 'Link', link: '/guide/fields/link' },
               { text: 'Map', link: '/guide/fields/map' },
               { text: 'Lists & Alignment', link: '/guide/fields/lists-alignment' },
@@ -103,6 +104,7 @@ export default defineConfig({
                   { text: 'Resize', link: '/guide/modules/resize' },
                   { text: 'Syntax (Highlight)', link: '/guide/modules/syntax' },
                   { text: 'Table', link: '/guide/modules/table' },
+                  { text: 'Video Selection', link: '/guide/modules/video-selection' },
                 ]
               },
             ]

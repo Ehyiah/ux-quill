@@ -4,6 +4,8 @@
 
 The HtmlEdit module allows users to view and edit the raw HTML source code of the editor content.
 
+This module is now bundled directly into `@ehyiah/ux-quill` (replaces the external `quill-html-edit-button` package).
+
 **Options:**
 - **debug**: Enable debug logging. Default: `false`.
 - **msg**: The message displayed in the modal. Default: `'Edit html source'`.

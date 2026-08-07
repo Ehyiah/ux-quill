@@ -26,10 +26,12 @@ import '../../../assets/dist/register-modules.js'
 // Extra registrations that register-modules.js does NOT handle
 import Quill from 'quill'
 import ImageFigure from '../../../assets/dist/blots/imageFigure.js'
+import VideoFigure from '../../../assets/dist/blots/videoFigure.js'
 import QuillTableBetter from 'quill-table-better'
 import { Mention } from '../../../assets/dist/modules/mention.js'
 
 Quill.register(ImageFigure, true)
+Quill.register('formats/video', VideoFigure, true)
 
 // Save original Toolbar.attach before TableToolbar potentially overrides it
 const OriginalToolbar = Quill.import('modules/toolbar')
