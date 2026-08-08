@@ -70,7 +70,7 @@ To render saved maps on a page (outside the editor), include the `quill_content_
 
 The `quill_content_scripts()` function emits a Stimulus controller element (`data-controller="ehyiah--ux-quill--quill-maps"`) that automatically initializes all `.ql-map` elements on the page.
 
-> **AssetMapper / importmap:** the display page must render the importmap (`{{ importmap('app') }}`, usually in `base.html.twig`) so the controller can be loaded. After updating the bundle, re-run `bin/console importmap:install`.
+> **AssetMapper / importmap:** the display page must render the importmap (`importmap('app')`, usually in `base.html.twig`) so the controller can be loaded. After updating the bundle, re-run `bin/console importmap:install`.
 >
 > **Webpack Encore:** the `quill-maps` controller is registered via `@symfony/stimulus-bridge` from `assets/controllers.json`. After updating the bundle, run `bin/console ux:controllers:dump` (or add the `quill-maps` entry manually), then rebuild your assets (`yarn watch` / `yarn build`).
 >

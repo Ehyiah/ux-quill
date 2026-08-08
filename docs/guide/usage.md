@@ -203,13 +203,13 @@ It is **not** needed on:
 
 #### Requirements
 
-- **AssetMapper / importmap:** the page must render the importmap (`{{ importmap('app') }}`, usually in `base.html.twig`) and `bin/console importmap:install` must have been run after updating the bundle.
+- **AssetMapper / importmap:** the page must render the importmap (`importmap('app')`, usually in `base.html.twig`) and `bin/console importmap:install` must have been run after updating the bundle.
 - **Webpack Encore:** the `quill-maps` controller must be listed in `assets/controllers.json` (run `bin/console ux:controllers:dump` after updating the bundle), then rebuild your assets (`yarn watch` / `yarn build`).
 
 #### Troubleshooting
 
 - Map not initialized → check that the `<div data-controller="ehyiah--ux-quill--quill-maps">` element is present, that the controller is registered (browser console: `Controller not found`?), and that no JavaScript error occurred.
-- 404 on `/assets/@ehyiah/ux-quill/dist/modules/map-utils.js` → the module is being loaded without the importmap (AssetMapper) — render `{{ importmap('app') }}` and re-run `bin/console importmap:install`.
+- 404 on `/assets/@ehyiah/ux-quill/dist/modules/map-utils.js` → the module is being loaded without the importmap (AssetMapper) — render it via `importmap('app')` and re-run `bin/console importmap:install`.
 
 The `quill-maps` controller also dispatches lifecycle events (`ux-quill:map:before-init`, `ux-quill:map:initialized`, `ux-quill:map:error`, `ux-quill:maps:completed`) — see [Map events](/guide/modules/map#map-events).
 

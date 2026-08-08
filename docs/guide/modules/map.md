@@ -169,7 +169,7 @@ To render saved maps on a page (outside the editor), **`quill_content_scripts()`
 
 `quill_content_scripts()` emits a Stimulus controller element (`data-controller="ehyiah--ux-quill--quill-maps"`) that initializes every `.ql-map` element on the page.
 
-> **The display page must render the importmap** (`{{ importmap('app') }}`, usually in `base.html.twig`) so the controller can be loaded. After updating the bundle, re-run `bin/console importmap:install`.
+> **The display page must render the importmap** (`importmap('app')`, usually in `base.html.twig`) so the controller can be loaded. After updating the bundle, re-run `bin/console importmap:install`.
 >
 > **With Webpack Encore**, the `quill-maps` controller is registered via `@symfony/stimulus-bridge` from `assets/controllers.json`. After updating the bundle, run `bin/console ux:controllers:dump` (or add the `quill-maps` entry manually), then rebuild your assets (`yarn watch` / `yarn build`).
 >
@@ -179,7 +179,7 @@ To render saved maps on a page (outside the editor), **`quill_content_scripts()`
 
 > By default the saved content stores the editor's rendered HTML (`use_semantic_html` is `false`). If you prefer a lighter, clean saved markup (the `.ql-map` element and its data attributes only, no tiles), enable `use_semantic_html` in `quill_extra_options` — `quill_content_scripts()` is still required to render the map.
 
-> **Troubleshooting — 404 on `/assets/@ehyiah/ux-quill/dist/modules/map-utils.js`:** the display page is loading `map-init.js` as a plain module without the importmap, so its relative imports can't be resolved (AssetMapper only serves versioned files). Make sure the display page renders `{{ importmap('app') }}` (usually in `base.html.twig`) and that `bin/console importmap:install` has been re-run after updating the bundle.
+> **Troubleshooting — 404 on `/assets/@ehyiah/ux-quill/dist/modules/map-utils.js`:** the display page is loading `map-init.js` as a plain module without the importmap, so its relative imports can't be resolved (AssetMapper only serves versioned files). Make sure the display page renders the importmap (`importmap('app')`, usually in `base.html.twig`) and that `bin/console importmap:install` has been re-run after updating the bundle.
 
 ### Map events
 
