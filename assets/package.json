@@ -23,8 +23,15 @@
                     "highlight.js/styles/atom-one-dark.css": true,
                     "katex/dist/katex.min.css": true,
                     "@ehyiah/ux-quill/dist/styles/html-edit/html-edit.css": true,
-                    "@ehyiah/ux-quill/dist/styles/gallery/gallery.css": true
+                    "@ehyiah/ux-quill/dist/styles/gallery/gallery.css": true,
+                    "@ehyiah/ux-quill/dist/styles/map-modal.css": true
                 }
+            },
+            "quill-maps": {
+                "main": "dist/map-init.js",
+                "webpackMode": "eager",
+                "fetch": "eager",
+                "enabled": true
             }
         },
         "importmap": {
@@ -46,7 +53,8 @@
             "eventemitter3": "^5.0.1",
             "lodash-es": "^4.17.21",
             "quill2-emoji": "^0.1.2",
-            "quill2-emoji/dist/style.css": "^0.1.2"
+            "quill2-emoji/dist/style.css": "^0.1.2",
+            "leaflet": "^1.9.4"
         }
     },
     "scripts": {
@@ -100,6 +108,7 @@
         "eventemitter3": "^5.0.1",
         "highlight.js": "^11.9.0",
         "katex": "^0.16.9",
+        "leaflet": "^1.9.4",
         "lodash-es": "^4.17.21",
         "quill": "2.0.3",
         "quill-delta": "^5.1.0",
@@ -114,6 +123,7 @@
         "eventemitter3": "^5.0.1",
         "highlight.js": "^11.9.0",
         "katex": "^0.16.9",
+        "leaflet": "^1.9.4",
         "lodash-es": "^4.17.21",
         "quill": "2.0.3",
         "quill-delta": "^5.1.0",
@@ -160,7 +170,8 @@
         "moduleNameMapper": {
             "\\.(css|less)$": "<rootDir>/tests/setup/__mocks__/styleMock.js",
             "^../src/blots/image$": "<rootDir>/tests/setup/__mocks__/image.ts",
-            "^quill$": "<rootDir>/tests/setup/__mocks__/quill.ts"
+            "^quill$": "<rootDir>/tests/setup/__mocks__/quill.ts",
+            "^leaflet$": "<rootDir>/tests/setup/__mocks__/leaflet.ts"
         },
         "testMatch": [
             "<rootDir>/tests/**/*.test.ts"

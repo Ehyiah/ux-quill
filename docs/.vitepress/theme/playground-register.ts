@@ -7,7 +7,9 @@ import 'quill-table-better/dist/quill-table-better.css'
 import 'quill2-emoji/dist/style.css'
 import 'highlight.js/styles/atom-one-dark.css'
 import 'katex/dist/katex.min.css'
+import 'leaflet/dist/leaflet.css'
 import '../../../assets/dist/styles/gallery/gallery.css'
+import '../../../assets/dist/styles/map-modal.css'
 import '../../../assets/dist/styles/quill-content.css'
 
 // ============================================================

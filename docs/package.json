@@ -17,6 +17,7 @@
     "eventemitter3": "^5.0.1",
     "highlight.js": "^11.9.0",
     "katex": "^0.16.9",
+    "leaflet": "^1.9.4",
     "lodash-es": "^4.17.21",
     "quill": "2.0.3",
     "quill-delta": "^5.1.0",
