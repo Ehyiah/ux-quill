@@ -26,6 +26,12 @@
                     "@ehyiah/ux-quill/dist/styles/gallery/gallery.css": true,
                     "@ehyiah/ux-quill/dist/styles/map-modal.css": true
                 }
+            },
+            "quill-maps": {
+                "main": "dist/map-init.js",
+                "webpackMode": "eager",
+                "fetch": "eager",
+                "enabled": true
             }
         },
         "importmap": {

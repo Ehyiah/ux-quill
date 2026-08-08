@@ -92,14 +92,10 @@ describe('MapModule', () => {
             }).not.toThrow();
         });
 
-        it('should log received options when debug is enabled', () => {
+        it('should log resolved options when debug is enabled', () => {
             const logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
             try {
                 new MapModule(mockQuill, { debug: true, marker: { iconUrl: 'https://example.com/pin.png' } });
-                expect(logSpy).toHaveBeenCalledWith(
-                    '[mapModule] options received:',
-                    expect.objectContaining({ debug: true, marker: { iconUrl: 'https://example.com/pin.png' } }),
-                );
                 expect(logSpy).toHaveBeenCalledWith(
                     '[mapModule] resolved options:',
                     expect.objectContaining({ marker: { iconUrl: 'https://example.com/pin.png' } }),
@@ -457,7 +453,23 @@ describe('MapModule', () => {
             toJSON: () => ({}),
         } as DOMRect;
 
-        it('should activate the map and prevent default when clicking inside', () => {
+        it('should keep the map interactive so the background can be panned directly', () => {
+            const module = new MapModule(mockQuill, {});
+            const container = document.createElement('div');
+            container.getBoundingClientRect = () => rect;
+            const mapDiv = document.createElement('div');
+            const map = { invalidateSize: jest.fn() };
+            document.body.appendChild(container);
+
+            (module as any).setupContainerInteraction(container, mapDiv, map, 'leaflet');
+
+            expect(container.style.pointerEvents).toBe('auto');
+            expect(mapDiv.style.pointerEvents).toBe('auto');
+
+            document.body.removeChild(container);
+        });
+
+        it('should prevent default and refresh the map size when clicking inside', () => {
             const module = new MapModule(mockQuill, {});
             const container = document.createElement('div');
             container.getBoundingClientRect = () => rect;
@@ -477,21 +489,20 @@ describe('MapModule', () => {
             document.dispatchEvent(event);
 
             expect(preventDefault).toHaveBeenCalled();
-            expect(container.style.pointerEvents).toBe('auto');
-            expect(mapDiv.style.pointerEvents).toBe('auto');
             expect(map.invalidateSize).toHaveBeenCalled();
 
             document.body.removeChild(container);
         });
 
-        it('should deactivate the map when clicking outside', () => {
+        it('should not prevent default when clicking outside the map', () => {
             const module = new MapModule(mockQuill, {});
             const container = document.createElement('div');
             container.getBoundingClientRect = () => rect;
             const mapDiv = document.createElement('div');
+            const map = { invalidateSize: jest.fn() };
             document.body.appendChild(container);
 
-            (module as any).setupContainerInteraction(container, mapDiv, {}, 'leaflet');
+            (module as any).setupContainerInteraction(container, mapDiv, map, 'leaflet');
 
             const event = new MouseEvent('mousedown', {
                 clientX: 200,
@@ -499,10 +510,11 @@ describe('MapModule', () => {
                 bubbles: true,
                 cancelable: true,
             });
+            const preventDefault = jest.spyOn(event, 'preventDefault');
             document.dispatchEvent(event);
 
-            expect(container.style.pointerEvents).toBe('none');
-            expect(mapDiv.style.pointerEvents).toBe('none');
+            expect(preventDefault).not.toHaveBeenCalled();
+            expect(map.invalidateSize).not.toHaveBeenCalled();
 
             document.body.removeChild(container);
         });

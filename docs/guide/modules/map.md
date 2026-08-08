@@ -124,9 +124,9 @@ new MapModule(options: [
 
 ### Editing a map
 
-- **Click on the map** to activate it (enables panning and zooming)
-- **Click outside the map** to deactivate it (prevents accidental interaction while editing text)
+- **Drag the map background** to pan the view directly
 - **Drag the marker** to adjust the position — the coordinates are saved automatically
+- The map does not capture keyboard focus, so typing in the editor is unaffected
 
 ### Map selection toolbar
 
@@ -158,16 +158,52 @@ The map container uses the class `.ql-map`. You can customize it with CSS:
 
 ## Displaying saved maps
 
-To render saved maps on a page (outside the editor), include the `quill_content_scripts()` function in your template:
+To render saved maps on a page (outside the editor), **`quill_content_scripts()` is required** — together with `quill_content_styles()` — in your template:
 
 ```twig
 <twig:QuillContent :value="content" />
 
 {{ quill_content_styles() }}
-{{ quill_content_scripts() }}
+{{ quill_content_scripts() }} {# ← required: initializes the maps #}
 ```
 
-The `quill_content_scripts()` function emits a `<script>` tag that automatically initializes all `.ql-map` elements on the page.
+`quill_content_scripts()` emits a Stimulus controller element (`data-controller="ehyiah--ux-quill--quill-maps"`) that initializes every `.ql-map` element on the page.
+
+> **The display page must render the importmap** (`{{ importmap('app') }}`, usually in `base.html.twig`) so the controller can be loaded. After updating the bundle, re-run `bin/console importmap:install`.
+>
+> **With Webpack Encore**, the `quill-maps` controller is registered via `@symfony/stimulus-bridge` from `assets/controllers.json`. After updating the bundle, run `bin/console ux:controllers:dump` (or add the `quill-maps` entry manually), then rebuild your assets (`yarn watch` / `yarn build`).
+>
+> See [Usage → Loading the required JavaScript](/guide/usage#loading-the-required-javascript-maps) for when `quill_content_scripts()` is needed.
+
+> **Without `quill_content_scripts()`, maps are not initialized:** the saved content contains the Leaflet markup rendered in the editor, and without the script (and its Leaflet CSS) the map tiles display as an unstyled grid of grey squares. Always include both functions on the display page.
+
+> By default the saved content stores the editor's rendered HTML (`use_semantic_html` is `false`). If you prefer a lighter, clean saved markup (the `.ql-map` element and its data attributes only, no tiles), enable `use_semantic_html` in `quill_extra_options` — `quill_content_scripts()` is still required to render the map.
+
+> **Troubleshooting — 404 on `/assets/@ehyiah/ux-quill/dist/modules/map-utils.js`:** the display page is loading `map-init.js` as a plain module without the importmap, so its relative imports can't be resolved (AssetMapper only serves versioned files). Make sure the display page renders `{{ importmap('app') }}` (usually in `base.html.twig`) and that `bin/console importmap:install` has been re-run after updating the bundle.
+
+### Map events
+
+The `quill-maps` controller dispatches custom events on each `.ql-map` element during initialization (`bubbles: true`, so you can listen on `document`):
+
+| Event | Detail | When |
+| --- | --- | --- |
+| `ux-quill:map:before-init` | `{ options }` | Before a map starts initializing |
+| `ux-quill:map:initialized` | `{ options }` | After a map has been initialized successfully |
+| `ux-quill:map:error` | `{ options, message }` | When a map fails to initialize (missing Google API key, failed library load) |
+| `ux-quill:maps:completed` | — | On the controller element, after all maps on the page have been processed |
+
+`options` is the full map value read from the `.ql-map` element: `provider` (`'osm'` or `'google'`), `lat`, `lng`, `zoom`, `googleApiKey`, `tileUrl`, `height`, `width`, `scrollWheelZoom`, `draggable`, `marker`. Example:
+
+```js
+document.addEventListener('ux-quill:map:initialized', (event) => {
+    console.log(`Map initialized (${event.detail.options.provider})`, event.target);
+    console.log('Marker:', event.detail.options.marker);
+});
+
+document.addEventListener('ux-quill:map:error', (event) => {
+    console.error('Map failed:', event.detail.options.provider, event.detail.message);
+});
+```
 
 ## Try it live
 

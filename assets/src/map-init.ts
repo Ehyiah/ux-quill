@@ -1,4 +1,29 @@
+import { Controller } from '@hotwired/stimulus';
 import { injectLeafletStyles, loadScript, buildLeafletIcon, buildGoogleMarkerOptions } from './modules/map-utils.ts';
+
+const initializedMaps = new WeakSet<HTMLElement>();
+
+let mapsCompletionPromise: Promise<void> | null = null;
+
+type MapInitResult = { ok: boolean; message?: string };
+
+type MapValue = {
+    lat: number;
+    lng: number;
+    zoom: number;
+    provider: string;
+    googleApiKey: string | null;
+    tileUrl: string | null;
+    height: string;
+    width: string;
+    scrollWheelZoom: boolean;
+    draggable: boolean;
+    marker: any;
+};
+
+function dispatchMapEvent(container: HTMLElement, name: string, detail: Record<string, unknown>): void {
+    container.dispatchEvent(new CustomEvent(name, { bubbles: true, detail }));
+}
 
 function readMarker(container: HTMLElement): any | null {
     const attr = container.getAttribute('data-marker');
@@ -10,33 +35,63 @@ function readMarker(container: HTMLElement): any | null {
     }
 }
 
+function readMapValue(container: HTMLElement): MapValue {
+    return {
+        lat: parseFloat(container.getAttribute('data-lat') || '48.8566'),
+        lng: parseFloat(container.getAttribute('data-lng') || '2.3522'),
+        zoom: parseInt(container.getAttribute('data-zoom') || '13', 10),
+        provider: container.getAttribute('data-provider') || 'osm',
+        googleApiKey: container.getAttribute('data-google-api-key') || null,
+        tileUrl: container.getAttribute('data-tile-url') || null,
+        height: container.style.height || '300px',
+        width: container.style.width || '100%',
+        scrollWheelZoom: container.getAttribute('data-scroll-wheel-zoom') !== 'false',
+        draggable: container.getAttribute('data-draggable') !== 'false',
+        marker: readMarker(container),
+    };
+}
+
 async function initMap(container: HTMLElement): Promise<void> {
-    const lat = parseFloat(container.getAttribute('data-lat') || '48.8566');
-    const lng = parseFloat(container.getAttribute('data-lng') || '2.3522');
-    const zoom = parseInt(container.getAttribute('data-zoom') || '13', 10);
-    const tileUrl = container.getAttribute('data-tile-url') || 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-    const height = container.style.height || '300px';
+    const value = readMapValue(container);
+    dispatchMapEvent(container, 'ux-quill:map:before-init', { options: value });
 
-    const placeholder = container.querySelector('.ql-map-placeholder');
-    if (placeholder) placeholder.remove();
+    // The saved content may contain the Leaflet DOM rendered in the editor (tiles, panes, marker).
+    // Clear it so a fresh map is rendered from the data attributes.
+    container.innerHTML = '';
 
-    const provider = container.getAttribute('data-provider') || 'osm';
-    const marker = readMarker(container);
-    if (provider === 'google') {
-        const apiKey = container.getAttribute('data-google-api-key');
-        if (!apiKey) {
+    let result: MapInitResult;
+    if (value.provider === 'google') {
+        if (!value.googleApiKey) {
             showError(container, 'Google Maps API key is required');
+            dispatchMapEvent(container, 'ux-quill:map:error', {
+                options: value,
+                message: 'Google Maps API key is required',
+            });
             return;
         }
-        await initGoogleMap(container, lat, lng, zoom, apiKey, marker);
+        result = await initGoogleMap(container, value.lat, value.lng, value.zoom, value.googleApiKey, value.marker);
     } else {
-        await initOsmMap(container, lat, lng, zoom, tileUrl, height, marker);
+        result = await initOsmMap(
+            container,
+            value.lat,
+            value.lng,
+            value.zoom,
+            value.tileUrl || 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            value.height,
+            value.marker,
+        );
+    }
+
+    if (result.ok) {
+        dispatchMapEvent(container, 'ux-quill:map:initialized', { options: value });
+    } else {
+        dispatchMapEvent(container, 'ux-quill:map:error', { options: value, message: result.message });
     }
 }
 
 async function initOsmMap(
     container: HTMLElement, lat: number, lng: number, zoom: number, tileUrl: string, height: string, marker: any
-): Promise<void> {
+): Promise<MapInitResult> {
     try {
         await injectLeafletStyles();
         const L = await import('leaflet');
@@ -61,15 +116,19 @@ async function initOsmMap(
         (L as any).marker([lat, lng], { icon: markerIcon }).addTo(map);
 
         setTimeout(() => map.invalidateSize(), 100);
+
+        return { ok: true };
     } catch (error) {
         console.error('Failed to initialize Leaflet map:', error);
         showError(container, 'Failed to load map');
+
+        return { ok: false, message: 'Failed to load map' };
     }
 }
 
 async function initGoogleMap(
     container: HTMLElement, lat: number, lng: number, zoom: number, apiKey: string, marker: any
-): Promise<void> {
+): Promise<MapInitResult> {
     try {
         await loadScript(`https://maps.googleapis.com/maps/api/js?key=${apiKey}`);
 
@@ -91,9 +150,13 @@ async function initGoogleMap(
             map,
             ...buildGoogleMarkerOptions(marker),
         });
+
+        return { ok: true };
     } catch (error) {
         console.error('Failed to initialize Google Map:', error);
         showError(container, 'Failed to load Google Maps');
+
+        return { ok: false, message: 'Failed to load Google Maps' };
     }
 }
 
@@ -105,17 +168,24 @@ function showError(container: HTMLElement, message: string): void {
     container.appendChild(errorDiv);
 }
 
-export function initQuillMaps(): void {
-    const maps = document.querySelectorAll('.ql-map');
-    maps.forEach((el) => {
-        initMap(el as HTMLElement);
-    });
+export function initQuillMaps(): Promise<void> {
+    if (!mapsCompletionPromise) {
+        const pending: Promise<unknown>[] = [];
+        document.querySelectorAll('.ql-map').forEach((el) => {
+            if (initializedMaps.has(el)) return;
+            initializedMaps.add(el);
+            pending.push(initMap(el as HTMLElement));
+        });
+        mapsCompletionPromise = Promise.allSettled(pending).then(() => undefined);
+    }
+
+    return mapsCompletionPromise;
 }
 
-if (typeof document !== 'undefined') {
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initQuillMaps);
-    } else {
-        initQuillMaps();
+export default class extends Controller {
+    connect() {
+        initQuillMaps().then(() => {
+            this.element.dispatchEvent(new CustomEvent('ux-quill:maps:completed', { bubbles: true }));
+        });
     }
 }

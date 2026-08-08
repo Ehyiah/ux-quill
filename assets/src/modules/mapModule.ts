@@ -253,9 +253,12 @@ export class MapModule {
         map: any,
         library: string
     ): void {
-        const activate = () => {
-            container.style.pointerEvents = 'auto';
-            mapDiv.style.pointerEvents = 'auto';
+        // Keep the map interactive at all times so the background can be panned
+        // directly (and the marker dragged) without a click-to-activate step.
+        container.style.pointerEvents = 'auto';
+        mapDiv.style.pointerEvents = 'auto';
+
+        const refreshSize = () => {
             if (library === 'leaflet') {
                 map.invalidateSize();
             } else if (library === 'google') {
@@ -263,11 +266,9 @@ export class MapModule {
             }
         };
 
-        const deactivate = () => {
-            container.style.pointerEvents = 'none';
-            mapDiv.style.pointerEvents = 'none';
-        };
-
+        // Capture-phase guard: prevent the browser from moving keyboard focus (and the
+        // editor caret) to the map when clicking it, without blocking Leaflet's own
+        // drag handling (its listeners still run on the map container).
         const handlePointerDown = (e: MouseEvent | TouchEvent) => {
             const clientX = e instanceof MouseEvent ? e.clientX : e.touches[0]?.clientX;
             const clientY = e instanceof MouseEvent ? e.clientY : e.touches[0]?.clientY;
@@ -282,24 +283,20 @@ export class MapModule {
 
             if (isInside) {
                 e.preventDefault();
-                activate();
-            } else {
-                deactivate();
+                refreshSize();
             }
         };
 
-        document.addEventListener('mousedown', handlePointerDown);
-        document.addEventListener('touchstart', handlePointerDown, { passive: false });
+        document.addEventListener('mousedown', handlePointerDown, true);
+        document.addEventListener('touchstart', handlePointerDown, { passive: false, capture: true });
 
         const instance = MAPS_INSTANCES.get(container);
         if (instance) {
             instance.cleanup = () => {
-                document.removeEventListener('mousedown', handlePointerDown);
-                document.removeEventListener('touchstart', handlePointerDown);
+                document.removeEventListener('mousedown', handlePointerDown, true);
+                document.removeEventListener('touchstart', handlePointerDown, true);
             };
         }
-
-        deactivate();
     }
 
     private showMapError(container: HTMLElement, message: string): void {

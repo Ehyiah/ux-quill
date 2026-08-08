@@ -83,21 +83,17 @@ final class QuillContentExtension extends AbstractExtension
     }
 
     /**
-     * Emits the <script> tags required to initialize interactive Quill content (e.g. maps).
+     * Emits the Stimulus controller element required to initialize interactive Quill content (e.g. maps).
+     *
+     * The controller is registered by the bundle (`symfony.controllers` in `assets/package.json`) and is
+     * loaded through the app's importmap (AssetMapper) or Webpack Encore (`@symfony/stimulus-bridge`).
      */
     public function renderScripts(): string
     {
-        if (null === $this->assetMapper) {
-            return '';
+        if ($this->shouldEmit('quill-maps-controller')) {
+            return '<div data-controller="ehyiah--ux-quill--quill-maps" hidden></div>';
         }
 
-        $scripts = [];
-
-        $mapInit = '@ehyiah/ux-quill/dist/map-init.js';
-        if ($this->shouldEmit($mapInit) && null !== $url = $this->assetMapper->getPublicPath($mapInit)) {
-            $scripts[] = sprintf('<script type="module" src="%s"></script>', htmlspecialchars($url, ENT_QUOTES));
-        }
-
-        return implode("\n", $scripts);
+        return '';
     }
 }
