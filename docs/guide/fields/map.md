@@ -57,6 +57,20 @@ new MapModule(options: [
 ]),
 ```
 
+## Map selection toolbar
+
+Selecting an inserted map in the editor shows a floating toolbar (provided by the `mapSelection` module, enabled by default with `MapField`):
+
+- **¶+ / +¶** — insert an empty paragraph before or after the map
+- **Size (25% / 50% / 75% / 100% + custom)** — set the map width
+- **Align left / center / right** — aligns the map within the content
+- **Edit location** — re-opens the location picker pre-filled with the map's current position
+- **Delete** — removes the map from the editor
+
+> **Note:** alignment has a visible effect only when the map width is below 100%.
+
+See the [module documentation](/guide/modules/map#map-selection-toolbar) for details.
+
 ## Displaying saved maps
 
 To render saved maps on a page (outside the editor), include the `quill_content_scripts()` function in your template:

@@ -185,7 +185,7 @@ const MODULE_DEFS: Record<string, ModuleDefEntry> = {
   },
   map: {
     toolbar: ['map'],
-    config: { map: { provider: 'osm', center: [48.8566, 2.3522], zoom: 13, height: '300px' } },
+    config: { map: { provider: 'osm', center: [48.8566, 2.3522], zoom: 13, height: '300px' }, mapSelection: {} },
   },
   link: {
     toolbar: ['link'],
@@ -319,6 +319,7 @@ function buildConfig() {
           ],
         },
         map: { provider: 'osm', center: [48.8566, 2.3522], zoom: 13, height: '300px' },
+        mapSelection: {},
       },
     }
   }
