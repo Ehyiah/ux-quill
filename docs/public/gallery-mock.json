@@ -1,0 +1,48 @@
+{
+  "data": [
+    {
+      "url": "https://picsum.photos/id/10/800/600",
+      "thumbnail": "https://picsum.photos/id/10/200/200",
+      "title": "Forest"
+    },
+    {
+      "url": "https://picsum.photos/id/20/800/600",
+      "thumbnail": "https://picsum.photos/id/20/200/200",
+      "title": "Bird"
+    },
+    {
+      "url": "https://picsum.photos/id/30/800/600",
+      "thumbnail": "https://picsum.photos/id/30/200/200",
+      "title": "Cup"
+    },
+    {
+      "url": "https://picsum.photos/id/40/800/600",
+      "thumbnail": "https://picsum.photos/id/40/200/200",
+      "title": "Camera"
+    },
+    {
+      "url": "https://picsum.photos/id/50/800/600",
+      "thumbnail": "https://picsum.photos/id/50/200/200",
+      "title": "Nature"
+    },
+    {
+      "url": "https://picsum.photos/id/60/800/600",
+      "thumbnail": "https://picsum.photos/id/60/200/200",
+      "title": "Desert"
+    },
+    {
+      "url": "https://picsum.photos/id/70/800/600",
+      "thumbnail": "https://picsum.photos/id/70/200/200",
+      "title": "Car"
+    },
+    {
+      "url": "https://picsum.photos/id/80/800/600",
+      "thumbnail": "https://picsum.photos/id/80/200/200",
+      "title": "Coffee"
+    }
+  ],
+  "links": {
+    "next": "/ux-quill/gallery-mock-page2.json",
+    "prev": null
+  }
+}

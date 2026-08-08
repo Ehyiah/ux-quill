@@ -5,35 +5,20 @@ import { ToolbarCustomizer } from "./ui/toolbarCustomizer.js";
 import { handleUploadResponse, uploadStrategies } from "./upload-utils.js";
 import "./register-modules.js";
 import QuillTableBetter from 'quill-table-better';
-const Image = Quill.import('formats/image');
-const oldFormats = Image.formats;
-Image.formats = function (domNode) {
-  const formats = oldFormats.call(this, domNode);
-  if (domNode.hasAttribute('style')) {
-    formats.style = domNode.getAttribute('style');
+import { Mention } from "./modules/mention.js";
+
+// Register custom ImageFigure blot to override default image
+import ImageFigure from "./blots/imageFigure.js";
+Quill.register(ImageFigure, true);
+
+// Register custom VideoFigure blot to override default image
+import VideoFigure from "./blots/videoFigure.js";
+Quill.register('formats/video', VideoFigure, true);
+export default class _Class extends Controller {
+  constructor() {
+    super(...arguments);
+    this.quillInstance = null;
   }
-  return formats;
-};
-Image.prototype.format = function (name, value) {
-  value ? this.domNode.setAttribute(name, String(value)) : this.domNode.removeAttribute(name);
-};
-export default class extends Controller {
-  static targets = ['input', 'editorContainer'];
-  static values = (() => ({
-    toolbarOptions: {
-      type: Array,
-      default: []
-    },
-    extraOptions: {
-      type: Object,
-      default: {}
-    },
-    modulesOptions: {
-      type: Array,
-      default: []
-    }
-  }))();
-  quillInstance = null;
   connect() {
     // Prevent re-initialization if Quill instance already exists
     // This is important for LiveComponent compatibility
@@ -50,22 +35,26 @@ export default class extends Controller {
     this.initializeQuill(options, unprocessedIcons);
   }
   disconnect() {
+    var _this$element;
     if (this.quillInstance) {
       this.quillInstance = null;
     }
+    (_this$element = this.element) == null || _this$element.querySelectorAll('.ql-toolbar, .quill-counter-container').forEach(el => el.remove());
+    this.editorContainerTarget && (this.editorContainerTarget.innerHTML = '');
+    document.querySelectorAll('[class*="table-better-menu"]').forEach(el => el.remove());
   }
   buildQuillOptions() {
-    const {
-      debug,
-      placeholder,
-      theme,
-      style
-    } = this.extraOptionsValue;
+    const _this$extraOptionsVal = this.extraOptionsValue,
+      debug = _this$extraOptionsVal.debug,
+      placeholder = _this$extraOptionsVal.placeholder,
+      theme = _this$extraOptionsVal.theme,
+      style = _this$extraOptionsVal.style;
     const readOnly = this.extraOptionsValue.read_only;
     const enabledModules = {
       'toolbar': this.toolbarOptionsValue
     };
     const mergedModules = mergeModules(this.modulesOptionsValue, enabledModules);
+    this.enrichImageGalleryModule(mergedModules);
     return {
       debug,
       modules: mergedModules,
@@ -75,15 +64,35 @@ export default class extends Controller {
       readOnly
     };
   }
+  enrichImageGalleryModule(modules) {
+    if (modules['imageGallery']) {
+      const galleryOptions = modules['imageGallery'];
+      const uploadConfig = this.extraOptionsValue.upload_handler;
+      if (uploadConfig) {
+        if (galleryOptions.uploadEndpoint === undefined) {
+          galleryOptions.uploadEndpoint = uploadConfig.upload_endpoint;
+        }
+        if (galleryOptions.uploadStrategy === undefined) {
+          galleryOptions.uploadStrategy = uploadConfig.type;
+        }
+        if (galleryOptions.authConfig === undefined) {
+          galleryOptions.authConfig = uploadConfig.security;
+        }
+        if (galleryOptions.jsonResponseFilePath === undefined) {
+          galleryOptions.jsonResponseFilePath = uploadConfig.json_response_file_path;
+        }
+      }
+    }
+  }
   setupQuillStyles(options) {
     if (options.style === 'inline') {
       const styleAttributes = ['align', 'background', 'color', 'direction', 'font', 'size'];
-      styleAttributes.forEach(attr => Quill.register(Quill.import(`attributors/style/${attr}`), true));
+      styleAttributes.forEach(attr => Quill.register(Quill.import("attributors/style/" + attr), true));
     }
   }
   setupUploadHandler(options) {
     const config = this.extraOptionsValue.upload_handler;
-    if (config?.upload_endpoint && uploadStrategies[config.type]) {
+    if (config != null && config.upload_endpoint && uploadStrategies[config.type]) {
       const uploadFunction = file => uploadStrategies[config.type](config.upload_endpoint, file, config.security).then(response => handleUploadResponse(response, config.json_response_file_path));
       Object.assign(options.modules, {
         imageUploader: {
@@ -114,7 +123,8 @@ export default class extends Controller {
     quill.updateContents(initialData);
     this.dispatchEvent('hydrate:after', quill);
     quill.on('text-change', () => {
-      const quillContent = this.extraOptionsValue?.use_semantic_html ? quill.getSemanticHTML() : quill.root.innerHTML;
+      var _this$extraOptionsVal2;
+      const quillContent = (_this$extraOptionsVal2 = this.extraOptionsValue) != null && _this$extraOptionsVal2.use_semantic_html ? quill.getSemanticHTML() : quill.root.innerHTML;
       const inputContent = this.inputTarget;
       inputContent.value = quillContent;
       this.bubbles(inputContent);
@@ -178,5 +188,27 @@ export default class extends Controller {
     if (isTablePresent) {
       Quill.register('modules/table-better', QuillTableBetter);
     }
+    if (options.modules) {
+      for (const moduleName in options.modules) {
+        if (moduleName.startsWith('mention')) {
+          Quill.register("modules/" + moduleName, Mention);
+        }
+      }
+    }
   }
 }
+_Class.targets = ['input', 'editorContainer'];
+_Class.values = {
+  toolbarOptions: {
+    type: Array,
+    default: []
+  },
+  extraOptions: {
+    type: Object,
+    default: {}
+  },
+  modulesOptions: {
+    type: Array,
+    default: []
+  }
+};

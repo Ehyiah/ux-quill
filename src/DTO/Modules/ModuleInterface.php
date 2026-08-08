@@ -12,7 +12,7 @@ namespace Ehyiah\QuillJsBundle\DTO\Modules;
 interface ModuleInterface
 {
     /**
-     * @param array<mixed>|int|string $options
+     * @param array<mixed> $options
      */
-    public function __construct(string $name, array|int|string $options);
+    public function __construct(string $name, array $options);
 }

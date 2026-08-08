@@ -1,6 +1,6 @@
 <?php
 
-namespace DTO\Fields\Block;
+namespace Ehyiah\QuillJsBundle\Tests\DTO\Fields\Block;
 
 use Ehyiah\QuillJsBundle\DTO\Fields\BlockField\FontField;
 use PHPUnit\Framework\TestCase;
@@ -20,8 +20,7 @@ final class FontFieldTest extends TestCase
         $result = $field->getOption();
 
         $expectedResult = [
-            'font' => [
-            ],
+            'font' => [],
         ];
 
         $this->assertEquals($expectedResult, $result);

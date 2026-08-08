@@ -13,3 +13,4 @@ compose.override.yaml
 *.map
 /docs/node_modules/
 /docs/.vitepress/cache/
+/docs/.vitepress/dist/

@@ -1,0 +1,13 @@
+<{{ this.tag }} {{ attributes.defaults({
+    class: this.isClassStyle ? 'ql-snow' : ''
+}) }}>
+    {% block content %}
+        {% if this.isClassStyle %}
+            <div class="ql-editor">
+                {{ (this.value ?? '')|raw }}
+            </div>
+        {% else %}
+            {{ (this.value ?? '')|raw }}
+        {% endif %}
+    {% endblock %}
+</{{ this.tag }}>

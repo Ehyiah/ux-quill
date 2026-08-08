@@ -6,7 +6,7 @@ use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillFieldModuleInterface;
 use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillInlineFieldInterface;
 use Ehyiah\QuillJsBundle\DTO\Modules\TableModule;
 
-class TableField implements QuillInlineFieldInterface, QuillFieldModuleInterface
+final class TableField implements QuillInlineFieldInterface, QuillFieldModuleInterface
 {
     public const NAME = 'table-better';
 

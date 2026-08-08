@@ -1,40 +1,26 @@
 import { Controller } from '@hotwired/stimulus';
 import Quill from 'quill';
 import * as Options from 'quill/core/quill';
-import { ExtraOptions, ModuleOptions } from './types.d.ts';
+import type { ExtraOptions, ModuleOptions } from './types.d.ts';
 import mergeModules from './modules.ts';
 import { ToolbarCustomizer } from './ui/toolbarCustomizer.ts';
 import { handleUploadResponse, uploadStrategies } from './upload-utils.ts';
 
 import './register-modules.ts';
 import QuillTableBetter from 'quill-table-better';
+import {Mention} from './modules/mention.ts';
+
+// Register custom ImageFigure blot to override default image
+import ImageFigure from './blots/imageFigure.ts';
+Quill.register(ImageFigure, true);
+
+// Register custom VideoFigure blot to override default image
+import VideoFigure from './blots/videoFigure.ts';
+Quill.register('formats/video', VideoFigure, true);
 
 interface DOMNode extends HTMLElement {
     getAttribute(name: string): string | null;
-    setAttribute(name: string, value: string): void;
-    removeAttribute(name: string): void;
-    hasAttribute(name: string): boolean;
 }
-
-const Image = Quill.import('formats/image');
-const oldFormats = Image.formats;
-
-Image.formats = function(domNode: DOMNode) {
-    const formats = oldFormats.call(this, domNode);
-    if (domNode.hasAttribute('style')) {
-        formats.style = domNode.getAttribute('style');
-    }
-    return formats;
-};
-
-type ImageWithDOM = {
-    domNode: DOMNode;
-    format(name: string, value: string | boolean | null): void;
-};
-
-Image.prototype.format = function(this: ImageWithDOM, name: string, value: string | boolean | null) {
-    value ? this.domNode.setAttribute(name, String(value)) : this.domNode.removeAttribute(name);
-};
 
 export default class extends Controller {
     declare readonly inputTarget: HTMLInputElement;
@@ -85,6 +71,10 @@ export default class extends Controller {
         if (this.quillInstance) {
             this.quillInstance = null;
         }
+
+        this.element?.querySelectorAll('.ql-toolbar, .quill-counter-container').forEach(el => el.remove());
+        this.editorContainerTarget && (this.editorContainerTarget.innerHTML = '');
+        document.querySelectorAll('[class*="table-better-menu"]').forEach(el => el.remove());
     }
 
     private buildQuillOptions(): Options {
@@ -95,6 +85,8 @@ export default class extends Controller {
         };
         const mergedModules = mergeModules(this.modulesOptionsValue, enabledModules);
 
+        this.enrichImageGalleryModule(mergedModules);
+
         return {
             debug,
             modules: mergedModules,
@@ -103,6 +95,28 @@ export default class extends Controller {
             style,
             readOnly,
         };
+    }
+
+    private enrichImageGalleryModule(modules: any) {
+        if (modules['imageGallery']) {
+            const galleryOptions = modules['imageGallery'];
+            const uploadConfig = this.extraOptionsValue.upload_handler;
+
+            if (uploadConfig) {
+                if (galleryOptions.uploadEndpoint === undefined) {
+                    galleryOptions.uploadEndpoint = uploadConfig.upload_endpoint;
+                }
+                if (galleryOptions.uploadStrategy === undefined) {
+                    galleryOptions.uploadStrategy = uploadConfig.type;
+                }
+                if (galleryOptions.authConfig === undefined) {
+                    galleryOptions.authConfig = uploadConfig.security;
+                }
+                if (galleryOptions.jsonResponseFilePath === undefined) {
+                    galleryOptions.jsonResponseFilePath = uploadConfig.json_response_file_path;
+                }
+            }
+        }
     }
 
     private setupQuillStyles(options: Options) {
@@ -154,7 +168,7 @@ export default class extends Controller {
 
     private setupContentSync(quill: Quill) {
         // set initial content as a delta for better compatibility and allow table-module to work
-        const initialData = quill.clipboard.convert({html: this.inputTarget.value})
+        const initialData = quill.clipboard.convert({ html: this.inputTarget.value })
         this.dispatchEvent('hydrate:before', initialData);
         quill.updateContents(initialData);
         this.dispatchEvent('hydrate:after', quill);
@@ -229,6 +243,14 @@ export default class extends Controller {
 
         if (isTablePresent) {
             Quill.register('modules/table-better', QuillTableBetter);
+        }
+
+        if (options.modules) {
+            for (const moduleName in options.modules) {
+                if (moduleName.startsWith('mention')) {
+                    Quill.register(`modules/${moduleName}`, Mention);
+                }
+            }
         }
     }
 }

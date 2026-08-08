@@ -4,10 +4,9 @@ namespace Ehyiah\QuillJsBundle\DTO\Fields\InlineField;
 
 use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillFieldModuleInterface;
 use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillInlineFieldInterface;
-use Ehyiah\QuillJsBundle\DTO\Modules\ImageDragAndDropModule;
-use Ehyiah\QuillJsBundle\DTO\Modules\ResizeModule;
+use Ehyiah\QuillJsBundle\DTO\Modules\ImageSelectionModule;
 
-class ImageField implements QuillInlineFieldInterface, QuillFieldModuleInterface
+final class ImageField implements QuillInlineFieldInterface, QuillFieldModuleInterface
 {
     public function getOption(): string
     {
@@ -16,6 +15,6 @@ class ImageField implements QuillInlineFieldInterface, QuillFieldModuleInterface
 
     public static function importModules(): array
     {
-        return [ResizeModule::class, ImageDragAndDropModule::class];
+        return [ImageSelectionModule::class];
     }
 }

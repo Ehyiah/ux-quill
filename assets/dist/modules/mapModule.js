@@ -1,0 +1,281 @@
+function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
+import Quill from 'quill';
+import MapBlot from "../blots/map.js";
+import MapModal from "./map-modal.js";
+import { loadScript, injectLeafletStyles, buildLeafletIcon, buildGoogleMarkerOptions } from "./map-utils.js";
+Quill.register(MapBlot);
+const MAPS_INSTANCES = new WeakMap();
+export class MapModule {
+  constructor(quill, options) {
+    this.quill = void 0;
+    this.options = void 0;
+    this.debug = false;
+    this.observer = null;
+    this.quill = quill;
+    this.debug = options.debug === true;
+    this.options = {
+      provider: options.provider || 'osm',
+      center: options.center || [48.8566, 2.3522],
+      zoom: options.zoom || 13,
+      googleApiKey: options.googleApiKey || null,
+      tileUrl: options.tileUrl || null,
+      height: options.height || '300px',
+      scrollWheelZoom: options.scrollWheelZoom !== false,
+      draggable: options.draggable !== false,
+      marker: options.marker || null
+    };
+    if (this.debug) {
+      console.log('[mapModule] resolved options:', this.options);
+    }
+    this.addToolbarHandler();
+    this.observeEditor();
+    this.initExistingMaps();
+  }
+  getQuill() {
+    return this.quill;
+  }
+  getMapOptions() {
+    return this.options;
+  }
+  addToolbarHandler() {
+    const toolbar = this.quill.getModule('toolbar');
+    if (!toolbar) return;
+    toolbar.addHandler('map', () => {
+      const modal = new MapModal(this);
+      modal.open();
+    });
+  }
+  insertMap(lat, lng) {
+    const range = this.quill.getSelection(true);
+    if (!range) return;
+    const mapValue = {
+      lat: lat != null ? lat : this.options.center[0],
+      lng: lng != null ? lng : this.options.center[1],
+      zoom: this.options.zoom,
+      provider: this.options.provider,
+      googleApiKey: this.options.googleApiKey,
+      tileUrl: this.options.tileUrl,
+      height: this.options.height,
+      scrollWheelZoom: this.options.scrollWheelZoom,
+      draggable: this.options.draggable,
+      marker: this.options.marker
+    };
+    if (this.debug) {
+      console.log('[mapModule] mapValue inserted:', mapValue);
+    }
+    this.quill.insertEmbed(range.index, 'map', mapValue, 'user');
+    this.quill.insertText(range.index + 1, '\n', 'api');
+    this.quill.setSelection(range.index + 2, 'api');
+  }
+  editMapLocation(container) {
+    const value = MapBlot.value(container);
+    const modal = new MapModal(this, {
+      lat: value.lat,
+      lng: value.lng,
+      title: 'Edit map location',
+      confirmLabel: 'Update Map',
+      onConfirm: (lat, lng) => {
+        this.updateMapLocation(container, lat, lng);
+      }
+    });
+    modal.open();
+  }
+  updateMapLocation(container, lat, lng) {
+    container.setAttribute('data-lat', String(lat));
+    container.setAttribute('data-lng', String(lng));
+    const instance = MAPS_INSTANCES.get(container);
+    if (instance) {
+      if (instance.library === 'leaflet') {
+        instance.map.setView([lat, lng]);
+        instance.marker.setLatLng([lat, lng]);
+      } else if (instance.library === 'google') {
+        instance.map.setCenter({
+          lat,
+          lng
+        });
+        instance.marker.setPosition({
+          lat,
+          lng
+        });
+      }
+    }
+    this.quill.update('api');
+  }
+  observeEditor() {
+    const editor = this.quill.root;
+    this.observer = new MutationObserver(mutations => {
+      for (const mutation of mutations) {
+        for (const node of Array.from(mutation.addedNodes)) {
+          if (node instanceof HTMLElement && node.classList.contains('ql-map')) {
+            this.initMapForContainer(node);
+          }
+        }
+      }
+    });
+    this.observer.observe(editor, {
+      childList: true,
+      subtree: true
+    });
+  }
+  initExistingMaps() {
+    const maps = this.quill.root.querySelectorAll('.ql-map');
+    maps.forEach(map => {
+      this.initMapForContainer(map);
+    });
+  }
+  initMapForContainer(container) {
+    if (MAPS_INSTANCES.has(container)) return;
+    const value = MapBlot.value(container);
+    if (this.debug) {
+      console.log('[mapModule] value from DOM:', value);
+    }
+    const placeholder = container.querySelector('.ql-map-placeholder');
+    if (placeholder) placeholder.remove();
+    if (value.provider === 'google' && value.googleApiKey) {
+      this.initGoogleMap(container, value);
+    } else {
+      this.initOsmMap(container, value);
+    }
+  }
+  async initOsmMap(container, value) {
+    try {
+      await injectLeafletStyles();
+      const L = await import('leaflet');
+      const markerIcon = buildLeafletIcon(L, value.marker);
+      const mapDiv = document.createElement('div');
+      mapDiv.style.width = '100%';
+      mapDiv.style.height = '100%';
+      container.appendChild(mapDiv);
+      const tileUrl = value.tileUrl || 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+      const map = L.map(mapDiv, {
+        center: [value.lat, value.lng],
+        zoom: value.zoom,
+        scrollWheelZoom: value.scrollWheelZoom
+      });
+      L.tileLayer(tileUrl, {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
+      const marker = L.marker([value.lat, value.lng], {
+        draggable: value.draggable,
+        icon: markerIcon
+      }).addTo(map);
+      if (value.draggable) {
+        marker.on('dragend', () => {
+          const pos = marker.getLatLng();
+          container.setAttribute('data-lat', String(pos.lat));
+          container.setAttribute('data-lng', String(pos.lng));
+          this.quill.update('api');
+        });
+      }
+      MAPS_INSTANCES.set(container, {
+        map,
+        marker,
+        library: 'leaflet'
+      });
+      this.setupContainerInteraction(container, mapDiv, map, 'leaflet');
+    } catch (error) {
+      console.error('Failed to initialize Leaflet map:', error);
+      this.showMapError(container, 'Failed to load map library');
+    }
+  }
+  async initGoogleMap(container, value) {
+    try {
+      const apiKey = value.googleApiKey;
+      if (!apiKey) {
+        this.showMapError(container, 'Google Maps API key is required');
+        return;
+      }
+      await loadScript("https://maps.googleapis.com/maps/api/js?key=" + apiKey);
+      const mapDiv = document.createElement('div');
+      mapDiv.style.width = '100%';
+      mapDiv.style.height = '100%';
+      container.appendChild(mapDiv);
+      const center = {
+        lat: value.lat,
+        lng: value.lng
+      };
+      const map = new window.google.maps.Map(mapDiv, {
+        center,
+        zoom: value.zoom,
+        scrollwheel: value.scrollWheelZoom,
+        mapTypeControl: false,
+        streetViewControl: false
+      });
+      const marker = new window.google.maps.Marker(_extends({
+        position: center,
+        map,
+        draggable: value.draggable
+      }, buildGoogleMarkerOptions(value.marker)));
+      if (value.draggable) {
+        marker.addListener('dragend', () => {
+          const pos = marker.getPosition();
+          container.setAttribute('data-lat', String(pos.lat()));
+          container.setAttribute('data-lng', String(pos.lng()));
+          this.quill.update('api');
+        });
+      }
+      MAPS_INSTANCES.set(container, {
+        map,
+        marker,
+        library: 'google'
+      });
+      this.setupContainerInteraction(container, mapDiv, map, 'google');
+    } catch (error) {
+      console.error('Failed to initialize Google Map:', error);
+      this.showMapError(container, 'Failed to load Google Maps');
+    }
+  }
+  setupContainerInteraction(container, mapDiv, map, library) {
+    // Keep the map interactive at all times so the background can be panned
+    // directly (and the marker dragged) without a click-to-activate step.
+    container.style.pointerEvents = 'auto';
+    mapDiv.style.pointerEvents = 'auto';
+    const refreshSize = () => {
+      if (library === 'leaflet') {
+        map.invalidateSize();
+      } else if (library === 'google') {
+        window.google.maps.event.trigger(map, 'resize');
+      }
+    };
+
+    // Capture-phase guard: prevent the browser from moving keyboard focus (and the
+    // editor caret) to the map when clicking it, without blocking Leaflet's own
+    // drag handling (its listeners still run on the map container).
+    const handlePointerDown = e => {
+      var _e$touches$, _e$touches$2;
+      const clientX = e instanceof MouseEvent ? e.clientX : (_e$touches$ = e.touches[0]) == null ? void 0 : _e$touches$.clientX;
+      const clientY = e instanceof MouseEvent ? e.clientY : (_e$touches$2 = e.touches[0]) == null ? void 0 : _e$touches$2.clientY;
+      if (clientX === undefined || clientY === undefined) return;
+      const rect = container.getBoundingClientRect();
+      const isInside = clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom;
+      if (isInside) {
+        e.preventDefault();
+        refreshSize();
+      }
+    };
+    document.addEventListener('mousedown', handlePointerDown, true);
+    document.addEventListener('touchstart', handlePointerDown, {
+      passive: false,
+      capture: true
+    });
+    const instance = MAPS_INSTANCES.get(container);
+    if (instance) {
+      instance.cleanup = () => {
+        document.removeEventListener('mousedown', handlePointerDown, true);
+        document.removeEventListener('touchstart', handlePointerDown, true);
+      };
+    }
+  }
+  showMapError(container, message) {
+    container.innerHTML = '';
+    const errorDiv = document.createElement('div');
+    errorDiv.style.display = 'flex';
+    errorDiv.style.alignItems = 'center';
+    errorDiv.style.justifyContent = 'center';
+    errorDiv.style.height = '100%';
+    errorDiv.style.color = '#cc0000';
+    errorDiv.style.fontSize = '14px';
+    errorDiv.textContent = message;
+    container.appendChild(errorDiv);
+  }
+}

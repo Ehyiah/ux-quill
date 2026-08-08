@@ -21,12 +21,24 @@ final class HtmlEditModule implements ModuleInterface
     // Require Highlight, auto-registered but currently not really working well, waiting for PR in the module
     public const SYNTAX_OPTION = 'syntax';
 
+    /**
+     * @var array<mixed>|int|string
+     */
+    public $options;
+
     public function __construct(
         public string $name = self::NAME,
-        /**
-         * @var array<mixed>|int|string
-         */
-        public $options = [
+        array $options = [],
+    ) {
+        $this->options = array_merge($this->getDefaultOptions(), $options);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function getDefaultOptions(): array
+    {
+        return [
             self::DEBUG_OPTION => false,
             self::SYNTAX_OPTION => false,
             self::CLOSE_ON_CLICK_OVERLAY_OPTION => false,
@@ -35,7 +47,6 @@ final class HtmlEditModule implements ModuleInterface
             self::MESSAGE_OPTION => 'Edit html source',
             self::OK_TEXT_OPTION => 'Save',
             self::CANCEL_TEXT_OPTION => 'Cancel',
-        ],
-    ) {
+        ];
     }
 }

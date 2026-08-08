@@ -13,6 +13,7 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             fail-fast: true
+            max-parallel: 4
             matrix:
                 php-version: ['8.1', '8.2', '8.3', '8.4']
                 symfony-version: ['6.4', '7.4', '8.0']
@@ -31,6 +32,8 @@ jobs:
             - name: Checkout code
               if: ${{ !env.ACT }}
               uses: actions/checkout@v4
+              with:
+                  ref: ${{ github.event.pull_request.head.sha || github.ref }}
 
             # Clean up test projects from previous runs (for local act testing)
             - name: Clean up previous test projects
@@ -68,7 +71,24 @@ jobs:
               run: |
                   # Installer notre bundle depuis le dépôt local
                   composer config repositories.local '{"type": "path", "url": "../", "options": {"symlink": true}}'
-                  composer require ehyiah/ux-quill:@dev
+                  
+                  # Retry en cas d'échec transitoire de résolution des paquets JS via l'API jsDelivr
+                  # (voir https://github.com/jsdelivr/jsdelivr/issues/18717)
+                  MAX_ATTEMPTS=5
+                  for attempt in $(seq 1 $MAX_ATTEMPTS); do
+                    if composer require ehyiah/ux-quill:@dev; then
+                      echo "✅ Installation réussie (tentative $attempt)"
+                      break
+                    fi
+                  
+                    if [ "$attempt" -eq "$MAX_ATTEMPTS" ]; then
+                      echo "❌ Échec après $MAX_ATTEMPTS tentatives"
+                      exit 1
+                    fi
+                  
+                    echo "⚠️ Tentative $attempt échouée, probable souci temporaire de résolution jsDelivr. Nouvelle tentative dans 20s..."
+                    sleep 20
+                  done
                   
                   # Vérifier que le bundle est correctement installé dans composer.json
                   cat composer.json | grep ehyiah/ux-quill

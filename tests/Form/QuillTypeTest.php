@@ -2,6 +2,7 @@
 
 namespace Ehyiah\QuillJsBundle\Tests\Form;
 
+use Ehyiah\QuillJsBundle\Config\QuillConfigBuilder;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\BoldField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\CodeBlockField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\EmojiField;
@@ -10,8 +11,8 @@ use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ImageField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ItalicField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\UnderlineField;
 use Ehyiah\QuillJsBundle\DTO\Modules\EmojiModule;
-use Ehyiah\QuillJsBundle\DTO\Modules\ImageDragAndDropModule;
-use Ehyiah\QuillJsBundle\DTO\Modules\ResizeModule;
+use Ehyiah\QuillJsBundle\DTO\Modules\ImageSelectionModule;
+use Ehyiah\QuillJsBundle\DTO\Modules\NodeMoverModule;
 use Ehyiah\QuillJsBundle\DTO\Modules\SyntaxModule;
 use Ehyiah\QuillJsBundle\Form\QuillType;
 use Generator;
@@ -28,6 +29,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 final class QuillTypeTest extends TestCase
 {
     private QuillType $quillType;
+    private QuillConfigBuilder $configBuilder;
     private FormInterface $form;
     private FormView $formView;
 
@@ -36,7 +38,8 @@ final class QuillTypeTest extends TestCase
         parent::setUp();
 
         $translator = $this->createMock(TranslatorInterface::class);
-        $this->quillType = new QuillType($translator);
+        $this->configBuilder = new QuillConfigBuilder($translator);
+        $this->quillType = new QuillType($this->configBuilder);
         $this->form = $this->createMock(FormInterface::class);
         $this->formView = new FormView();
     }
@@ -68,6 +71,32 @@ final class QuillTypeTest extends TestCase
 
     public static function provideOptionsToBuildView(): Generator
     {
+        $defaultExtraOptions = [
+            'custom_icons' => [],
+            'upload_handler' => [
+                'type' => 'form',
+                'upload_endpoint' => null,
+                'json_response_file_path' => null,
+                'security' => [
+                    'type' => null,
+                    'jwt_token' => null,
+                    'username' => null,
+                    'password' => null,
+                    'custom_header' => null,
+                    'custom_header_value' => null,
+                ],
+            ],
+            'debug' => 'error',
+            'height' => '200px',
+            'theme' => 'snow',
+            'placeholder' => 'Quill editor',
+            'style' => 'class',
+            'modules' => [],
+            'use_semantic_html' => false,
+            'read_only' => false,
+            'assets' => [],
+        ];
+
         yield [
             [
                 'quill_options' => [
@@ -77,8 +106,7 @@ final class QuillTypeTest extends TestCase
                     [new ImageField()],
                     [new EmojiField()],
                 ],
-                'quill_extra_options' => [
-                ],
+                'quill_extra_options' => [],
                 'modules' => [],
             ],
             [
@@ -89,13 +117,12 @@ final class QuillTypeTest extends TestCase
                     ['image'],
                     ['emoji'],
                 ],
-                'quill_extra_options' => [
-                ],
+                'quill_extra_options' => $defaultExtraOptions,
                 'modules' => [
                     new SyntaxModule(),
-                    new ResizeModule(),
-                    new ImageDragAndDropModule(),
+                    new ImageSelectionModule(),
                     new EmojiModule(),
+                    new NodeMoverModule(),
                 ],
             ],
         ];
@@ -105,8 +132,7 @@ final class QuillTypeTest extends TestCase
                     [new BoldField(), new ItalicField()],
                     [new BoldField(), new UnderlineField()],
                 ],
-                'quill_extra_options' => [
-                ],
+                'quill_extra_options' => [],
                 'modules' => [],
             ],
             [
@@ -114,9 +140,9 @@ final class QuillTypeTest extends TestCase
                     ['bold', 'italic'],
                     ['bold', 'underline'],
                 ],
-                'quill_extra_options' => [
-                ],
+                'quill_extra_options' => $defaultExtraOptions,
                 'modules' => [
+                    new NodeMoverModule(),
                 ],
             ],
         ];
@@ -128,7 +154,8 @@ final class QuillTypeTest extends TestCase
     public function testConfigureOptions(): void
     {
         $translator = $this->createMock(TranslatorInterface::class);
-        $quillType = new QuillType($translator);
+        $configBuilder = new QuillConfigBuilder($translator);
+        $quillType = new QuillType($configBuilder);
 
         $resolver = new OptionsResolver();
         $quillType->configureOptions($resolver);
@@ -147,7 +174,8 @@ final class QuillTypeTest extends TestCase
     public function testGetBlockPrefix(): void
     {
         $translator = $this->createMock(TranslatorInterface::class);
-        $quillType = new QuillType($translator);
+        $configBuilder = new QuillConfigBuilder($translator);
+        $quillType = new QuillType($configBuilder);
 
         $this->assertEquals('quill', $quillType->getBlockPrefix());
     }
@@ -158,7 +186,8 @@ final class QuillTypeTest extends TestCase
     public function testGetParent(): void
     {
         $translator = $this->createMock(TranslatorInterface::class);
-        $quillType = new QuillType($translator);
+        $configBuilder = new QuillConfigBuilder($translator);
+        $quillType = new QuillType($configBuilder);
 
         $this->assertEquals(TextareaType::class, $quillType->getParent());
     }
@@ -192,6 +221,50 @@ final class QuillTypeTest extends TestCase
         $this->assertEquals('200px', $extraOptions['height']);
         $this->assertEquals('snow', $extraOptions['theme']);
         $this->assertEquals('Quill editor', $extraOptions['placeholder']);
+    }
+
+    /**
+     * @covers ::buildView
+     */
+    public function testBuildViewWithQuillExtraOptionsAsArray(): void
+    {
+        $options = [
+            'quill_options' => [['bold', 'italic']],
+            'quill_extra_options' => [
+                'height' => '500px',
+            ],
+            'modules' => [],
+        ];
+
+        $this->quillType->buildView($this->formView, $this->form, $options);
+
+        $extraOptions = json_decode($this->formView->vars['attr']['quill_extra_options'], true);
+
+        $this->assertArrayHasKey('theme', $extraOptions);
+        $this->assertEquals('snow', $extraOptions['theme']);
+        $this->assertEquals('500px', $extraOptions['height']);
+    }
+
+    /**
+     * @covers ::buildView
+     */
+    public function testBuildViewWithQuillExtraOptionsAsClosure(): void
+    {
+        $options = [
+            'quill_options' => [['bold', 'italic']],
+            'quill_extra_options' => static function (OptionsResolver $resolver) {
+                $resolver->setDefault('height', '700px');
+            },
+            'modules' => [],
+        ];
+
+        $this->quillType->buildView($this->formView, $this->form, $options);
+
+        $extraOptions = json_decode($this->formView->vars['attr']['quill_extra_options'], true);
+
+        $this->assertArrayHasKey('theme', $extraOptions);
+        $this->assertEquals('snow', $extraOptions['theme']);
+        $this->assertEquals('700px', $extraOptions['height']);
     }
 
     /**

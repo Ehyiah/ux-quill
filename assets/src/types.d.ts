@@ -1,30 +1,126 @@
-import {AuthConfig} from './upload-utils';
+import { AuthConfig } from './upload-utils';
 
 export type ExtraOptions = {
     theme: string;
-    debug: string|null;
-    height: string|null;
-    placeholder: string|null;
-    upload_handler: uploadOptions;
-    style: string;
+    debug: 'error' | 'warn' | 'log' | 'info' | null;
+    height: string | null;
+    placeholder: string | null;
+    upload_handler: UploadOptions;
+    style: 'class' | 'inline';
     use_semantic_html: boolean;
-    custom_icons?: {[key: string]: string};
+    custom_icons?: { [key: string]: string };
     read_only: boolean;
+    assets?: {
+        styleSheets?: string[] | { [key: string]: string };
+        scripts?: string[] | { [key: string]: string };
+    };
 }
 
-export type uploadOptions = {
-    type: string;
-    upload_endpoint: null|string;
-    json_response_file_path: null|string;
-    security?: AuthConfig
+export type UploadOptions = {
+    type: 'form' | 'json';
+    upload_endpoint: null | string;
+    json_response_file_path: null | string;
+    security?: AuthConfig;
 }
 
-interface ModuleInterface {
+export type ImageGalleryOptions = {
+    listEndpoint: string;
+    uploadEndpoint?: string;
+    searchEndpoint?: string;
+    icon?: string;
+    buttonTitle?: string;
+    uploadTitle?: string;
+    messageLoadingOption?: string;
+    messageNextPageOption?: string;
+    messagePrevPageOption?: string;
+    messageErrorOption?: string;
+    messageNoImageOption?: string;
+    messageSearchPlaceholderOption?: string;
+    messageTitleOption?: string;
+    messageCloseOption?: string;
+    authConfig?: AuthConfig;
+    jsonResponseFilePath?: string;
+    uploadStrategy?: 'form' | 'json';
+}
+
+export interface ReadingTimeOptions {
+    wpm?: number;
+    label?: string;
+    suffix?: string;
+    target?: string;
+    readTimeOk?: number;
+    readTimeMedium?: number;
+}
+
+export type SpeechToTextOptions = {
+    language?: string;
+    continuous?: boolean;
+    visualizer?: boolean;
+    waveformColor?: string;
+    histogramColor?: string;
+    debug?: boolean;
+    buttonTitleStart?: string;
+    buttonTitleStop?: string;
+    titleInactive?: string;
+    titleStarting?: string;
+    titleActive?: string;
+};
+
+export type CountOptions = {
+    words?: boolean;
+    words_label?: string;
+    words_container?: string;
+    characters?: boolean;
+    characters_label?: string;
+    characters_container?: string;
+}
+
+export type NotionToolbarOptions = {
+    slashMenu?: boolean;
+    floatingToolbar?: boolean;
+}
+
+export type MapMarkerOptions = {
+    iconUrl?: string | null;
+    iconRetinaUrl?: string | null;
+    shadowUrl?: string | null;
+    iconSize?: [number, number] | null;
+    iconAnchor?: [number, number] | null;
+    popupAnchor?: [number, number] | null;
+    shadowSize?: [number, number] | null;
+    label?: string | null;
+};
+
+export type MapOptions = {
+    provider?: 'osm' | 'google';
+    center?: [number, number];
+    zoom?: number;
+    googleApiKey?: string | null;
+    tileUrl?: string | null;
+    height?: string;
+    scrollWheelZoom?: boolean;
+    draggable?: boolean;
+    marker?: MapMarkerOptions | null;
+    debug?: boolean;
+};
+
+export type MapValue = {
+    lat: number;
+    lng: number;
+    zoom: number;
+    provider: string;
+    googleApiKey?: string | null;
+    tileUrl?: string | null;
+    height?: string;
+    width?: string;
+    scrollWheelZoom?: boolean;
+    draggable?: boolean;
+    marker?: MapMarkerOptions | null;
+};
+
+export interface ModuleInterface {
     name: string;
-    options: string|Array<any>;
+    options: any | ImageGalleryOptions | ReadingTimeOptions | SpeechToTextOptions | CountOptions | NotionToolbarOptions;
 }
 
-export type ModuleOptions = {
-    name: string;
-    options: Array<ModuleInterface>
-}
+export type ModuleOptions = ModuleInterface[];
