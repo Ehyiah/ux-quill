@@ -60,6 +60,7 @@ export default defineConfig({
               { text: 'Media', link: '/guide/fields/media' },
               { text: 'Page Break', link: '/guide/fields/pagebreak' },
               { text: 'Table', link: '/guide/fields/table' },
+              { text: 'Templates', link: '/guide/fields/templates' },
               { text: 'Text Formatting', link: '/guide/fields/text-formatting' },
             ]
           },
@@ -105,6 +106,7 @@ export default defineConfig({
                   { text: 'Syntax (Highlight)', link: '/guide/modules/syntax' },
                   { text: 'Table', link: '/guide/modules/table' },
                   { text: 'Video Selection', link: '/guide/modules/video-selection' },
+                  { text: 'TemplatesModule', link: '/guide/modules/templates' },
                 ]
               },
             ]
