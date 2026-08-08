@@ -33,7 +33,7 @@ The following templates are provided out of the box and can be used as-is or as 
 You can mix default constants with your own templates:
 
 ```php
-new TemplatesModule([
+new TemplatesModule(options: [
     TemplatesModule::TEMPLATE_SIGNATURE,
     TemplatesModule::TEMPLATE_INTRODUCTION,
     ['label' => 'My custom template', 'content' => '<p>Custom content here</p>'],
@@ -61,7 +61,7 @@ $builder->add('content', QuillType::class, [
         [new BoldField(), new ItalicField(), new TemplatesField()],
     ],
     'modules' => [
-        new TemplatesModule([
+        new TemplatesModule(options: [
             ['label' => 'Signature', 'content' => '<p>Cordialement,<br>John Doe</p>'],
             ['label' => 'Introduction', 'content' => '<p>Bonjour,</p><p>Je me permets de vous contacter au sujet de...</p>'],
             ['label' => 'Legal notice', 'content' => '<p><em>This document is confidential and intended solely for the addressee.</em></p>'],

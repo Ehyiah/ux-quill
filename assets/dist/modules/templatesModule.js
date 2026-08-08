@@ -3,7 +3,8 @@ function isTemplateOption(item) {
   return typeof item === 'object' && item !== null && 'label' in item && 'content' in item;
 }
 function readIconFromToolbar(quill) {
-  const toolbarOptions = quill.options?.modules?.toolbar;
+  var _options;
+  const toolbarOptions = (_options = quill.options) == null || (_options = _options.modules) == null ? void 0 : _options.toolbar;
   if (!Array.isArray(toolbarOptions)) {
     return null;
   }
@@ -26,7 +27,7 @@ export class TemplatesModule {
   }
   setup() {
     const toolbar = this.quill.getModule('toolbar');
-    if (!toolbar?.container) {
+    if (!(toolbar != null && toolbar.container)) {
       return;
     }
     const buttons = toolbar.container.querySelectorAll('.ql-template');
@@ -45,7 +46,7 @@ export class TemplatesModule {
       return;
     }
     btn.dataset.templateInitialized = 'true';
-    btn.innerHTML = icon ?? DEFAULT_ICON;
+    btn.innerHTML = icon != null ? icon : DEFAULT_ICON;
     btn.setAttribute('title', 'Templates');
     if (!templates.length) {
       return;
@@ -80,8 +81,8 @@ export class TemplatesModule {
       } else {
         document.querySelectorAll('.ql-template-dropdown').forEach(el => el.style.display = 'none');
         const rect = btn.getBoundingClientRect();
-        dropdown.style.top = `${rect.bottom + window.scrollY}px`;
-        dropdown.style.left = `${rect.left + window.scrollX}px`;
+        dropdown.style.top = rect.bottom + "px";
+        dropdown.style.left = rect.left + "px";
         dropdown.style.display = 'block';
       }
     };

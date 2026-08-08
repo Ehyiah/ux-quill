@@ -7,8 +7,8 @@ namespace Ehyiah\QuillJsBundle\DTO\Modules;
  *
  * Example:
  * new TemplatesModule([
- *     ['label' => 'Signature', 'content' => '<p>Cordialement,</p>'],
- *     ['label' => 'Introduction', 'content' => '<p>Bonjour,</p>'],
+ *     ['label' => 'Signature', 'content' => '<p>Best regards,</p>'],
+ *     ['label' => 'Introduction', 'content' => '<p>Hello,</p>'],
  * ])
  */
 final class TemplatesModule implements ModuleInterface

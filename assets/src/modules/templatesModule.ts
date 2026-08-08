@@ -112,8 +112,8 @@ export class TemplatesModule {
                 document.querySelectorAll('.ql-template-dropdown').forEach((el: any) => el.style.display = 'none');
 
                 const rect = btn.getBoundingClientRect();
-                dropdown.style.top = `${rect.bottom + window.scrollY}px`;
-                dropdown.style.left = `${rect.left + window.scrollX}px`;
+                dropdown.style.top = `${rect.bottom}px`;
+                dropdown.style.left = `${rect.left}px`;
                 dropdown.style.display = 'block';
             }
         };

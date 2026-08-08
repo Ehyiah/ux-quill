@@ -70,6 +70,7 @@ These modules are usually automatically imported when the corresponding field is
 | **ResizeModule** | YES | [see details](./resize.md) | resize | array | [] |
 | **SyntaxModule** | YES | [see details](./syntax.md) | syntax | string | `'true'` |
 | **TableModule** | YES | [see details](./table.md) | table-better | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\TableModule`` |
+| **TemplatesModule** | YES | [see details](./templates.md) | templates | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\TemplatesModule`` |
 | **VideoSelectionModule** | YES | [see details](./video-selection.md) | videoSelection | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\VideoSelectionModule`` |
 
 ### Independent Modules
@@ -95,4 +96,3 @@ These modules provide global behavior and must usually be added manually to the 
 | **GridBordersModule** | NO | [see details](./grid-borders.md) | gridBorders | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\GridBordersModule`` |
 | **STTModule** | NO | [see details](./stt.md) | speechToText | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\STTModule`` |
 | **ImageGalleryModule** | YES | [see details](./image-gallery.md) | imageGallery | array | `listEndpoint`, `uploadEndpoint`, `searchEndpoint`, `icon` |
-| **TemplatesModule**  |      YES      | Adds a Templates button to the toolbar. Clicking it opens a dropdown of predefined HTML templates that can be inserted at the cursor position. Use with `TemplatesField`. | templates | array | array of ``['label' => string, 'content' => string]`` | ``[]`` |
