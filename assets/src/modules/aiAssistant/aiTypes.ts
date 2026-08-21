@@ -87,6 +87,7 @@ export interface AiLabels {
   btnClose: string;
   btnGenerate: string;
   btnRegenerate: string;
+  generating: string;
   loadingModel: string;
   preparing: string;
 }
@@ -150,6 +151,7 @@ export const DEFAULT_LABELS: AiLabels = {
   btnClose: 'Close',
   btnGenerate: 'Generate',
   btnRegenerate: 'Regenerate',
+  generating: 'Generating',
   loadingModel: 'Loading model...',
   preparing: 'Preparing...',
 };
@@ -207,6 +209,7 @@ export const LOCALES: Record<UiLanguage, Partial<AiLabels>> = {
     btnClose: 'Fermer',
     btnGenerate: 'G\u00E9n\u00E9rer',
     btnRegenerate: 'R\u00E9g\u00E9n\u00E9rer',
+    generating: 'G\u00E9n\u00E9ration',
     loadingModel: 'Chargement du mod\u00E8le...',
     preparing: 'Pr\u00E9paration...',
   },
@@ -261,6 +264,7 @@ export const LOCALES: Record<UiLanguage, Partial<AiLabels>> = {
     btnClose: 'Schlie\u00DFen',
     btnGenerate: 'Generieren',
     btnRegenerate: 'Neu generieren',
+    generating: 'Generierung',
     loadingModel: 'Modell wird geladen...',
     preparing: 'Vorbereitung...',
   },
@@ -315,6 +319,7 @@ export const LOCALES: Record<UiLanguage, Partial<AiLabels>> = {
     btnClose: 'Cerrar',
     btnGenerate: 'Generar',
     btnRegenerate: 'Regenerar',
+    generating: 'Generando',
     loadingModel: 'Cargando modelo...',
     preparing: 'Preparando...',
   },

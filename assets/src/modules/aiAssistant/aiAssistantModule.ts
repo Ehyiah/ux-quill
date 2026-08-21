@@ -211,21 +211,55 @@ div.ai-assistant-wrapper .ai-assistant-btn svg { width: 18px; height: 18px; disp
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255,255,255,.7);
+  background: rgba(20, 27, 48, .38);
+  backdrop-filter: blur(4px);
+  animation: aiFadeIn .15s ease-out;
+}
+.ai-assistant-loading-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 26px 34px;
+  background: #fff;
+  border: 1px solid #e5e9f2;
+  border-radius: 16px;
+  box-shadow: 0 24px 64px rgba(25,35,61,.22);
+  animation: aiPanelIn .18s ease-out;
 }
 .ai-assistant-loading-spinner {
-  width: 36px;
-  height: 36px;
-  border: 4px solid #e0e0e0;
-  border-top-color: #06c;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  animation: aiSpinnerRotate .7s linear infinite;
+  background: conic-gradient(from 0deg, #5965d8, #9a6ee0 55%, #e8edff 80%, transparent);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px));
+          mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px));
+  animation: aiSpinnerRotate .9s linear infinite;
 }
 .ai-assistant-loading-text {
-  margin-top: 12px;
-  color: #666;
+  display: flex;
+  align-items: baseline;
+  color: #40495f;
   font-size: 14px;
-  text-align: center;
+  font-weight: 500;
+}
+.ai-assistant-loading-dots {
+  display: inline-flex;
+  margin-left: 6px;
+}
+.ai-assistant-loading-dots i {
+  width: 4px;
+  height: 4px;
+  margin-left: 3px;
+  border-radius: 50%;
+  background: #5965d8;
+  animation: aiDotPulse 1s ease-in-out infinite;
+}
+.ai-assistant-loading-dots i:nth-child(2) { animation-delay: .15s; }
+.ai-assistant-loading-dots i:nth-child(3) { animation-delay: .3s; }
+@keyframes aiDotPulse {
+  0%, 100% { opacity: .25; transform: translateY(0); }
+  50%      { opacity: 1;   transform: translateY(-2px); }
 }
 
 .ai-assistant-error {
@@ -478,7 +512,7 @@ export class AiAssistantModule {
     this.aiManager.onDownloadProgress((progress) => {
       const el = this.loadingEl;
       if (!el) return;
-      const textEl = el.querySelector('.ai-assistant-loading-text') as HTMLElement | null;
+      const textEl = el.querySelector('.ai-assistant-loading-label') as HTMLElement | null;
       if (textEl) {
         textEl.textContent = progress < 100
           ? `${this.aiManager.getLabels().loadingModel} ${progress}%`
@@ -754,14 +788,34 @@ export class AiAssistantModule {
     if (this.loadingEl) return;
     const el = document.createElement('div');
     el.className = 'ai-assistant-loading';
-    el.style.flexDirection = 'column';
+    el.setAttribute('role', 'status');
+
+    const card = document.createElement('div');
+    card.className = 'ai-assistant-loading-card';
+
     const spinner = document.createElement('div');
     spinner.className = 'ai-assistant-loading-spinner';
-    el.appendChild(spinner);
+    spinner.setAttribute('aria-hidden', 'true');
+
     const text = document.createElement('div');
     text.className = 'ai-assistant-loading-text';
-    text.textContent = 'Chargement...';
-    el.appendChild(text);
+
+    const label = document.createElement('span');
+    label.className = 'ai-assistant-loading-label';
+    label.textContent = this.aiManager.getLabels().generating || '';
+    text.appendChild(label);
+
+    const dots = document.createElement('span');
+    dots.className = 'ai-assistant-loading-dots';
+    dots.setAttribute('aria-hidden', 'true');
+    for (let i = 0; i < 3; i++) {
+      dots.appendChild(document.createElement('i'));
+    }
+    text.appendChild(dots);
+
+    card.appendChild(spinner);
+    card.appendChild(text);
+    el.appendChild(card);
     document.body.appendChild(el);
     this.loadingEl = el;
   }
