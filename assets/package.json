@@ -46,8 +46,7 @@
             "katex": "^0.16.9",
             "katex/dist/katex.min.css": "^0.16.9",
             "eventemitter3": "^5.0.1",
-            "lodash-es": "^4.17.21",
-            "@huggingface/transformers": "^4.2.0"
+            "lodash-es": "^4.17.21"
         }
     },
     "scripts": {
@@ -111,9 +110,13 @@
         "highlight.js": "^11.9.0",
         "katex": "^0.16.9"
     },
+    "peerDependenciesMeta": {
+        "@huggingface/transformers": {
+            "optional": true
+        }
+    },
     "dependencies": {
         "@hotwired/stimulus": "^3.0.0",
-        "@huggingface/transformers": "^4.2.0",
         "@wllama/wllama": "^3.5.1",
         "axios": "^1.4.0",
         "eventemitter3": "^5.0.1",
@@ -181,7 +184,7 @@
             "^.+\\.tsx?$": "ts-jest"
         },
         "transformIgnorePatterns": [
-            "/node_modules/(?!quill|quill2-emoji|@huggingface/transformers|@wllama/wllama)"
+            "/node_modules/(?!quill|quill2-emoji|@wllama/wllama)"
         ],
         "rootDir": ".",
         "moduleFileExtensions": [

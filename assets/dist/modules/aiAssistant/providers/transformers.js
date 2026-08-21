@@ -1,8 +1,29 @@
+function _tsRewriteRelativeImportExtensions(t, e) { return "string" == typeof t && /^\.\.?\//.test(t) ? t.replace(/\.(tsx)$|((?:\.d)?)((?:\.[^./]+)?)\.([cm]?)ts$/i, function (t, s, r, n, o) { return s ? e ? ".jsx" : ".js" : !r || n && o ? r + n + "." + o.toLowerCase() + "js" : t; }) : t; }
 import { BaseAiProvider } from "./base.js";
+import { warnCdnFallback } from "../utils/cdnFallback.js";
+const TRANSFORMERS_CDN_URL = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0';
 let pipelinePromise = null;
+async function importTransformersPipeline() {
+  var _mod;
+  let mod;
+  try {
+    mod = await import('@huggingface/transformers');
+  } catch (_unused) {
+    warnCdnFallback('@huggingface/transformers');
+    mod = await import(_tsRewriteRelativeImportExtensions(TRANSFORMERS_CDN_URL));
+  }
+  if (typeof ((_mod = mod) == null ? void 0 : _mod.pipeline) !== 'function') {
+    throw new Error('Loaded @huggingface/transformers but the "pipeline" export is missing.');
+  }
+  return mod.pipeline;
+}
 async function getPipelineFn() {
   if (!pipelinePromise) {
-    pipelinePromise = import('@huggingface/transformers').then(mod => mod.pipeline);
+    pipelinePromise = importTransformersPipeline().catch(error => {
+      pipelinePromise = null;
+      const reason = error instanceof Error ? error.message : String(error);
+      throw new Error("Failed to load @huggingface/transformers locally and from CDN. Install @huggingface/transformers or check network access. (" + reason + ")");
+    });
   }
   return pipelinePromise;
 }

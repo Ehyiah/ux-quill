@@ -1,5 +1,6 @@
 import { BaseAiProvider } from './base.js';
 import type { AiFeature, RewriteStyle, SummaryFormat, GrammarSuggestion, SynonymResult } from '../aiTypes';
+import { warnCdnFallback } from '../utils/cdnFallback.js';
 
 interface WllamaModelConfig {
   repo: string;
@@ -70,6 +71,7 @@ export class WllamaProvider extends BaseAiProvider {
     try {
       wllamaModule = await import('@wllama/wllama');
     } catch {
+      warnCdnFallback('@wllama/wllama');
       wllamaModule = await import(
         'https://cdn.jsdelivr.net/npm/@wllama/wllama@3.5.1/esm/index.js'
       );

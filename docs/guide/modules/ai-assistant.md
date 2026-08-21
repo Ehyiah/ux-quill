@@ -289,16 +289,16 @@ It works in all modern browsers without WebGPU.
 ### Installation
 
 ::: warning
-There is a problem with the package.json in wllama vendor. So you need to require it manually on your project, because AssetMapper can not find the correct main file.
+There is a problem with the `package.json` of the `@wllama/wllama` vendor package (its `main` field points to the wrong file), so AssetMapper cannot register it automatically. You must require it with the explicit ESM path.
 :::
 
-The consuming app must install `@wllama/wllama`:
+The package is loaded lazily on first feature use. If it is not installed, the provider loads it from the jsdelivr CDN and prints a console warning. This fallback is convenient for development but is **not recommended in production** — install it explicitly so the library and its WASM binary are self-hosted:
 
 ```bash
 # With npm/yarn (Webpack Encore)
 yarn add @wllama/wllama
 
-# With Symfony importmap (use the explicit CDN path)
+# With Symfony importmap (use the explicit ESM path)
 bin/console importmap:require @wllama/wllama/esm/index.js
 ```
 
@@ -394,6 +394,15 @@ Browse more GGUF models on HuggingFace: [huggingface.co/models?library=gguf](htt
 ## Transformers provider configuration
 
 Provider `transformers` runs ONNX models entirely in-browser using [@huggingface/transformers](https://github.com/huggingface/transformers.js). Models are downloaded from HuggingFace Hub on first use and cached in the browser.
+
+The package is **optional**: if it is not installed, the provider loads it from the jsdelivr CDN and prints a console warning. This fallback is convenient for development but is **not recommended in production** — install it explicitly:
+
+```bash
+yarn add @huggingface/transformers
+
+# Or with Symfony importmap
+bin/console importmap:require @huggingface/transformers
+```
 
 ### How it works
 

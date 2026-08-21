@@ -1,5 +1,6 @@
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 import { BaseAiProvider } from "./base.js";
+import { warnCdnFallback } from "../utils/cdnFallback.js";
 const DEFAULT_MODEL = {
   repo: 'Qwen/Qwen2.5-0.5B-Instruct-GGUF',
   file: 'qwen2.5-0.5b-instruct-q4_k_m.gguf'
@@ -71,6 +72,7 @@ export class WllamaProvider extends BaseAiProvider {
     try {
       wllamaModule = await import('@wllama/wllama');
     } catch (_unused) {
+      warnCdnFallback('@wllama/wllama');
       wllamaModule = await import('https://cdn.jsdelivr.net/npm/@wllama/wllama@3.5.1/esm/index.js');
     }
     const {

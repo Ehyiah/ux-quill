@@ -1,14 +1,39 @@
 import { BaseAiProvider } from './base.js';
 import type { AiFeature, RewriteStyle, SummaryFormat, GrammarSuggestion, SynonymResult } from '../aiTypes';
+import { warnCdnFallback } from '../utils/cdnFallback.js';
+
+const TRANSFORMERS_CDN_URL = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0';
 
 type PipelineFunction = (...args: unknown[]) => Promise<unknown>;
 type PipelineLoader = Promise<PipelineFunction>;
 
 let pipelinePromise: Promise<unknown> | null = null;
 
+async function importTransformersPipeline(): Promise<unknown> {
+  let mod: { pipeline?: unknown };
+  try {
+    mod = await import('@huggingface/transformers');
+  } catch {
+    warnCdnFallback('@huggingface/transformers');
+    mod = await import(TRANSFORMERS_CDN_URL);
+  }
+
+  if (typeof mod?.pipeline !== 'function') {
+    throw new Error('Loaded @huggingface/transformers but the "pipeline" export is missing.');
+  }
+
+  return mod.pipeline;
+}
+
 async function getPipelineFn(): Promise<unknown> {
   if (!pipelinePromise) {
-    pipelinePromise = import('@huggingface/transformers').then((mod) => mod.pipeline);
+    pipelinePromise = importTransformersPipeline().catch((error: unknown) => {
+      pipelinePromise = null;
+      const reason = error instanceof Error ? error.message : String(error);
+      throw new Error(
+        `Failed to load @huggingface/transformers locally and from CDN. Install @huggingface/transformers or check network access. (${reason})`,
+      );
+    });
   }
   return pipelinePromise;
 }
