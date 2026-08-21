@@ -101,6 +101,10 @@ export class Layout {
         const toolbar = this.quill.getModule('toolbar');
         if (!toolbar) return;
 
+        const button = toolbar.container?.querySelector('button.ql-layout');
+        button?.setAttribute('title', 'Layout');
+        button?.setAttribute('aria-label', 'Layout');
+
         toolbar.addHandler('layout', this.onToolbarClick.bind(this));
     }
 

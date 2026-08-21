@@ -1,5 +1,6 @@
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 import Delta from 'quill-delta';
+import { serializeContent, serializeHtml } from "../utils/serializeContent.js";
 export class Autosave {
   constructor(quill, options) {
     this.quill = void 0;
@@ -33,7 +34,7 @@ export class Autosave {
       if (savedData.startsWith('{"ops":')) {
         this.clear();
       } else {
-        const currentHtml = this.quill.root.innerHTML;
+        const currentHtml = serializeContent(this.quill.root);
         if (savedData === currentHtml) {
           this.clear();
           return;
@@ -68,7 +69,7 @@ export class Autosave {
     });
   }
   save() {
-    const html = this.quill.root.innerHTML;
+    const html = serializeContent(this.quill.root);
     const text = this.quill.getText().trim();
     if (text === '') {
       this.clear();
@@ -78,10 +79,13 @@ export class Autosave {
   }
   restore(html) {
     this.quill.setContents(new Delta(), 'silent');
-    this.quill.root.innerHTML = html;
+    this.quill.root.innerHTML = serializeHtml(html);
     this.quill.scroll.build();
     this.quill.scroll.optimize();
     this.quill.root.classList.toggle('ql-blank', this.quill.editor.isBlank());
+    this.quill.root.dispatchEvent(new CustomEvent('quill:autosave:restored', {
+      bubbles: true
+    }));
   }
   clear() {
     localStorage.removeItem(this.storageKey);

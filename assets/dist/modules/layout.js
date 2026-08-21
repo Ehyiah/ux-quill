@@ -49,8 +49,12 @@ export class Layout {
     document.head.appendChild(style);
   }
   setupToolbarHandler() {
+    var _toolbar$container;
     const toolbar = this.quill.getModule('toolbar');
     if (!toolbar) return;
+    const button = (_toolbar$container = toolbar.container) == null ? void 0 : _toolbar$container.querySelector('button.ql-layout');
+    button == null || button.setAttribute('title', 'Layout');
+    button == null || button.setAttribute('aria-label', 'Layout');
     toolbar.addHandler('layout', this.onToolbarClick.bind(this));
   }
   onToolbarClick() {

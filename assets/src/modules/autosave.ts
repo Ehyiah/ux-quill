@@ -1,5 +1,6 @@
 import Quill from 'quill';
 import Delta from 'quill-delta';
+import { serializeContent, serializeHtml } from '../utils/serializeContent.ts';
 
 type AutosaveOptions = {
     interval: number;
@@ -48,7 +49,7 @@ export class Autosave {
             if (savedData.startsWith('{"ops":')) {
                 this.clear();
             } else {
-                const currentHtml = this.quill.root.innerHTML;
+                const currentHtml = serializeContent(this.quill.root);
 
                 if (savedData === currentHtml) {
                     this.clear();
@@ -87,7 +88,7 @@ export class Autosave {
     }
 
     private save(): void {
-        const html = this.quill.root.innerHTML;
+        const html = serializeContent(this.quill.root);
         const text = this.quill.getText().trim();
 
         if (text === '') {
@@ -99,10 +100,11 @@ export class Autosave {
 
     private restore(html: string): void {
         this.quill.setContents(new Delta(), 'silent');
-        this.quill.root.innerHTML = html;
+        this.quill.root.innerHTML = serializeHtml(html);
         this.quill.scroll.build();
         this.quill.scroll.optimize();
         this.quill.root.classList.toggle('ql-blank', this.quill.editor.isBlank());
+        this.quill.root.dispatchEvent(new CustomEvent('quill:autosave:restored', { bubbles: true }));
     }
 
     private clear(): void {

@@ -6,11 +6,11 @@ import type { ExtraOptions, ModuleOptions } from './types.d.ts';
 import mergeModules from './modules.ts';
 import { ToolbarCustomizer } from './ui/toolbarCustomizer.ts';
 import { handleUploadResponse, uploadStrategies } from './upload-utils.ts';
+import { serializeContent, serializeHtml } from './utils/serializeContent.ts';
 
 import './register-modules.ts';
 import QuillTableBetter from 'quill-table-better';
 import {Mention} from './modules/mention.ts';
-import ImageFigure from './blots/imageFigure.ts';
 import LayoutBlot from './blots/layout.ts';
 
 // Register custom ImageFigure blot to override default image
@@ -177,25 +177,29 @@ export default class extends Controller {
         });
 
         const savedHtml = this.inputTarget.value;
+        const initialData = quill.clipboard.convert({ html: savedHtml });
+        this.dispatchEvent('hydrate:before', initialData);
         if (savedHtml) {
-            this.dispatchEvent('hydrate:before', savedHtml);
             quill.setContents(new Delta(), 'silent');
-            quill.root.innerHTML = savedHtml;
+            quill.root.innerHTML = serializeHtml(savedHtml);
             quill.scroll.build();
             quill.scroll.optimize();
             quill.root.classList.toggle('ql-blank', quill.editor.isBlank());
-            this.dispatchEvent('hydrate:after', quill);
         }
+        this.dispatchEvent('hydrate:after', quill);
 
-        quill.on('text-change', () => {
+        const syncContent = () => {
             const quillContent = this.extraOptionsValue?.use_semantic_html
-                ? quill.getSemanticHTML()
-                : quill.root.innerHTML;
+                ? serializeHtml(quill.getSemanticHTML())
+                : serializeContent(quill.root);
 
             const inputContent = this.inputTarget;
             inputContent.value = quillContent;
             this.bubbles(inputContent);
-        });
+        };
+
+        quill.on('text-change', syncContent);
+        quill.root.addEventListener('quill:autosave:restored', syncContent);
     }
 
     private bubbles(inputContent: HTMLInputElement)
