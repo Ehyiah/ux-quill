@@ -6,9 +6,10 @@ export function showReviewModal(options: {
   description: string;
   originalText?: string;
   generatedText: string;
+  onRegenerate?: () => Promise<string>;
 }, labels?: AiLabels): Promise<string | null> {
   const l = labels || DEFAULT_LABELS;
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const overlay = document.createElement('div');
     overlay.className = 'ai-assistant-modal-overlay';
 
@@ -46,11 +47,21 @@ export function showReviewModal(options: {
     applyBtn.className = 'ai-assistant-btn-primary';
     applyBtn.textContent = l.btnApply;
 
+    let regenerateBtn: HTMLButtonElement | null = null;
+    if (options.onRegenerate) {
+      regenerateBtn = document.createElement('button');
+      regenerateBtn.className = 'ai-assistant-btn-secondary ai-assistant-btn-regenerate';
+      regenerateBtn.textContent = `\u21BB ${l.btnRegenerate}`;
+    }
+
+    const busy = { value: false };
+
     const cleanup = () => {
       overlay.remove();
     };
 
     const apply = () => {
+      if (busy.value) return;
       cleanup();
       resolve(textarea.value);
     };
@@ -60,8 +71,41 @@ export function showReviewModal(options: {
       resolve(null);
     };
 
+    const setBusy = (value: boolean): void => {
+      busy.value = value;
+      textarea.readOnly = value;
+      overlay.classList.toggle('ai-assistant-modal-busy', value);
+      for (const btn of [regenerateBtn, cancelBtn, applyBtn]) {
+        if (btn) {
+          btn.disabled = value;
+        }
+      }
+    };
+
+    const regenerate = async (): Promise<void> => {
+      if (!options.onRegenerate || !regenerateBtn || busy.value) return;
+
+      setBusy(true);
+      regenerateBtn.classList.add('ai-assistant-btn-loading');
+      try {
+        textarea.value = await options.onRegenerate();
+        textarea.scrollTop = textarea.scrollHeight;
+      } catch (error) {
+        cleanup();
+        reject(error);
+      } finally {
+        regenerateBtn.classList.remove('ai-assistant-btn-loading');
+        setBusy(false);
+      }
+    };
+
     cancelBtn.addEventListener('click', cancel);
     applyBtn.addEventListener('click', apply);
+    if (regenerateBtn) {
+      regenerateBtn.addEventListener('click', () => {
+        void regenerate();
+      });
+    }
 
     textarea.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
@@ -78,6 +122,9 @@ export function showReviewModal(options: {
       }
     });
 
+    if (regenerateBtn) {
+      actions.appendChild(regenerateBtn);
+    }
     actions.appendChild(cancelBtn);
     actions.appendChild(applyBtn);
     modal.appendChild(actions);

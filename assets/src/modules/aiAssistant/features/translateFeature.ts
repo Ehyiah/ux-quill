@@ -56,6 +56,7 @@ export class TranslateFeature implements AiFeatureInterface {
         description: `${LANGUAGE_MAP[targetLang] || targetLang}`,
         originalText: selectedText,
         generatedText: translated,
+        onRegenerate: () => provider.translate(selectedText, targetLang),
       }, labels);
 
       if (edited !== null) {

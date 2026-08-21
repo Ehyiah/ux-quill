@@ -184,6 +184,7 @@ Available label keys:
 | `btnCancel` | Cancel | Cancel button |
 | `btnClose` | Close | Close button |
 | `btnGenerate` | Generate | Generate modal submit button |
+| `btnRegenerate` | Regenerate | Review modal regenerate button |
 | `loadingModel` | Loading model... | Download progress text |
 | `preparing` | Preparing... | Post-download text |
 

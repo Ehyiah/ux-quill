@@ -410,6 +410,25 @@ div.ai-assistant-wrapper .ai-assistant-btn svg { width: 18px; height: 18px; disp
   background: #f5f5f5;
   border-color: #bbb;
 }
+.ai-assistant-modal-actions button:disabled {
+  opacity: .55;
+  cursor: default;
+}
+.ai-assistant-btn-regenerate {
+  margin-right: auto;
+}
+.ai-assistant-btn-regenerate.ai-assistant-btn-loading::before {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 6px;
+  border: 2px solid #cbd2e0;
+  border-top-color: #5965d8;
+  border-radius: 50%;
+  vertical-align: -2px;
+  animation: aiSpinnerRotate .7s linear infinite;
+}
 .ai-assistant-btn-primary {
   padding: 7px 18px;
   border: none;

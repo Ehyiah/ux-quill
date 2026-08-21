@@ -41,7 +41,8 @@ export class SummarizeFeature {
         title: labels.summarizeResultTitle,
         description: format === 'bullets' ? labels.summarizeResultBullets : labels.summarizeResultParagraph,
         originalText: textToSummarize,
-        generatedText: summary
+        generatedText: summary,
+        onRegenerate: () => provider.summarize(textToSummarize, format)
       }, labels);
       if (edited !== null) {
         const prefix = format === 'bullets' ? labels.summarizePrefix : labels.summarizePrefix;

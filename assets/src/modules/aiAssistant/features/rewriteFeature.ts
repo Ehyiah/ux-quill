@@ -49,6 +49,7 @@ export class RewriteFeature implements AiFeatureInterface {
         description: labels.rewriteStyleLabel.replace('{style}', style),
         originalText: selectedText,
         generatedText: rewritten,
+        onRegenerate: () => provider.rewrite(selectedText, style),
       }, labels);
 
       if (edited !== null) {

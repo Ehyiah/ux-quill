@@ -36,7 +36,8 @@ export class RewriteFeature {
         title: labels.featureRewrite,
         description: labels.rewriteStyleLabel.replace('{style}', style),
         originalText: selectedText,
-        generatedText: rewritten
+        generatedText: rewritten,
+        onRegenerate: () => provider.rewrite(selectedText, style)
       }, labels);
       if (edited !== null) {
         quill.updateContents([{

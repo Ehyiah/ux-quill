@@ -35,6 +35,7 @@ export class GenerateFeature implements AiFeatureInterface {
         title: labels.generateResultTitle,
         description: labels.generateResultDesc,
         generatedText: result,
+        onRegenerate: () => provider.generate(prompt),
       }, labels);
 
       if (edited !== null) {

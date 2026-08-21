@@ -55,6 +55,7 @@ export class SummarizeFeature implements AiFeatureInterface {
         description: format === 'bullets' ? labels.summarizeResultBullets : labels.summarizeResultParagraph,
         originalText: textToSummarize,
         generatedText: summary,
+        onRegenerate: () => provider.summarize(textToSummarize, format),
       }, labels);
 
       if (edited !== null) {

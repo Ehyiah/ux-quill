@@ -52,7 +52,8 @@ export class TranslateFeature {
         title: labels.featureTranslate,
         description: "" + (LANGUAGE_MAP[targetLang] || targetLang),
         originalText: selectedText,
-        generatedText: translated
+        generatedText: translated,
+        onRegenerate: () => provider.translate(selectedText, targetLang)
       }, labels);
       if (edited !== null) {
         quill.updateContents([{

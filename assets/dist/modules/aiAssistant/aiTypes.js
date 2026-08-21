@@ -48,6 +48,7 @@ export const DEFAULT_LABELS = {
   btnCancel: 'Cancel',
   btnClose: 'Close',
   btnGenerate: 'Generate',
+  btnRegenerate: 'Regenerate',
   loadingModel: 'Loading model...',
   preparing: 'Preparing...'
 };
@@ -103,6 +104,7 @@ export const LOCALES = {
     btnCancel: 'Annuler',
     btnClose: 'Fermer',
     btnGenerate: 'G\u00E9n\u00E9rer',
+    btnRegenerate: 'R\u00E9g\u00E9n\u00E9rer',
     loadingModel: 'Chargement du mod\u00E8le...',
     preparing: 'Pr\u00E9paration...'
   },
@@ -156,6 +158,7 @@ export const LOCALES = {
     btnCancel: 'Abbrechen',
     btnClose: 'Schlie\u00DFen',
     btnGenerate: 'Generieren',
+    btnRegenerate: 'Neu generieren',
     loadingModel: 'Modell wird geladen...',
     preparing: 'Vorbereitung...'
   },
@@ -209,6 +212,7 @@ export const LOCALES = {
     btnCancel: 'Cancelar',
     btnClose: 'Cerrar',
     btnGenerate: 'Generar',
+    btnRegenerate: 'Regenerar',
     loadingModel: 'Cargando modelo...',
     preparing: 'Preparando...'
   }

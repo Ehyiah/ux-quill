@@ -51,18 +51,25 @@ export class GrammarFeature implements AiFeatureInterface {
     const labels = this.aiManager.getLabels();
 
     try {
+      const buildCorrection = async (): Promise<string> => {
+        const suggestions = await provider.correct(text);
+        if (suggestions.length === 0) {
+          return text;
+        }
+
+        let correctedText = text;
+        for (const s of suggestions) {
+          correctedText =
+            correctedText.substring(0, s.offset) + s.suggestion +
+            correctedText.substring(s.offset + s.length);
+        }
+
+        return correctedText;
+      };
+
       this.aiManager.setLoading(true);
-      const suggestions = await provider.correct(text);
+      const correctedText = await buildCorrection();
       this.aiManager.setLoading(false);
-
-      if (suggestions.length === 0) return;
-
-      let correctedText = text;
-      for (const s of suggestions) {
-        correctedText =
-          correctedText.substring(0, s.offset) + s.suggestion +
-          correctedText.substring(s.offset + s.length);
-      }
 
       if (correctedText === text) return;
 
@@ -71,6 +78,7 @@ export class GrammarFeature implements AiFeatureInterface {
         description: labels.grammarDescription,
         originalText: text,
         generatedText: correctedText,
+        onRegenerate: buildCorrection,
       }, labels);
 
       if (edited !== null) {

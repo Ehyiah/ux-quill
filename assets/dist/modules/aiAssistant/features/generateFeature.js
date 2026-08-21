@@ -25,7 +25,8 @@ export class GenerateFeature {
       const edited = await showReviewModal({
         title: labels.generateResultTitle,
         description: labels.generateResultDesc,
-        generatedText: result
+        generatedText: result,
+        onRegenerate: () => provider.generate(prompt)
       }, labels);
       if (edited !== null) {
         quill.updateContents([{
