@@ -89,29 +89,45 @@ export class RewriteFeature {
           expanded: '\uD83D\uDCD0'
         };
         const icon = document.createElement('span');
+        icon.className = 'ai-assistant-submenu-icon';
+        icon.setAttribute('aria-hidden', 'true');
         icon.textContent = iconMap[s.value] || '\u2728';
-        icon.style.cssText = 'flex-shrink:0;width:24px;text-align:center;font-size:16px;';
-        const text = document.createElement('span');
-        text.style.cssText = 'flex:1;min-width:0;';
-        text.innerHTML = "<div style=\"font-size:13px;font-weight:500;\">" + s.label + "</div><div style=\"font-size:11px;color:#888;\">" + s.desc + "</div>";
+        const copy = document.createElement('span');
+        copy.className = 'ai-assistant-submenu-copy';
+        const labelEl = document.createElement('span');
+        labelEl.className = 'ai-assistant-submenu-label';
+        labelEl.textContent = s.label;
+        const descEl = document.createElement('span');
+        descEl.className = 'ai-assistant-submenu-description';
+        descEl.textContent = s.desc;
+        copy.appendChild(labelEl);
+        copy.appendChild(descEl);
         item.appendChild(icon);
-        item.appendChild(text);
+        item.appendChild(copy);
         item.addEventListener('click', () => {
-          document.removeEventListener('click', outsideClick);
-          container.remove();
-          resolve(s.value);
+          finish(s.value);
         });
         container.appendChild(item);
       });
       const outsideClick = e => {
         if (!container.contains(e.target)) {
-          document.removeEventListener('click', outsideClick);
-          container.remove();
-          resolve(null);
+          finish(null);
         }
+      };
+      const onKeyDown = e => {
+        if (e.key === 'Escape') {
+          finish(null);
+        }
+      };
+      const finish = value => {
+        document.removeEventListener('click', outsideClick);
+        document.removeEventListener('keydown', onKeyDown);
+        container.remove();
+        resolve(value);
       };
       setTimeout(() => {
         document.addEventListener('click', outsideClick);
+        document.addEventListener('keydown', onKeyDown);
       }, 0);
       document.body.appendChild(container);
       const refRect = anchorRect || ((_window$getSelection = window.getSelection()) == null || (_window$getSelection = _window$getSelection.getRangeAt(0)) == null ? void 0 : _window$getSelection.getBoundingClientRect());

@@ -91,34 +91,50 @@ export class SummarizeFeature implements AiFeatureInterface {
         item.className = 'ai-assistant-submenu-item';
 
         const icon = document.createElement('span');
+        icon.className = 'ai-assistant-submenu-icon';
+        icon.setAttribute('aria-hidden', 'true');
         icon.textContent = opt.icon;
-        icon.style.cssText = 'flex-shrink:0;width:24px;text-align:center;font-size:16px;';
 
-        const text = document.createElement('span');
-        text.style.cssText = 'flex:1;min-width:0;';
-        text.innerHTML = `<div style="font-size:13px;font-weight:500;">${opt.label}</div><div style="font-size:11px;color:#888;">${opt.desc}</div>`;
+        const copy = document.createElement('span');
+        copy.className = 'ai-assistant-submenu-copy';
+        const labelEl = document.createElement('span');
+        labelEl.className = 'ai-assistant-submenu-label';
+        labelEl.textContent = opt.label;
+        const descEl = document.createElement('span');
+        descEl.className = 'ai-assistant-submenu-description';
+        descEl.textContent = opt.desc;
+        copy.appendChild(labelEl);
+        copy.appendChild(descEl);
 
         item.appendChild(icon);
-        item.appendChild(text);
+        item.appendChild(copy);
 
         item.addEventListener('click', () => {
-          document.removeEventListener('click', outsideClick);
-          container.remove();
-          resolve(opt.value);
+          finish(opt.value);
         });
         container.appendChild(item);
       });
 
       const outsideClick = (e: MouseEvent) => {
         if (!container.contains(e.target as Node)) {
-          document.removeEventListener('click', outsideClick);
-          container.remove();
-          resolve(null);
+          finish(null);
         }
+      };
+      const onKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          finish(null);
+        }
+      };
+      const finish = (value: SummaryFormat | null) => {
+        document.removeEventListener('click', outsideClick);
+        document.removeEventListener('keydown', onKeyDown);
+        container.remove();
+        resolve(value);
       };
 
       setTimeout(() => {
         document.addEventListener('click', outsideClick);
+        document.addEventListener('keydown', onKeyDown);
       }, 0);
 
       document.body.appendChild(container);

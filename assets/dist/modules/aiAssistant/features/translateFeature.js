@@ -141,29 +141,41 @@ export class TranslateFeature {
         const item = document.createElement('button');
         item.className = 'ai-assistant-submenu-item';
         const icon = document.createElement('span');
+        icon.className = 'ai-assistant-submenu-icon';
+        icon.setAttribute('aria-hidden', 'true');
         icon.textContent = lang.flag;
-        icon.style.cssText = 'flex-shrink:0;width:24px;text-align:center;font-size:16px;';
-        const text = document.createElement('span');
-        text.style.cssText = 'flex:1;';
-        text.textContent = lang.label;
+        const copy = document.createElement('span');
+        copy.className = 'ai-assistant-submenu-copy';
+        const labelEl = document.createElement('span');
+        labelEl.className = 'ai-assistant-submenu-label';
+        labelEl.textContent = lang.label;
+        copy.appendChild(labelEl);
         item.appendChild(icon);
-        item.appendChild(text);
+        item.appendChild(copy);
         item.addEventListener('click', () => {
-          document.removeEventListener('click', outsideClick);
-          container.remove();
-          resolve(lang.code);
+          finish(lang.code);
         });
         container.appendChild(item);
       });
       const outsideClick = e => {
         if (!container.contains(e.target)) {
-          document.removeEventListener('click', outsideClick);
-          container.remove();
-          resolve(null);
+          finish(null);
         }
+      };
+      const onKeyDown = e => {
+        if (e.key === 'Escape') {
+          finish(null);
+        }
+      };
+      const finish = value => {
+        document.removeEventListener('click', outsideClick);
+        document.removeEventListener('keydown', onKeyDown);
+        container.remove();
+        resolve(value);
       };
       setTimeout(() => {
         document.addEventListener('click', outsideClick);
+        document.addEventListener('keydown', onKeyDown);
       }, 0);
       document.body.appendChild(container);
       const refRect = anchorRect || ((_window$getSelection = window.getSelection()) == null || (_window$getSelection = _window$getSelection.getRangeAt(0)) == null ? void 0 : _window$getSelection.getBoundingClientRect());
