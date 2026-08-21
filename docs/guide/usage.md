@@ -263,7 +263,64 @@ There are up to three separate layers, and you load only what you need:
 | Stylesheet | Twig call (with assetMapper)                                         | When do you need it                                                   | Fields                                                    | Modules | Required? |
 | --- |----------------------------------------------------------------------|-----------------------------------------------------------------------|-----------------------------------------------------------| --- | --- |
 | `quill.snow.css` | <span v-pre>{{ quill_content_styles() }}</span>                      | Always when using `class` style                                       | All quill built-in fields (ImageField is overriden in this bundle) | — | ✅ Yes |
-| `@ehyiah/ux-quill/dist/styles/quill-content.css` | Always included with <span v-pre>{{ quill_content_styles() }}</span> | Structural rules for advanced blots — page-break, video, image-figure | `PageBreakField`, `VideoField`, `ImageField`              | `PageBreakModule`, `ImageSelectionModule` | ⚠️ Only if you use these fields |
+| `@ehyiah/ux-quill/dist/styles/quill-content.css` | Always included with <span v-pre>{{ quill_content_styles() }}</span> | Structural rules for advanced blots — page-break, video, image-figure, layout | `PageBreakField`, `VideoField`, `ImageField`, `LayoutField`              | `PageBreakModule`, `ImageSelectionModule`, `LayoutModule` | ⚠️ Only if you use these fields |
 | `@ehyiah/ux-quill/dist/styles/quill-content-theme.css` | <span v-pre>{{ quill_content_styles(cosmetic=true) }}</span>         | Cosmetic built-in style                                               | — | `MentionModule` | ❌ Optional — style them yourself otherwise |
 
+## Overriding built-in CSS
+
+The bundle (and quill itself) ships differents stylesheets:
+- `quill.snow.css` — Quill's official theme (`.ql-editor h1`, `.ql-snow .ql-toolbar`, ...)
+- `quill-content.css` — structural rules for advanced and custom blots (`.ql-editor .ql-layout-col`, ...)
+
+### Specificity principle
+
+Both use selectors like `.ql-editor .xxx` (specificity 0,2,0). To override, you need
+**equal or higher specificity** loaded **after** the built-in sheets.
+
+### Where to put your overrides
+
+**In your own stylesheet** loaded after Quill CSS (recommended):
+
+```twig
+{% block stylesheets %}
+    {{ quill_content_styles() }}
+    <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
+{% endblock %}
+```
+
+Same specificity wins by order — your rules apply after Quill's.
+
+### Scoping — editor vs frontend
+
+Since both the editor and `<twig:QuillContent>` use `.ql-editor`, a plain
+`.ql-editor .xxx` override affects both. Use unique parent selectors to target
+only one:
+
+| Context       | Parent selector | How to set it |
+|---------------|----------------|---------------|
+| Editor only   | `[data-controller="ehyiah--ux-quill--quill"]` | Already present on the edit form |
+| Frontend only | Your own class | `<twig:QuillContent class="my-render">` |
+
+```css
+/* Editor only */
+[data-controller="ehyiah--ux-quill--quill"] .ql-layout-col {
+    border: none;
+    padding: 0;
+}
+
+/* Frontend only */
+.my-render .ql-layout-col {
+    border: 1px solid #e5e7eb;
+    padding: 12px;
+}
+```
+
+### Precedence summary
+
+| Your selector | Specificity | Beats `.ql-editor .xxx` ? |
+|---|---|---|
+| `.ql-editor .xxx` | 0,2,0 | Only if loaded after |
+| `.my-wrapper .ql-editor .xxx` | 0,3,0 | Always |
+| `[data-controller="ehyiah--ux-quill--quill"] .xxx` | 0,2,0 | Only if loaded after |
+| `.xxx` | 0,1,0 | Never — lower specificity |
 

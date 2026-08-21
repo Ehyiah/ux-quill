@@ -1,4 +1,6 @@
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
+import Delta from 'quill-delta';
+import { serializeContent, serializeHtml } from "../utils/serializeContent.js";
 export class Autosave {
   constructor(quill, options) {
     this.quill = void 0;
@@ -28,32 +30,25 @@ export class Autosave {
   init() {
     const savedData = localStorage.getItem(this.storageKey);
     if (savedData) {
-      try {
-        var _currentContents$ops;
-        const savedDelta = JSON.parse(savedData);
-        const currentContents = this.quill.getContents();
-
-        // Compare Deltas instead of HTML
-        if (JSON.stringify(savedDelta) === JSON.stringify(currentContents)) {
+      // Migration: old delta format (JSON) — clear it
+      if (savedData.startsWith('{"ops":')) {
+        this.clear();
+      } else {
+        const currentHtml = serializeContent(this.quill.root);
+        if (savedData === currentHtml) {
           this.clear();
           return;
         }
-
-        // Check if current editor is effectively empty
         const currentText = this.quill.getText().trim();
-        const isCurrentEmpty = currentText === '' && ((_currentContents$ops = currentContents.ops) == null ? void 0 : _currentContents$ops.length) <= 1;
+        const isCurrentEmpty = currentText === '';
         if (this.options.restore_type === 'auto' && isCurrentEmpty) {
-          this.restore(savedDelta);
+          this.restore(savedData);
         } else {
-          this.showRestoreNotification(savedDelta);
+          this.showRestoreNotification(savedData);
         }
-      } catch (e) {
-        // If parsing fails, it's probably old HTML data, clear it
-        this.clear();
       }
     }
-    this.quill.on('text-change', (delta, oldDelta, source) => {
-      if (source !== 'user') return;
+    this.quill.on('text-change', () => {
       if (this.saveTimeout) clearTimeout(this.saveTimeout);
       this.saveTimeout = setTimeout(() => this.save(), this.options.interval);
     });
@@ -74,19 +69,23 @@ export class Autosave {
     });
   }
   save() {
-    var _contents$ops;
-    const contents = this.quill.getContents();
+    const html = serializeContent(this.quill.root);
     const text = this.quill.getText().trim();
-    if (text === '' && ((_contents$ops = contents.ops) == null ? void 0 : _contents$ops.length) <= 1) {
+    if (text === '') {
       this.clear();
       return;
     }
-    localStorage.setItem(this.storageKey, JSON.stringify(contents));
+    localStorage.setItem(this.storageKey, html);
   }
-  restore(contents) {
-    this.quill.setContents(contents, 'api');
-    // Important: tell Quill that content has changed to trigger Stimulus sync
-    this.quill.update();
+  restore(html) {
+    this.quill.setContents(new Delta(), 'silent');
+    this.quill.root.innerHTML = serializeHtml(html);
+    this.quill.scroll.build();
+    this.quill.scroll.optimize();
+    this.quill.root.classList.toggle('ql-blank', this.quill.editor.isBlank());
+    this.quill.root.dispatchEvent(new CustomEvent('quill:autosave:restored', {
+      bubbles: true
+    }));
   }
   clear() {
     localStorage.removeItem(this.storageKey);

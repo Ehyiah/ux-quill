@@ -16,8 +16,15 @@ jest.mock('quill', () => {
             addEventListener: jest.fn(),
         },
         clipboard: {
-            convert: jest.fn().mockReturnValue({ ops: [] })
+            convert: jest.fn().mockReturnValue({ ops: [] }),
+            addMatcher: jest.fn(),
         },
+        scroll: {
+            build: jest.fn(),
+            optimize: jest.fn(),
+        },
+        setContents: jest.fn(),
+        update: jest.fn(),
         updateContents: jest.fn(),
         getModule: jest.fn().mockImplementation((name) => {
             if (name === 'toolbar') {

@@ -231,6 +231,10 @@ const MODULE_DEFS: Record<string, ModuleDefEntry> = {
       { label: 'Bullet list', content: '<ul><li>First item</li><li>Second item</li><li>Third item</li></ul>' },
     ] },
   },
+  layout: {
+    toolbar: ['layout'],
+    config: {},
+  },
 }
 
 const BASE_TOOLBAR = [
@@ -269,6 +273,7 @@ function buildConfig() {
         ['emoji'],
         ['table-better'],
         ['divider', 'pageBreak'],
+        ['layout'],
         ['imageGallery'],
         ['map'],
       ],
@@ -379,6 +384,16 @@ async function initEditor() {
   if (props.content) {
     const delta = quill.clipboard.convert({ html: props.content })
     quill.setContents(delta)
+  }
+
+  // modules whose constructor may fail to register their toolbar handler
+  // must be instantiated manually after Quill is fully initialized
+  if (enabledList.value.includes('layout') || isAll()) {
+    const tb = quill.getModule('toolbar')
+    if (tb && !tb.handlers.layout) {
+      const mod = await import('../../../../assets/dist/modules/layout.js')
+      new mod.Layout(quill, {})
+    }
   }
 
   htmlOutput.value = quill.root.innerHTML

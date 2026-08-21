@@ -118,9 +118,20 @@ export type MapValue = {
     marker?: MapMarkerOptions | null;
 };
 
+export type LayoutPreset = {
+    cols: number;
+    ratios: string[];
+    label: string;
+};
+
+export type LayoutOptions = {
+    presets: LayoutPreset[];
+    allow_wrap: boolean;
+};
+
 export interface ModuleInterface {
     name: string;
-    options: any | ImageGalleryOptions | ReadingTimeOptions | SpeechToTextOptions | CountOptions | NotionToolbarOptions;
+    options: any | ImageGalleryOptions | ReadingTimeOptions | SpeechToTextOptions | CountOptions | NotionToolbarOptions | LayoutOptions;
 }
 
 export type ModuleOptions = ModuleInterface[];

@@ -27,3 +27,30 @@
 .ql-editor .ql-image-figure {
     margin: 1em auto;
 }
+
+.ql-editor .ql-layout {
+    margin: 1em 0;
+    display: grid;
+    gap: 16px;
+    clear: both;
+}
+
+.ql-editor .ql-layout-col {
+    min-width: 0;
+    min-height: 48px;
+    padding: 8px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    outline: none;
+}
+
+.ql-editor .ql-layout-col:focus {
+    border-color: #b3d4fc;
+    box-shadow: 0 0 0 1px #b3d4fc;
+}
+
+@media (max-width: 640px) {
+    .ql-editor .ql-layout {
+        grid-template-columns: 1fr !important;
+    }
+}

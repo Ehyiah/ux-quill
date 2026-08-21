@@ -1,14 +1,17 @@
 import { Controller } from '@hotwired/stimulus';
 import Quill from 'quill';
+import Delta from 'quill-delta';
 import * as Options from 'quill/core/quill';
 import type { ExtraOptions, ModuleOptions } from './types.d.ts';
 import mergeModules from './modules.ts';
 import { ToolbarCustomizer } from './ui/toolbarCustomizer.ts';
 import { handleUploadResponse, uploadStrategies } from './upload-utils.ts';
+import { serializeContent, serializeHtml } from './utils/serializeContent.ts';
 
 import './register-modules.ts';
 import QuillTableBetter from 'quill-table-better';
 import {Mention} from './modules/mention.ts';
+import LayoutBlot from './blots/layout.ts';
 
 // Register custom ImageFigure blot to override default image
 import ImageFigure from './blots/imageFigure.ts';
@@ -167,21 +170,36 @@ export default class extends Controller {
     }
 
     private setupContentSync(quill: Quill) {
-        // set initial content as a delta for better compatibility and allow table-module to work
-        const initialData = quill.clipboard.convert({ html: this.inputTarget.value })
+        // Clipboard matchers — used by autosave restore and paste
+        quill.clipboard.addMatcher('.ql-layout', (node: Element, _delta: any, _scroll: any) => {
+            const value = LayoutBlot.value(node as HTMLElement);
+            return new Delta().insert({ layout: value });
+        });
+
+        const savedHtml = this.inputTarget.value;
+        const initialData = quill.clipboard.convert({ html: savedHtml });
         this.dispatchEvent('hydrate:before', initialData);
-        quill.updateContents(initialData);
+        if (savedHtml) {
+            quill.setContents(new Delta(), 'silent');
+            quill.root.innerHTML = serializeHtml(savedHtml);
+            quill.scroll.build();
+            quill.scroll.optimize();
+            quill.root.classList.toggle('ql-blank', quill.editor.isBlank());
+        }
         this.dispatchEvent('hydrate:after', quill);
 
-        quill.on('text-change', () => {
+        const syncContent = () => {
             const quillContent = this.extraOptionsValue?.use_semantic_html
-                ? quill.getSemanticHTML()
-                : quill.root.innerHTML;
+                ? serializeHtml(quill.getSemanticHTML())
+                : serializeContent(quill.root);
 
             const inputContent = this.inputTarget;
             inputContent.value = quillContent;
             this.bubbles(inputContent);
-        });
+        };
+
+        quill.on('text-change', syncContent);
+        quill.root.addEventListener('quill:autosave:restored', syncContent);
     }
 
     private bubbles(inputContent: HTMLInputElement)
