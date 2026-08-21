@@ -7,7 +7,9 @@ import 'quill-table-better/dist/quill-table-better.css'
 import 'quill2-emoji/dist/style.css'
 import 'highlight.js/styles/atom-one-dark.css'
 import 'katex/dist/katex.min.css'
+import 'leaflet/dist/leaflet.css'
 import '../../../assets/dist/styles/gallery/gallery.css'
+import '../../../assets/dist/styles/map-modal.css'
 import '../../../assets/dist/styles/quill-content.css'
 
 // ============================================================
@@ -24,10 +26,12 @@ import '../../../assets/dist/register-modules.js'
 // Extra registrations that register-modules.js does NOT handle
 import Quill from 'quill'
 import ImageFigure from '../../../assets/dist/blots/imageFigure.js'
+import VideoFigure from '../../../assets/dist/blots/videoFigure.js'
 import QuillTableBetter from 'quill-table-better'
 import { Mention } from '../../../assets/dist/modules/mention.js'
 
 Quill.register(ImageFigure, true)
+Quill.register('formats/video', VideoFigure, true)
 
 // Save original Toolbar.attach before TableToolbar potentially overrides it
 const OriginalToolbar = Quill.import('modules/toolbar')

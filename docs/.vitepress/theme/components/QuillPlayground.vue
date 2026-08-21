@@ -61,6 +61,10 @@ const MODULE_DEFS: Record<string, ModuleDefEntry> = {
     toolbar: ['image'],
     config: { imageSelection: {}, resize: {} },
   },
+  videoSelection: {
+    toolbar: ['video'],
+    config: { videoSelection: {} },
+  },
   table: {
     toolbar: ['table-better'],
     config: { table: false, 'table-better': { toolbarTable: true } },
@@ -179,6 +183,10 @@ const MODULE_DEFS: Record<string, ModuleDefEntry> = {
     toolbar: [],
     config: { slashModule: {} },
   },
+  map: {
+    toolbar: ['map'],
+    config: { map: { provider: 'osm', center: [48.8566, 2.3522], zoom: 13, height: '300px' }, mapSelection: {} },
+  },
   link: {
     toolbar: ['link'],
     config: { linkAttributes: {} },
@@ -214,6 +222,14 @@ const MODULE_DEFS: Record<string, ModuleDefEntry> = {
   media: {
     toolbar: ['video', 'formula'],
     config: {},
+  },
+  templates: {
+    toolbar: ['template'],
+    config: { templates: [
+      { label: 'Signature', content: '<p>Best regards,</p><p><strong>Your Name</strong><br>Your Title<br>your.email@example.com</p>' },
+      { label: 'Introduction', content: '<p>Dear Sir or Madam,</p><p>I am writing to you regarding...</p>' },
+      { label: 'Bullet list', content: '<ul><li>First item</li><li>Second item</li><li>Third item</li></ul>' },
+    ] },
   },
   layout: {
     toolbar: ['layout'],
@@ -259,6 +275,7 @@ function buildConfig() {
         ['divider', 'pageBreak'],
         ['layout'],
         ['imageGallery'],
+        ['map'],
       ],
       modules: {
         table: false,
@@ -291,6 +308,7 @@ function buildConfig() {
         slashModule: {},
         pasteSanitizer: { plainText: false },
         imageSelection: {},
+        videoSelection: {},
         nodeMover: {
           borderColor: null,
           dropIndicatorColor: '#ff0000',
@@ -313,6 +331,8 @@ function buildConfig() {
             { id: 6, value: 'Frank Castle' },
           ],
         },
+        map: { provider: 'osm', center: [48.8566, 2.3522], zoom: 13, height: '300px' },
+        mapSelection: {},
       },
     }
   }

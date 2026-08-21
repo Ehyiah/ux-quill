@@ -19,7 +19,8 @@ export class SmartLinks {
     if (!selection) return;
     const cursorIndex = selection.index;
     if (cursorIndex === null || cursorIndex === undefined) return;
-    const [leaf] = quill.getLeaf(cursorIndex);
+    const _quill$getLeaf = quill.getLeaf(cursorIndex),
+      leaf = _quill$getLeaf[0];
     if (!leaf) return;
     if (leaf.parent.domNode.localName === 'a') return;
     const value = leaf.value();

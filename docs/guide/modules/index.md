@@ -65,10 +65,13 @@ These modules are usually automatically imported when the corresponding field is
 | **EmojiModule** | YES | [see details](./emoji.md) | emoji-toolbar | string | `'true'` |
 | **ImageSelectionModule** | YES | [see details](./image-selection.md) | imageSelection | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\ImageSelectionModule`` |
 | **LinkAttributesModule** | YES | [see details](./link-attributes.md) | linkAttributes | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\LinkAttributesModule`` |
+| **MapModule** | YES | [see details](./map.md) | map | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\MapModule`` |
 | **PageBreakModule** | YES | [see details](./pagebreak.md) | pageBreak | array | ['label' => 'Page Break'] |
 | **ResizeModule** | YES | [see details](./resize.md) | resize | array | [] |
 | **SyntaxModule** | YES | [see details](./syntax.md) | syntax | string | `'true'` |
 | **TableModule** | YES | [see details](./table.md) | table-better | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\TableModule`` |
+| **TemplatesModule** | YES | [see details](./templates.md) | templates | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\TemplatesModule`` |
+| **VideoSelectionModule** | YES | [see details](./video-selection.md) | videoSelection | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\VideoSelectionModule`` |
 | **LayoutModule** | YES | [see details](./layout.md) | layout | array | see ``Ehyiah\QuillJsBundle\DTO\Modules\LayoutModule`` |
 
 ### Independent Modules

@@ -25,6 +25,11 @@ final class QuillContentExtension extends AbstractExtension
                 $this->renderStyles(...),
                 ['is_safe' => ['html']]
             ),
+            new TwigFunction(
+                'quill_content_scripts',
+                $this->renderScripts(...),
+                ['is_safe' => ['html']]
+            ),
         ];
     }
 
@@ -75,5 +80,20 @@ final class QuillContentExtension extends AbstractExtension
     private function link(string $url): string
     {
         return sprintf('<link rel="stylesheet" href="%s">', htmlspecialchars($url, ENT_QUOTES));
+    }
+
+    /**
+     * Emits the Stimulus controller element required to initialize interactive Quill content (e.g. maps).
+     *
+     * The controller is registered by the bundle (`symfony.controllers` in `assets/package.json`) and is
+     * loaded through the app's importmap (AssetMapper) or Webpack Encore (`@symfony/stimulus-bridge`).
+     */
+    public function renderScripts(): string
+    {
+        if ($this->shouldEmit('quill-maps-controller')) {
+            return '<div data-controller="ehyiah--ux-quill--quill-maps" hidden></div>';
+        }
+
+        return '';
     }
 }
