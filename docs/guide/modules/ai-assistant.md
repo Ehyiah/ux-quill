@@ -62,9 +62,9 @@ $builder->add('content', QuillType::class, [
 | :--- | :--- | :--- | :--- |
 | **provider** | `string` | Provider to use: `'api'`, `'wllama'`, or `'transformers'` | `'transformers'` |
 | **features** | `array` | List of enabled features. See the full list below. | `[]` |
-| **models** | `array` | Per-task model overrides (see [Per-task models](#per-task-models)) | `[]` |
-| **reasoning** | `bool` | Allow the model to show chain-of-thought reasoning. Set to `false` for models like Qwen that output long reasoning before the answer. | `true` |
-| **temperature** | `float` | Generation temperature (0.0 = deterministic, 1.0 = creative). Applies to all features across all providers. | `0.7` |
+| **models** | `array` | Per-task model options for local providers (`wllama` and `transformers`) | `[]` |
+| **reasoning** | `bool` | Local provider reasoning option. The API provider is configured server-side. | `true` |
+| **temperature** | `float` | Local provider generation temperature. The API provider uses `QUILL_AI_TEMPERATURE`. | `0.7` |
 | **keyboardShortcut** | `array\|false` | Shortcut to open the AI menu from the editor. `false` disables it. | `['key' => 'Space', 'ctrlKey' => true]` |
 | **ui_language** | `string` | UI language for all labels and buttons: `'en'`, `'fr'`, `'de'`, or `'es'` | `'en'` |
 | **labels** | `array` | Per-label overrides (see [Custom labels](#custom-labels)) | `[]` |
@@ -209,7 +209,7 @@ When using `provider: 'api'`, the module sends requests to a backend PHP control
 | `QUILL_AI_MODEL` | Default model name | `gpt-4o-mini` |
 | `QUILL_AI_MAX_TOKENS` | Maximum tokens per response | `4096` |
 | `QUILL_AI_TEMPERATURE` | Generation temperature | `0.7` |
-| `QUILL_AI_TIMEOUT` | Curl timeout in seconds | `120` |
+| `QUILL_AI_TIMEOUT` | HTTP timeout in seconds | `120` |
 
 > **Security note:** API keys are never exposed to the frontend. If `apiKey` or `api_key` is set in the module options, the PHP DTO throws an `InvalidArgumentException`. Always use environment variables.
 
@@ -227,13 +227,13 @@ ux_quill_ai_assistant:
 
 This imports the route `/_ux/quill/ai-assistant` (POST) which the JavaScript `ApiProvider` calls for all AI features.
 
-### Per-task models
+### Per-task models for local providers
 
-You can configure a different model for each task via the `models` option:
+For local providers, you can configure a different model for each task via the `models` option:
 
 ```php
 new AiAssistantModule(options: [
-    'provider' => 'api',
+    'provider' => 'wllama',
     'features' => ['rewrite', 'translate', 'generate'],
     'models' => [
         'translate' => 'gpt-4o-mini',
@@ -243,7 +243,7 @@ new AiAssistantModule(options: [
 ]),
 ```
 
-If a task has no model override, the default model (`QUILL_AI_MODEL`) is used.
+The API provider uses the single model configured by `QUILL_AI_MODEL`; model overrides from the frontend are not accepted.
 
 ### Full example with API provider
 
@@ -259,7 +259,6 @@ $builder->add('content', QuillType::class, [
     'modules' => [
         new AiAssistantModule(options: [
             'provider' => 'api',
-            'reasoning' => false,
             'features' => [
                 'rewrite',
                 'translate',
@@ -267,10 +266,6 @@ $builder->add('content', QuillType::class, [
                 'generate',
                 'summarize',
                 'toc',
-            ],
-            'models' => [
-                'translate' => 'gpt-4o-mini',
-                'rewrite' => 'gpt-4o',
             ],
             'translate' => [
                 'target_languages' => ['fr', 'en', 'es', 'de', 'it'],

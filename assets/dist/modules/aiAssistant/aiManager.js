@@ -11,6 +11,7 @@ export class AiManager {
     this.labels = void 0;
     this.loadingCallbacks = [];
     this.downloadProgressCallbacks = [];
+    this.errorCallbacks = [];
     this.options = options;
     const lang = options.ui_language || 'en';
     const baseLabels = _extends({}, DEFAULT_LABELS, LOCALES[lang]);
@@ -18,10 +19,7 @@ export class AiManager {
     switch (options.provider) {
       case 'api':
         this.provider = new ApiProvider({
-          models: options.models,
-          debug: options.debug,
-          reasoning: options.reasoning,
-          temperature: options.temperature
+          debug: options.debug
         });
         break;
       case 'wllama':
@@ -49,6 +47,16 @@ export class AiManager {
   }
   onDownloadProgress(callback) {
     this.downloadProgressCallbacks.push(callback);
+  }
+  onError(callback) {
+    this.errorCallbacks.push(callback);
+  }
+  reportError(error) {
+    const normalizedError = error instanceof Error ? error : new Error('The AI request failed.');
+    if (this.options.debug) {
+      console.error('AI request failed:', normalizedError);
+    }
+    this.errorCallbacks.forEach(callback => callback(normalizedError));
   }
   emitDownloadProgress(progress) {
     this.downloadProgressCallbacks.forEach(cb => cb(progress));

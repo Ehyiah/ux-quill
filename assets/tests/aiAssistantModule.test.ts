@@ -7,10 +7,12 @@ describe('AiAssistantModule', () => {
     let mockProvider: jest.Mocked<AiProvider>;
     let mockAiManager: jest.Mocked<AiManager>;
     let keydownHandler: ((event: KeyboardEvent) => void) | null = null;
+    let errorHandler: ((error: Error) => void) | null = null;
 
     beforeEach(() => {
         document.body.innerHTML = '';
         keydownHandler = null;
+        errorHandler = null;
 
         mockProvider = {
             name: 'api',
@@ -34,6 +36,10 @@ describe('AiAssistantModule', () => {
             setLoading: jest.fn(),
             onLoadingChange: jest.fn(),
             onDownloadProgress: jest.fn(),
+            onError: jest.fn().mockImplementation((callback: (error: Error) => void) => {
+                errorHandler = callback;
+            }),
+            reportError: jest.fn(),
         } as unknown as jest.Mocked<AiManager>;
 
         const containerEl = document.createElement('div');
@@ -72,6 +78,7 @@ describe('AiAssistantModule', () => {
     afterEach(() => {
         document.querySelectorAll('.ai-assistant-backdrop').forEach(el => el.remove());
         document.querySelectorAll('.ai-assistant-panel').forEach(el => el.remove());
+        document.querySelectorAll('.ai-assistant-error').forEach(el => el.remove());
     });
 
     function createModule(keyboardShortcut?: { key: string; ctrlKey?: boolean; shiftKey?: boolean; altKey?: boolean; metaKey?: boolean } | false): AiAssistantModule {
@@ -169,6 +176,16 @@ describe('AiAssistantModule', () => {
             expect(panel).not.toBeNull();
             expect(panel.style.top).toBe('104px');
             expect(panel.style.left).toBe('50px');
+        });
+    });
+
+    describe('errors', () => {
+        it('should display backend error messages', () => {
+            createModule(false);
+
+            errorHandler!(new Error('The API is unavailable'));
+
+            expect(document.querySelector('.ai-assistant-error')?.textContent).toBe('The API is unavailable');
         });
     });
 });

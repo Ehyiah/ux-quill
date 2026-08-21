@@ -67,7 +67,7 @@ export class TranslateFeature implements AiFeatureInterface {
       }
     } catch (error) {
       this.aiManager.setLoading(false);
-      console.error('Translation failed:', error);
+      this.aiManager.reportError(error);
     }
   }
 

@@ -139,7 +139,7 @@ export class SynonymFeature implements AiFeatureInterface {
       await this.showSynonymPopup(synonyms, selectedWord, labels, quill, finalWordRange);
     } catch (error) {
       this.aiManager.setLoading(false);
-      console.error('Synonym search failed:', error);
+      this.aiManager.reportError(error);
     }
   }
 

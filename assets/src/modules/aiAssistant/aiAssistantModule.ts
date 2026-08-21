@@ -195,6 +195,22 @@ div.ai-assistant-wrapper .ai-assistant-btn svg { width: 18px; height: 18px; disp
   text-align: center;
 }
 
+.ai-assistant-error {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 100002;
+  max-width: min(420px, calc(100vw - 32px));
+  padding: 12px 16px;
+  border: 1px solid #f0b8b8;
+  border-radius: 8px;
+  background: #fff5f5;
+  box-shadow: 0 8px 24px rgba(0,0,0,.15);
+  color: #9b1c1c;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
 .ai-assistant-submenu {
   position: fixed;
   z-index: 100000;
@@ -351,6 +367,7 @@ export class AiAssistantModule {
   private panel: HTMLElement | null = null;
   private backdrop: HTMLElement | null = null;
   private loadingEl: HTMLElement | null = null;
+  private errorEl: HTMLElement | null = null;
   private panelSelection: { index: number; length: number } | null = null;
   private panelAnchorRect: DOMRect | undefined;
 
@@ -381,6 +398,7 @@ export class AiAssistantModule {
           : this.aiManager.getLabels().preparing;
       }
     });
+    this.aiManager.onError((error) => this.showError(error));
   }
 
   private initializeFeatures(options: AiAssistantOptions): void {
@@ -655,6 +673,24 @@ export class AiAssistantModule {
       this.loadingEl.remove();
       this.loadingEl = null;
     }
+  }
+
+  private showError(error: Error): void {
+    this.errorEl?.remove();
+
+    const errorEl = document.createElement('div');
+    errorEl.className = 'ai-assistant-error';
+    errorEl.setAttribute('role', 'alert');
+    errorEl.textContent = error.message;
+    document.body.appendChild(errorEl);
+    this.errorEl = errorEl;
+
+    window.setTimeout(() => {
+      if (this.errorEl === errorEl) {
+        errorEl.remove();
+        this.errorEl = null;
+      }
+    }, 6000);
   }
 
   private closePanel(): void {

@@ -6,6 +6,7 @@ import { WllamaProvider } from './providers/wllama.js';
 
 type LoadingCallback = (loading: boolean) => void;
 type DownloadProgressCallback = (progress: number) => void;
+type ErrorCallback = (error: Error) => void;
 
 export class AiManager {
   private provider: AiProvider;
@@ -13,6 +14,7 @@ export class AiManager {
   private labels: AiLabels;
   private loadingCallbacks: LoadingCallback[] = [];
   private downloadProgressCallbacks: DownloadProgressCallback[] = [];
+  private errorCallbacks: ErrorCallback[] = [];
 
   constructor(options: AiOptions) {
     this.options = options;
@@ -21,12 +23,9 @@ export class AiManager {
     this.labels = { ...baseLabels, ...options.labels };
 
     switch (options.provider) {
-      case 'api':
-        this.provider = new ApiProvider({
-          models: options.models,
+        case 'api':
+          this.provider = new ApiProvider({
           debug: options.debug,
-          reasoning: options.reasoning,
-          temperature: options.temperature,
         });
         break;
       case 'wllama':
@@ -57,6 +56,18 @@ export class AiManager {
 
   onDownloadProgress(callback: DownloadProgressCallback): void {
     this.downloadProgressCallbacks.push(callback);
+  }
+
+  onError(callback: ErrorCallback): void {
+    this.errorCallbacks.push(callback);
+  }
+
+  reportError(error: unknown): void {
+    const normalizedError = error instanceof Error ? error : new Error('The AI request failed.');
+    if (this.options.debug) {
+      console.error('AI request failed:', normalizedError);
+    }
+    this.errorCallbacks.forEach((callback) => callback(normalizedError));
   }
 
   private emitDownloadProgress(progress: number): void {

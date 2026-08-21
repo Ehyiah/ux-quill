@@ -36,7 +36,7 @@ export class GenerateFeature {
       }
     } catch (error) {
       this.aiManager.setLoading(false);
-      console.error('Generation failed:', error);
+      this.aiManager.reportError(error);
     }
   }
   async promptInput() {

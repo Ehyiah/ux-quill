@@ -24,19 +24,4 @@ final class AiAssistantConfig
         $this->temperature = $temperature ?? 0.7;
         $this->timeout = $timeout ?? 120;
     }
-
-    /**
-     * @param array<string, mixed> $options
-     */
-    public function withOptions(array $options): self
-    {
-        return new self(
-            apiKey: $this->apiKey,
-            apiUrl: $options['api_url'] ?? $this->apiUrl,
-            model: $options['model'] ?? $this->model,
-            maxTokens: $options['max_tokens'] ?? $this->maxTokens,
-            temperature: $options['temperature'] ?? $this->temperature,
-            timeout: $options['timeout'] ?? $this->timeout,
-        );
-    }
 }

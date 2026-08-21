@@ -65,7 +65,7 @@ export class TranslateFeature {
       }
     } catch (error) {
       this.aiManager.setLoading(false);
-      console.error('Translation failed:', error);
+      this.aiManager.reportError(error);
     }
   }
   async promptLanguage(anchorRect) {

@@ -66,7 +66,7 @@ export class SummarizeFeature implements AiFeatureInterface {
       }
     } catch (error) {
       this.aiManager.setLoading(false);
-      console.error('Summarization failed:', error);
+      this.aiManager.reportError(error);
     }
   }
 

@@ -49,7 +49,7 @@ export class RewriteFeature {
       }
     } catch (error) {
       this.aiManager.setLoading(false);
-      console.error('Rewrite failed:', error);
+      this.aiManager.reportError(error);
     }
   }
   async promptStyle(anchorRect) {

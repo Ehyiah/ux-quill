@@ -7,6 +7,7 @@ use Ehyiah\QuillJsBundle\Controller\AiAssistantController;
 use Ehyiah\QuillJsBundle\DTO\Modules\Config\AiAssistantConfig;
 use Ehyiah\QuillJsBundle\Form\QuillAdminField;
 use Ehyiah\QuillJsBundle\Form\QuillType;
+use Ehyiah\QuillJsBundle\Service\SymfonyHttpClientAiAssistantClient;
 use Ehyiah\QuillJsBundle\Twig\Components\QuillContent;
 use Ehyiah\QuillJsBundle\Twig\QuillContentExtension;
 use Symfony\Component\AssetMapper\AssetMapperInterface;
@@ -95,11 +96,30 @@ class QuillJsExtension extends Extension implements PrependExtensionInterface
             ->setArgument('$timeout', '%env(default::QUILL_AI_TIMEOUT)%')
         );
 
-        // Register the AI Assistant controller
-        $container->setDefinition(AiAssistantController::class, (new Definition(AiAssistantController::class))
+        // Register the optional Symfony HttpClient integration when available.
+        $clientReference = null;
+        if (class_exists('Symfony\Component\HttpClient\HttpClient')) {
+            $httpClient = (new Definition('Symfony\Contracts\HttpClient\HttpClientInterface'))
+                ->setFactory(['Symfony\Component\HttpClient\HttpClient', 'create'])
+            ;
+
+            $container->setDefinition(SymfonyHttpClientAiAssistantClient::class, (new Definition(SymfonyHttpClientAiAssistantClient::class))
+                ->setArgument('$httpClient', $httpClient)
+                ->setPublic(false)
+            );
+            $clientReference = new Reference(SymfonyHttpClientAiAssistantClient::class);
+        }
+
+        // Register the AI Assistant controller even without HttpClient so it can
+        // return a clear installation error when the endpoint is used.
+        $controllerDefinition = (new Definition(AiAssistantController::class))
             ->setArgument('$config', new Reference(AiAssistantConfig::class))
             ->addTag('controller.service_arguments')
-        );
+        ;
+        if (null !== $clientReference) {
+            $controllerDefinition->setArgument('$client', $clientReference);
+        }
+        $container->setDefinition(AiAssistantController::class, $controllerDefinition);
     }
 
     private function isAssetMapperAvailable(ContainerBuilder $container): bool

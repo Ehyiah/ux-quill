@@ -38,6 +38,7 @@ describe('SynonymFeature', () => {
         synonymClickToReplace: 'Click to replace',
       }),
       setLoading: jest.fn(),
+      reportError: jest.fn(),
     } as unknown as jest.Mocked<AiManager>;
 
     mockQuill = {
@@ -170,15 +171,11 @@ it('should replace only the word when synonym is clicked', async () => {
       mockContent = 'Hello world';
       mockProvider.findSynonyms.mockRejectedValue(new Error('API error'));
 
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-
       await feature.trigger();
 
       expect(mockAiManager.setLoading).toHaveBeenCalledWith(true);
       expect(mockAiManager.setLoading).toHaveBeenCalledWith(false);
-      expect(consoleSpy).toHaveBeenCalledWith('Synonym search failed:', expect.any(Error));
-
-      consoleSpy.mockRestore();
+      expect(mockAiManager.reportError).toHaveBeenCalledWith(expect.any(Error));
     });
 
     it('should use default count of 5 if not provided', async () => {

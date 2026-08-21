@@ -35,6 +35,8 @@ describe('InlineToolbar', () => {
             setLoading: jest.fn(),
             onLoadingChange: jest.fn(),
             onDownloadProgress: jest.fn(),
+            onError: jest.fn(),
+            reportError: jest.fn(),
         } as unknown as jest.Mocked<AiManager>;
 
         container = document.createElement('div');

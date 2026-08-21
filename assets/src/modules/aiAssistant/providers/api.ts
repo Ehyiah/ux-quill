@@ -4,10 +4,7 @@ import type { AiFeature, RewriteStyle, SummaryFormat, GrammarSuggestion, Synonym
 const API_ENDPOINT = '/_ux/quill/ai-assistant';
 
 interface ApiProviderOptions {
-  models?: Partial<Record<AiFeature, string>>;
   debug?: boolean;
-  reasoning?: boolean;
-  temperature?: number;
 }
 
 export class ApiProvider extends BaseAiProvider {
@@ -26,10 +23,6 @@ export class ApiProvider extends BaseAiProvider {
     return true;
   }
 
-  private getModel(feature: AiFeature): string | undefined {
-    return this.options.models?.[feature];
-  }
-
   private async callApi(feature: string, text: string, extra: Record<string, unknown> = {}): Promise<string> {
     const payload: Record<string, unknown> = {
       feature,
@@ -37,25 +30,8 @@ export class ApiProvider extends BaseAiProvider {
       ...extra,
     };
 
-    const model = this.getModel(feature as AiFeature);
-    if (model) {
-      payload.model = model;
-    }
-
     if (this.options.debug) {
-      console.log(`[AI:${feature}:request]`, { text: text.substring(0, 100), ...extra, model });
-    }
-
-    if (this.options.reasoning === false) {
-      payload.reasoning = false;
-    }
-
-    if (this.options.temperature !== undefined) {
-      payload.temperature = this.options.temperature;
-    }
-
-    if (this.options.temperature !== undefined) {
-      payload.temperature = this.options.temperature;
+      console.log(`[AI:${feature}:request]`, { text: text.substring(0, 100), ...extra });
     }
 
     const start = performance.now();
@@ -66,14 +42,19 @@ export class ApiProvider extends BaseAiProvider {
       body: JSON.stringify(payload),
     });
 
-    const data = await response.json();
+    let data: { error?: unknown; result?: unknown; usage?: unknown } = {};
+    try {
+      data = await response.json() as typeof data;
+    } catch {
+      throw new Error(`AI API error: HTTP ${response.status}`);
+    }
 
     if (!response.ok) {
       const errorMsg = data?.error || `HTTP ${response.status}`;
       throw new Error(`AI API error: ${errorMsg}`);
     }
 
-    const result = data?.result || '';
+    const result = typeof data.result === 'string' ? data.result : '';
 
     if (this.options.debug) {
       const duration = Math.round(performance.now() - start);

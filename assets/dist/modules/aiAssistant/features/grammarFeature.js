@@ -64,7 +64,7 @@ export class GrammarFeature {
       }
     } catch (error) {
       this.aiManager.setLoading(false);
-      console.error('Grammar check failed:', error);
+      this.aiManager.reportError(error);
     }
   }
 }

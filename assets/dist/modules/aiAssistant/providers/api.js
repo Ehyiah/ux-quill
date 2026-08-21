@@ -16,10 +16,6 @@ export class ApiProvider extends BaseAiProvider {
   isAvailable() {
     return true;
   }
-  getModel(feature) {
-    var _this$options$models;
-    return (_this$options$models = this.options.models) == null ? void 0 : _this$options$models[feature];
-  }
   async callApi(feature, text, extra) {
     if (extra === void 0) {
       extra = {};
@@ -28,25 +24,10 @@ export class ApiProvider extends BaseAiProvider {
       feature,
       text
     }, extra);
-    const model = this.getModel(feature);
-    if (model) {
-      payload.model = model;
-    }
     if (this.options.debug) {
       console.log("[AI:" + feature + ":request]", _extends({
         text: text.substring(0, 100)
-      }, extra, {
-        model
-      }));
-    }
-    if (this.options.reasoning === false) {
-      payload.reasoning = false;
-    }
-    if (this.options.temperature !== undefined) {
-      payload.temperature = this.options.temperature;
-    }
-    if (this.options.temperature !== undefined) {
-      payload.temperature = this.options.temperature;
+      }, extra));
     }
     const start = performance.now();
     const response = await fetch(API_ENDPOINT, {
@@ -56,19 +37,26 @@ export class ApiProvider extends BaseAiProvider {
       },
       body: JSON.stringify(payload)
     });
-    const data = await response.json();
+    let data = {};
+    try {
+      data = await response.json();
+    } catch (_unused) {
+      throw new Error("AI API error: HTTP " + response.status);
+    }
     if (!response.ok) {
-      const errorMsg = (data == null ? void 0 : data.error) || "HTTP " + response.status;
+      var _data;
+      const errorMsg = ((_data = data) == null ? void 0 : _data.error) || "HTTP " + response.status;
       throw new Error("AI API error: " + errorMsg);
     }
-    const result = (data == null ? void 0 : data.result) || '';
+    const result = typeof data.result === 'string' ? data.result : '';
     if (this.options.debug) {
+      var _data2;
       const duration = Math.round(performance.now() - start);
       const log = {
         result,
         duration: duration + "ms"
       };
-      if (data != null && data.usage) {
+      if ((_data2 = data) != null && _data2.usage) {
         log.usage = data.usage;
       }
       console.log("[AI:" + feature + ":response]", log);
@@ -137,7 +125,7 @@ export class ApiProvider extends BaseAiProvider {
           word: ''
         };
       }).filter(s => s.word.length > 0);
-    } catch (_unused) {
+    } catch (_unused2) {
       return [];
     }
   }

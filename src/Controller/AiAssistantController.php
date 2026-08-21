@@ -3,6 +3,7 @@
 namespace Ehyiah\QuillJsBundle\Controller;
 
 use Ehyiah\QuillJsBundle\DTO\Modules\Config\AiAssistantConfig;
+use Ehyiah\QuillJsBundle\Service\AiAssistantClientInterface;
 use InvalidArgumentException;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -17,6 +18,7 @@ class AiAssistantController
 
     public function __construct(
         private readonly AiAssistantConfig $config,
+        private readonly ?AiAssistantClientInterface $client = null,
     ) {
     }
 
@@ -44,21 +46,23 @@ class AiAssistantController
             return $this->error('Missing or invalid "text".');
         }
 
-        $options = $payload['options'] ?? [];
-        if (!is_array($options)) {
-            $options = [];
+        if (array_key_exists('options', $payload)) {
+            return $this->error('The "options" object is managed by the server and cannot be sent in the request.');
         }
 
-        $model = $payload['model'] ?? null;
-        if (is_string($model) && '' !== $model) {
-            $options['model'] = $model;
+        foreach (['api_url', 'model', 'max_tokens', 'temperature', 'timeout', 'reasoning'] as $option) {
+            if (array_key_exists($option, $payload)) {
+                return $this->error(sprintf('The "%s" option is managed by the server and cannot be overridden from the request.', $option));
+            }
         }
 
-        $cfg = $this->config->withOptions($options);
-
+        $messages = $this->buildMessages($feature, $text, $payload);
         try {
-            $messages = $this->buildMessages($feature, $text, $payload);
-            $apiResult = $this->callApi($cfg, $messages);
+            if (null === $this->client) {
+                throw new RuntimeException('The AI Assistant API provider requires symfony/http-client. Install it with: composer require symfony/http-client');
+            }
+
+            $apiResult = $this->client->complete($this->config, $messages);
         } catch (RuntimeException $e) {
             return $this->error($e->getMessage());
         }
@@ -78,7 +82,7 @@ class AiAssistantController
      */
     private function buildMessages(string $feature, string $text, array $payload): array
     {
-        $messages = match ($feature) {
+        return match ($feature) {
             'translate' => $this->buildTranslateMessages($text, $payload),
             'rewrite' => $this->buildRewriteMessages($text, $payload),
             'grammar' => $this->buildGrammarMessages($text),
@@ -87,13 +91,6 @@ class AiAssistantController
             'synonym' => $this->buildSynonymMessages($text, $payload),
             default => throw new InvalidArgumentException(sprintf('Unknown feature "%s".', $feature)),
         };
-
-        $reasoning = $payload['reasoning'] ?? true;
-        if (!$reasoning && isset($messages[0]) && 'system' === $messages[0]['role']) {
-            $messages[0]['content'] .= ' Do not show any reasoning, thinking, or chain-of-thought. Respond directly with only the final answer.';
-        }
-
-        return $messages;
     }
 
     /**
@@ -133,9 +130,7 @@ class AiAssistantController
         ];
     }
 
-    /**
-     * @return array<int, array{role: string, content: string}>
-     */
+    /** @return array<int, array{role: string, content: string}> */
     private function buildGrammarMessages(string $text): array
     {
         return [
@@ -144,9 +139,7 @@ class AiAssistantController
         ];
     }
 
-    /**
-     * @return array<int, array{role: string, content: string}>
-     */
+    /** @return array<int, array{role: string, content: string}> */
     private function buildGenerateMessages(string $text): array
     {
         return [
@@ -187,58 +180,6 @@ class AiAssistantController
             ['role' => 'system', 'content' => 'You are a lexicography assistant. Respond ONLY with a valid JSON array of synonym objects in format [{"word": "...", "score": 0.0-1.0}]. Sort by relevance (highest score first). No explanations, no notes.'],
             ['role' => 'user', 'content' => sprintf('Find up to %d synonyms for the word "%s". Detect the language automatically. Respond only with the JSON array.', $count, $text)],
         ];
-    }
-
-    /**
-     * @param array<int, array{role: string, content: string}> $messages
-     *
-     * @return array{result: string, usage: array<string, int>|null}
-     */
-    private function callApi(AiAssistantConfig $config, array $messages): array
-    {
-        $headers = [
-            'Content-Type: application/json',
-        ];
-
-        if (null !== $config->apiKey && '' !== $config->apiKey) {
-            $headers[] = 'Authorization: Bearer ' . $config->apiKey;
-        }
-
-        $payload = json_encode([
-            'model' => $config->model,
-            'messages' => $messages,
-            'max_tokens' => $config->maxTokens,
-            'temperature' => $config->temperature,
-        ], JSON_THROW_ON_ERROR);
-
-        $ch = curl_init($config->apiUrl);
-        curl_setopt_array($ch, [
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => $payload,
-            CURLOPT_HTTPHEADER => $headers,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT => $config->timeout,
-        ]);
-
-        $body = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $error = curl_error($ch);
-        curl_close($ch);
-
-        if (false === $body || $httpCode >= 400) {
-            throw new RuntimeException(sprintf('API error (HTTP %d): %s', $httpCode, $error ?: ($body ?: 'Unknown error')));
-        }
-
-        if (!is_string($body)) {
-            throw new RuntimeException('API returned non-string response.');
-        }
-
-        $data = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-
-        $result = trim($data['choices'][0]['message']['content'] ?? '');
-        $usage = $data['usage'] ?? null;
-
-        return ['result' => $result, 'usage' => $usage];
     }
 
     private function error(string $message): JsonResponse

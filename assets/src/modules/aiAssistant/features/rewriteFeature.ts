@@ -60,7 +60,7 @@ export class RewriteFeature implements AiFeatureInterface {
       }
     } catch (error) {
       this.aiManager.setLoading(false);
-      console.error('Rewrite failed:', error);
+      this.aiManager.reportError(error);
     }
   }
 
