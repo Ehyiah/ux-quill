@@ -225,6 +225,20 @@ access_control:
     - { path: ^/_ux/quill/ai-assistant$, roles: ROLE_ADMIN }
 ```
 
+Throttling is strongly recommended when using the `api` provider, since every request forwarded by the endpoint consumes your API quota. Define a rate limiter:
+
+```yaml
+# config/packages/rate_limiter.yaml (example)
+framework:
+    rate_limiter:
+        quill_ai_assistant:
+            policy: sliding_window
+            limit: 20
+            interval: 1 minute
+```
+
+Then enforce it with a `kernel.request` event subscriber (or any throttling solution of your choice) matching the `/_ux/quill/ai-assistant` path.
+
 > **Security note:** API keys are never exposed to the frontend. If `apiKey` or `api_key` is set in the module options, the PHP DTO throws an `InvalidArgumentException`. Always use environment variables.
 
 > **Unauthenticated endpoints:** When `QUILL_AI_API_KEY` is not set, the controller sends no `Authorization` header. This works with local endpoints like Ollama and LLM Studio.
