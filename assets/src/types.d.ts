@@ -26,9 +26,9 @@ export type AiKeyboardShortcut = {
 
 export type AiOptions = {
     provider?: string;
-    api_key?: string | null;
     features?: Partial<Record<string, boolean | Record<string, unknown>>>;
-    models?: Partial<Record<string, string>>;
+    model?: string;
+    debug?: boolean;
     keyboardShortcut?: AiKeyboardShortcut | false;
     translate?: {
         target_languages?: string[];

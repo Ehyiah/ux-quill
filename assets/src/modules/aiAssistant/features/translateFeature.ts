@@ -104,6 +104,7 @@ export class TranslateFeature implements AiFeatureInterface {
 
       languages.forEach((lang) => {
         const item = document.createElement('button');
+        item.type = 'button';
         item.className = 'ai-assistant-submenu-item';
 
         const icon = document.createElement('span');

@@ -17,8 +17,7 @@ final class AiAssistantModule implements ModuleInterface
     public const FEATURE_SYNONYM = 'synonym';
 
     public const PROVIDER_OPTION = 'provider';
-    public const MODELS_OPTION = 'models';
-    public const REASONING_OPTION = 'reasoning';
+    public const MODEL_OPTION = 'model';
     public const TEMPERATURE_OPTION = 'temperature';
     public const UI_LANGUAGE_OPTION = 'ui_language';
     public const LABELS_OPTION = 'labels';
@@ -41,7 +40,6 @@ final class AiAssistantModule implements ModuleInterface
     ) {
         $defaults = [
             self::PROVIDER_OPTION => 'transformers',
-            self::REASONING_OPTION => true,
             self::TEMPERATURE_OPTION => 0.7,
             'features' => [],
             'translate' => [
@@ -62,6 +60,11 @@ final class AiAssistantModule implements ModuleInterface
         $provider = $merged[self::PROVIDER_OPTION] ?? null;
         if (null !== $provider && !in_array($provider, self::ALLOWED_PROVIDERS, true)) {
             throw new InvalidArgumentException(sprintf('AiAssistantModule provider must be one of: %s. Got "%s".', implode(', ', self::ALLOWED_PROVIDERS), $provider));
+        }
+
+        $model = $merged[self::MODEL_OPTION] ?? null;
+        if (null !== $model && (!is_string($model) || '' === trim($model))) {
+            throw new InvalidArgumentException('AiAssistantModule model must be a non-empty string.');
         }
 
         $uiLanguage = $merged[self::UI_LANGUAGE_OPTION] ?? null;
@@ -113,15 +116,6 @@ final class AiAssistantModule implements ModuleInterface
         foreach (['apiKey', 'api_key'] as $key) {
             if (array_key_exists($key, $options)) {
                 throw new InvalidArgumentException(sprintf('The "%s" option cannot be set in AiAssistantModule options. Use environment variables (QUILL_AI_API_KEY) instead.', $key));
-            }
-        }
-
-        $models = $options[self::MODELS_OPTION] ?? [];
-        if (is_array($models)) {
-            foreach ($models as $feature => $modelConfig) {
-                if (is_array($modelConfig) && (isset($modelConfig['apiKey']) || isset($modelConfig['api_key']))) {
-                    throw new InvalidArgumentException(sprintf('The "apiKey" option cannot be set in models.%s. Use environment variables instead.', $feature));
-                }
             }
         }
     }

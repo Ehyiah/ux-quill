@@ -89,6 +89,7 @@ export class SummarizeFeature implements AiFeatureInterface {
 
       options.forEach((opt) => {
         const item = document.createElement('button');
+        item.type = 'button';
         item.className = 'ai-assistant-submenu-item';
 
         const icon = document.createElement('span');

@@ -7,6 +7,7 @@ import { AiManager } from "./modules/aiAssistant/aiManager.js";
 import "./register-modules.js";
 import QuillTableBetter from 'quill-table-better';
 import ImageFigure from "./blots/imageFigure.js";
+const AI_FEATURES = ['rewrite', 'translate', 'grammar', 'generate', 'summarize', 'toc', 'synonym'];
 
 // Register custom ImageFigure blot to override default image
 Quill.register(ImageFigure, true);
@@ -108,15 +109,21 @@ export default class _Class extends Controller {
       return;
     }
     const features = {};
-    raw.features.forEach(f => {
-      features[f] = true;
+    raw.features.forEach(feature => {
+      if (AI_FEATURES.includes(feature)) {
+        features[feature] = true;
+      }
     });
-    const aiManager = new AiManager({
-      provider: raw.provider || 'transformers',
-      models: raw.models || undefined,
+    const provider = raw.provider === 'api' || raw.provider === 'wllama' ? raw.provider : 'transformers';
+    const aiOptions = {
+      provider,
       features,
       debug: !!raw.debug
-    });
+    };
+    if (raw.model) {
+      aiOptions.model = String(raw.model);
+    }
+    const aiManager = new AiManager(aiOptions);
     const keyboardShortcut = raw.keyboardShortcut !== undefined ? raw.keyboardShortcut : {
       key: 'Space',
       ctrlKey: true,

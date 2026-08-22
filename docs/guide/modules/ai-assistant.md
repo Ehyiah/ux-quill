@@ -62,8 +62,7 @@ $builder->add('content', QuillType::class, [
 | :--- | :--- | :--- | :--- |
 | **provider** | `string` | Provider to use: `'api'`, `'wllama'`, or `'transformers'` | `'transformers'` |
 | **features** | `array` | List of enabled features. See the full list below. | `[]` |
-| **models** | `array` | Per-task model options for local providers (`wllama` and `transformers`) | `[]` |
-| **reasoning** | `bool` | Local provider reasoning option. The API provider is configured server-side. | `true` |
+| **model** | `string` | Global model override for local providers (`wllama`: `REPO/FILE.gguf`, `transformers`: HF ONNX id) — single model shared by all features | — |
 | **temperature** | `float` | Local provider generation temperature. The API provider uses `QUILL_AI_TEMPERATURE`. | `0.7` |
 | **keyboardShortcut** | `array\|false` | Shortcut to open the AI menu from the editor. `false` disables it. | `['key' => 'Space', 'ctrlKey' => true]` |
 | **ui_language** | `string` | UI language for all labels and buttons: `'en'`, `'fr'`, `'de'`, or `'es'` | `'en'` |
@@ -185,6 +184,10 @@ Available label keys:
 | `btnClose` | Close | Close button |
 | `btnGenerate` | Generate | Generate modal submit button |
 | `btnRegenerate` | Regenerate | Review modal regenerate button |
+| `panelTitle` | AI Assistant | Panel header title (also used for the toolbar button label) |
+| `groupEdit` | Edit | Panel group heading |
+| `groupCreate` | Create | Panel group heading |
+| `groupAnalyze` | Analyze | Panel group heading |
 | `generating` | Generating | Loading overlay text |
 | `loadingModel` | Loading model... | Download progress text |
 | `preparing` | Preparing... | Post-download text |
@@ -212,6 +215,15 @@ When using `provider: 'api'`, the module sends requests to a backend PHP control
 | `QUILL_AI_MAX_TOKENS` | Maximum tokens per response | `4096` |
 | `QUILL_AI_TEMPERATURE` | Generation temperature | `0.7` |
 | `QUILL_AI_TIMEOUT` | HTTP timeout in seconds | `120` |
+| `QUILL_AI_MAX_TEXT_CHARS` | Maximum characters accepted per request | `8000` |
+
+> **Security note:** the endpoint is public by default. Protect it in your application — restrict it with `access_control` (e.g. `ROLE_ADMIN`) and consider Symfony's rate limiter to avoid abusive usage of your API quota:
+
+```yaml
+# config/packages/security.yaml (example)
+access_control:
+    - { path: ^/_ux/quill/ai-assistant$, roles: ROLE_ADMIN }
+```
 
 > **Security note:** API keys are never exposed to the frontend. If `apiKey` or `api_key` is set in the module options, the PHP DTO throws an `InvalidArgumentException`. Always use environment variables.
 
@@ -229,21 +241,27 @@ ux_quill_ai_assistant:
 
 This imports the route `/_ux/quill/ai-assistant` (POST) which the JavaScript `ApiProvider` calls for all AI features.
 
-### Per-task models for local providers
+### Global model for local providers
 
-For local providers, you can configure a different model for each task via the `models` option:
+Local providers load a **single model** shared by all features. Configure it with the `model` option:
 
 ```php
+// wllama — HUGGINGFACE_REPO/FILENAME.gguf
 new AiAssistantModule(options: [
     'provider' => 'wllama',
     'features' => ['rewrite', 'translate', 'generate'],
-    'models' => [
-        'translate' => 'gpt-4o-mini',
-        'rewrite' => 'gpt-4o',
-        'generate' => 'gpt-4o',
-    ],
+    'model' => 'Qwen/Qwen2.5-1.5B-Instruct-GGUF/qwen2.5-1.5b-instruct-q4_k_m.gguf',
+]),
+
+// transformers — HuggingFace ONNX model id
+new AiAssistantModule(options: [
+    'provider' => 'transformers',
+    'features' => ['rewrite', 'translate', 'summarize'],
+    'model' => 'Xenova/LaMini-Flan-T5-783M',
 ]),
 ```
+
+Precedence: `model` option → provider defaults (per-feature for transformers). The chosen transformers model must remain compatible with the pipeline tasks (`text2text-generation`, `summarization`, `text-generation`).
 
 The API provider uses the single model configured by `QUILL_AI_MODEL`; model overrides from the frontend are not accepted.
 
@@ -322,18 +340,16 @@ WebGPU provides **2–5x faster inference** compared to CPU-only WASM. If you ta
 
 ### Custom model
 
-You can override the default model by setting the `translate` model (the provider uses this as its single model config — all features share the same loaded model):
+You can override the default model with the global `model` option (the provider uses it as its single model config — all features share the same loaded model):
 
 ```php
 new AiAssistantModule(options: [
     'provider' => 'wllama',
-    'models' => [
-        'translate' => 'Qwen/Qwen2.5-1.5B-Instruct-GGUF/qwen2.5-1.5b-instruct-q4_k_m.gguf',
-    ],
+    'model' => 'Qwen/Qwen2.5-1.5B-Instruct-GGUF/qwen2.5-1.5b-instruct-q4_k_m.gguf',
 ]),
 ```
 
-The `models.translate` value uses the format `HUGGINGFACE_REPO/FILENAME.gguf`. The model is downloaded once from HuggingFace Hub on first feature use, then cached in the browser.
+The `model` value uses the format `HUGGINGFACE_REPO/FILENAME.gguf`. The model is downloaded once from HuggingFace Hub on first feature use, then cached in the browser.
 
 ### How to find GGUF models on HuggingFace
 
@@ -373,11 +389,20 @@ GGUF files are named with their quantization method, which determines the trade-
 The wllama provider loads **one model** in the browser and reuses it for all features (rewrite, translate, grammar, etc.). This is by design — loading a GGUF model involves a multi-hundred-MB download and significant memory, so switching models per-feature is not practical.
 :::
 
+::: warning
+Model quality matters a lot for **grammar correction**. The default `Qwen2.5-0.5B-Instruct` is fast but struggles with French (and other non-English) grammar — it may answer in the wrong language or produce approximate corrections. For reliable grammar results, load a larger model such as `Qwen2.5-1.5B-Instruct` or `Llama-3.2-1B-Instruct` via the global `model` option (it configures the single model used by wllama):
+
+```php
+'model' => 'Qwen/Qwen2.5-1.5B-Instruct-GGUF/qwen2.5-1.5b-instruct-q4_k_m.gguf',
+```
+:::
+
 ### Recommended GGUF models
 
 | Model | Repo / File pattern | Size (Q4) | RAM | Quality | Notes |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Qwen2.5-0.5B-Instruct** | `Qwen/Qwen2.5-0.5B-Instruct-GGUF` | ~350 MB | 512 MB | ★★★★☆ | Best quality/size ratio, recommended default |
+| **Qwen2.5-0.5B-Instruct** | `Qwen/Qwen2.5-0.5B-Instruct-GGUF` | ~350 MB | 512 MB | ★★☆☆☆ | default |
+| **Qwen2.5-1.5B-Instruct** | `Qwen/Qwen2.5-1.5B-Instruct-GGUF` | ~350 MB | 512 MB | ★★★★☆ | Best quality/size ratio, recommended |
 | **SmolLM2-360M-Instruct** | `HuggingFaceTB/SmolLM2-360M-Instruct-GGUF` | ~250 MB | 384 MB | ★★★☆☆ | Very lightweight, good for simple translations |
 | **TinyLlama-1.1B-Chat** | `TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF` | ~700 MB | 1 GB | ★★★★☆ | Good general-purpose model |
 | **Llama-3.2-1B-Instruct** | `bartowski/Llama-3.2-1B-Instruct-GGUF` | ~700 MB | 1 GB | ★★★★☆ | Excellent instruction following |
@@ -394,6 +419,10 @@ Browse more GGUF models on HuggingFace: [huggingface.co/models?library=gguf](htt
 ## Transformers provider configuration
 
 Provider `transformers` runs ONNX models entirely in-browser using [@huggingface/transformers](https://github.com/huggingface/transformers.js). Models are downloaded from HuggingFace Hub on first use and cached in the browser.
+
+::: warning
+The default ONNX models (`Xenova/LaMini-Flan-T5-783M`, `Xenova/distilgpt2`) are English-centric and small — grammar correction on non-English text (e.g. French) will be unreliable. Prefer the `wllama` provider with a larger multilingual GGUF model for serious grammar usage.
+:::
 
 The package is **optional**: if it is not installed, the provider loads it from the jsdelivr CDN and prints a console warning. This fallback is convenient for development but is **not recommended in production** — install it explicitly:
 
@@ -447,7 +476,7 @@ The transformers provider is **not recommended for production use**:
 - Inference depends on the user's device CPU power
 :::
 
-Currently, models are hardcoded in the provider and cannot be configured via the `models` option. For customizable models, use the [`wllama` provider](#wllama-provider-configuration) or the [`api` provider](#api-provider-configuration).
+Models are hardcoded per feature in the provider. You can override them all with the global `model` option (it must stay compatible with the pipeline tasks — see [Global model for local providers](#global-model-for-local-providers)). For curated models, use the [`wllama` provider](#wllama-provider-configuration) or the [`api` provider](#api-provider-configuration).
 
 ::: tip
 For most use cases, the `api` provider (recommended) or `wllama` provider will give better results. The `transformers` provider is primarily intended for development and testing.

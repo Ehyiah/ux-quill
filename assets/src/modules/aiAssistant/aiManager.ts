@@ -30,7 +30,7 @@ export class AiManager {
         break;
       case 'wllama':
         this.provider = new WllamaProvider({
-          model: options.models?.translate,
+          model: options.model,
           debug: options.debug,
           temperature: options.temperature,
           onProgress: (progress: number) => {
@@ -41,7 +41,7 @@ export class AiManager {
       default:
         this.provider = new TransformersProvider((progress: number) => {
           this.emitDownloadProgress(progress);
-        }, options.temperature);
+        }, options.temperature, options.model);
         break;
     }
   }
@@ -56,6 +56,19 @@ export class AiManager {
 
   onDownloadProgress(callback: DownloadProgressCallback): void {
     this.downloadProgressCallbacks.push(callback);
+  }
+
+  /**
+   * Forwards per-feature model download progress when the provider supports
+   * it (TransformersProvider). Returns an unsubscribe function, or undefined
+   * when the active provider has no per-feature progress.
+   */
+  onModelProgress(feature: AiFeature, callback: (progress: number) => void): (() => void) | undefined {
+    const capable = this.provider as Partial<{
+      onModelProgress: (feature: AiFeature, callback: (progress: number) => void) => () => void;
+    }>;
+
+    return capable.onModelProgress?.(feature, callback);
   }
 
   onError(callback: ErrorCallback): void {

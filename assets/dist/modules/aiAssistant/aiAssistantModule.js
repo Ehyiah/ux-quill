@@ -5,6 +5,7 @@ import { GenerateFeature } from "./features/generateFeature.js";
 import { SummarizeFeature } from "./features/summarizeFeature.js";
 import { TocFeature } from "./features/tocFeature.js";
 import { SynonymFeature } from "./features/synonymFeature.js";
+const PANEL_ID = 'ai-assistant-panel';
 const FEATURE_ICONS = {
   rewrite: '\u270D\uFE0F',
   translate: '\uD83C\uDF10',
@@ -23,10 +24,10 @@ const FEATURE_GROUPS = {
   toc: 'analyze',
   synonym: 'edit'
 };
-const GROUP_LABELS = {
-  edit: 'Edit',
-  create: 'Create',
-  analyze: 'Analyze'
+const GROUP_LABEL_KEYS = {
+  edit: 'groupEdit',
+  create: 'groupCreate',
+  analyze: 'groupAnalyze'
 };
 let stylesInjected = false;
 function injectStyles() {
@@ -48,6 +49,7 @@ export class AiAssistantModule {
     this.errorEl = null;
     this.panelSelection = null;
     this.panelAnchorRect = void 0;
+    this.panelKeydownHandler = null;
     this.quill = quill;
     this.aiManager = options.aiManager;
     injectStyles();
@@ -107,8 +109,11 @@ export class AiAssistantModule {
     this.button = document.createElement('button');
     this.button.className = 'ql-ai-assistant ai-assistant-btn';
     this.button.innerHTML = "\n      <svg viewBox=\"0 0 18 18\">\n        <path d=\"M9 2 L11 7 L16 7 L12 10.5 L13.5 16 L9 12.5 L4.5 16 L6 10.5 L2 7 L7 7 Z\"\n              class=\"ql-fill\" fill=\"currentColor\"/>\n      </svg>\n    ";
+    this.button.type = 'button';
     this.button.setAttribute('aria-label', 'AI Assistant');
     this.button.title = 'AI Assistant';
+    this.button.setAttribute('aria-controls', PANEL_ID);
+    this.button.setAttribute('aria-expanded', 'false');
     this.button.addEventListener('click', e => {
       e.stopPropagation();
       e.preventDefault();
@@ -166,8 +171,10 @@ export class AiAssistantModule {
     this.openPanel();
   }
   openPanel(anchorRect) {
+    var _this$button;
     this.panelAnchorRect = anchorRect;
     this.showPanel();
+    (_this$button = this.button) == null || _this$button.setAttribute('aria-expanded', 'true');
   }
   showPanel() {
     this.panelSelection = this.quill.getSelection() || null;
@@ -178,6 +185,15 @@ export class AiAssistantModule {
     document.body.appendChild(this.backdrop);
     this.panel = document.createElement('div');
     this.panel.className = 'ai-assistant-panel';
+    this.panel.id = PANEL_ID;
+    this.panelKeydownHandler = event => {
+      if (event.key === 'Escape') {
+        event.stopPropagation();
+        this.closePanel();
+      }
+    };
+    document.addEventListener('keydown', this.panelKeydownHandler);
+    const labels = this.aiManager.getLabels();
     const header = document.createElement('div');
     header.className = 'ai-assistant-panel-header';
     const mark = document.createElement('span');
@@ -186,7 +202,7 @@ export class AiAssistantModule {
     mark.textContent = '\u2728';
     const title = document.createElement('span');
     title.className = 'ai-assistant-panel-title';
-    title.textContent = 'AI Assistant';
+    title.textContent = labels.panelTitle || 'AI Assistant';
     header.appendChild(mark);
     header.appendChild(title);
     this.panel.appendChild(header);
@@ -207,6 +223,7 @@ export class AiAssistantModule {
           instance
         } = _ref2;
         const item = document.createElement('button');
+        item.type = 'button';
         item.className = 'ai-assistant-item';
         const icon = document.createElement('span');
         icon.className = 'ai-assistant-item-icon';
@@ -234,9 +251,9 @@ export class AiAssistantModule {
         item.appendChild(icon);
         item.appendChild(text);
         item.addEventListener('mousedown', e => {
-          var _this$button;
+          var _this$button2;
           e.preventDefault();
-          const btnRect = (_this$button = this.button) == null ? void 0 : _this$button.getBoundingClientRect();
+          const btnRect = (_this$button2 = this.button) == null ? void 0 : _this$button2.getBoundingClientRect();
           this.closePanel();
           if (this.panelSelection) {
             this.quill.setSelection(this.panelSelection.index, this.panelSelection.length, 'api');
@@ -264,12 +281,14 @@ export class AiAssistantModule {
         });
       }
     });
+    const labels = this.aiManager.getLabels();
     const result = [];
     Object.entries(groups).forEach(_ref3 => {
       let [key, items] = _ref3;
       if (items.length > 0) {
+        const labelKey = GROUP_LABEL_KEYS[key];
         result.push({
-          label: GROUP_LABELS[key] || key,
+          label: (labelKey ? labels[labelKey] : '') || key,
           items
         });
       }
@@ -277,9 +296,9 @@ export class AiAssistantModule {
     return result;
   }
   positionPanel() {
-    var _this$button2;
+    var _this$button3;
     if (!this.panel) return;
-    const btnRect = this.panelAnchorRect || ((_this$button2 = this.button) == null ? void 0 : _this$button2.getBoundingClientRect());
+    const btnRect = this.panelAnchorRect || ((_this$button3 = this.button) == null ? void 0 : _this$button3.getBoundingClientRect());
     if (!btnRect) return;
     const panelWidth = this.panel.offsetWidth;
     const panelHeight = this.panel.offsetHeight;
@@ -352,8 +371,13 @@ export class AiAssistantModule {
     }, 6000);
   }
   closePanel() {
+    var _this$button4;
     this.panelSelection = null;
     this.panelAnchorRect = undefined;
+    if (this.panelKeydownHandler) {
+      document.removeEventListener('keydown', this.panelKeydownHandler);
+      this.panelKeydownHandler = null;
+    }
     if (this.panel) {
       this.panel.remove();
       this.panel = null;
@@ -362,5 +386,6 @@ export class AiAssistantModule {
       this.backdrop.remove();
       this.backdrop = null;
     }
+    (_this$button4 = this.button) == null || _this$button4.setAttribute('aria-expanded', 'false');
   }
 }

@@ -45,6 +45,11 @@ export interface AiLabels {
   descToc: string;
   descSynonym: string;
 
+  panelTitle: string;
+  groupEdit: string;
+  groupCreate: string;
+  groupAnalyze: string;
+
   rewriteStyleTitle: string;
   rewriteFormal: string;
   rewriteFormalDesc: string;
@@ -108,6 +113,11 @@ export const DEFAULT_LABELS: AiLabels = {
   descSummarize: 'Summarize the content',
   descToc: 'Create a table of contents',
   descSynonym: 'Find synonyms for the selected word',
+
+  panelTitle: 'AI Assistant',
+  groupEdit: 'Edit',
+  groupCreate: 'Create',
+  groupAnalyze: 'Analyze',
 
   rewriteStyleTitle: 'Rewriting style',
   rewriteFormal: 'Formal',
@@ -204,6 +214,10 @@ export const LOCALES: Record<UiLanguage, Partial<AiLabels>> = {
     synonymTitle: 'Synonymes',
     synonymNoResults: 'Aucun synonyme trouv\u00E9',
     synonymClickToReplace: 'Cliquer pour remplacer',
+    panelTitle: 'Assistant IA',
+    groupEdit: '\u00C9dition',
+    groupCreate: 'Cr\u00E9er',
+    groupAnalyze: 'Analyser',
     btnApply: 'Appliquer',
     btnCancel: 'Annuler',
     btnClose: 'Fermer',
@@ -259,6 +273,10 @@ export const LOCALES: Record<UiLanguage, Partial<AiLabels>> = {
     synonymTitle: 'Synonyme',
     synonymNoResults: 'Keine Synonyme gefunden',
     synonymClickToReplace: 'Zum Ersetzen klicken',
+    panelTitle: 'KI-Assistent',
+    groupEdit: 'Bearbeiten',
+    groupCreate: 'Erstellen',
+    groupAnalyze: 'Analysieren',
     btnApply: 'Anwenden',
     btnCancel: 'Abbrechen',
     btnClose: 'Schlie\u00DFen',
@@ -314,6 +332,10 @@ export const LOCALES: Record<UiLanguage, Partial<AiLabels>> = {
     synonymTitle: 'Sin\u00F3nimos',
     synonymNoResults: 'No se encontraron sin\u00F3nimos',
     synonymClickToReplace: 'Haz clic para reemplazar',
+    panelTitle: 'Asistente IA',
+    groupEdit: 'Editar',
+    groupCreate: 'Crear',
+    groupAnalyze: 'Analizar',
     btnApply: 'Aplicar',
     btnCancel: 'Cancelar',
     btnClose: 'Cerrar',
@@ -327,11 +349,9 @@ export const LOCALES: Record<UiLanguage, Partial<AiLabels>> = {
 
 export interface AiOptions {
   provider?: AiProviderType;
-  api_key?: string | null;
   features?: Partial<Record<AiFeature, boolean | Record<string, unknown>>>;
-  models?: Partial<Record<AiFeature, string>>;
+  model?: string;
   debug?: boolean;
-  reasoning?: boolean;
   temperature?: number;
   ui_language?: UiLanguage;
   labels?: Partial<AiLabels>;

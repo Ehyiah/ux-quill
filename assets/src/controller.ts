@@ -6,10 +6,21 @@ import mergeModules from './modules.ts';
 import { ToolbarCustomizer } from './ui/toolbarCustomizer.ts';
 import { handleUploadResponse, uploadStrategies } from './upload-utils.ts';
 import { AiManager } from './modules/aiAssistant/aiManager.ts';
+import type { AiOptions as ManagerAiOptions, AiFeature, AiProviderType } from './modules/aiAssistant/aiTypes.js';
 
 import './register-modules.ts';
 import QuillTableBetter from 'quill-table-better';
 import ImageFigure from './blots/imageFigure.ts';
+
+const AI_FEATURES: readonly AiFeature[] = [
+    'rewrite',
+    'translate',
+    'grammar',
+    'generate',
+    'summarize',
+    'toc',
+    'synonym',
+];
 
 // Register custom ImageFigure blot to override default image
 Quill.register(ImageFigure, true);
@@ -157,15 +168,28 @@ export default class extends Controller {
             return;
         }
 
-        const features: Record<string, boolean> = {};
-        raw.features.forEach((f: string) => { features[f] = true; });
+        const features: Partial<Record<AiFeature, boolean>> = {};
+        raw.features.forEach((feature: string) => {
+            if ((AI_FEATURES as readonly string[]).includes(feature)) {
+                features[feature as AiFeature] = true;
+            }
+        });
 
-        const aiManager = new AiManager({
-            provider: raw.provider || 'transformers',
-            models: raw.models || undefined,
+        const provider: AiProviderType = raw.provider === 'api' || raw.provider === 'wllama'
+            ? raw.provider
+            : 'transformers';
+
+        const aiOptions: ManagerAiOptions = {
+            provider,
             features,
             debug: !!raw.debug,
-        });
+        };
+
+        if (raw.model) {
+            aiOptions.model = String(raw.model);
+        }
+
+        const aiManager = new AiManager(aiOptions);
 
         const keyboardShortcut: AiKeyboardShortcut | false = raw.keyboardShortcut !== undefined
             ? raw.keyboardShortcut as AiKeyboardShortcut | false

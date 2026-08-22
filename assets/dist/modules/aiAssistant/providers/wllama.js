@@ -121,30 +121,34 @@ export class WllamaProvider extends BaseAiProvider {
     };
     return this.chat([{
       role: 'system',
-      content: "You rewrite text in a " + styleDesc[style] + " tone."
+      content: "You rewrite text in a " + styleDesc[style] + " tone. Respond with ONLY the rewritten text, no explanations, no quotes."
     }, {
       role: 'user',
-      content: "Rewrite this:\n" + text
+      content: "Input: " + text + "\nOutput:"
     }]);
   }
   async translate(text, targetLang) {
     const targetName = LANGUAGE_MAP[targetLang] || targetLang;
     return this.chat([{
       role: 'system',
-      content: 'You are a professional translator. Respond with ONLY the translation, no explanations or notes.'
+      content: 'You are a professional translator. Detect the source language automatically. Respond with ONLY the translation, no explanations or notes.'
     }, {
       role: 'user',
-      content: "Translate the following text to " + targetName + ". Detect the source language automatically:\n" + text
-    }]);
+      content: "Translate the following text to " + targetName + ".\n\nInput: " + text + "\nOutput:"
+    }], {
+      temperature: 0.1
+    });
   }
   async correct(text) {
     const result = await this.chat([{
       role: 'system',
-      content: 'You are a grammar expert. Correct all grammatical errors. Preserve the original meaning and style. Respond with ONLY the corrected text, no explanations.'
+      content: 'You are a grammar corrector. Always reply in the SAME language as the input text. Reply with ONLY the corrected text — no explanations, no quotes.'
     }, {
       role: 'user',
-      content: "Correct the grammatical errors in the following text. Detect the language and preserve it:\n" + text
-    }]);
+      content: "Text: " + text + "\nCorrected:"
+    }], {
+      temperature: 0.1
+    });
     if (!result || result === text) return [];
     return [{
       original: text,
@@ -157,7 +161,7 @@ export class WllamaProvider extends BaseAiProvider {
   async generate(prompt, _onStream) {
     return this.chat([{
       role: 'system',
-      content: 'You are a helpful writing assistant.'
+      content: 'You are a helpful writing assistant. Respond with ONLY the requested content, no explanations and no greetings.'
     }, {
       role: 'user',
       content: prompt
@@ -166,14 +170,16 @@ export class WllamaProvider extends BaseAiProvider {
     });
   }
   async summarize(text, format) {
-    const instruction = format === 'bullets' ? 'Summarize as bullet points:' : 'Summarize concisely:';
+    const instruction = format === 'bullets' ? 'Summarize as bullet points.' : 'Summarize concisely.';
     const result = await this.chat([{
       role: 'system',
-      content: 'You are a summarizer.'
+      content: "You are a summarizer. " + instruction + " Respond with ONLY the summary, no preamble."
     }, {
       role: 'user',
-      content: instruction + "\n" + text
-    }]);
+      content: "Input: " + text + "\nOutput:"
+    }], {
+      temperature: 0.3
+    });
     if (format === 'bullets' && !result.startsWith('\u2022') && !result.startsWith('-')) {
       return result.split('.').filter(s => s.trim().length > 0).map(s => "\u2022 " + s.trim() + ".").join('\n');
     }
@@ -182,10 +188,10 @@ export class WllamaProvider extends BaseAiProvider {
   async findSynonyms(word, count) {
     const result = await this.chat([{
       role: 'system',
-      content: 'You are a lexicography assistant. Respond ONLY with a valid JSON array of synonym objects in format [{"word": "...", "score": 0.0-1.0}]. Sort by relevance. No explanations.'
+      content: 'You are a lexicography assistant. Respond with ONLY a RAW JSON array of objects in format [{"word": "...", "score": 0.0-1.0}], sorted by relevance. No markdown fences, no explanations.'
     }, {
       role: 'user',
-      content: "Find up to " + count + " synonyms for the word \"" + word + "\". Detect the language automatically. Respond only with the JSON array."
+      content: "Find up to " + count + " synonyms for the word \"" + word + "\". Detect the language automatically. Reply with the JSON array only."
     }], {
       max_tokens: 300,
       temperature: 0.3

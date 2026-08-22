@@ -124,8 +124,8 @@ export class WllamaProvider extends BaseAiProvider {
     };
 
     return this.chat([
-      { role: 'system', content: `You rewrite text in a ${styleDesc[style]} tone.` },
-      { role: 'user', content: `Rewrite this:\n${text}` },
+      { role: 'system', content: `You rewrite text in a ${styleDesc[style]} tone. Respond with ONLY the rewritten text, no explanations, no quotes.` },
+      { role: 'user', content: `Input: ${text}\nOutput:` },
     ]);
   }
 
@@ -133,16 +133,16 @@ export class WllamaProvider extends BaseAiProvider {
     const targetName = LANGUAGE_MAP[targetLang] || targetLang;
 
     return this.chat([
-      { role: 'system', content: 'You are a professional translator. Respond with ONLY the translation, no explanations or notes.' },
-      { role: 'user', content: `Translate the following text to ${targetName}. Detect the source language automatically:\n${text}` },
-    ]);
+      { role: 'system', content: 'You are a professional translator. Detect the source language automatically. Respond with ONLY the translation, no explanations or notes.' },
+      { role: 'user', content: `Translate the following text to ${targetName}.\n\nInput: ${text}\nOutput:` },
+    ], { temperature: 0.1 });
   }
 
   async correct(text: string): Promise<GrammarSuggestion[]> {
     const result = await this.chat([
-      { role: 'system', content: 'You are a grammar expert. Correct all grammatical errors. Preserve the original meaning and style. Respond with ONLY the corrected text, no explanations.' },
-      { role: 'user', content: `Correct the grammatical errors in the following text. Detect the language and preserve it:\n${text}` },
-    ]);
+      { role: 'system', content: 'You are a grammar corrector. Always reply in the SAME language as the input text. Reply with ONLY the corrected text — no explanations, no quotes.' },
+      { role: 'user', content: `Text: ${text}\nCorrected:` },
+    ], { temperature: 0.1 });
 
     if (!result || result === text) return [];
 
@@ -157,20 +157,20 @@ export class WllamaProvider extends BaseAiProvider {
 
   async generate(prompt: string, _onStream?: (chunk: string) => void): Promise<string> {
     return this.chat([
-      { role: 'system', content: 'You are a helpful writing assistant.' },
+      { role: 'system', content: 'You are a helpful writing assistant. Respond with ONLY the requested content, no explanations and no greetings.' },
       { role: 'user', content: prompt },
     ], { max_tokens: 200 });
   }
 
   async summarize(text: string, format: SummaryFormat): Promise<string> {
     const instruction = format === 'bullets'
-      ? 'Summarize as bullet points:'
-      : 'Summarize concisely:';
+      ? 'Summarize as bullet points.'
+      : 'Summarize concisely.';
 
     const result = await this.chat([
-      { role: 'system', content: 'You are a summarizer.' },
-      { role: 'user', content: `${instruction}\n${text}` },
-    ]);
+      { role: 'system', content: `You are a summarizer. ${instruction} Respond with ONLY the summary, no preamble.` },
+      { role: 'user', content: `Input: ${text}\nOutput:` },
+    ], { temperature: 0.3 });
 
     if (format === 'bullets' && !result.startsWith('\u2022') && !result.startsWith('-')) {
       return result
@@ -185,8 +185,8 @@ export class WllamaProvider extends BaseAiProvider {
 
   async findSynonyms(word: string, count: number): Promise<SynonymResult[]> {
     const result = await this.chat([
-      { role: 'system', content: 'You are a lexicography assistant. Respond ONLY with a valid JSON array of synonym objects in format [{"word": "...", "score": 0.0-1.0}]. Sort by relevance. No explanations.' },
-      { role: 'user', content: `Find up to ${count} synonyms for the word "${word}". Detect the language automatically. Respond only with the JSON array.` },
+      { role: 'system', content: 'You are a lexicography assistant. Respond with ONLY a RAW JSON array of objects in format [{"word": "...", "score": 0.0-1.0}], sorted by relevance. No markdown fences, no explanations.' },
+      { role: 'user', content: `Find up to ${count} synonyms for the word "${word}". Detect the language automatically. Reply with the JSON array only.` },
     ], { max_tokens: 300, temperature: 0.3 });
 
     try {

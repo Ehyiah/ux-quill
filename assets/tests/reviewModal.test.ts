@@ -75,4 +75,32 @@ describe('showReviewModal', () => {
         await expect(modal).rejects.toThrow('boom');
         expect(document.querySelector('.ai-assistant-modal-overlay')).toBeNull();
     });
+
+    it('closes on global Escape even when the textarea is not focused', async () => {
+        const modal = showReviewModal({ title: 'T', description: 'D', generatedText: 'x' }, labels);
+        await flush();
+
+        document.body.focus();
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+
+        await expect(modal).resolves.toBeNull();
+        expect(document.querySelector('.ai-assistant-modal-overlay')).toBeNull();
+    });
+
+    it('restores focus to the previously focused element on close', async () => {
+        const trigger = document.createElement('button');
+        trigger.textContent = 'opener';
+        document.body.appendChild(trigger);
+        trigger.focus();
+
+        const modal = showReviewModal({ title: 'T', description: 'D', generatedText: 'x' }, labels);
+        await new Promise((resolve) => setTimeout(resolve, 150));
+
+        expect(document.activeElement).not.toBe(trigger);
+
+        (document.querySelector('.ai-assistant-btn-primary') as HTMLButtonElement).click();
+
+        await expect(modal).resolves.toBe('x');
+        expect(document.activeElement).toBe(trigger);
+    });
 });

@@ -66,62 +66,77 @@ const MODEL_MAP = {
   }
 };
 export class TransformersProvider extends BaseAiProvider {
-  constructor(onProgress, temperature) {
+  constructor(onProgress, temperature, model) {
     super();
     this.name = 'transformers';
     this.requiresApiKey = false;
     this.supportedFeatures = ['rewrite', 'translate', 'grammar', 'generate', 'summarize', 'toc', 'synonym'];
     this.pipelines = new Map();
     this.loaders = new Map();
-    this.modelProgress = new Map();
+    this.progressListeners = new Map();
     this.onProgress = void 0;
     this.temperature = void 0;
+    this.customModel = void 0;
     this.onProgress = onProgress;
     this.temperature = temperature != null ? temperature : 0.7;
+    this.customModel = model || undefined;
   }
   isAvailable() {
     return true;
   }
+
+  /**
+   * Subscribes to the download progress of the model used by `feature`.
+   * Returns an unsubscribe function. Events are emitted by the underlying
+   * progress_callback, no polling involved.
+   */
   onModelProgress(feature, callback) {
-    var _MODEL_MAP$feature;
-    const key = ((_MODEL_MAP$feature = MODEL_MAP[feature]) == null ? void 0 : _MODEL_MAP$feature.model) || feature;
-    this.modelProgress.set(key, 0);
-    const originalCallback = callback;
-    const interval = setInterval(() => {
-      const current = this.modelProgress.get(key) || 0;
-      originalCallback(current);
-      if (current >= 100) {
-        clearInterval(interval);
-      }
-    }, 200);
+    let listeners = this.progressListeners.get(feature);
+    if (!listeners) {
+      listeners = new Set();
+      this.progressListeners.set(feature, listeners);
+    }
+    listeners.add(callback);
+    return () => {
+      var _this$progressListene;
+      (_this$progressListene = this.progressListeners.get(feature)) == null || _this$progressListene.delete(callback);
+    };
+  }
+  emitModelProgress(feature, progress) {
+    var _this$progressListene2;
+    (_this$progressListene2 = this.progressListeners.get(feature)) == null || _this$progressListene2.forEach(callback => callback(progress));
   }
   async getPipeline(feature) {
+    var _this$customModel;
     const config = MODEL_MAP[feature];
     if (!config) {
       throw new Error("No model configured for feature: " + feature);
     }
-    const key = config.task + ":" + config.model;
+    const key = config.task + ":" + ((_this$customModel = this.customModel) != null ? _this$customModel : config.model);
     if (this.pipelines.has(key)) {
       return this.pipelines.get(key);
     }
     if (!this.loaders.has(key)) {
       var _this$onProgress;
       (_this$onProgress = this.onProgress) == null || _this$onProgress.call(this, 0);
-      this.loaders.set(key, getPipelineFn().then(pipeline => pipeline(config.task, config.model, {
-        progress_callback: progress => {
-          if (progress.status === 'progress_total' && typeof progress.progress === 'number') {
-            var _this$onProgress2;
-            const pct = Math.round(progress.progress);
-            this.modelProgress.set(key, pct);
-            (_this$onProgress2 = this.onProgress) == null || _this$onProgress2.call(this, pct);
+      this.loaders.set(key, getPipelineFn().then(pipeline => {
+        var _this$customModel2;
+        return pipeline(config.task, (_this$customModel2 = this.customModel) != null ? _this$customModel2 : config.model, {
+          progress_callback: progress => {
+            if (progress.status === 'progress_total' && typeof progress.progress === 'number') {
+              var _this$onProgress2;
+              const pct = Math.round(progress.progress);
+              (_this$onProgress2 = this.onProgress) == null || _this$onProgress2.call(this, pct);
+              this.emitModelProgress(feature, pct);
+            }
+            if (progress.status === 'ready') {
+              var _this$onProgress3;
+              (_this$onProgress3 = this.onProgress) == null || _this$onProgress3.call(this, 100);
+              this.emitModelProgress(feature, 100);
+            }
           }
-          if (progress.status === 'ready') {
-            var _this$onProgress3;
-            this.modelProgress.set(key, 100);
-            (_this$onProgress3 = this.onProgress) == null || _this$onProgress3.call(this, 100);
-          }
-        }
-      })));
+        });
+      }));
     }
     const pipe = await this.loaders.get(key);
     this.pipelines.set(key, pipe);
@@ -129,13 +144,13 @@ export class TransformersProvider extends BaseAiProvider {
   }
   async rewrite(text, style) {
     const pipe = await this.getPipeline('rewrite');
-    const prefixMap = {
-      formal: 'Please rewrite the following text in a formal tone:\n',
-      casual: 'Please rewrite the following text in a casual tone:\n',
-      concise: 'Please rewrite the following text to be more concise:\n',
-      expanded: 'Please rewrite the following text to be more detailed:\n'
+    const instructionMap = {
+      formal: 'Rewrite the text in a formal tone.',
+      casual: 'Rewrite the text in a casual tone.',
+      concise: 'Rewrite the text to be more concise.',
+      expanded: 'Rewrite the text with more detail.'
     };
-    const prompt = "" + prefixMap[style] + text;
+    const prompt = instructionMap[style] + " Output only the rewritten text:\n" + text;
     const result = await pipe(prompt, {
       max_new_tokens: Math.round(text.split(' ').length * 2) + 50,
       temperature: this.temperature,
@@ -146,7 +161,7 @@ export class TransformersProvider extends BaseAiProvider {
   async translate(text, targetLang) {
     const pipe = await this.getPipeline('translate');
     const targetName = LANGUAGE_MAP[targetLang] || targetLang;
-    const prompt = "Translate the following text to " + targetName + ":\n" + text;
+    const prompt = "Translate this text to " + targetName + ". Output only the translation:\n" + text;
     const result = await pipe(prompt, {
       max_new_tokens: Math.round(text.split(' ').length * 3) + 50,
       temperature: this.temperature,
@@ -156,7 +171,7 @@ export class TransformersProvider extends BaseAiProvider {
   }
   async correct(text) {
     const pipe = await this.getPipeline('grammar');
-    const prompt = "Correct the grammatical errors in the following text. Detect the language and preserve it:\n" + text;
+    const prompt = "Correct grammar mistakes. Reply in the SAME language as the input. Output ONLY the corrected text:\n" + text;
     const result = await pipe(prompt, {
       max_new_tokens: Math.round(text.split(' ').length * 2) + 30,
       temperature: this.temperature,
@@ -199,7 +214,8 @@ export class TransformersProvider extends BaseAiProvider {
     const pipe = await this.getPipeline('summarize');
     const maxLength = format === 'bullets' ? 80 : 130;
     const minLength = format === 'bullets' ? 30 : 40;
-    const result = await pipe(text, {
+    const instruction = format === 'bullets' ? 'Summarize the following text as short bullet points.' : 'Summarize the following text briefly.';
+    const result = await pipe(instruction + "\n" + text, {
       max_length: maxLength,
       min_length: minLength
     });

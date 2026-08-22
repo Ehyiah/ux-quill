@@ -45,6 +45,9 @@ describe('AiAssistantModule', () => {
         const containerEl = document.createElement('div');
         document.body.appendChild(containerEl);
 
+        const toolbarContainer = document.createElement('div');
+        containerEl.appendChild(toolbarContainer);
+
         mockQuill = {
             getSelection: jest.fn().mockReturnValue({ index: 0, length: 5 }),
             setSelection: jest.fn(),
@@ -52,7 +55,7 @@ describe('AiAssistantModule', () => {
             getModule: jest.fn().mockImplementation((name: string) => {
                 if (name === 'toolbar') {
                     return {
-                        container: document.createElement('div'),
+                        container: toolbarContainer,
                     };
                 }
                 return undefined;
@@ -176,6 +179,22 @@ describe('AiAssistantModule', () => {
             expect(panel).not.toBeNull();
             expect(panel.style.top).toBe('104px');
             expect(panel.style.left).toBe('50px');
+        });
+
+        it('should close on Escape and toggle aria-expanded', () => {
+            const module = createModule(false);
+            const button = document.querySelector('.ql-ai-assistant') as HTMLButtonElement;
+            if (!button) {
+                throw new Error(`NO BUTTON — body=${document.body.innerHTML.slice(0, 400)}`);
+            }
+
+            module.openPanel();
+            expect(button.getAttribute('aria-expanded')).toBe('true');
+
+            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+
+            expect(document.querySelector('.ai-assistant-panel')).toBeNull();
+            expect(button.getAttribute('aria-expanded')).toBe('false');
         });
     });
 

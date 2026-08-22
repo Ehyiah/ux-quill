@@ -79,6 +79,30 @@ final class AiAssistantModuleTest extends TestCase
     /**
      * @covers ::__construct
      */
+    public function testGlobalModelOptionIsAccepted(): void
+    {
+        $module = new AiAssistantModule(options: [
+            'provider' => 'wllama',
+            'model' => 'Qwen/Qwen2.5-1.5B-Instruct-GGUF/qwen2.5-1.5b-instruct-q4_k_m.gguf',
+        ]);
+
+        $this->assertSame('Qwen/Qwen2.5-1.5B-Instruct-GGUF/qwen2.5-1.5b-instruct-q4_k_m.gguf', $module->options['model']);
+    }
+
+    /**
+     * @covers ::__construct
+     */
+    public function testEmptyModelThrows(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('AiAssistantModule model must be a non-empty string.');
+
+        new AiAssistantModule(options: ['model' => '   ']);
+    }
+
+    /**
+     * @covers ::__construct
+     */
     public function testInvalidKeyboardShortcutThrows(): void
     {
         $this->expectException(InvalidArgumentException::class);

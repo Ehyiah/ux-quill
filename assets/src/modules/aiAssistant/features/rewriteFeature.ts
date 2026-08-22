@@ -85,6 +85,7 @@ export class RewriteFeature implements AiFeatureInterface {
 
       styles.forEach((s) => {
         const item = document.createElement('button');
+        item.type = 'button';
         item.className = 'ai-assistant-submenu-item';
 
         const iconMap: Record<string, string> = {

@@ -1,6 +1,6 @@
 import type Quill from 'quill';
 import { AiManager } from './aiManager.js';
-import type { AiFeature, AiFeatureInterface, AiLabels } from './aiTypes.js';
+import type { AiFeature, AiFeatureInterface } from './aiTypes.js';
 import { RewriteFeature } from './features/rewriteFeature.js';
 import { TranslateFeature } from './features/translateFeature.js';
 import { GrammarFeature } from './features/grammarFeature.js';
@@ -15,11 +15,7 @@ interface AiAssistantOptions {
   keyboardShortcut?: { key: string; ctrlKey?: boolean; shiftKey?: boolean; altKey?: boolean; metaKey?: boolean } | false;
 }
 
-interface FeatureMeta {
-  icon: string;
-  desc: string;
-  group: 'edit' | 'create' | 'analyze';
-}
+const PANEL_ID = 'ai-assistant-panel';
 
 const FEATURE_ICONS: Record<AiFeature, string> = {
   rewrite: '\u270D\uFE0F',
@@ -41,10 +37,17 @@ const FEATURE_GROUPS: Record<AiFeature, 'edit' | 'create' | 'analyze'> = {
   synonym: 'edit',
 };
 
-const GROUP_LABELS: Record<string, string> = {
-  edit: 'Edit',
-  create: 'Create',
-  analyze: 'Analyze',
+const GROUP_LABEL_KEYS: Record<string, keyof AiLabelFallbacks> = {
+  edit: 'groupEdit',
+  create: 'groupCreate',
+  analyze: 'groupAnalyze',
+};
+
+type AiLabelFallbacks = {
+  panelTitle: string;
+  groupEdit: string;
+  groupCreate: string;
+  groupAnalyze: string;
 };
 
 let stylesInjected = false;
@@ -491,6 +494,7 @@ export class AiAssistantModule {
   private errorEl: HTMLElement | null = null;
   private panelSelection: { index: number; length: number } | null = null;
   private panelAnchorRect: DOMRect | undefined;
+  private panelKeydownHandler: ((event: KeyboardEvent) => void) | null = null;
 
   constructor(quill: Quill, options: AiAssistantOptions) {
     this.quill = quill;
@@ -560,8 +564,11 @@ export class AiAssistantModule {
               class="ql-fill" fill="currentColor"/>
       </svg>
     `;
+    this.button.type = 'button';
     this.button.setAttribute('aria-label', 'AI Assistant');
     this.button.title = 'AI Assistant';
+    this.button.setAttribute('aria-controls', PANEL_ID);
+    this.button.setAttribute('aria-expanded', 'false');
 
     this.button.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -635,6 +642,7 @@ export class AiAssistantModule {
   openPanel(anchorRect?: DOMRect): void {
     this.panelAnchorRect = anchorRect;
     this.showPanel();
+    this.button?.setAttribute('aria-expanded', 'true');
   }
 
   private showPanel(): void {
@@ -647,6 +655,16 @@ export class AiAssistantModule {
 
     this.panel = document.createElement('div');
     this.panel.className = 'ai-assistant-panel';
+    this.panel.id = PANEL_ID;
+    this.panelKeydownHandler = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.stopPropagation();
+        this.closePanel();
+      }
+    };
+    document.addEventListener('keydown', this.panelKeydownHandler);
+
+    const labels = this.aiManager.getLabels();
 
     const header = document.createElement('div');
     header.className = 'ai-assistant-panel-header';
@@ -658,7 +676,7 @@ export class AiAssistantModule {
 
     const title = document.createElement('span');
     title.className = 'ai-assistant-panel-title';
-    title.textContent = 'AI Assistant';
+    title.textContent = labels.panelTitle || 'AI Assistant';
 
     header.appendChild(mark);
     header.appendChild(title);
@@ -679,6 +697,7 @@ export class AiAssistantModule {
 
       group.items.forEach(({ feature, instance }) => {
         const item = document.createElement('button');
+        item.type = 'button';
         item.className = 'ai-assistant-item';
 
         const icon = document.createElement('span');
@@ -744,10 +763,12 @@ export class AiAssistantModule {
       }
     });
 
+    const labels = this.aiManager.getLabels();
     const result: Array<{ label: string; items: Array<{ feature: AiFeatureInterface; instance: AiFeatureInterface }> }> = [];
     Object.entries(groups).forEach(([key, items]) => {
       if (items.length > 0) {
-        result.push({ label: GROUP_LABELS[key] || key, items });
+        const labelKey = GROUP_LABEL_KEYS[key];
+        result.push({ label: (labelKey ? labels[labelKey] : '') || key, items });
       }
     });
 
@@ -848,6 +869,10 @@ export class AiAssistantModule {
   private closePanel(): void {
     this.panelSelection = null;
     this.panelAnchorRect = undefined;
+    if (this.panelKeydownHandler) {
+      document.removeEventListener('keydown', this.panelKeydownHandler);
+      this.panelKeydownHandler = null;
+    }
     if (this.panel) {
       this.panel.remove();
       this.panel = null;
@@ -856,5 +881,6 @@ export class AiAssistantModule {
       this.backdrop.remove();
       this.backdrop = null;
     }
+    this.button?.setAttribute('aria-expanded', 'false');
   }
 }

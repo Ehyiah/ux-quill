@@ -43,6 +43,7 @@ export class GenerateFeature {
   async promptInput() {
     const labels = this.aiManager.getLabels();
     return new Promise(resolve => {
+      const previouslyFocused = document.activeElement;
       const overlay = document.createElement('div');
       overlay.className = 'ai-assistant-modal-overlay';
       const modal = document.createElement('div');
@@ -56,27 +57,49 @@ export class GenerateFeature {
       const actions = document.createElement('div');
       actions.className = 'ai-assistant-modal-actions';
       const cancelBtn = document.createElement('button');
+      cancelBtn.type = 'button';
       cancelBtn.className = 'ai-assistant-btn-secondary';
       cancelBtn.textContent = labels.btnCancel;
       const submitBtn = document.createElement('button');
+      submitBtn.type = 'button';
       submitBtn.className = 'ai-assistant-btn-primary';
       submitBtn.textContent = labels.btnGenerate;
-      cancelBtn.addEventListener('click', () => {
+      const finish = value => {
+        document.removeEventListener('keydown', onKeyDown);
         overlay.remove();
-        resolve(null);
-      });
-      textarea.addEventListener('keydown', e => {
-        if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-          submitBtn.click();
-        }
+        previouslyFocused == null || previouslyFocused.focus();
+        resolve(value);
+      };
+      const getFocusable = () => [textarea, cancelBtn, submitBtn];
+      const onKeyDown = e => {
         if (e.key === 'Escape') {
-          cancelBtn.click();
+          e.preventDefault();
+          finish(null);
+          return;
         }
-      });
+        if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+          e.preventDefault();
+          submitBtn.click();
+          return;
+        }
+        if (e.key === 'Tab') {
+          const focusable = getFocusable();
+          const first = focusable[0];
+          const last = focusable[focusable.length - 1];
+          const active = document.activeElement;
+          if (e.shiftKey && (active === first || active === null)) {
+            e.preventDefault();
+            last.focus();
+          } else if (!e.shiftKey && active === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      };
+      cancelBtn.addEventListener('click', () => finish(null));
       submitBtn.addEventListener('click', () => {
         const value = textarea.value.trim();
-        overlay.remove();
-        resolve(value || null);
+        finish(value || null);
       });
       actions.appendChild(cancelBtn);
       actions.appendChild(submitBtn);
@@ -86,6 +109,7 @@ export class GenerateFeature {
       modal.appendChild(actions);
       overlay.appendChild(modal);
       document.body.appendChild(overlay);
+      document.addEventListener('keydown', onKeyDown);
       setTimeout(() => textarea.focus(), 100);
     });
   }

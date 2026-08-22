@@ -60,32 +60,42 @@ export class TransformersProvider extends BaseAiProvider {
 
   private pipelines = new Map<string, PipelineFunction>();
   private loaders = new Map<string, PipelineLoader>();
-  private modelProgress = new Map<string, number>();
+  private progressListeners = new Map<AiFeature, Set<(progress: number) => void>>();
   private onProgress?: (progress: number) => void;
   private temperature: number;
+  private customModel?: string;
 
-  constructor(onProgress?: (progress: number) => void, temperature?: number) {
+  constructor(onProgress?: (progress: number) => void, temperature?: number, model?: string) {
     super();
     this.onProgress = onProgress;
     this.temperature = temperature ?? 0.7;
+    this.customModel = model || undefined;
   }
 
   isAvailable(): boolean {
     return true;
   }
 
-  onModelProgress(feature: AiFeature, callback: (progress: number) => void): void {
-    const key = MODEL_MAP[feature]?.model || feature;
-    this.modelProgress.set(key, 0);
-    const originalCallback = callback;
+  /**
+   * Subscribes to the download progress of the model used by `feature`.
+   * Returns an unsubscribe function. Events are emitted by the underlying
+   * progress_callback, no polling involved.
+   */
+  onModelProgress(feature: AiFeature, callback: (progress: number) => void): () => void {
+    let listeners = this.progressListeners.get(feature);
+    if (!listeners) {
+      listeners = new Set();
+      this.progressListeners.set(feature, listeners);
+    }
+    listeners.add(callback);
 
-    const interval = setInterval(() => {
-      const current = this.modelProgress.get(key) || 0;
-      originalCallback(current);
-      if (current >= 100) {
-        clearInterval(interval);
-      }
-    }, 200);
+    return () => {
+      this.progressListeners.get(feature)?.delete(callback);
+    };
+  }
+
+  private emitModelProgress(feature: AiFeature, progress: number): void {
+    this.progressListeners.get(feature)?.forEach((callback) => callback(progress));
   }
 
   private async getPipeline(feature: AiFeature): Promise<PipelineFunction> {
@@ -94,7 +104,7 @@ export class TransformersProvider extends BaseAiProvider {
       throw new Error(`No model configured for feature: ${feature}`);
     }
 
-    const key = `${config.task}:${config.model}`;
+    const key = `${config.task}:${this.customModel ?? config.model}`;
 
     if (this.pipelines.has(key)) {
       return this.pipelines.get(key)!;
@@ -105,16 +115,16 @@ export class TransformersProvider extends BaseAiProvider {
       this.loaders.set(
         key,
         getPipelineFn().then((pipeline) =>
-          (pipeline as any)(config.task, config.model, {
+          (pipeline as any)(config.task, this.customModel ?? config.model, {
             progress_callback: (progress: { status: string; progress: number }) => {
               if (progress.status === 'progress_total' && typeof progress.progress === 'number') {
                 const pct = Math.round(progress.progress);
-                this.modelProgress.set(key, pct);
                 this.onProgress?.(pct);
+                this.emitModelProgress(feature, pct);
               }
               if (progress.status === 'ready') {
-                this.modelProgress.set(key, 100);
                 this.onProgress?.(100);
+                this.emitModelProgress(feature, 100);
               }
             },
           })
@@ -130,14 +140,14 @@ export class TransformersProvider extends BaseAiProvider {
   async rewrite(text: string, style: RewriteStyle): Promise<string> {
     const pipe = await this.getPipeline('rewrite');
 
-    const prefixMap: Record<RewriteStyle, string> = {
-      formal: 'Please rewrite the following text in a formal tone:\n',
-      casual: 'Please rewrite the following text in a casual tone:\n',
-      concise: 'Please rewrite the following text to be more concise:\n',
-      expanded: 'Please rewrite the following text to be more detailed:\n',
+    const instructionMap: Record<RewriteStyle, string> = {
+      formal: 'Rewrite the text in a formal tone.',
+      casual: 'Rewrite the text in a casual tone.',
+      concise: 'Rewrite the text to be more concise.',
+      expanded: 'Rewrite the text with more detail.',
     };
 
-    const prompt = `${prefixMap[style]}${text}`;
+    const prompt = `${instructionMap[style]} Output only the rewritten text:\n${text}`;
     const result = await pipe(prompt, {
       max_new_tokens: Math.round(text.split(' ').length * 2) + 50,
       temperature: this.temperature,
@@ -151,7 +161,7 @@ export class TransformersProvider extends BaseAiProvider {
     const pipe = await this.getPipeline('translate');
     const targetName = LANGUAGE_MAP[targetLang] || targetLang;
 
-    const prompt = `Translate the following text to ${targetName}:\n${text}`;
+    const prompt = `Translate this text to ${targetName}. Output only the translation:\n${text}`;
 
     const result = await pipe(prompt, {
       max_new_tokens: Math.round(text.split(' ').length * 3) + 50,
@@ -164,7 +174,7 @@ export class TransformersProvider extends BaseAiProvider {
 
   async correct(text: string): Promise<GrammarSuggestion[]> {
     const pipe = await this.getPipeline('grammar');
-    const prompt = `Correct the grammatical errors in the following text. Detect the language and preserve it:\n${text}`;
+    const prompt = `Correct grammar mistakes. Reply in the SAME language as the input. Output ONLY the corrected text:\n${text}`;
 
     const result = await pipe(prompt, {
       max_new_tokens: Math.round(text.split(' ').length * 2) + 30,
@@ -220,8 +230,11 @@ export class TransformersProvider extends BaseAiProvider {
 
     const maxLength = format === 'bullets' ? 80 : 130;
     const minLength = format === 'bullets' ? 30 : 40;
+    const instruction = format === 'bullets'
+      ? 'Summarize the following text as short bullet points.'
+      : 'Summarize the following text briefly.';
 
-    const result = await pipe(text, {
+    const result = await pipe(`${instruction}\n${text}`, {
       max_length: maxLength,
       min_length: minLength,
     });

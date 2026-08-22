@@ -140,6 +140,7 @@ export class TranslateFeature {
       container.appendChild(title);
       languages.forEach(lang => {
         const item = document.createElement('button');
+        item.type = 'button';
         item.className = 'ai-assistant-submenu-item';
         const icon = document.createElement('span');
         icon.className = 'ai-assistant-submenu-icon';

@@ -5,7 +5,6 @@ import { TransformersProvider } from "./providers/transformers.js";
 import { WllamaProvider } from "./providers/wllama.js";
 export class AiManager {
   constructor(options) {
-    var _options$models;
     this.provider = void 0;
     this.options = void 0;
     this.labels = void 0;
@@ -24,7 +23,7 @@ export class AiManager {
         break;
       case 'wllama':
         this.provider = new WllamaProvider({
-          model: (_options$models = options.models) == null ? void 0 : _options$models.translate,
+          model: options.model,
           debug: options.debug,
           temperature: options.temperature,
           onProgress: progress => {
@@ -35,7 +34,7 @@ export class AiManager {
       default:
         this.provider = new TransformersProvider(progress => {
           this.emitDownloadProgress(progress);
-        }, options.temperature);
+        }, options.temperature, options.model);
         break;
     }
   }
@@ -47,6 +46,16 @@ export class AiManager {
   }
   onDownloadProgress(callback) {
     this.downloadProgressCallbacks.push(callback);
+  }
+
+  /**
+   * Forwards per-feature model download progress when the provider supports
+   * it (TransformersProvider). Returns an unsubscribe function, or undefined
+   * when the active provider has no per-feature progress.
+   */
+  onModelProgress(feature, callback) {
+    const capable = this.provider;
+    return capable.onModelProgress == null ? void 0 : capable.onModelProgress(feature, callback);
   }
   onError(callback) {
     this.errorCallbacks.push(callback);
