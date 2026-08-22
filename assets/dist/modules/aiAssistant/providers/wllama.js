@@ -1,3 +1,4 @@
+function _tsRewriteRelativeImportExtensions(t, e) { return "string" == typeof t && /^\.\.?\//.test(t) ? t.replace(/\.(tsx)$|((?:\.d)?)((?:\.[^./]+)?)\.([cm]?)ts$/i, function (t, s, r, n, o) { return s ? e ? ".jsx" : ".js" : !r || n && o ? r + n + "." + o.toLowerCase() + "js" : t; }) : t; }
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 import { BaseAiProvider } from "./base.js";
 import { warnCdnFallback } from "../utils/cdnFallback.js";
@@ -5,6 +6,14 @@ const DEFAULT_MODEL = {
   repo: 'Qwen/Qwen2.5-0.5B-Instruct-GGUF',
   file: 'qwen2.5-0.5b-instruct-q4_k_m.gguf'
 };
+const WLLAMA_CDN = 'https://cdn.jsdelivr.net/npm/@wllama/wllama@3.6.0';
+export function isCorruptedCacheError(error) {
+  if (error instanceof RangeError) {
+    return true;
+  }
+  const message = error instanceof Error ? error.message : String(error != null ? error : '');
+  return /DataView|corrupt|invalid gguf/i.test(message);
+}
 const LANGUAGE_MAP = {
   fr: 'French',
   en: 'English',
@@ -62,54 +71,134 @@ export class WllamaProvider extends BaseAiProvider {
   async ensureLoaded() {
     if (this.wllamaInstance) return;
     if (this.loadPromise) return this.loadPromise;
-    this.loadPromise = this.loadModel();
+    this.loadPromise = this.loadModel().catch(error => {
+      this.loadPromise = null;
+      throw error;
+    });
     return this.loadPromise;
   }
   async loadModel() {
-    var _this$onProgress, _this$onProgress3;
+    var _this$onProgress;
     (_this$onProgress = this.onProgress) == null || _this$onProgress.call(this, 0);
     let wllamaModule;
     try {
       wllamaModule = await import('@wllama/wllama');
     } catch (_unused) {
       warnCdnFallback('@wllama/wllama');
-      wllamaModule = await import('https://cdn.jsdelivr.net/npm/@wllama/wllama@3.5.1/esm/index.js');
+      wllamaModule = await import(/* @vite-ignore */_tsRewriteRelativeImportExtensions(WLLAMA_CDN + "/esm/index.js"));
     }
     const {
       Wllama
     } = wllamaModule;
-    const wasmAssetsPath = {
-      default: 'https://cdn.jsdelivr.net/npm/@wllama/wllama@3.5.1/src/wasm/wllama.wasm'
-    };
-    const wllama = new Wllama(wasmAssetsPath);
+    const recoveries = ['none', 'purge', 'wipe'];
+    let lastError;
+    for (let i = 0; i < recoveries.length; i++) {
+      try {
+        var _this$onProgress2;
+        this.wllamaInstance = await this.initInstance(Wllama, recoveries[i]);
+        (_this$onProgress2 = this.onProgress) == null || _this$onProgress2.call(this, 100);
+        return;
+      } catch (error) {
+        var _this$onProgress3;
+        lastError = error;
+        if (!isCorruptedCacheError(error)) {
+          throw error;
+        }
+        this.debugLog("model load failed (attempt " + (i + 1) + "/" + recoveries.length + ")", error);
+        (_this$onProgress3 = this.onProgress) == null || _this$onProgress3.call(this, 0);
+      }
+    }
+    throw new Error("Failed to load model " + this.modelConfig.repo + "/" + this.modelConfig.file + " after " + recoveries.length + " attempts" + (" (" + (lastError instanceof Error ? lastError.message : String(lastError)) + ").") + ' Clear site data for this origin and try again.');
+  }
+  async initInstance(WllamaClass, recovery) {
+    if (recovery === void 0) {
+      recovery = 'none';
+    }
+    const wllama = new WllamaClass({
+      default: WLLAMA_CDN + "/src/wasm/wllama.wasm"
+    }, {
+      suppressNativeLog: !this.debug
+    });
+    if (recovery === 'purge') {
+      await this.purgeRepoCacheEntries(wllama);
+    } else if (recovery === 'wipe') {
+      this.debugLog('wiping the whole model cache');
+      await wllama.cacheManager.clear();
+    }
+    await this.purgeCorruptedCacheEntries(wllama);
     await wllama.loadModelFromHF({
       repo: this.modelConfig.repo,
       file: this.modelConfig.file
     }, {
+      useCache: recovery === 'none',
       progressCallback: progress => {
-        var _this$onProgress2;
+        var _this$onProgress4;
         const pct = progress.total > 0 ? Math.round(progress.loaded / progress.total * 100) : 0;
-        (_this$onProgress2 = this.onProgress) == null || _this$onProgress2.call(this, pct);
+        (_this$onProgress4 = this.onProgress) == null || _this$onProgress4.call(this, pct);
       }
     });
-    this.wllamaInstance = wllama;
-    (_this$onProgress3 = this.onProgress) == null || _this$onProgress3.call(this, 100);
+    return wllama;
+  }
+  async purgeRepoCacheEntries(wllama) {
+    try {
+      const entries = await wllama.cacheManager.list();
+      for (const entry of entries) {
+        var _entry$metadata$origi, _entry$metadata, _entry$name;
+        const url = String((_entry$metadata$origi = entry == null || (_entry$metadata = entry.metadata) == null ? void 0 : _entry$metadata.originalURL) != null ? _entry$metadata$origi : '');
+        if (url.includes(this.modelConfig.repo) || String((_entry$name = entry == null ? void 0 : entry.name) != null ? _entry$name : '').includes(this.modelConfig.file)) {
+          await wllama.cacheManager.delete(entry.name);
+        }
+      }
+    } catch (_unused2) {
+      // best-effort; the wipe step covers what this cannot see
+    }
+  }
+  debugLog(message, error) {
+    if (this.debug) {
+      console.debug("[wllama] " + message, error != null ? error : '');
+    }
+  }
+  async purgeCorruptedCacheEntries(wllama) {
+    try {
+      const entries = await wllama.cacheManager.list();
+      for (const entry of entries) {
+        var _entry$metadata$origi2, _entry$metadata2, _entry$metadata3, _entry$size;
+        const expectedSize = Number((_entry$metadata$origi2 = entry == null || (_entry$metadata2 = entry.metadata) == null ? void 0 : _entry$metadata2.originalSize) != null ? _entry$metadata$origi2 : 0);
+        if (expectedSize > 0 && typeof (entry == null || (_entry$metadata3 = entry.metadata) == null ? void 0 : _entry$metadata3.originalURL) === 'string' && entry.metadata.originalURL.includes(this.modelConfig.repo) && Number((_entry$size = entry == null ? void 0 : entry.size) != null ? _entry$size : -1) !== expectedSize) {
+          await wllama.cacheManager.delete(entry.name);
+        }
+      }
+    } catch (_unused3) {
+      // best-effort; a corrupted cache is also recovered by the bypass retry path
+    }
   }
   async chat(messages, options) {
-    var _options$max_tokens, _options$temperature2, _result$choices;
+    var _result;
     if (options === void 0) {
       options = {};
     }
     await this.ensureLoaded();
-    const result = await this.wllamaInstance.createChatCompletion({
-      messages,
-      max_tokens: (_options$max_tokens = options.max_tokens) != null ? _options$max_tokens : 256,
-      temperature: (_options$temperature2 = options.temperature) != null ? _options$temperature2 : this.temperature,
-      chat_template_kwargs: {
-        add_generation_prompt: true
+    let result;
+    try {
+      var _options$max_tokens, _options$temperature2;
+      result = await this.wllamaInstance.createChatCompletion({
+        messages,
+        max_tokens: (_options$max_tokens = options.max_tokens) != null ? _options$max_tokens : 256,
+        temperature: (_options$temperature2 = options.temperature) != null ? _options$temperature2 : this.temperature,
+        chat_template_kwargs: {
+          add_generation_prompt: true
+        }
+      });
+    } catch (error) {
+      // A crashed WASM context is unusable: force a clean model reload on next use.
+      this.wllamaInstance = null;
+      this.loadPromise = null;
+      if (isCorruptedCacheError(error)) {
+        throw new Error("Wllama inference failed (" + (error instanceof Error ? error.message : String(error)) + ")." + ' The model will be reloaded from scratch on next use.');
       }
-    });
-    const content = (result == null || (_result$choices = result.choices) == null || (_result$choices = _result$choices[0]) == null || (_result$choices = _result$choices.message) == null ? void 0 : _result$choices.content) || '';
+      throw error;
+    }
+    const content = ((_result = result) == null || (_result = _result.choices) == null || (_result = _result[0]) == null || (_result = _result.message) == null ? void 0 : _result.content) || '';
     return content.trim();
   }
   async rewrite(text, style) {
@@ -219,7 +308,7 @@ export class WllamaProvider extends BaseAiProvider {
           word: ''
         };
       }).filter(s => s.word.length > 0);
-    } catch (_unused2) {
+    } catch (_unused4) {
       return [];
     }
   }

@@ -12,6 +12,16 @@ const DEFAULT_MODEL: WllamaModelConfig = {
   file: 'qwen2.5-0.5b-instruct-q4_k_m.gguf',
 };
 
+const WLLAMA_CDN = 'https://cdn.jsdelivr.net/npm/@wllama/wllama@3.6.0';
+
+export function isCorruptedCacheError(error: unknown): boolean {
+  if (error instanceof RangeError) {
+    return true;
+  }
+  const message = error instanceof Error ? error.message : String(error ?? '');
+  return /DataView|corrupt|invalid gguf/i.test(message);
+}
+
 const LANGUAGE_MAP: Record<string, string> = {
   fr: 'French', en: 'English', es: 'Spanish', de: 'German',
   it: 'Italian', pt: 'Portuguese', nl: 'Dutch', pl: 'Polish',
@@ -60,7 +70,10 @@ export class WllamaProvider extends BaseAiProvider {
     if (this.wllamaInstance) return;
     if (this.loadPromise) return this.loadPromise;
 
-    this.loadPromise = this.loadModel();
+    this.loadPromise = this.loadModel().catch((error: unknown) => {
+      this.loadPromise = null;
+      throw error;
+    });
     return this.loadPromise;
   }
 
@@ -72,21 +85,56 @@ export class WllamaProvider extends BaseAiProvider {
       wllamaModule = await import('@wllama/wllama');
     } catch {
       warnCdnFallback('@wllama/wllama');
-      wllamaModule = await import(
-        'https://cdn.jsdelivr.net/npm/@wllama/wllama@3.5.1/esm/index.js'
-      );
+      wllamaModule = await import(/* @vite-ignore */ `${WLLAMA_CDN}/esm/index.js`);
     }
 
     const { Wllama } = wllamaModule;
 
-    const wasmAssetsPath = {
-      default: 'https://cdn.jsdelivr.net/npm/@wllama/wllama@3.5.1/src/wasm/wllama.wasm',
-    };
-    const wllama = new Wllama(wasmAssetsPath);
+    const recoveries: Array<'none' | 'purge' | 'wipe'> = ['none', 'purge', 'wipe'];
+    let lastError: unknown;
+
+    for (let i = 0; i < recoveries.length; i++) {
+      try {
+        this.wllamaInstance = await this.initInstance(Wllama, recoveries[i]);
+        this.onProgress?.(100);
+        return;
+      } catch (error) {
+        lastError = error;
+        if (!isCorruptedCacheError(error)) {
+          throw error;
+        }
+        this.debugLog(`model load failed (attempt ${i + 1}/${recoveries.length})`, error);
+        this.onProgress?.(0);
+      }
+    }
+
+    throw new Error(
+      `Failed to load model ${this.modelConfig.repo}/${this.modelConfig.file} after ${recoveries.length} attempts`
+      + ` (${lastError instanceof Error ? lastError.message : String(lastError)}).`
+      + ' Clear site data for this origin and try again.',
+    );
+  }
+
+  private async initInstance(WllamaClass: any, recovery: 'none' | 'purge' | 'wipe' = 'none'): Promise<any> {
+    const wllama = new WllamaClass({
+      default: `${WLLAMA_CDN}/src/wasm/wllama.wasm`,
+    }, {
+      suppressNativeLog: !this.debug,
+    });
+
+    if (recovery === 'purge') {
+      await this.purgeRepoCacheEntries(wllama);
+    } else if (recovery === 'wipe') {
+      this.debugLog('wiping the whole model cache');
+      await wllama.cacheManager.clear();
+    }
+
+    await this.purgeCorruptedCacheEntries(wllama);
 
     await wllama.loadModelFromHF(
       { repo: this.modelConfig.repo, file: this.modelConfig.file },
       {
+        useCache: recovery === 'none',
         progressCallback: (progress: { loaded: number; total: number }) => {
           const pct = progress.total > 0 ? Math.round((progress.loaded / progress.total) * 100) : 0;
           this.onProgress?.(pct);
@@ -94,8 +142,46 @@ export class WllamaProvider extends BaseAiProvider {
       },
     );
 
-    this.wllamaInstance = wllama;
-    this.onProgress?.(100);
+    return wllama;
+  }
+
+  private async purgeRepoCacheEntries(wllama: any): Promise<void> {
+    try {
+      const entries = await wllama.cacheManager.list();
+      for (const entry of entries) {
+        const url = String(entry?.metadata?.originalURL ?? '');
+        if (url.includes(this.modelConfig.repo) || String(entry?.name ?? '').includes(this.modelConfig.file)) {
+          await wllama.cacheManager.delete(entry.name);
+        }
+      }
+    } catch {
+      // best-effort; the wipe step covers what this cannot see
+    }
+  }
+
+  private debugLog(message: string, error?: unknown): void {
+    if (this.debug) {
+      console.debug(`[wllama] ${message}`, error ?? '');
+    }
+  }
+
+  private async purgeCorruptedCacheEntries(wllama: any): Promise<void> {
+    try {
+      const entries = await wllama.cacheManager.list();
+      for (const entry of entries) {
+        const expectedSize = Number(entry?.metadata?.originalSize ?? 0);
+        if (
+          expectedSize > 0
+          && typeof entry?.metadata?.originalURL === 'string'
+          && entry.metadata.originalURL.includes(this.modelConfig.repo)
+          && Number(entry?.size ?? -1) !== expectedSize
+        ) {
+          await wllama.cacheManager.delete(entry.name);
+        }
+      }
+    } catch {
+      // best-effort; a corrupted cache is also recovered by the bypass retry path
+    }
   }
 
   private async chat(
@@ -104,12 +190,26 @@ export class WllamaProvider extends BaseAiProvider {
   ): Promise<string> {
     await this.ensureLoaded();
 
-    const result = await this.wllamaInstance.createChatCompletion({
-      messages,
-      max_tokens: options.max_tokens ?? 256,
-      temperature: options.temperature ?? this.temperature,
-      chat_template_kwargs: { add_generation_prompt: true },
-    });
+    let result: any;
+    try {
+      result = await this.wllamaInstance.createChatCompletion({
+        messages,
+        max_tokens: options.max_tokens ?? 256,
+        temperature: options.temperature ?? this.temperature,
+        chat_template_kwargs: { add_generation_prompt: true },
+      });
+    } catch (error) {
+      // A crashed WASM context is unusable: force a clean model reload on next use.
+      this.wllamaInstance = null;
+      this.loadPromise = null;
+      if (isCorruptedCacheError(error)) {
+        throw new Error(
+          `Wllama inference failed (${error instanceof Error ? error.message : String(error)}).`
+          + ' The model will be reloaded from scratch on next use.',
+        );
+      }
+      throw error;
+    }
 
     const content = result?.choices?.[0]?.message?.content || '';
     return content.trim();

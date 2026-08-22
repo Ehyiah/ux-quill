@@ -15,7 +15,7 @@ async function importTransformersPipeline(): Promise<unknown> {
     mod = await import('@huggingface/transformers');
   } catch {
     warnCdnFallback('@huggingface/transformers');
-    mod = await import(TRANSFORMERS_CDN_URL);
+    mod = await import(/* @vite-ignore */ TRANSFORMERS_CDN_URL);
   }
 
   if (typeof mod?.pipeline !== 'function') {
@@ -207,7 +207,6 @@ export class TransformersProvider extends BaseAiProvider {
         max_new_tokens: 150,
         do_sample: true,
         temperature: this.temperature,
-        // @ts-expect-error - callback is valid
         callback: (token: string) => {
           onStream(token);
         },

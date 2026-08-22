@@ -10,7 +10,7 @@ async function importTransformersPipeline() {
     mod = await import('@huggingface/transformers');
   } catch (_unused) {
     warnCdnFallback('@huggingface/transformers');
-    mod = await import(_tsRewriteRelativeImportExtensions(TRANSFORMERS_CDN_URL));
+    mod = await import(/* @vite-ignore */_tsRewriteRelativeImportExtensions(TRANSFORMERS_CDN_URL));
   }
   if (typeof ((_mod = mod) == null ? void 0 : _mod.pipeline) !== 'function') {
     throw new Error('Loaded @huggingface/transformers but the "pipeline" export is missing.');
@@ -196,7 +196,6 @@ export class TransformersProvider extends BaseAiProvider {
         max_new_tokens: 150,
         do_sample: true,
         temperature: this.temperature,
-        // @ts-expect-error - callback is valid
         callback: token => {
           onStream(token);
         }

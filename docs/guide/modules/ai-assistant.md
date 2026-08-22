@@ -342,11 +342,37 @@ yarn add @wllama/wllama
 bin/console importmap:require @wllama/wllama/esm/index.js
 ```
 
+::: warning Vite users
+With a **Vite** build, the lazy import of this package is analyzed at **build time**: if the package is not installed, you get `Failed to resolve import "@wllama/wllama"` (unlike webpack, which defers the failure to runtime and lets the CDN fallback engage). Two options:
+
+Option 1 (recommended): install the package so Vite bundles it normally.
+
+```bash
+yarn add @wllama/wllama
+```
+
+Option 2: keep the CDN fallback behavior by marking the package as external.
+
+```js
+// vite.config.js
+export default {
+    optimizeDeps: { exclude: ['@wllama/wllama'] },
+    build: {
+        rollupOptions: { external: [/^@wllama\//] },
+    },
+};
+```
+:::
+
 ### How it works
 
 1. On first feature use, the provider downloads the GGUF model from HuggingFace (default: `Qwen/Qwen2.5-0.5B-Instruct-GGUF`, q4_k_m — ~350 MB).
 2. Download progress is shown in the loading overlay.
 3. All 7 features use `createChatCompletion()` with system/user messages.
+
+::: info Troubleshooting
+If you ever see `RangeError: Offset is outside the bounds of the DataView`, the GGUF file was truncated (interrupted or flaky download). The provider recovers automatically: it purges the affected cache entries, retries with a fresh download, and wipes the browser model storage as a last resort. An inference crash also resets the model, which is reloaded cleanly on the next action. If the error keeps coming back, your network probably truncates large transfers — clear site data for the origin and retry on a more stable connection.
+:::
 
 ### GPU acceleration (WebGPU)
 
@@ -454,6 +480,20 @@ yarn add @huggingface/transformers
 # Or with Symfony importmap
 bin/console importmap:require @huggingface/transformers
 ```
+
+::: warning Vite users
+Same constraint as for `@wllama/wllama`: with a **Vite** build, an uninstalled optional package fails at **build time** (`Failed to resolve import`). Either install it, or mark it as external:
+
+```js
+// vite.config.js
+export default {
+    optimizeDeps: { exclude: ['@huggingface/transformers'] },
+    build: {
+        rollupOptions: { external: [/^@huggingface\//] },
+    },
+};
+```
+:::
 
 ### How it works
 
