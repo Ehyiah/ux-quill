@@ -8,6 +8,7 @@ import { GenerateFeature } from './features/generateFeature.js';
 import { SummarizeFeature } from './features/summarizeFeature.js';
 import { TocFeature } from './features/tocFeature.js';
 import { SynonymFeature } from './features/synonymFeature.js';
+import { dismissAiSubmenu } from './utils/submenu.js';
 
 interface AiAssistantOptions {
   aiManager: AiManager;
@@ -298,7 +299,66 @@ div.ai-assistant-wrapper .ai-assistant-btn svg { width: 18px; height: 18px; disp
   font-size: 13px;
   line-height: 1.4;
 }
-
+.ai-assistant-notice {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  right: auto;
+  bottom: auto;
+  transform: translate(-50%, -50%);
+  z-index: 100002;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: min(440px, calc(100vw - 32px));
+  padding: 12px 16px;
+  border: 1px solid #dce3f4;
+  border-radius: 12px;
+  background: #f7f8ff;
+  box-shadow: 0 12px 32px rgba(30, 41, 70, .14);
+  color: #394765;
+  font-size: 13px;
+  line-height: 1.45;
+  animation: aiFadeIn .15s ease-out;
+}
+.ai-assistant-notice-message {
+  flex: 1;
+}
+.ai-assistant-notice-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  margin: -4px -8px -4px 0;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #69758e;
+  cursor: pointer;
+  font: inherit;
+  font-size: 20px;
+  line-height: 1;
+  transition: background .15s ease, color .15s ease;
+}
+.ai-assistant-notice-close:hover { background: #e9edfb; color: #394765; }
+.ai-assistant-notice-close:focus-visible { outline: 2px solid #717be0; outline-offset: 1px; }
+.ai-assistant-notice::before {
+  content: 'i';
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #e7ebff;
+  color: #5965d8;
+  font-size: 12px;
+  font-weight: 700;
+}
 .ai-assistant-submenu {
   position: fixed;
   z-index: 100000;
@@ -685,6 +745,7 @@ export class AiAssistantModule {
   }
 
   openPanel(anchorRect?: DOMRect, trigger?: HTMLElement): void {
+    dismissAiSubmenu();
     if (this.panel) {
       this.closePanel();
       return;

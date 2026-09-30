@@ -1,5 +1,7 @@
 import { expandWordSelection } from "../utils/wordSelection.js";
 import { showReviewModal } from "../utils/reviewModal.js";
+import { showAiNotice } from "../utils/notice.js";
+import { AI_SUBMENU_DISMISS_EVENT } from "../utils/submenu.js";
 const submenuIcon = paths => "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\">" + paths + "</svg>";
 const REWRITE_STYLE_ICONS = {
   formal: submenuIcon('<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18M10 12v2h4v-2"/>'),
@@ -22,6 +24,8 @@ export class RewriteFeature {
     const quill = this.quill;
     const selection = quill.getSelection();
     if (!selection || selection.length === 0) {
+      const labels = this.aiManager.getLabels();
+      showAiNotice(labels.selectionRequired, labels.btnClose, quill.scroll.domNode);
       return;
     }
     const getChar = i => {
@@ -30,7 +34,11 @@ export class RewriteFeature {
     };
     const wordRange = expandWordSelection(getChar, selection.index, selection.length);
     const selectedText = quill.getText(wordRange.index, wordRange.length).trim();
-    if (!selectedText) return;
+    if (!selectedText) {
+      const labels = this.aiManager.getLabels();
+      showAiNotice(labels.selectionRequired, labels.btnClose, quill.scroll.domNode);
+      return;
+    }
     const style = await this.promptStyle(anchorRect);
     if (!style) return;
     const provider = this.aiManager.getProvider();
@@ -123,12 +131,16 @@ export class RewriteFeature {
         }
       };
       const finish = value => {
+        document.removeEventListener(AI_SUBMENU_DISMISS_EVENT, onDismiss);
         document.removeEventListener('click', outsideClick);
         document.removeEventListener('keydown', onKeyDown);
         container.remove();
         resolve(value);
       };
+      const onDismiss = () => finish(null);
+      document.addEventListener(AI_SUBMENU_DISMISS_EVENT, onDismiss);
       setTimeout(() => {
+        if (!container.isConnected) return;
         document.addEventListener('click', outsideClick);
         document.addEventListener('keydown', onKeyDown);
       }, 0);

@@ -1,4 +1,5 @@
 import { showReviewModal } from "../utils/reviewModal.js";
+import { showAiNotice } from "../utils/notice.js";
 export class GrammarFeature {
   constructor(quill, aiManager) {
     this.name = 'grammar';
@@ -34,7 +35,11 @@ export class GrammarFeature {
       replaceIndex = 0;
       replaceLength = quill.getLength() - 1;
     }
-    if (!text) return;
+    if (!text) {
+      const labels = this.aiManager.getLabels();
+      showAiNotice(labels.grammarNoContent, labels.btnClose, quill.scroll.domNode);
+      return;
+    }
     const provider = this.aiManager.getProvider();
     const labels = this.aiManager.getLabels();
     try {
@@ -52,7 +57,10 @@ export class GrammarFeature {
       this.aiManager.setLoading(true);
       const correctedText = await buildCorrection();
       this.aiManager.setLoading(false);
-      if (correctedText === text) return;
+      if (correctedText === text) {
+        showAiNotice(labels.grammarNoIssues, labels.btnClose, quill.scroll.domNode);
+        return;
+      }
       const edited = await showReviewModal({
         title: labels.featureGrammar,
         description: labels.grammarDescription,

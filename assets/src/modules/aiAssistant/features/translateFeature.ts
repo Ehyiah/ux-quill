@@ -2,6 +2,8 @@ import type { AiManager } from '../aiManager.js';
 import type { AiFeature, AiFeatureInterface } from '../aiTypes.js';
 import { expandWordSelection } from '../utils/wordSelection.js';
 import { showReviewModal } from '../utils/reviewModal.js';
+import { showAiNotice } from '../utils/notice.js';
+import { AI_SUBMENU_DISMISS_EVENT } from '../utils/submenu.js';
 
 const LANGUAGE_MAP: Record<string, string> = {
   fr: 'French', en: 'English', es: 'Spanish', de: 'German',
@@ -25,10 +27,12 @@ export class TranslateFeature implements AiFeatureInterface {
   }
 
   async trigger(anchorRect?: DOMRect): Promise<void> {
-    const quill = this.quill as { getSelection(): { index: number; length: number } | null; getText(index?: number, length?: number): string; updateContents(delta: { ops: Array<Record<string, unknown>> }): void; getLength(): number };
+    const quill = this.quill as { getSelection(): { index: number; length: number } | null; getText(index?: number, length?: number): string; updateContents(delta: { ops: Array<Record<string, unknown>> }): void; getLength(): number; scroll: { domNode: HTMLElement } };
     const selection = quill.getSelection();
 
     if (!selection || selection.length === 0) {
+      const labels = this.aiManager.getLabels();
+      showAiNotice(labels.selectionRequired, labels.btnClose, quill.scroll.domNode);
       return;
     }
 
@@ -38,7 +42,11 @@ export class TranslateFeature implements AiFeatureInterface {
     };
     const wordRange = expandWordSelection(getChar, selection.index, selection.length);
     const selectedText = quill.getText(wordRange.index, wordRange.length).trim();
-    if (!selectedText) return;
+    if (!selectedText) {
+      const labels = this.aiManager.getLabels();
+      showAiNotice(labels.selectionRequired, labels.btnClose, quill.scroll.domNode);
+      return;
+    }
 
     const targetLang = await this.promptLanguage(anchorRect);
     if (!targetLang) return;
@@ -139,13 +147,17 @@ export class TranslateFeature implements AiFeatureInterface {
         }
       };
       const finish = (value: string | null) => {
+        document.removeEventListener(AI_SUBMENU_DISMISS_EVENT, onDismiss);
         document.removeEventListener('click', outsideClick);
         document.removeEventListener('keydown', onKeyDown);
         container.remove();
         resolve(value);
       };
+      const onDismiss = () => finish(null);
 
+      document.addEventListener(AI_SUBMENU_DISMISS_EVENT, onDismiss);
       setTimeout(() => {
+        if (!container.isConnected) return;
         document.addEventListener('click', outsideClick);
         document.addEventListener('keydown', onKeyDown);
       }, 0);

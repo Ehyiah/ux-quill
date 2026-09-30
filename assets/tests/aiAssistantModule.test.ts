@@ -185,6 +185,29 @@ describe('AiAssistantModule', () => {
             expect(document.activeElement).toBe(previouslyFocused);
         });
 
+        it('dismisses an open feature submenu before reopening the main panel', () => {
+            mockQuill.getSelection.mockReturnValue({ index: 0, length: 5 });
+            mockQuill.getText = jest.fn((index?: number, length?: number) => {
+                const text = 'hello';
+                return index === undefined ? text : text.slice(index, index + (length ?? 1));
+            });
+            mockQuill.getLength = jest.fn().mockReturnValue(5);
+
+            const module = new AiAssistantModule(mockQuill, {
+                aiManager: mockAiManager,
+                features: { rewrite: true },
+                keyboardShortcut: false,
+            });
+            module.openPanel();
+            (document.querySelector('[role="menuitem"]') as HTMLButtonElement).click();
+            expect(document.querySelector('.ai-assistant-submenu')).not.toBeNull();
+
+            (document.querySelector('.ql-ai-assistant') as HTMLButtonElement).click();
+
+            expect(document.querySelector('.ai-assistant-submenu')).toBeNull();
+            expect(document.querySelector('.ai-assistant-panel')).not.toBeNull();
+        });
+
         it('activates a menu item on click and restores the editor selection', () => {
             const module = createModule(false);
             const feature = (module as any).featureInstances[0];

@@ -1,5 +1,7 @@
 import { expandWordSelection } from "../utils/wordSelection.js";
 import { showReviewModal } from "../utils/reviewModal.js";
+import { showAiNotice } from "../utils/notice.js";
+import { AI_SUBMENU_DISMISS_EVENT } from "../utils/submenu.js";
 const submenuIcon = paths => "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\">" + paths + "</svg>";
 const SUMMARY_FORMAT_ICONS = {
   paragraph: submenuIcon('<path d="M7 3h8l4 4v14H7z"/><path d="M15 3v5h4M10 12h6M10 16h6"/>'),
@@ -33,7 +35,11 @@ export class SummarizeFeature {
       textToSummarize = quill.getText().trim();
       insertIndex = quill.getLength();
     }
-    if (!textToSummarize) return;
+    if (!textToSummarize) {
+      const labels = this.aiManager.getLabels();
+      showAiNotice(labels.summarizeNoContent, labels.btnClose, quill.scroll.domNode);
+      return;
+    }
     const format = await this.promptFormat(anchorRect);
     if (!format) return;
     const provider = this.aiManager.getProvider();
@@ -117,12 +123,16 @@ export class SummarizeFeature {
         }
       };
       const finish = value => {
+        document.removeEventListener(AI_SUBMENU_DISMISS_EVENT, onDismiss);
         document.removeEventListener('click', outsideClick);
         document.removeEventListener('keydown', onKeyDown);
         container.remove();
         resolve(value);
       };
+      const onDismiss = () => finish(null);
+      document.addEventListener(AI_SUBMENU_DISMISS_EVENT, onDismiss);
       setTimeout(() => {
+        if (!container.isConnected) return;
         document.addEventListener('click', outsideClick);
         document.addEventListener('keydown', onKeyDown);
       }, 0);

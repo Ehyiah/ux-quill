@@ -12,6 +12,43 @@ describe('GenerateFeature', () => {
     afterEach(() => {
         document.body.innerHTML = '';
         jest.clearAllMocks();
+        jest.clearAllTimers();
+        jest.useRealTimers();
+    });
+
+    it('keeps the prompt dialog open and shows a notice for an empty prompt', async () => {
+        jest.useFakeTimers();
+        const aiManager = {
+            getLabels: jest.fn().mockReturnValue({
+                featureGenerate: 'Generate content',
+                generateModalTitle: 'Generate',
+                generateDesc: 'Describe the content',
+                generatePlaceholder: 'Prompt',
+                generatePromptRequired: 'Enter a prompt first.',
+                btnCancel: 'Cancel',
+                btnGenerate: 'Generate',
+                btnClose: 'Close',
+            }),
+            getProvider: jest.fn(),
+        } as unknown as AiManager;
+        const quill = {
+            getSelection: jest.fn().mockReturnValue(null),
+            getLength: jest.fn().mockReturnValue(1),
+            updateContents: jest.fn(),
+            scroll: { domNode: document.createElement('div') },
+        };
+        const feature = new GenerateFeature(quill, aiManager);
+
+        const trigger = feature.trigger();
+        (document.querySelector('.ai-assistant-btn-primary') as HTMLButtonElement).click();
+
+        expect(document.querySelector('.ai-assistant-modal-overlay')).not.toBeNull();
+        expect(document.querySelector('[role="status"]')?.textContent).toBe('Enter a prompt first.');
+        expect(aiManager.getProvider).not.toHaveBeenCalled();
+
+        (document.querySelector('.ai-assistant-modal-actions .ai-assistant-btn-secondary') as HTMLButtonElement).click();
+        await trigger;
+        expect(document.querySelector('.ai-assistant-modal-overlay')).toBeNull();
     });
 
     it('shows the module loading indicator while regenerating', async () => {

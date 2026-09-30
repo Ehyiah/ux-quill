@@ -43,7 +43,9 @@ export interface AiLabels {
   descGenerate: string;
   descSummarize: string;
   descToc: string;
+  tocNoHeadings: string;
   descSynonym: string;
+  selectionRequired: string;
 
   panelTitle: string;
   groupEdit: string;
@@ -64,9 +66,12 @@ export interface AiLabels {
   translateTargetTitle: string;
 
   grammarDescription: string;
+  grammarNoContent: string;
+  grammarNoIssues: string;
 
   generateTitle: string;
   generateDesc: string;
+  generatePromptRequired: string;
   generatePlaceholder: string;
   generateModalTitle: string;
   generateResultTitle: string;
@@ -82,10 +87,12 @@ export interface AiLabels {
   summarizeResultBullets: string;
   summarizeResultParagraph: string;
   summarizePrefix: string;
+  summarizeNoContent: string;
 
   synonymTitle: string;
   synonymNoResults: string;
   synonymClickToReplace: string;
+  synonymWordRequired: string;
 
   btnApply: string;
   btnCancel: string;
@@ -112,7 +119,9 @@ export const DEFAULT_LABELS: AiLabels = {
   descGenerate: 'Generate text with AI',
   descSummarize: 'Summarize the content',
   descToc: 'Create a table of contents',
+  tocNoHeadings: 'No headings up to H{depth} found. Add headings or increase the TOC depth.',
   descSynonym: 'Find synonyms for the selected word',
+  selectionRequired: 'Select text in the editor to use this feature.',
 
   panelTitle: 'AI Assistant',
   groupEdit: 'Edit',
@@ -133,9 +142,12 @@ export const DEFAULT_LABELS: AiLabels = {
   translateTargetTitle: 'Target language',
 
   grammarDescription: 'Text corrected automatically',
+  grammarNoContent: 'There is no text to check. Add content or select a passage.',
+  grammarNoIssues: 'No grammar issues were found.',
 
   generateTitle: 'Generate content',
   generateDesc: 'Describe what you want to generate, then press Generate.',
+  generatePromptRequired: 'Enter a prompt before generating content.',
   generatePlaceholder: 'Example: Write a paragraph about the benefits of remote work...',
   generateModalTitle: 'Generate content',
   generateResultTitle: 'Generated content',
@@ -151,10 +163,12 @@ export const DEFAULT_LABELS: AiLabels = {
   summarizeResultBullets: 'Key points',
   summarizeResultParagraph: 'Paragraph summary',
   summarizePrefix: '\n\nSummary:\n',
+  summarizeNoContent: 'No text to summarize. Add content or select a passage.',
 
   synonymTitle: 'Synonyms',
   synonymNoResults: 'No synonyms found',
   synonymClickToReplace: 'Click to replace',
+  synonymWordRequired: 'Select a word to find synonyms.',
 
   btnApply: 'Apply',
   btnCancel: 'Cancel',
@@ -182,7 +196,9 @@ export const LOCALES: Record<UiLanguage, Partial<AiLabels>> = {
     descGenerate: 'G\u00E9n\u00E9rer du texte par IA',
     descSummarize: 'R\u00E9sumer le contenu',
     descToc: 'Cr\u00E9er une table des mati\u00E8res',
+    tocNoHeadings: 'Aucun titre jusqu\u2019\u00E0 H{depth} trouv\u00E9. Ajoutez des titres ou augmentez la profondeur du sommaire.',
     descSynonym: 'Trouver des synonymes du mot s\u00E9lectionn\u00E9',
+    selectionRequired: 'S\u00E9lectionnez du texte dans l\u2019\u00E9diteur pour utiliser cette fonction.',
     rewriteStyleTitle: 'Style de r\u00E9\u00E9criture',
     rewriteFormal: 'Formel',
     rewriteFormalDesc: 'Ton professionnel et soutenu',
@@ -195,8 +211,11 @@ export const LOCALES: Record<UiLanguage, Partial<AiLabels>> = {
     rewriteStyleLabel: 'Style : {style}',
     translateTargetTitle: 'Langue de destination',
     grammarDescription: 'Texte corrig\u00E9 automatiquement',
+    grammarNoContent: 'Aucun texte \u00E0 v\u00E9rifier. Ajoutez du contenu ou s\u00E9lectionnez un passage.',
+    grammarNoIssues: 'Aucune faute de grammaire d\u00E9tect\u00E9e.',
     generateTitle: 'G\u00E9n\u00E9rer du contenu',
     generateDesc: 'D\u00E9crivez ce que vous voulez g\u00E9n\u00E9rer, puis appuyez sur G\u00E9n\u00E9rer.',
+    generatePromptRequired: 'Saisissez une consigne avant de g\u00E9n\u00E9rer du contenu.',
     generatePlaceholder: 'Exemple : \u00C9cris un paragraphe sur les avantages du t\u00E9l\u00E9travail...',
     generateModalTitle: 'G\u00E9n\u00E9rer du contenu',
     generateResultTitle: 'Contenu g\u00E9n\u00E9r\u00E9',
@@ -211,9 +230,11 @@ export const LOCALES: Record<UiLanguage, Partial<AiLabels>> = {
     summarizeResultBullets: 'Points cl\u00E9s',
     summarizeResultParagraph: 'R\u00E9sum\u00E9 en paragraphe',
     summarizePrefix: '\n\nR\u00E9sum\u00E9 :\n',
+    summarizeNoContent: 'Aucun texte \u00E0 r\u00E9sumer. Ajoutez du contenu ou s\u00E9lectionnez un passage.',
     synonymTitle: 'Synonymes',
     synonymNoResults: 'Aucun synonyme trouv\u00E9',
     synonymClickToReplace: 'Cliquer pour remplacer',
+    synonymWordRequired: 'S\u00E9lectionnez un mot pour trouver des synonymes.',
     panelTitle: 'Assistant IA',
     groupEdit: '\u00C9dition',
     groupCreate: 'Cr\u00E9er',
@@ -241,7 +262,9 @@ export const LOCALES: Record<UiLanguage, Partial<AiLabels>> = {
     descGenerate: 'Text mit KI generieren',
     descSummarize: 'Den Inhalt zusammenfassen',
     descToc: 'Inhaltsverzeichnis erstellen',
+    tocNoHeadings: 'Keine \u00DCberschriften bis H{depth} gefunden. F\u00FCgen Sie \u00DCberschriften hinzu oder erh\u00F6hen Sie die Tiefe des Inhaltsverzeichnisses.',
     descSynonym: 'Synonyme f\u00FCr das ausgew\u00E4hlte Wort finden',
+    selectionRequired: 'W\u00E4hlen Sie Text im Editor aus, um diese Funktion zu verwenden.',
     rewriteStyleTitle: 'Umformulierungsstil',
     rewriteFormal: 'Formell',
     rewriteFormalDesc: 'Professioneller und akademischer Ton',
@@ -254,8 +277,11 @@ export const LOCALES: Record<UiLanguage, Partial<AiLabels>> = {
     rewriteStyleLabel: 'Stil: {style}',
     translateTargetTitle: 'Zielsprache',
     grammarDescription: 'Text automatisch korrigiert',
+    grammarNoContent: 'Kein Text zum Pr\u00FCfen. F\u00FCgen Sie Inhalt hinzu oder w\u00E4hlen Sie einen Abschnitt aus.',
+    grammarNoIssues: 'Es wurden keine Grammatikfehler gefunden.',
     generateTitle: 'Inhalt generieren',
     generateDesc: 'Beschreiben Sie, was Sie generieren m\u00F6chten, und dr\u00FCcken Sie dann Generieren.',
+    generatePromptRequired: 'Geben Sie vor der Generierung einen Prompt ein.',
     generatePlaceholder: 'Beispiel: Schreiben Sie einen Absatz \u00FCber die Vorteile des Remote-Arbeitens...',
     generateModalTitle: 'Inhalt generieren',
     generateResultTitle: 'Generierter Inhalt',
@@ -270,9 +296,11 @@ export const LOCALES: Record<UiLanguage, Partial<AiLabels>> = {
     summarizeResultBullets: 'Hauptpunkte',
     summarizeResultParagraph: 'Absatz-Zusammenfassung',
     summarizePrefix: '\n\nZusammenfassung:\n',
+    summarizeNoContent: 'Kein Text zum Zusammenfassen. F\u00FCgen Sie Inhalt hinzu oder w\u00E4hlen Sie einen Abschnitt aus.',
     synonymTitle: 'Synonyme',
     synonymNoResults: 'Keine Synonyme gefunden',
     synonymClickToReplace: 'Zum Ersetzen klicken',
+    synonymWordRequired: 'W\u00E4hlen Sie ein Wort aus, um Synonyme zu finden.',
     panelTitle: 'KI-Assistent',
     groupEdit: 'Bearbeiten',
     groupCreate: 'Erstellen',
@@ -300,7 +328,9 @@ export const LOCALES: Record<UiLanguage, Partial<AiLabels>> = {
     descGenerate: 'Generar texto con IA',
     descSummarize: 'Resumir el contenido',
     descToc: 'Crear una tabla de contenidos',
+    tocNoHeadings: 'No se encontraron encabezados hasta H{depth}. A\u00F1ade encabezados o aumenta la profundidad del \u00EDndice.',
     descSynonym: 'Buscar sin\u00F3nimos de la palabra seleccionada',
+    selectionRequired: 'Selecciona texto en el editor para usar esta funci\u00F3n.',
     rewriteStyleTitle: 'Estilo de reescritura',
     rewriteFormal: 'Formal',
     rewriteFormalDesc: 'Tono profesional y acad\u00E9mico',
@@ -313,8 +343,11 @@ export const LOCALES: Record<UiLanguage, Partial<AiLabels>> = {
     rewriteStyleLabel: 'Estilo: {style}',
     translateTargetTitle: 'Idioma de destino',
     grammarDescription: 'Texto corregido autom\u00E1ticamente',
+    grammarNoContent: 'No hay texto que revisar. A\u00F1ade contenido o selecciona un fragmento.',
+    grammarNoIssues: 'No se encontraron errores gramaticales.',
     generateTitle: 'Generar contenido',
     generateDesc: 'Describe lo que quieres generar, luego presiona Generar.',
+    generatePromptRequired: 'Escribe una instrucci\u00F3n antes de generar contenido.',
     generatePlaceholder: 'Ejemplo: Escribe un p\u00E1rrafo sobre las ventajas del teletrabajo...',
     generateModalTitle: 'Generar contenido',
     generateResultTitle: 'Contenido generado',
@@ -329,9 +362,11 @@ export const LOCALES: Record<UiLanguage, Partial<AiLabels>> = {
     summarizeResultBullets: 'Puntos clave',
     summarizeResultParagraph: 'Resumen en p\u00E1rrafo',
     summarizePrefix: '\n\nResumen:\n',
+    summarizeNoContent: 'No hay texto que resumir. A\u00F1ade contenido o selecciona un fragmento.',
     synonymTitle: 'Sin\u00F3nimos',
     synonymNoResults: 'No se encontraron sin\u00F3nimos',
     synonymClickToReplace: 'Haz clic para reemplazar',
+    synonymWordRequired: 'Selecciona una palabra para buscar sin\u00F3nimos.',
     panelTitle: 'Asistente IA',
     groupEdit: 'Editar',
     groupCreate: 'Crear',

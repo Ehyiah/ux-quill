@@ -10,7 +10,9 @@ describe('SynonymFeature', () => {
   let mockContent = '';
 
   afterEach(() => {
-    document.querySelectorAll('.ai-assistant-submenu').forEach(el => el.remove());
+    document.querySelectorAll('.ai-assistant-submenu, .ai-assistant-notice').forEach(el => el.remove());
+    jest.clearAllTimers();
+    jest.useRealTimers();
   });
 
   beforeEach(() => {
@@ -36,6 +38,9 @@ describe('SynonymFeature', () => {
         synonymTitle: 'Synonyms',
         synonymNoResults: 'No synonyms found',
         synonymClickToReplace: 'Click to replace',
+        selectionRequired: 'Select text in the editor.',
+        synonymWordRequired: 'Select a word.',
+        btnClose: 'Close',
       }),
       setLoading: jest.fn(),
       reportError: jest.fn(),
@@ -57,6 +62,7 @@ describe('SynonymFeature', () => {
       container: {
         getBoundingClientRect: jest.fn().mockReturnValue({ left: 0, top: 0, width: 500, height: 300 }),
       },
+      scroll: { domNode: document.createElement('div') },
     };
 
     feature = new SynonymFeature(mockQuill, mockAiManager, { count: 5 });
@@ -64,18 +70,33 @@ describe('SynonymFeature', () => {
 
   describe('trigger', () => {
     it('should not proceed if no selection', async () => {
+      jest.useFakeTimers();
       mockQuill.getSelection.mockReturnValue(null);
 
       await feature.trigger();
 
+      expect(document.querySelector('[role="status"]')?.textContent).toBe('Select text in the editor.');
       expect(mockProvider.findSynonyms).not.toHaveBeenCalled();
     });
 
     it('should not proceed if selection length is 0', async () => {
+      jest.useFakeTimers();
       mockQuill.getSelection.mockReturnValue({ index: 5, length: 0 });
 
       await feature.trigger();
 
+      expect(document.querySelector('[role="status"]')?.textContent).toBe('Select text in the editor.');
+      expect(mockProvider.findSynonyms).not.toHaveBeenCalled();
+    });
+
+    it('should show a notice when the selection contains no word', async () => {
+      jest.useFakeTimers();
+      mockQuill.getSelection.mockReturnValue({ index: 0, length: 3 });
+      mockContent = '!!!';
+
+      await feature.trigger();
+
+      expect(document.querySelector('[role="status"]')?.textContent).toBe('Select a word.');
       expect(mockProvider.findSynonyms).not.toHaveBeenCalled();
     });
 

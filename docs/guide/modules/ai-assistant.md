@@ -179,6 +179,13 @@ Available label keys:
 | `descGenerate` | Generate text with AI | Feature menu description |
 | `descSummarize` | Summarize the content | Feature menu description |
 | `descToc` | Create a table of contents | Feature menu description |
+| `tocNoHeadings` | No headings up to H{depth} found. Add headings or increase the TOC depth. | Notice shown when no eligible headings are available |
+| `summarizeNoContent` | No text to summarize. Add content or select a passage. | Notice shown when there is no content to summarize |
+| `selectionRequired` | Select text in the editor to use this feature. | Notice shown when a feature requires a text selection |
+| `grammarNoContent` | There is no text to check. Add content or select a passage. | Notice shown when the grammar checker has no input |
+| `grammarNoIssues` | No grammar issues were found. | Notice shown when text needs no grammar correction |
+| `generatePromptRequired` | Enter a prompt before generating content. | Notice shown when the generation prompt is empty |
+| `synonymWordRequired` | Select a word to find synonyms. | Notice shown when the selection contains no word |
 | `btnApply` | Apply | Review modal apply button |
 | `btnCancel` | Cancel | Cancel button |
 | `btnClose` | Close | Close button |
@@ -617,6 +624,8 @@ The Summarize feature condenses your content into a shorter version. By default 
    - **Key points** — bullet-point list of main ideas.
 5. The summary is inserted after the selection, or at the end of the document if nothing was selected.
 
+If the document or selected passage is empty, an informational notice explains that text is needed to create a summary.
+
 ---
 
 ## Table of contents
@@ -628,7 +637,7 @@ The Table of Contents feature scans the editor's headings (`<h1>` through `<h6>`
 2. Choose **Generate TOC**.
 3. A bullet-point list of all headings (respecting the configured depth) is inserted at position `0`.
 
-**Note:** This feature works purely on DOM extraction — no model is downloaded. If the document has no headings, nothing is inserted.
+**Note:** This feature works purely on DOM extraction — no model is downloaded. If there are no headings within the configured depth, nothing is inserted and the user sees a notice explaining how to fix it.
 
 ### options
 

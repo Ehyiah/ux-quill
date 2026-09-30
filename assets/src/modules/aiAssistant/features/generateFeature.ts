@@ -1,6 +1,7 @@
 import type { AiManager } from '../aiManager.js';
 import type { AiFeature, AiFeatureInterface } from '../aiTypes.js';
 import { showReviewModal } from '../utils/reviewModal.js';
+import { showAiNotice } from '../utils/notice.js';
 
 export class GenerateFeature implements AiFeatureInterface {
   readonly name: AiFeature = 'generate';
@@ -61,6 +62,7 @@ export class GenerateFeature implements AiFeatureInterface {
 
   private async promptInput(): Promise<string | null> {
     const labels = this.aiManager.getLabels();
+    const quill = this.quill as { scroll: { domNode: HTMLElement } };
     return new Promise((resolve) => {
       const previouslyFocused = document.activeElement as HTMLElement | null;
       const overlay = document.createElement('div');
@@ -131,7 +133,11 @@ export class GenerateFeature implements AiFeatureInterface {
 
       submitBtn.addEventListener('click', () => {
         const value = textarea.value.trim();
-        finish(value || null);
+        if (!value) {
+          showAiNotice(labels.generatePromptRequired, labels.btnClose, quill.scroll.domNode);
+          return;
+        }
+        finish(value);
       });
 
       actions.appendChild(cancelBtn);

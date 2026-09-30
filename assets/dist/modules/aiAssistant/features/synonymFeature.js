@@ -1,3 +1,5 @@
+import { showAiNotice } from "../utils/notice.js";
+import { AI_SUBMENU_DISMISS_EVENT } from "../utils/submenu.js";
 function isWordChar(ch) {
   if (!ch) return false;
   const code = ch.charCodeAt(0);
@@ -46,15 +48,17 @@ export class SynonymFeature {
   async trigger() {
     const quill = this.quill;
     const selection = quill.getSelection();
+    const labels = this.aiManager.getLabels();
     if (!selection || selection.length === 0) {
+      showAiNotice(labels.selectionRequired, labels.btnClose, quill.scroll.domNode);
       return;
     }
     const target = this.resolveWordTarget(quill, selection);
     if (!target) {
+      showAiNotice(labels.synonymWordRequired, labels.btnClose, quill.scroll.domNode);
       return;
     }
     const provider = this.aiManager.getProvider();
-    const labels = this.aiManager.getLabels();
     const count = this.config.count || 5;
     try {
       this.aiManager.setLoading(true);
@@ -138,11 +142,13 @@ export class SynonymFeature {
       const wordIndex = wordRange.index;
       const wordLength = wordRange.length;
       const finish = () => {
+        document.removeEventListener(AI_SUBMENU_DISMISS_EVENT, onDismiss);
         document.removeEventListener('click', outsideClick);
         document.removeEventListener('keydown', onKeyDown);
         container.remove();
         resolve();
       };
+      const onDismiss = () => finish();
       const outsideClick = e => {
         if (!container.contains(e.target)) {
           finish();
@@ -182,7 +188,9 @@ export class SynonymFeature {
         });
         container.appendChild(item);
       });
+      document.addEventListener(AI_SUBMENU_DISMISS_EVENT, onDismiss);
       setTimeout(() => {
+        if (!container.isConnected) return;
         document.addEventListener('click', outsideClick);
         document.addEventListener('keydown', onKeyDown);
       }, 0);
@@ -215,14 +223,30 @@ export class SynonymFeature {
     noResults.style.cssText = 'padding: 12px 14px; font-size: 13px; color: #888; text-align: center;';
     noResults.textContent = labels.synonymNoResults;
     container.appendChild(noResults);
-    const outsideClick = e => {
-      if (!container.contains(e.target)) {
-        document.removeEventListener('click', outsideClick);
-        container.remove();
+    const dismissTimeout = {};
+    const dismiss = () => {
+      document.removeEventListener(AI_SUBMENU_DISMISS_EVENT, onDismiss);
+      document.removeEventListener('click', outsideClick);
+      document.removeEventListener('keydown', onKeyDown);
+      container.remove();
+      if (dismissTimeout.id !== undefined) {
+        window.clearTimeout(dismissTimeout.id);
       }
     };
+    const outsideClick = e => {
+      if (!container.contains(e.target)) {
+        dismiss();
+      }
+    };
+    const onKeyDown = e => {
+      if (e.key === 'Escape') dismiss();
+    };
+    const onDismiss = () => dismiss();
+    document.addEventListener(AI_SUBMENU_DISMISS_EVENT, onDismiss);
     setTimeout(() => {
+      if (!container.isConnected) return;
       document.addEventListener('click', outsideClick);
+      document.addEventListener('keydown', onKeyDown);
     }, 0);
     document.body.appendChild(container);
     const bounds = quill.getBounds(wordIndex);
@@ -239,9 +263,6 @@ export class SynonymFeature {
       container.style.left = '50%';
       container.style.transform = 'translate(-50%, -50%)';
     }
-    setTimeout(() => {
-      container.remove();
-      document.removeEventListener('click', outsideClick);
-    }, 2000);
+    dismissTimeout.id = window.setTimeout(dismiss, 2000);
   }
 }

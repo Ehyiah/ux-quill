@@ -1,5 +1,7 @@
 import type { AiManager } from '../aiManager.js';
 import type { AiFeature, AiFeatureInterface, SynonymResult } from '../aiTypes.js';
+import { showAiNotice } from '../utils/notice.js';
+import { AI_SUBMENU_DISMISS_EVENT } from '../utils/submenu.js';
 
 interface QuillSelection {
   index: number;
@@ -19,6 +21,7 @@ type SynonymQuill = {
   setSelection(index: number, length: number, source?: string): void;
   getBounds(index: number, length?: number): { left: number; top: number; height: number; width: number };
   getLength(): number;
+  scroll: { domNode: HTMLElement };
 };
 
 type CharAt = (index: number) => string;
@@ -85,17 +88,19 @@ export class SynonymFeature implements AiFeatureInterface {
   async trigger(): Promise<void> {
     const quill = this.quill as SynonymQuill;
     const selection = quill.getSelection();
+    const labels = this.aiManager.getLabels();
     if (!selection || selection.length === 0) {
+      showAiNotice(labels.selectionRequired, labels.btnClose, quill.scroll.domNode);
       return;
     }
 
     const target = this.resolveWordTarget(quill, selection);
     if (!target) {
+      showAiNotice(labels.synonymWordRequired, labels.btnClose, quill.scroll.domNode);
       return;
     }
 
     const provider = this.aiManager.getProvider();
-    const labels = this.aiManager.getLabels();
     const count = (this.config.count as number) || 5;
 
     try {
@@ -199,13 +204,14 @@ export class SynonymFeature implements AiFeatureInterface {
 
       const wordIndex = wordRange.index;
       const wordLength = wordRange.length;
-
       const finish = () => {
+        document.removeEventListener(AI_SUBMENU_DISMISS_EVENT, onDismiss);
         document.removeEventListener('click', outsideClick);
         document.removeEventListener('keydown', onKeyDown);
         container.remove();
         resolve();
       };
+      const onDismiss = () => finish();
 
       const outsideClick = (e: MouseEvent) => {
         if (!container.contains(e.target as Node)) {
@@ -252,7 +258,9 @@ export class SynonymFeature implements AiFeatureInterface {
         container.appendChild(item);
       });
 
+      document.addEventListener(AI_SUBMENU_DISMISS_EVENT, onDismiss);
       setTimeout(() => {
+        if (!container.isConnected) return;
         document.addEventListener('click', outsideClick);
         document.addEventListener('keydown', onKeyDown);
       }, 0);
@@ -299,15 +307,31 @@ export class SynonymFeature implements AiFeatureInterface {
     noResults.textContent = labels.synonymNoResults;
     container.appendChild(noResults);
 
-    const outsideClick = (e: MouseEvent) => {
-      if (!container.contains(e.target as Node)) {
-        document.removeEventListener('click', outsideClick);
-        container.remove();
+    const dismissTimeout: { id?: number } = {};
+    const dismiss = () => {
+      document.removeEventListener(AI_SUBMENU_DISMISS_EVENT, onDismiss);
+      document.removeEventListener('click', outsideClick);
+      document.removeEventListener('keydown', onKeyDown);
+      container.remove();
+      if (dismissTimeout.id !== undefined) {
+        window.clearTimeout(dismissTimeout.id);
       }
     };
+    const outsideClick = (e: MouseEvent) => {
+      if (!container.contains(e.target as Node)) {
+        dismiss();
+      }
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') dismiss();
+    };
+    const onDismiss = () => dismiss();
 
+    document.addEventListener(AI_SUBMENU_DISMISS_EVENT, onDismiss);
     setTimeout(() => {
+      if (!container.isConnected) return;
       document.addEventListener('click', outsideClick);
+      document.addEventListener('keydown', onKeyDown);
     }, 0);
 
     document.body.appendChild(container);
@@ -328,9 +352,6 @@ export class SynonymFeature implements AiFeatureInterface {
       container.style.transform = 'translate(-50%, -50%)';
     }
 
-    setTimeout(() => {
-      container.remove();
-      document.removeEventListener('click', outsideClick);
-    }, 2000);
+    dismissTimeout.id = window.setTimeout(dismiss, 2000);
   }
 }

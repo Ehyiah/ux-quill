@@ -1,5 +1,7 @@
 import { expandWordSelection } from "../utils/wordSelection.js";
 import { showReviewModal } from "../utils/reviewModal.js";
+import { showAiNotice } from "../utils/notice.js";
+import { AI_SUBMENU_DISMISS_EVENT } from "../utils/submenu.js";
 const LANGUAGE_MAP = {
   fr: 'French',
   en: 'English',
@@ -31,6 +33,8 @@ export class TranslateFeature {
     const quill = this.quill;
     const selection = quill.getSelection();
     if (!selection || selection.length === 0) {
+      const labels = this.aiManager.getLabels();
+      showAiNotice(labels.selectionRequired, labels.btnClose, quill.scroll.domNode);
       return;
     }
     const getChar = i => {
@@ -39,7 +43,11 @@ export class TranslateFeature {
     };
     const wordRange = expandWordSelection(getChar, selection.index, selection.length);
     const selectedText = quill.getText(wordRange.index, wordRange.length).trim();
-    if (!selectedText) return;
+    if (!selectedText) {
+      const labels = this.aiManager.getLabels();
+      showAiNotice(labels.selectionRequired, labels.btnClose, quill.scroll.domNode);
+      return;
+    }
     const targetLang = await this.promptLanguage(anchorRect);
     if (!targetLang) return;
     const provider = this.aiManager.getProvider();
@@ -170,12 +178,16 @@ export class TranslateFeature {
         }
       };
       const finish = value => {
+        document.removeEventListener(AI_SUBMENU_DISMISS_EVENT, onDismiss);
         document.removeEventListener('click', outsideClick);
         document.removeEventListener('keydown', onKeyDown);
         container.remove();
         resolve(value);
       };
+      const onDismiss = () => finish(null);
+      document.addEventListener(AI_SUBMENU_DISMISS_EVENT, onDismiss);
       setTimeout(() => {
+        if (!container.isConnected) return;
         document.addEventListener('click', outsideClick);
         document.addEventListener('keydown', onKeyDown);
       }, 0);

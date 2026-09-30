@@ -1,5 +1,6 @@
 import type { AiManager } from '../aiManager.js';
 import type { AiFeature, AiFeatureInterface } from '../aiTypes.js';
+import { showAiNotice } from '../utils/notice.js';
 
 interface TocEntry {
   level: number;
@@ -34,7 +35,15 @@ export class TocFeature implements AiFeatureInterface {
     };
 
     const raw = this.extractHeaders(quill);
-    if (raw.length === 0) return;
+    if (raw.length === 0) {
+      const labels = this.aiManager.getLabels();
+      showAiNotice(
+        labels.tocNoHeadings.replace('{depth}', String(this.depth)),
+        labels.btnClose,
+        quill.scroll.domNode,
+      );
+      return;
+    }
 
     const entries: TocEntry[] = raw.map((h) => ({
       ...h,

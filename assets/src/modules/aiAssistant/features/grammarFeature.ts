@@ -1,6 +1,7 @@
 import type { AiManager } from '../aiManager.js';
 import type { AiFeature, AiFeatureInterface } from '../aiTypes.js';
 import { showReviewModal } from '../utils/reviewModal.js';
+import { showAiNotice } from '../utils/notice.js';
 
 export class GrammarFeature implements AiFeatureInterface {
   readonly name: AiFeature = 'grammar';
@@ -22,6 +23,7 @@ export class GrammarFeature implements AiFeatureInterface {
       getText(index?: number, length?: number): string;
       getLength(): number;
       updateContents(delta: { ops: Array<Record<string, unknown>> }): void;
+      scroll: { domNode: HTMLElement };
     };
     const selection = quill.getSelection();
     const useSelection = selection && selection.length > 0;
@@ -45,7 +47,11 @@ export class GrammarFeature implements AiFeatureInterface {
       replaceIndex = 0;
       replaceLength = quill.getLength() - 1;
     }
-    if (!text) return;
+    if (!text) {
+      const labels = this.aiManager.getLabels();
+      showAiNotice(labels.grammarNoContent, labels.btnClose, quill.scroll.domNode);
+      return;
+    }
 
     const provider = this.aiManager.getProvider();
     const labels = this.aiManager.getLabels();
@@ -71,7 +77,10 @@ export class GrammarFeature implements AiFeatureInterface {
       const correctedText = await buildCorrection();
       this.aiManager.setLoading(false);
 
-      if (correctedText === text) return;
+      if (correctedText === text) {
+        showAiNotice(labels.grammarNoIssues, labels.btnClose, quill.scroll.domNode);
+        return;
+      }
 
       const edited = await showReviewModal({
         title: labels.featureGrammar,

@@ -1,4 +1,5 @@
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
+import { showAiNotice } from "../utils/notice.js";
 export class TocFeature {
   constructor(quill, aiManager, config) {
     if (config === void 0) {
@@ -19,7 +20,11 @@ export class TocFeature {
     var _quill$getContents$op;
     const quill = this.quill;
     const raw = this.extractHeaders(quill);
-    if (raw.length === 0) return;
+    if (raw.length === 0) {
+      const labels = this.aiManager.getLabels();
+      showAiNotice(labels.tocNoHeadings.replace('{depth}', String(this.depth)), labels.btnClose, quill.scroll.domNode);
+      return;
+    }
     const entries = raw.map(h => _extends({}, h, {
       id: this.generateId(h.text)
     }));

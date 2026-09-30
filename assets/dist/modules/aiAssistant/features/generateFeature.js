@@ -1,4 +1,5 @@
 import { showReviewModal } from "../utils/reviewModal.js";
+import { showAiNotice } from "../utils/notice.js";
 export class GenerateFeature {
   constructor(quill, aiManager) {
     this.name = 'generate';
@@ -51,6 +52,7 @@ export class GenerateFeature {
   }
   async promptInput() {
     const labels = this.aiManager.getLabels();
+    const quill = this.quill;
     return new Promise(resolve => {
       const previouslyFocused = document.activeElement;
       const overlay = document.createElement('div');
@@ -108,7 +110,11 @@ export class GenerateFeature {
       cancelBtn.addEventListener('click', () => finish(null));
       submitBtn.addEventListener('click', () => {
         const value = textarea.value.trim();
-        finish(value || null);
+        if (!value) {
+          showAiNotice(labels.generatePromptRequired, labels.btnClose, quill.scroll.domNode);
+          return;
+        }
+        finish(value);
       });
       actions.appendChild(cancelBtn);
       actions.appendChild(submitBtn);
