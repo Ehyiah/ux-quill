@@ -18,7 +18,15 @@ final class AiAssistantModuleTest extends TestCase
     {
         $module = new AiAssistantModule();
         $this->assertEquals('aiAssistant', $module->name);
-        $this->assertEquals([], $module->options['features']);
+        $this->assertEquals([
+            AiAssistantModule::FEATURE_REWRITE,
+            AiAssistantModule::FEATURE_TRANSLATE,
+            AiAssistantModule::FEATURE_GRAMMAR,
+            AiAssistantModule::FEATURE_GENERATE,
+            AiAssistantModule::FEATURE_SUMMARIZE,
+            AiAssistantModule::FEATURE_TOC,
+            AiAssistantModule::FEATURE_SYNONYM,
+        ], $module->options['features']);
         $this->assertEquals(['fr', 'en', 'es', 'de', 'it', 'pt'], $module->options['translate']['target_languages']);
         $this->assertEquals(3, $module->options['toc']['depth']);
         $this->assertEquals(5, $module->options['synonym']['count']);

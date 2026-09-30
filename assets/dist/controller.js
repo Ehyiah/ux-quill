@@ -105,7 +105,11 @@ export default class _Class extends Controller {
   }
   setupAiAssistant(options) {
     const raw = options.modules.aiAssistant;
-    if (!raw || !Array.isArray(raw.features) || raw.features.length === 0) {
+    if (!raw) {
+      return;
+    }
+    if (!Array.isArray(raw.features) || raw.features.length === 0) {
+      delete options.modules.aiAssistant;
       return;
     }
     const features = {};
@@ -114,6 +118,10 @@ export default class _Class extends Controller {
         features[feature] = true;
       }
     });
+    if (Object.keys(features).length === 0) {
+      delete options.modules.aiAssistant;
+      return;
+    }
     const provider = raw.provider === 'api' || raw.provider === 'wllama' ? raw.provider : 'transformers';
     const aiOptions = {
       provider,

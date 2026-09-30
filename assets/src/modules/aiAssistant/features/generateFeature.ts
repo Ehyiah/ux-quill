@@ -35,7 +35,16 @@ export class GenerateFeature implements AiFeatureInterface {
         title: labels.generateResultTitle,
         description: labels.generateResultDesc,
         generatedText: result,
-        onRegenerate: () => provider.generate(prompt),
+        onRegenerate: async () => {
+          this.aiManager.setLoading(true);
+          try {
+            // Give the loading overlay a chance to render before local inference starts.
+            await new Promise<void>((resolve) => setTimeout(resolve, 0));
+            return await provider.generate(prompt);
+          } finally {
+            this.aiManager.setLoading(false);
+          }
+        },
       }, labels);
 
       if (edited !== null) {

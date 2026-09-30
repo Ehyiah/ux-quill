@@ -41,7 +41,15 @@ final class AiAssistantModule implements ModuleInterface
         $defaults = [
             self::PROVIDER_OPTION => 'transformers',
             self::TEMPERATURE_OPTION => 0.7,
-            'features' => [],
+            'features' => [
+                self::FEATURE_REWRITE,
+                self::FEATURE_TRANSLATE,
+                self::FEATURE_GRAMMAR,
+                self::FEATURE_GENERATE,
+                self::FEATURE_SUMMARIZE,
+                self::FEATURE_TOC,
+                self::FEATURE_SYNONYM,
+            ],
             'translate' => [
                 'target_languages' => ['fr', 'en', 'es', 'de', 'it', 'pt'],
                 'default_language' => 'en',

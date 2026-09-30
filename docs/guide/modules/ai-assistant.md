@@ -5,8 +5,7 @@ outline: [1, 3]
 # AiAssistantModule
 
 The AiAssistantModule adds an AI-powered writing assistant to the Quill editor.
-It provides six features at the moment
-— reformulation, translation, grammar correction, content generation, summarization, and automatic table of contents generation.
+It provides seven features: reformulation, translation, grammar correction, content generation, summarization, automatic table of contents generation, and synonym suggestions.
 
 1. Choose a provider (see [Choose a provider](#choose-a-provider))
 2. Configure the module with it (see [Module configuration](#module-configuration))
@@ -36,7 +35,7 @@ Providers **`transformers`** and **`wllama`** are not recommended or for testing
 :::
 
 
-When enabled, the module adds a "star" icon button to the toolbar. Clicking it opens a dropdown menu listing the enabled features.
+When enabled, the module adds a "star" icon button to the toolbar. Clicking it opens a dropdown menu listing the enabled features. All seven features are enabled by default; pass a `features` list to select a subset, or `[]` to disable the assistant.
 
 # Module configuration
 
@@ -61,7 +60,7 @@ $builder->add('content', QuillType::class, [
 | Option | Type | Description | Default |
 | :--- | :--- | :--- | :--- |
 | **provider** | `string` | Provider to use: `'api'`, `'wllama'`, or `'transformers'` | `'transformers'` |
-| **features** | `array` | List of enabled features. See the full list below. | `[]` |
+| **features** | `array` | List of enabled features. See the full list below. | `['rewrite', 'translate', 'grammar', 'generate', 'summarize', 'toc', 'synonym']` |
 | **model** | `string` | Global model override for local providers (`wllama`: `REPO/FILE.gguf`, `transformers`: HF ONNX id) — single model shared by all features | — |
 | **temperature** | `float` | Local provider generation temperature. The API provider uses `QUILL_AI_TEMPERATURE`. | `0.7` |
 | **keyboardShortcut** | `array\|false` | Shortcut to open the AI menu from the editor. `false` disables it. | `['key' => 'Space', 'ctrlKey' => true]` |
@@ -117,6 +116,7 @@ When the [InlineToolbarModule](/guide/modules/inline-toolbar) is also enabled, t
 | `'generate'` | Generate content | Generate new content from a prompt (with streaming) |
 | `'summarize'` | Summarize | Summarize selected text or the full document |
 | `'toc'` | Generate TOC | Generate a table of contents from headings |
+| `'synonym'` | Find synonym | Suggest synonyms for selected text |
 
 ### UI language
 

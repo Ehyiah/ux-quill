@@ -164,7 +164,11 @@ export default class extends Controller {
 
     private setupAiAssistant(options: Options): void {
         const raw = options.modules.aiAssistant;
-        if (!raw || !Array.isArray(raw.features) || raw.features.length === 0) {
+        if (!raw) {
+            return;
+        }
+        if (!Array.isArray(raw.features) || raw.features.length === 0) {
+            delete options.modules.aiAssistant;
             return;
         }
 
@@ -174,6 +178,10 @@ export default class extends Controller {
                 features[feature as AiFeature] = true;
             }
         });
+        if (Object.keys(features).length === 0) {
+            delete options.modules.aiAssistant;
+            return;
+        }
 
         const provider: AiProviderType = raw.provider === 'api' || raw.provider === 'wllama'
             ? raw.provider
