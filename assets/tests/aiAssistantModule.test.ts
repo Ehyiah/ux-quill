@@ -158,6 +158,46 @@ describe('AiAssistantModule', () => {
     });
 
     describe('openPanel', () => {
+        it('supports menu semantics and keyboard navigation', () => {
+            const previouslyFocused = document.createElement('button');
+            document.body.appendChild(previouslyFocused);
+            previouslyFocused.focus();
+
+            const module = new AiAssistantModule(mockQuill, {
+                aiManager: mockAiManager,
+                features: { synonym: true, generate: true },
+                keyboardShortcut: false,
+            });
+            module.openPanel();
+
+            const panel = document.querySelector('[role="menu"]') as HTMLElement;
+            const items = Array.from(panel.querySelectorAll<HTMLButtonElement>('[role="menuitem"]'));
+            expect(items.length).toBe(2);
+            expect(document.activeElement).toBe(items[0]);
+
+            items[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+            expect(document.activeElement).toBe(items[1]);
+            items[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+            expect(document.activeElement).toBe(items[0]);
+
+            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+            expect(document.querySelector('[role="menu"]')).toBeNull();
+            expect(document.activeElement).toBe(previouslyFocused);
+        });
+
+        it('activates a menu item on click and restores the editor selection', () => {
+            const module = createModule(false);
+            const feature = (module as any).featureInstances[0];
+            const trigger = jest.spyOn(feature, 'trigger').mockResolvedValue();
+
+            module.openPanel();
+            (document.querySelector('[role="menuitem"]') as HTMLButtonElement).click();
+
+            expect(mockQuill.setSelection).toHaveBeenCalledWith(0, 5, 'api');
+            expect(trigger).toHaveBeenCalled();
+            expect(document.querySelector('[role="menu"]')).toBeNull();
+        });
+
         it('should position the panel relative to the provided anchor rect', () => {
             const module = createModule(false);
 

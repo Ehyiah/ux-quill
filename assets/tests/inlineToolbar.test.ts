@@ -114,6 +114,9 @@ describe('InlineToolbar', () => {
 
         expect(preventDefault).toHaveBeenCalled();
         expect(stopPropagation).toHaveBeenCalled();
+        expect(document.querySelector('.ai-assistant-panel')).toBeNull();
+
+        aiButton.click();
         expect(document.querySelector('.ai-assistant-panel')).not.toBeNull();
     });
 

@@ -1,5 +1,10 @@
 import { expandWordSelection } from "../utils/wordSelection.js";
 import { showReviewModal } from "../utils/reviewModal.js";
+const submenuIcon = paths => "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\">" + paths + "</svg>";
+const SUMMARY_FORMAT_ICONS = {
+  paragraph: submenuIcon('<path d="M7 3h8l4 4v14H7z"/><path d="M15 3v5h4M10 12h6M10 16h6"/>'),
+  bullets: submenuIcon('<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4" cy="6" r=".7"/><circle cx="4" cy="12" r=".7"/><circle cx="4" cy="18" r=".7"/>')
+};
 export class SummarizeFeature {
   constructor(quill, aiManager) {
     this.name = 'summarize';
@@ -62,13 +67,11 @@ export class SummarizeFeature {
     const options = [{
       value: 'paragraph',
       label: labels.summarizeParagraph,
-      desc: labels.summarizeParagraphDesc,
-      icon: '\uD83D\uDCDD'
+      desc: labels.summarizeParagraphDesc
     }, {
       value: 'bullets',
       label: labels.summarizeBullets,
-      desc: labels.summarizeBulletsDesc,
-      icon: '\uD83D\uDCCC'
+      desc: labels.summarizeBulletsDesc
     }];
     return new Promise(resolve => {
       var _window$getSelection;
@@ -83,9 +86,9 @@ export class SummarizeFeature {
         item.type = 'button';
         item.className = 'ai-assistant-submenu-item';
         const icon = document.createElement('span');
-        icon.className = 'ai-assistant-submenu-icon';
+        icon.className = "ai-assistant-submenu-icon ai-assistant-format-" + opt.value;
         icon.setAttribute('aria-hidden', 'true');
-        icon.textContent = opt.icon;
+        icon.innerHTML = SUMMARY_FORMAT_ICONS[opt.value];
         const copy = document.createElement('span');
         copy.className = 'ai-assistant-submenu-copy';
         const labelEl = document.createElement('span');
@@ -128,8 +131,11 @@ export class SummarizeFeature {
       if (refRect) {
         const maxX = window.innerWidth - container.offsetWidth - 8;
         const x = Math.max(8, Math.min(refRect.left, maxX));
+        const below = refRect.bottom + 4;
+        const maxY = Math.max(8, window.innerHeight - container.offsetHeight - 8);
+        const y = below <= maxY ? below : Math.max(8, refRect.top - container.offsetHeight - 4);
         container.style.left = x + "px";
-        container.style.top = refRect.bottom + 4 + "px";
+        container.style.top = Math.min(y, maxY) + "px";
       } else {
         container.style.top = '50%';
         container.style.left = '50%';

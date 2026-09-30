@@ -3,6 +3,16 @@ import type { AiFeature, AiFeatureInterface, RewriteStyle } from '../aiTypes.js'
 import { expandWordSelection } from '../utils/wordSelection.js';
 import { showReviewModal } from '../utils/reviewModal.js';
 
+const submenuIcon = (paths: string): string =>
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
+
+const REWRITE_STYLE_ICONS: Record<RewriteStyle, string> = {
+  formal: submenuIcon('<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18M10 12v2h4v-2"/>'),
+  casual: submenuIcon('<circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/>'),
+  concise: submenuIcon('<path d="M13 2 4 14h7l-1 8 10-12h-7l0-8Z"/>'),
+  expanded: submenuIcon('<path d="M14 4h6v6m0-6-7 7M10 20H4v-6m0 6 7-7M4 10V4h6M4 4l7 7m3 3 6 6"/>'),
+};
+
 export class RewriteFeature implements AiFeatureInterface {
   readonly name: AiFeature = 'rewrite';
   readonly label: string;
@@ -88,17 +98,10 @@ export class RewriteFeature implements AiFeatureInterface {
         item.type = 'button';
         item.className = 'ai-assistant-submenu-item';
 
-        const iconMap: Record<string, string> = {
-          formal: '\uD83D\uDCDB',
-          casual: '\uD83D\uDE0A',
-          concise: '\u26A1',
-          expanded: '\uD83D\uDCD0',
-        };
-
         const icon = document.createElement('span');
-        icon.className = 'ai-assistant-submenu-icon';
+        icon.className = `ai-assistant-submenu-icon ai-assistant-style-${s.value}`;
         icon.setAttribute('aria-hidden', 'true');
-        icon.textContent = iconMap[s.value] || '\u2728';
+        icon.innerHTML = REWRITE_STYLE_ICONS[s.value];
 
         const copy = document.createElement('span');
         copy.className = 'ai-assistant-submenu-copy';
@@ -148,8 +151,11 @@ export class RewriteFeature implements AiFeatureInterface {
       if (refRect) {
         const maxX = window.innerWidth - container.offsetWidth - 8;
         const x = Math.max(8, Math.min(refRect.left, maxX));
+        const below = refRect.bottom + 4;
+        const maxY = Math.max(8, window.innerHeight - container.offsetHeight - 8);
+        const y = below <= maxY ? below : Math.max(8, refRect.top - container.offsetHeight - 4);
         container.style.left = `${x}px`;
-        container.style.top = `${refRect.bottom + 4}px`;
+        container.style.top = `${Math.min(y, maxY)}px`;
       } else {
         container.style.top = '50%';
         container.style.left = '50%';

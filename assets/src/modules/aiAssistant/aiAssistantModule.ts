@@ -17,21 +17,24 @@ interface AiAssistantOptions {
 
 const PANEL_ID = 'ai-assistant-panel';
 
+const featureIcon = (paths: string): string =>
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
+
 const FEATURE_ICONS: Record<AiFeature, string> = {
-  rewrite: '\u270D\uFE0F',
-  translate: '\uD83C\uDF10',
-  grammar: '\u2714\uFE0F',
-  summarize: '\uD83D\uDCDD',
-  generate: '\u2728',
-  toc: '\uD83D\uDCD1',
-  synonym: '\uD83D\uDD04',
+  rewrite: featureIcon('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/>'),
+  translate: featureIcon('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/>'),
+  grammar: featureIcon('<circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/>'),
+  summarize: featureIcon('<path d="M7 3h8l4 4v14H7z"/><path d="M15 3v5h4M10 12h6M10 16h6"/>'),
+  generate: featureIcon('<path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8Z"/><path d="m19 15 .8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8Z"/>'),
+  toc: featureIcon('<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4" cy="6" r=".7"/><circle cx="4" cy="12" r=".7"/><circle cx="4" cy="18" r=".7"/>'),
+  synonym: featureIcon('<path d="m16 3 4 4-4 4M20 7H4m4 14-4-4 4-4m-4 4h16"/>'),
 };
 
 const FEATURE_GROUPS: Record<AiFeature, 'edit' | 'create' | 'analyze'> = {
   rewrite: 'edit',
   translate: 'edit',
   grammar: 'edit',
-  summarize: 'create',
+  summarize: 'analyze',
   generate: 'create',
   toc: 'analyze',
   synonym: 'edit',
@@ -83,42 +86,48 @@ div.ai-assistant-wrapper .ai-assistant-btn svg { width: 18px; height: 18px; disp
 .ai-assistant-panel {
   position: fixed;
   z-index: 99999;
-  width: 320px;
-  max-width: calc(100vw - 24px);
+  width: 352px;
+  max-width: calc(100vw - 20px);
+  max-height: min(520px, calc(100vh - 20px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  box-sizing: border-box;
+  padding: 10px;
   background: #fff;
   border: 1px solid #e5e9f2;
-  border-radius: 14px;
-  box-shadow: 0 18px 48px rgba(30, 41, 70, .16), 0 3px 10px rgba(30, 41, 70, .08);
-  padding: 8px;
+  border-radius: 18px;
+  box-shadow: 0 20px 56px rgba(30, 41, 70, .18), 0 4px 14px rgba(30, 41, 70, .08);
   animation: aiPanelIn .18s ease-out;
   transform-origin: top left;
 }
+.ai-assistant-panel::-webkit-scrollbar { width: 6px; }
+.ai-assistant-panel::-webkit-scrollbar-thumb { background: #dce1ed; border-radius: 6px; }
 @keyframes aiPanelIn {
-  from { opacity: 0; transform: scale(.95) translateY(-4px); }
+  from { opacity: 0; transform: scale(.97) translateY(-5px); }
   to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 .ai-assistant-panel-header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 8px 12px;
-  border-bottom: 1px solid #eef1f6;
+  gap: 11px;
+  padding: 8px 9px 14px;
+  border-bottom: 1px solid #edf0f6;
   color: #19233d;
 }
 .ai-assistant-panel-mark {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  flex: 0 0 32px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #e8edff, #f2eaff);
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border: 1px solid rgba(89, 101, 216, .08);
+  border-radius: 12px;
+  background: linear-gradient(135deg, #e8edff, #f3ebff);
   color: #5965d8;
-  font-size: 18px;
-  line-height: 1;
 }
+.ai-assistant-panel-mark svg { width: 20px; height: 20px; }
 .ai-assistant-panel-title {
   font-size: 14px;
   font-weight: 700;
@@ -127,74 +136,83 @@ div.ai-assistant-wrapper .ai-assistant-btn svg { width: 18px; height: 18px; disp
 
 .ai-assistant-divider {
   height: 1px;
-  background: #eef1f6;
-  margin: 6px 8px;
+  background: #edf0f6;
+  margin: 7px 9px 1px;
 }
 
 .ai-assistant-group-label {
-  padding: 14px 8px 6px;
+  padding: 12px 9px 5px;
+  color: #818ba1;
+  cursor: default;
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  color: #9aa3b6;
-  cursor: default;
+  letter-spacing: .09em;
 }
 
 .ai-assistant-item {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 11px;
   width: 100%;
-  padding: 9px 8px;
+  min-height: 54px;
+  padding: 7px 9px;
   border: 1px solid transparent;
-  border-radius: 10px;
-  background: none;
+  border-radius: 12px;
+  background: transparent;
   cursor: pointer;
   text-align: left;
   font-family: inherit;
-  transition: background .15s, border-color .15s, transform .15s;
+  transition: background .16s ease, border-color .16s ease, transform .16s ease;
 }
-.ai-assistant-item:hover { background: #f6f7ff; border-color: #e4e7fb; }
-.ai-assistant-item:active { background: #edf0ff; transform: scale(.99); }
-.ai-assistant-item:focus-visible,
-.ai-assistant-submenu-item:focus-visible {
-  outline: 3px solid rgba(89, 101, 216, .24);
+.ai-assistant-item:hover { background: #f7f8ff; border-color: #e7e9fb; }
+.ai-assistant-item:active { background: #eef0ff; transform: scale(.99); }
+.ai-assistant-item:focus-visible {
+  outline: 2px solid #717be0;
   outline-offset: 1px;
 }
 
 .ai-assistant-item-icon {
-  flex-shrink: 0;
-  width: 32px;
-  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 10px;
-  background: #f1f3f8;
-  font-size: 16px;
-  transition: background .15s, transform .15s;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  transition: transform .16s ease;
 }
-.ai-assistant-item:hover .ai-assistant-item-icon {
-  background: #e6e9ff;
-  transform: translateY(-1px);
-}
+.ai-assistant-item-icon svg { width: 19px; height: 19px; }
+.ai-assistant-item:hover .ai-assistant-item-icon { transform: translateY(-1px); }
+.ai-assistant-icon-rewrite { color: #7354c8; background: #f2edff; }
+.ai-assistant-icon-translate { color: #3276bd; background: #eaf3ff; }
+.ai-assistant-icon-grammar { color: #25835b; background: #eaf7ef; }
+.ai-assistant-icon-summarize { color: #a36c1c; background: #fff4e5; }
+.ai-assistant-icon-generate { color: #6757ce; background: #f0edff; }
+.ai-assistant-icon-toc { color: #27818a; background: #e8f7f7; }
+.ai-assistant-icon-synonym { color: #b04e75; background: #fff0f5; }
 
 .ai-assistant-item-text {
   flex: 1;
   min-width: 0;
 }
 .ai-assistant-item-label {
+  color: #202942;
   font-size: 13px;
-  font-weight: 500;
-  color: #1a1a1a;
-  line-height: 1.3;
+  font-weight: 600;
+  line-height: 1.35;
 }
 .ai-assistant-item-desc {
+  margin-top: 2px;
+  color: #737e93;
   font-size: 11px;
-  color: #888;
-  line-height: 1.3;
-  margin-top: 1px;
+  line-height: 1.35;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ai-assistant-panel, .ai-assistant-item, .ai-assistant-item-icon {
+    animation: none !important;
+    transition: none !important;
+  }
 }
 
 .ai-assistant-backdrop {
@@ -284,41 +302,50 @@ div.ai-assistant-wrapper .ai-assistant-btn svg { width: 18px; height: 18px; disp
 .ai-assistant-submenu {
   position: fixed;
   z-index: 100000;
-  width: 248px;
-  max-width: calc(100vw - 24px);
+  box-sizing: border-box;
+  width: 320px;
+  max-width: calc(100vw - 20px);
+  max-height: min(460px, calc(100vh - 20px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 10px;
   background: #fff;
   border: 1px solid #e5e9f2;
-  border-radius: 14px;
-  box-shadow: 0 18px 48px rgba(30, 41, 70, .16), 0 3px 10px rgba(30, 41, 70, .08);
-  padding: 8px;
-  animation: aiPanelIn .16s ease-out;
+  border-radius: 16px;
+  box-shadow: 0 20px 56px rgba(30, 41, 70, .18), 0 4px 14px rgba(30, 41, 70, .08);
+  animation: aiPanelIn .18s ease-out;
+  transform-origin: top left;
 }
 .ai-assistant-submenu-title {
-  padding: 7px 8px 10px;
-  border-bottom: 1px solid #eef1f6;
-  font-size: 11px;
+  padding: 8px 9px 12px;
+  border-bottom: 1px solid #edf0f6;
+  color: #19233d;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: .01em;
-  color: #58627a;
 }
 .ai-assistant-submenu-item {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 11px;
   width: 100%;
-  padding: 9px 8px;
+  min-height: 54px;
+  padding: 7px 9px;
   border: 1px solid transparent;
-  border-radius: 10px;
-  background: none;
+  border-radius: 12px;
+  background: transparent;
+  color: #202942;
   cursor: pointer;
   text-align: left;
   font-family: inherit;
-  font-size: 13px;
-  color: #1a1a1a;
-  transition: background .15s, border-color .15s;
+  transition: background .16s ease, border-color .16s ease, transform .16s ease;
 }
-.ai-assistant-submenu-item:hover { background: #f6f7ff; border-color: #e4e7fb; }
-.ai-assistant-submenu-item:active { background: #edf0ff; }
+.ai-assistant-submenu-item:hover { background: #f7f8ff; border-color: #e7e9fb; }
+.ai-assistant-submenu-item:active { background: #eef0ff; transform: scale(.99); }
+.ai-assistant-submenu-item:focus-visible {
+  outline: 2px solid #717be0;
+  outline-offset: 1px;
+}
 .ai-assistant-submenu-copy {
   flex: 1;
   min-width: 0;
@@ -328,26 +355,41 @@ div.ai-assistant-wrapper .ai-assistant-btn svg { width: 18px; height: 18px; disp
   color: #202942;
   font-size: 13px;
   font-weight: 600;
-  line-height: 1.3;
+  line-height: 1.35;
 }
 .ai-assistant-submenu-description {
   display: block;
   margin-top: 2px;
-  color: #8a93a8;
+  color: #737e93;
   font-size: 11px;
-  line-height: 1.3;
+  line-height: 1.35;
 }
 .ai-assistant-submenu-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  flex: 0 0 28px;
-  border-radius: 8px;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
   background: #f1f3f8;
-  font-size: 15px;
+  color: #5965d8;
   line-height: 1;
+  transition: transform .16s ease;
+}
+.ai-assistant-submenu-icon svg { width: 19px; height: 19px; }
+.ai-assistant-submenu-item:hover .ai-assistant-submenu-icon { transform: translateY(-1px); }
+.ai-assistant-style-formal { color: #4e6497; background: #edf2ff; }
+.ai-assistant-style-casual { color: #25835b; background: #eaf7ef; }
+.ai-assistant-style-concise { color: #a36c1c; background: #fff4e5; }
+.ai-assistant-style-expanded { color: #7354c8; background: #f2edff; }
+.ai-assistant-format-paragraph { color: #3276bd; background: #eaf3ff; }
+.ai-assistant-format-bullets { color: #27818a; background: #e8f7f7; }
+@media (prefers-reduced-motion: reduce) {
+  .ai-assistant-submenu, .ai-assistant-submenu-item, .ai-assistant-submenu-icon {
+    animation: none !important;
+    transition: none !important;
+  }
 }
 
 .ai-assistant-modal-overlay {
@@ -495,6 +537,8 @@ export class AiAssistantModule {
   private panelSelection: { index: number; length: number } | null = null;
   private panelAnchorRect: DOMRect | undefined;
   private panelKeydownHandler: ((event: KeyboardEvent) => void) | null = null;
+  private panelPreviousFocus: HTMLElement | null = null;
+  private panelTrigger: HTMLElement | null = null;
 
   constructor(quill: Quill, options: AiAssistantOptions) {
     this.quill = quill;
@@ -568,6 +612,7 @@ export class AiAssistantModule {
     this.button.setAttribute('aria-label', 'AI Assistant');
     this.button.title = 'AI Assistant';
     this.button.setAttribute('aria-controls', PANEL_ID);
+    this.button.setAttribute('aria-haspopup', 'menu');
     this.button.setAttribute('aria-expanded', 'false');
 
     this.button.addEventListener('click', (e) => {
@@ -639,14 +684,23 @@ export class AiAssistantModule {
     this.openPanel();
   }
 
-  openPanel(anchorRect?: DOMRect): void {
+  openPanel(anchorRect?: DOMRect, trigger?: HTMLElement): void {
+    if (this.panel) {
+      this.closePanel();
+      return;
+    }
+
     this.panelAnchorRect = anchorRect;
+    this.panelTrigger = trigger || this.button;
+    this.panelTrigger?.setAttribute('aria-expanded', 'true');
     this.showPanel();
-    this.button?.setAttribute('aria-expanded', 'true');
   }
 
   private showPanel(): void {
     this.panelSelection = this.quill.getSelection() || null;
+    this.panelPreviousFocus = document.activeElement instanceof HTMLElement && document.activeElement !== document.body
+      ? document.activeElement
+      : null;
     this.backdrop = document.createElement('div');
     this.backdrop.className = 'ai-assistant-backdrop';
     this.backdrop.addEventListener('click', () => this.closePanel());
@@ -656,10 +710,29 @@ export class AiAssistantModule {
     this.panel = document.createElement('div');
     this.panel.className = 'ai-assistant-panel';
     this.panel.id = PANEL_ID;
+    this.panel.setAttribute('role', 'menu');
     this.panelKeydownHandler = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.stopPropagation();
         this.closePanel();
+        return;
+      }
+      if (!this.panel?.contains(event.target as Node)) return;
+      if (event.key === 'Tab') {
+        this.closePanel();
+        return;
+      }
+
+      const items = Array.from(this.panel.querySelectorAll<HTMLButtonElement>('[role="menuitem"]'));
+      const currentIndex = items.indexOf(document.activeElement as HTMLButtonElement);
+      let nextIndex: number | null = null;
+      if (event.key === 'ArrowDown') nextIndex = (currentIndex + 1) % items.length;
+      if (event.key === 'ArrowUp') nextIndex = (currentIndex - 1 + items.length) % items.length;
+      if (event.key === 'Home') nextIndex = 0;
+      if (event.key === 'End') nextIndex = items.length - 1;
+      if (nextIndex !== null && items[nextIndex]) {
+        event.preventDefault();
+        items[nextIndex].focus();
       }
     };
     document.addEventListener('keydown', this.panelKeydownHandler);
@@ -669,10 +742,12 @@ export class AiAssistantModule {
     const header = document.createElement('div');
     header.className = 'ai-assistant-panel-header';
 
+    this.panel.setAttribute('aria-label', labels.panelTitle || 'AI Assistant');
+
     const mark = document.createElement('span');
     mark.className = 'ai-assistant-panel-mark';
     mark.setAttribute('aria-hidden', 'true');
-    mark.textContent = '\u2728';
+    mark.innerHTML = featureIcon('<path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8Z"/><path d="m19 15 .8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8Z"/>');
 
     const title = document.createElement('span');
     title.className = 'ai-assistant-panel-title';
@@ -701,8 +776,8 @@ export class AiAssistantModule {
         item.className = 'ai-assistant-item';
 
         const icon = document.createElement('span');
-        icon.className = 'ai-assistant-item-icon';
-        icon.textContent = FEATURE_ICONS[feature.name] || '\u2728';
+        icon.className = `ai-assistant-item-icon ai-assistant-icon-${feature.name}`;
+        icon.innerHTML = FEATURE_ICONS[feature.name] || FEATURE_ICONS.generate;
 
         const text = document.createElement('span');
         text.className = 'ai-assistant-item-text';
@@ -725,6 +800,8 @@ export class AiAssistantModule {
         const desc = document.createElement('div');
         desc.className = 'ai-assistant-item-desc';
         desc.textContent = descMap[feature.name] || '';
+        item.setAttribute('role', 'menuitem');
+        item.tabIndex = -1;
 
         text.appendChild(label);
         text.appendChild(desc);
@@ -733,10 +810,13 @@ export class AiAssistantModule {
 
         item.addEventListener('mousedown', (e) => {
           e.preventDefault();
-          const btnRect = this.button?.getBoundingClientRect();
+        });
+        item.addEventListener('click', () => {
+          const selection = this.panelSelection;
+          const btnRect = this.panelTrigger?.getBoundingClientRect() || this.button?.getBoundingClientRect();
           this.closePanel();
-          if (this.panelSelection) {
-            this.quill.setSelection(this.panelSelection.index, this.panelSelection.length, 'api');
+          if (selection) {
+            this.quill.setSelection(selection.index, selection.length, 'api');
           }
           instance.trigger(btnRect);
         });
@@ -747,6 +827,7 @@ export class AiAssistantModule {
 
     document.body.appendChild(this.panel);
     this.positionPanel();
+    this.panel.querySelector<HTMLButtonElement>('[role="menuitem"]')?.focus();
   }
 
   private groupFeatures(): Array<{ label: string; items: Array<{ feature: AiFeatureInterface; instance: AiFeatureInterface }> }> {
@@ -867,6 +948,7 @@ export class AiAssistantModule {
   }
 
   private closePanel(): void {
+    const previousFocus = this.panelPreviousFocus;
     this.panelSelection = null;
     this.panelAnchorRect = undefined;
     if (this.panelKeydownHandler) {
@@ -881,6 +963,9 @@ export class AiAssistantModule {
       this.backdrop.remove();
       this.backdrop = null;
     }
-    this.button?.setAttribute('aria-expanded', 'false');
+    this.panelTrigger?.setAttribute('aria-expanded', 'false');
+    this.panelTrigger = null;
+    this.panelPreviousFocus = null;
+    if (previousFocus?.isConnected) previousFocus.focus();
   }
 }

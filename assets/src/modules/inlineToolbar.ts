@@ -179,16 +179,22 @@ export default class InlineToolbar {
             btn.type = 'button';
 
             if (f.name === 'aiAssistant') {
-                btn.onmousedown = (e) => {
+                btn.setAttribute('aria-controls', 'ai-assistant-panel');
+                btn.setAttribute('aria-haspopup', 'menu');
+                btn.setAttribute('aria-expanded', 'false');
+                btn.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                });
+                btn.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
 
                     const aiAssistant = this.quill.getModule('aiAssistant') as AiAssistantModule | undefined;
                     if (aiAssistant) {
-                        const btnRect = btn.getBoundingClientRect();
-                        aiAssistant.openPanel(btnRect);
+                        aiAssistant.openPanel(btn.getBoundingClientRect(), btn);
                     }
-                };
+                });
             } else {
                 btn.onmousedown = (e) => {
                     e.preventDefault();
