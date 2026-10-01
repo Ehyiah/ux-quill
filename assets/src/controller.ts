@@ -1,26 +1,16 @@
 import { Controller } from '@hotwired/stimulus';
 import Quill from 'quill';
 import * as Options from 'quill/core/quill';
-import type { AiKeyboardShortcut, ExtraOptions, ModuleOptions } from './types.d.ts';
+import type { ExtraOptions, ModuleOptions } from './types.d.ts';
 import mergeModules from './modules.ts';
 import { ToolbarCustomizer } from './ui/toolbarCustomizer.ts';
 import { handleUploadResponse, uploadStrategies } from './upload-utils.ts';
 import { AiManager } from './modules/aiAssistant/aiManager.ts';
-import type { AiOptions as ManagerAiOptions, AiFeature, AiProviderType } from './modules/aiAssistant/aiTypes.js';
+import { normalizeAiAssistantOptions } from './modules/aiAssistant/normalizeOptions.js';
 
 import './register-modules.ts';
 import QuillTableBetter from 'quill-table-better';
 import ImageFigure from './blots/imageFigure.ts';
-
-const AI_FEATURES: readonly AiFeature[] = [
-    'rewrite',
-    'translate',
-    'grammar',
-    'generate',
-    'summarize',
-    'toc',
-    'synonym',
-];
 
 // Register custom ImageFigure blot to override default image
 Quill.register(ImageFigure, true);
@@ -167,43 +157,19 @@ export default class extends Controller {
         if (!raw) {
             return;
         }
-        if (!Array.isArray(raw.features) || raw.features.length === 0) {
+
+        const normalized = normalizeAiAssistantOptions(raw as Record<string, unknown>);
+        if (!normalized) {
             delete options.modules.aiAssistant;
             return;
         }
 
-        const features: Partial<Record<AiFeature, boolean>> = {};
-        raw.features.forEach((feature: string) => {
-            if ((AI_FEATURES as readonly string[]).includes(feature)) {
-                features[feature as AiFeature] = true;
-            }
-        });
-        if (Object.keys(features).length === 0) {
-            delete options.modules.aiAssistant;
-            return;
-        }
-
-        const provider: AiProviderType = raw.provider === 'api' || raw.provider === 'wllama'
-            ? raw.provider
-            : 'transformers';
-
-        const aiOptions: ManagerAiOptions = {
-            provider,
-            features,
-            debug: !!raw.debug,
+        const aiManager = new AiManager(normalized.aiOptions);
+        options.modules.aiAssistant = {
+            aiManager,
+            features: normalized.aiOptions.features,
+            keyboardShortcut: normalized.keyboardShortcut,
         };
-
-        if (raw.model) {
-            aiOptions.model = String(raw.model);
-        }
-
-        const aiManager = new AiManager(aiOptions);
-
-        const keyboardShortcut: AiKeyboardShortcut | false = raw.keyboardShortcut !== undefined
-            ? raw.keyboardShortcut as AiKeyboardShortcut | false
-            : { key: 'Space', ctrlKey: true, shiftKey: false, altKey: false, metaKey: false };
-
-        options.modules.aiAssistant = { aiManager, features, keyboardShortcut };
 
         this.addAiAssistantToInlineToolbar(options);
     }

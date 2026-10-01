@@ -19,10 +19,12 @@ export class TranslateFeature implements AiFeatureInterface {
 
   private quill: unknown;
   private aiManager: AiManager;
+  private config: Record<string, unknown>;
 
-  constructor(quill: unknown, aiManager: AiManager) {
+  constructor(quill: unknown, aiManager: AiManager, config: Record<string, unknown> = {}) {
     this.quill = quill;
     this.aiManager = aiManager;
+    this.config = config;
     this.label = aiManager.getLabels().featureTranslate;
   }
 
@@ -82,7 +84,7 @@ export class TranslateFeature implements AiFeatureInterface {
 
   private async promptLanguage(anchorRect?: DOMRect): Promise<string | null> {
     const labels = this.aiManager.getLabels();
-    const languages = [
+    const availableLanguages = [
       { code: 'fr', label: 'Fran\u00E7ais', flag: '\uD83C\uDDEB\uD83C\uDDF7' },
       { code: 'en', label: 'English', flag: '\uD83C\uDDEC\uD83C\uDDE7' },
       { code: 'es', label: 'Espa\u00F1ol', flag: '\uD83C\uDDEA\uD83C\uDDF8' },
@@ -98,6 +100,15 @@ export class TranslateFeature implements AiFeatureInterface {
       { code: 'ar', label: '\u0627\u0644\u0639\u0631\u0628\u064A\u0629', flag: '\uD83C\uDDE6\uD83C\uDDEA' },
       { code: 'hi', label: '\u0939\u093F\u0928\u094D\u0926\u0940', flag: '\uD83C\uDDEE\uD83C\uDDF3' },
     ];
+    const targetLanguages = this.config.target_languages;
+    const configuredLanguages = Array.isArray(targetLanguages)
+      ? availableLanguages.filter((language) => targetLanguages.includes(language.code))
+      : availableLanguages;
+    const languages = configuredLanguages.length > 0 ? configuredLanguages : availableLanguages;
+    const defaultLanguage = typeof this.config.default_language === 'string'
+      && languages.some((language) => language.code === this.config.default_language)
+      ? this.config.default_language
+      : undefined;
 
     return new Promise((resolve) => {
       const container = document.createElement('div');
@@ -114,6 +125,7 @@ export class TranslateFeature implements AiFeatureInterface {
         const item = document.createElement('button');
         item.type = 'button';
         item.className = 'ai-assistant-submenu-item';
+        item.setAttribute('aria-pressed', String(lang.code === defaultLanguage));
 
         const icon = document.createElement('span');
         icon.className = 'ai-assistant-submenu-icon';

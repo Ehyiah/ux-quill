@@ -400,7 +400,7 @@ div.ai-assistant-wrapper .ai-assistant-btn svg { width: 18px; height: 18px; disp
   font-family: inherit;
   transition: background .16s ease, border-color .16s ease, transform .16s ease;
 }
-.ai-assistant-submenu-item:hover { background: #f7f8ff; border-color: #e7e9fb; }
+.ai-assistant-submenu-item:hover, .ai-assistant-submenu-item[aria-pressed="true"] { background: #f7f8ff; border-color: #e7e9fb; }
 .ai-assistant-submenu-item:active { background: #eef0ff; transform: scale(.99); }
 .ai-assistant-submenu-item:focus-visible {
   outline: 2px solid #717be0;
@@ -645,7 +645,10 @@ export class AiAssistantModule {
     Object.entries(features).forEach(([key, config]) => {
       const FeatureClass = featureMap[key];
       if (FeatureClass) {
-        const featureConfig = typeof config === 'object' && config !== null ? (config as Record<string, unknown>) : {};
+        const managerConfig = this.aiManager.getFeatureConfig(key as AiFeature);
+        const featureConfig = typeof config === 'object' && config !== null
+          ? { ...managerConfig, ...(config as Record<string, unknown>) }
+          : managerConfig;
         this.featureInstances.push(new FeatureClass(this.quill, this.aiManager, featureConfig));
       }
     });

@@ -104,9 +104,13 @@ export class AiManager {
   getFeatureConfig(feature: AiFeature): Record<string, unknown> {
     const features = this.options.features || {};
     const value = features[feature];
-    if (typeof value === 'object' && value !== null) {
-      return { ...value } as Record<string, unknown>;
-    }
-    return {};
+    const moduleOptions = {
+      translate: this.options.translate,
+      toc: this.options.toc,
+      synonym: this.options.synonym,
+    }[feature as 'translate' | 'toc' | 'synonym'];
+    const featureOptions = typeof value === 'object' && value !== null ? value : {};
+
+    return { ...(moduleOptions || {}), ...featureOptions } as Record<string, unknown>;
   }
 }

@@ -19,14 +19,19 @@ const LANGUAGE_MAP = {
   hi: 'Hindi'
 };
 export class TranslateFeature {
-  constructor(quill, aiManager) {
+  constructor(quill, aiManager, config) {
+    if (config === void 0) {
+      config = {};
+    }
     this.name = 'translate';
     this.label = void 0;
     this.requiresSelection = true;
     this.quill = void 0;
     this.aiManager = void 0;
+    this.config = void 0;
     this.quill = quill;
     this.aiManager = aiManager;
+    this.config = config;
     this.label = aiManager.getLabels().featureTranslate;
   }
   async trigger(anchorRect) {
@@ -79,7 +84,7 @@ export class TranslateFeature {
   }
   async promptLanguage(anchorRect) {
     const labels = this.aiManager.getLabels();
-    const languages = [{
+    const availableLanguages = [{
       code: 'fr',
       label: 'Fran\u00E7ais',
       flag: '\uD83C\uDDEB\uD83C\uDDF7'
@@ -136,6 +141,10 @@ export class TranslateFeature {
       label: '\u0939\u093F\u0928\u094D\u0926\u0940',
       flag: '\uD83C\uDDEE\uD83C\uDDF3'
     }];
+    const targetLanguages = this.config.target_languages;
+    const configuredLanguages = Array.isArray(targetLanguages) ? availableLanguages.filter(language => targetLanguages.includes(language.code)) : availableLanguages;
+    const languages = configuredLanguages.length > 0 ? configuredLanguages : availableLanguages;
+    const defaultLanguage = typeof this.config.default_language === 'string' && languages.some(language => language.code === this.config.default_language) ? this.config.default_language : undefined;
     return new Promise(resolve => {
       var _window$getSelection;
       const container = document.createElement('div');
@@ -150,6 +159,7 @@ export class TranslateFeature {
         const item = document.createElement('button');
         item.type = 'button';
         item.className = 'ai-assistant-submenu-item';
+        item.setAttribute('aria-pressed', String(lang.code === defaultLanguage));
         const icon = document.createElement('span');
         icon.className = 'ai-assistant-submenu-icon';
         icon.setAttribute('aria-hidden', 'true');

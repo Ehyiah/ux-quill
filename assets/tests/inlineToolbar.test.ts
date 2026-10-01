@@ -32,6 +32,7 @@ describe('InlineToolbar', () => {
                 featureSynonym: 'Find synonym',
                 descSynonym: 'Find synonyms for selected word',
             }),
+            getFeatureConfig: jest.fn().mockReturnValue({}),
             setLoading: jest.fn(),
             onLoadingChange: jest.fn(),
             onDownloadProgress: jest.fn(),

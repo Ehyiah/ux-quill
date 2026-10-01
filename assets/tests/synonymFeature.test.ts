@@ -199,6 +199,17 @@ it('should replace only the word when synonym is clicked', async () => {
       expect(mockAiManager.reportError).toHaveBeenCalledWith(expect.any(Error));
     });
 
+    it('should use a custom configured synonym count', async () => {
+      const customFeature = new SynonymFeature(mockQuill, mockAiManager, { count: 8 });
+      mockQuill.getSelection.mockReturnValue({ index: 6, length: 5 });
+      mockContent = 'Hello world';
+      mockProvider.findSynonyms.mockResolvedValue([]);
+
+      await customFeature.trigger();
+
+      expect(mockProvider.findSynonyms).toHaveBeenCalledWith('world', 8);
+    });
+
     it('should use default count of 5 if not provided', async () => {
       const featureWithoutConfig = new SynonymFeature(mockQuill, mockAiManager);
       mockQuill.getSelection.mockReturnValue({ index: 6, length: 5 });

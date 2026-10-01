@@ -4,10 +4,10 @@ import mergeModules from "./modules.js";
 import { ToolbarCustomizer } from "./ui/toolbarCustomizer.js";
 import { handleUploadResponse, uploadStrategies } from "./upload-utils.js";
 import { AiManager } from "./modules/aiAssistant/aiManager.js";
+import { normalizeAiAssistantOptions } from "./modules/aiAssistant/normalizeOptions.js";
 import "./register-modules.js";
 import QuillTableBetter from 'quill-table-better';
 import ImageFigure from "./blots/imageFigure.js";
-const AI_FEATURES = ['rewrite', 'translate', 'grammar', 'generate', 'summarize', 'toc', 'synonym'];
 
 // Register custom ImageFigure blot to override default image
 Quill.register(ImageFigure, true);
@@ -108,41 +108,16 @@ export default class _Class extends Controller {
     if (!raw) {
       return;
     }
-    if (!Array.isArray(raw.features) || raw.features.length === 0) {
+    const normalized = normalizeAiAssistantOptions(raw);
+    if (!normalized) {
       delete options.modules.aiAssistant;
       return;
     }
-    const features = {};
-    raw.features.forEach(feature => {
-      if (AI_FEATURES.includes(feature)) {
-        features[feature] = true;
-      }
-    });
-    if (Object.keys(features).length === 0) {
-      delete options.modules.aiAssistant;
-      return;
-    }
-    const provider = raw.provider === 'api' || raw.provider === 'wllama' ? raw.provider : 'transformers';
-    const aiOptions = {
-      provider,
-      features,
-      debug: !!raw.debug
-    };
-    if (raw.model) {
-      aiOptions.model = String(raw.model);
-    }
-    const aiManager = new AiManager(aiOptions);
-    const keyboardShortcut = raw.keyboardShortcut !== undefined ? raw.keyboardShortcut : {
-      key: 'Space',
-      ctrlKey: true,
-      shiftKey: false,
-      altKey: false,
-      metaKey: false
-    };
+    const aiManager = new AiManager(normalized.aiOptions);
     options.modules.aiAssistant = {
       aiManager,
-      features,
-      keyboardShortcut
+      features: normalized.aiOptions.features,
+      keyboardShortcut: normalized.keyboardShortcut
     };
     this.addAiAssistantToInlineToolbar(options);
   }

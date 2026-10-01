@@ -84,9 +84,12 @@ export class AiManager {
   getFeatureConfig(feature) {
     const features = this.options.features || {};
     const value = features[feature];
-    if (typeof value === 'object' && value !== null) {
-      return _extends({}, value);
-    }
-    return {};
+    const moduleOptions = {
+      translate: this.options.translate,
+      toc: this.options.toc,
+      synonym: this.options.synonym
+    }[feature];
+    const featureOptions = typeof value === 'object' && value !== null ? value : {};
+    return _extends({}, moduleOptions || {}, featureOptions);
   }
 }

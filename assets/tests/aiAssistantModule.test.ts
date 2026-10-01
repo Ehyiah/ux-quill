@@ -33,6 +33,11 @@ describe('AiAssistantModule', () => {
                 featureSynonym: 'Find synonym',
                 descSynonym: 'Find synonyms for selected word',
             }),
+            getFeatureConfig: jest.fn().mockImplementation((feature: string) => ({
+                translate: { target_languages: ['fr', 'de'], default_language: 'de' },
+                toc: { depth: 2 },
+                synonym: { count: 8 },
+            }[feature] || {})),
             setLoading: jest.fn(),
             onLoadingChange: jest.fn(),
             onDownloadProgress: jest.fn(),
@@ -155,6 +160,22 @@ describe('AiAssistantModule', () => {
 
             expect(document.querySelector('.ai-assistant-panel')).toBeNull();
         });
+    });
+
+    it('passes module options to configured feature instances', () => {
+        const module = new AiAssistantModule(mockQuill, {
+            aiManager: mockAiManager,
+            features: { translate: true, toc: true, synonym: true },
+            keyboardShortcut: false,
+        });
+        const instances = (module as any).featureInstances as Array<any>;
+
+        expect(instances.find((feature) => feature.name === 'translate').config).toEqual({
+            target_languages: ['fr', 'de'],
+            default_language: 'de',
+        });
+        expect(instances.find((feature) => feature.name === 'toc').depth).toBe(2);
+        expect(instances.find((feature) => feature.name === 'synonym').config.count).toBe(8);
     });
 
     describe('openPanel', () => {
