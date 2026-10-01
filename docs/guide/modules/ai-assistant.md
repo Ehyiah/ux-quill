@@ -68,6 +68,7 @@ $builder->add('content', QuillType::class, [
 | **labels** | `array` | Per-label overrides (see [Custom labels](#custom-labels)) | `[]` |
 | **translate** | `array` | Translation sub-options (see [Translation options](#translation-options)) | — |
 | **toc** | `array` | Table of contents sub-options (see [TOC options](#toc-options)) | — |
+| **synonym** | `array` | Synonym suggestions options (see [Synonym options](#synonym-options)) | — |
 
 ### Keyboard shortcut
 
@@ -652,6 +653,27 @@ new AiAssistantModule(options: [
     'features' => ['toc'],
     'toc' => [
         'depth' => 2, // only h1 and h2
+    ],
+]),
+```
+
+## Synonyms
+
+The Synonym feature suggests alternatives for the selected word. The number of suggestions can be configured with the `synonym.count` option.
+
+### Synonym options
+
+| Sub-option | Type | Description | Default |
+| :--- | :--- | :--- | :--- |
+| **count** | `int` | Maximum number of synonym suggestions to request | `5` |
+
+**Usage example:**
+
+```php
+new AiAssistantModule(options: [
+    'features' => ['synonym'],
+    'synonym' => [
+        'count' => 8,
     ],
 ]),
 ```
