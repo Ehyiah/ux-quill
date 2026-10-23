@@ -50,6 +50,9 @@
         "friendsoftwig/twigcs": "^6.4",
         "dg/bypass-finals": "^1.6"
     },
+    "suggest": {
+        "symfony/reprise": "To bundle the assets of your project with Vite or Rsbuild (Symfony Reprise) instead of Webpack Encore"
+    },
     "autoload": {
         "psr-4": {
             "Ehyiah\\QuillJsBundle\\": "src/"

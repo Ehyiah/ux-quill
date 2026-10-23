@@ -23,16 +23,19 @@ If you need an easy-to-use WYSIWYG (with no complex configuration) into a symfon
 ```
 If you are using the AssetMapper Component you're done !
 
-### step 2 next run (If you are using webpack encore, not needed with AssetMapper)
-``` sh
-    yarn install --force
-    yarn watch
+### Step 2: install the JavaScript package (Webpack Encore or Symfony Reprise)
+
+Not needed with AssetMapper. Install the npm package, declare the bundle controllers
+in `assets/controllers.json`, and let your bundler rebuild:
+
+```sh
+npm install @ehyiah/ux-quill
+npm run dev   # or npm run build
 ```
-OR
-``` sh
-    npm install --force
-    npm run watch
-```
+
+See the [installation guide](docs/guide/installation.md) for the `controllers.json`
+entry, the auto-imported stylesheets, and the Symfony Reprise (Vite / Rsbuild) setup.
+
 It's done, you can use the QuillType to build a QuillJs WYSIWYG
 
 You can add as many WYSIWYG fields inside same page like any normal fields.

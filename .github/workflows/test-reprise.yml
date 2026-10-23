@@ -1,0 +1,243 @@
+name: Test Bundle Installation with Symfony Reprise
+
+on:
+    workflow_dispatch:
+    push:
+        branches: [ main ]
+    pull_request:
+        branches: [ main ]
+
+jobs:
+    test_bundle_install_with_reprise:
+        name: Install the bundle in a Symfony Reprise app (no AssetMapper, no Encore)
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: '8.4'
+                  extensions: mbstring, xml, ctype, iconv, intl, dom, filter, json
+                  coverage: none
+                  tools: composer:v2
+
+            - name: Setup Node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '22'
+
+            - name: Create a new Symfony project
+              run: |
+                  composer create-project --no-interaction symfony/skeleton:"7.4.*" test-project-reprise
+                  cd test-project-reprise
+                  composer config repositories.local '{"type": "path", "url": "../", "options": {"symlink": true}}'
+
+            - name: Install the bundle, Symfony Reprise and EasyAdmin
+              working-directory: test-project-reprise
+              run: |
+                  composer require --no-interaction \
+                    ehyiah/ux-quill:@dev \
+                    symfony/reprise \
+                    symfony/twig-bundle \
+                    easycorp/easyadmin-bundle:^5.3
+
+            - name: Check that the project uses neither AssetMapper nor Webpack Encore
+              working-directory: test-project-reprise
+              run: |
+                  if composer show | grep -E "symfony/(asset-mapper|webpack-encore-bundle)"; then
+                    echo "❌ This project must not install AssetMapper nor Webpack Encore"
+                    exit 1
+                  fi
+                  echo "✅ Reprise only"
+
+            - name: QuillAdminField registers a Reprise entry (requires EasyAdmin >= 5.3)
+              working-directory: test-project-reprise
+              run: |
+                  cat > check-field.php << 'EOL'
+                  <?php
+
+                  require __DIR__ . '/vendor/autoload.php';
+
+                  use Ehyiah\QuillJsBundle\Form\QuillAdminField;
+
+                  $mode = QuillAdminField::resolveAssetsMode();
+                  echo "resolveAssetsMode(): {$mode}\n";
+
+                  $assets = QuillAdminField::new('quill')->getAsDto()->getAssets();
+
+                  echo "reprise entries: " . implode(', ', array_keys($assets->getRepriseAssets())) . "\n";
+
+                  if ('reprise' !== $mode) {
+                      fwrite(STDERR, "❌ FAIL: expected the reprise assets mode\n");
+                      exit(1);
+                  }
+
+                  if (!array_key_exists('quill-admin', $assets->getRepriseAssets())) {
+                      fwrite(STDERR, "❌ FAIL: quill-admin is not registered as a Reprise entry\n");
+                      exit(1);
+                  }
+
+                  if ([] !== $assets->getAssetMapperAssets() || [] !== $assets->getWebpackEncoreAssets()) {
+                      fwrite(STDERR, "❌ FAIL: AssetMapper / Encore entries should stay empty\n");
+                      exit(1);
+                  }
+
+                  echo "✅ The quill-admin entry is registered through Symfony Reprise\n";
+                  EOL
+
+                  php check-field.php
+
+            - name: The Quill form renders without AssetMapper
+              working-directory: test-project-reprise
+              run: |
+                  mkdir -p src/Controller templates
+
+                  cat > src/Controller/CheckController.php << 'EOL'
+                  <?php
+
+                  namespace App\Controller;
+
+                  use Ehyiah\QuillJsBundle\Form\QuillType;
+                  use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+                  use Symfony\Component\HttpFoundation\Response;
+                  use Symfony\Component\Routing\Attribute\Route;
+
+                  class CheckController extends AbstractController
+                  {
+                      #[Route('/check', name: 'check')]
+                      public function check(): Response
+                      {
+                          $form = $this->createFormBuilder(null, ['csrf_protection' => false])
+                              ->add('content', QuillType::class)
+                              ->getForm()
+                          ;
+
+                          return $this->render('check.html.twig', ['form' => $form->createView()]);
+                      }
+                  }
+                  EOL
+
+                  cat > templates/check.html.twig << 'EOL'
+                  <!DOCTYPE html>
+                  <html>
+                      <body>
+                          {{ form_start(form) }}
+                              {{ form_row(form.content) }}
+                          {{ form_end(form) }}
+                      </body>
+                  </html>
+                  EOL
+
+                  cat > render-check.php << 'EOL'
+                  <?php
+
+                  require __DIR__ . '/vendor/autoload.php';
+
+                  use App\Kernel;
+                  use Symfony\Component\Dotenv\Dotenv;
+                  use Symfony\Component\HttpFoundation\Request;
+
+                  (new Dotenv())->bootEnv(__DIR__ . '/.env');
+
+                  $response = (new Kernel('test', true))->handle(Request::create('/check'));
+
+                  echo 'HTTP ' . $response->getStatusCode() . "\n";
+
+                  if (200 !== $response->getStatusCode()) {
+                      fwrite(STDERR, substr($response->getContent(), 0, 4000));
+                      exit(1);
+                  }
+
+                  $html = $response->getContent();
+                  $failed = false;
+
+                  foreach ([
+                      'quill-container',
+                      'data-controller="ehyiah--ux-quill--quill"',
+                      'data-ehyiah--ux-quill--quill-toolbar-options-value',
+                      'data-ehyiah--ux-quill--quill-extra-options-value',
+                      'data-ehyiah--ux-quill--quill-modules-options-value',
+                  ] as $needle) {
+                      $found = str_contains($html, $needle);
+                      echo ($found ? '  ✓ ' : '  ✗ ') . $needle . "\n";
+                      $failed = $failed || !$found;
+                  }
+
+                  if ($failed) {
+                      fwrite(STDERR, "❌ FAIL: rendered HTML is missing expected markup\n");
+                      exit(1);
+                  }
+
+                  echo "✅ The Quill form renders without AssetMapper\n";
+                  EOL
+
+                  php render-check.php
+
+            - name: Build the assets with Vite
+              working-directory: test-project-reprise
+              run: |
+                  cat > package.json << 'EOL'
+                  {
+                      "name": "test-project-reprise",
+                      "private": true,
+                      "type": "module",
+                      "scripts": {
+                          "dev": "vite",
+                          "build": "vite build"
+                      }
+                  }
+                  EOL
+
+                  cat > vite.config.ts << 'EOL'
+                  import { defineConfig } from 'vite'
+                  import Symfony from '@symfony/reprise/vite'
+
+                  export default defineConfig({
+                      input: {
+                          app: './assets/app.js',
+                      },
+                      plugins: [
+                          Symfony({
+                              stimulus: './assets/controllers.json',
+                          }),
+                      ],
+                  })
+                  EOL
+
+                  cat > assets/app.js << 'EOL'
+                  import { startStimulusApp } from '@symfony/reprise/stimulus'
+
+                  startStimulusApp()
+                  EOL
+
+                  cat > assets/controllers.json << 'EOL'
+                  {
+                      "controllers": {
+                          "@ehyiah/ux-quill": {
+                              "quill": { "enabled": true, "fetch": "eager" },
+                              "quill-maps": { "enabled": true, "fetch": "eager" }
+                          }
+                      },
+                      "entrypoints": []
+                  }
+                  EOL
+
+                  npm install --no-fund --no-audit --save-dev vite @symfony/reprise
+                  npm install --no-fund --no-audit @ehyiah/ux-quill quill quill-table-better quill2-emoji highlight.js katex
+
+                  npx vite build
+
+            - name: Check the built assets
+              working-directory: test-project-reprise
+              run: |
+                  test -f public/build/entrypoints.json || (echo "❌ entrypoints.json is missing" && exit 1)
+
+                  if ! grep -q "ehyiah--ux-quill--quill" public/build/*.js; then
+                    echo "❌ The Quill Stimulus controller is missing from the built assets"
+                    exit 1
+                  fi
+
+                  echo "✅ The Quill controllers are bundled by Symfony Reprise"
