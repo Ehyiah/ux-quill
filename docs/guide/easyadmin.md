@@ -1,10 +1,10 @@
 # EasyAdmin Integration
 
-Integration will depend on how you handle assets in your project, AssetMapper or Webpack.
+Integration will depend on how you handle assets in your project, AssetMapper, Webpack Encore or Symfony Reprise.
 
 1. Optional first step
 
-**If you already have an entrypoint JavaScript file that you want to re-use in admin then skip this step. And directly go to the AssetMapper or Webpack integration.**
+**If you already have an entrypoint JavaScript file that you want to re-use in admin then skip this step. And directly go to the AssetMapper, Webpack or Reprise integration.**
 
 Otherwise: create a quill-admin.js inside the assets directory
 
@@ -13,7 +13,11 @@ Otherwise: create a quill-admin.js inside the assets directory
 import './bootstrap';
 ```
 
-2. See [AssetMapper](#When-using-AssetMapper) or [Webpack](#When-using-webpack)
+2. See [AssetMapper](#when-using-assetmapper), [Webpack](#when-using-webpack) or [Reprise](#when-using-symfony-reprise-vite--rsbuild)
+
+The built-in `QuillAdminField` detects your toolchain and registers the `quill-admin`
+entry accordingly (Symfony Reprise wins over AssetMapper and Webpack Encore).
+Reprise support requires EasyAdmin >= 5.3.
 
 ## When using AssetMapper
 
@@ -67,6 +71,43 @@ public function configureAssets(): Assets
 ```
 
 remember to recompile assets (yarn build/watch or npm equivalent).
+
+## When using Symfony Reprise (Vite / Rsbuild)
+
+- Create a `quill-admin` entry in your Vite or Rsbuild config
+(the entry name must be quill-admin as it is the name used in the built-in QuillAdminField, **but you can specify whatever you want as the actual JavaScript file in path**)
+
+```js
+// vite.config.ts
+import { defineConfig } from 'vite'
+import Symfony from '@symfony/reprise/vite'
+
+export default defineConfig({
+  input: {
+    app: './assets/app.js',
+    'quill-admin': './assets/quill-admin.js',
+  },
+  plugins: [
+    Symfony({
+      stimulus: './assets/controllers.json',
+    }),
+  ],
+})
+```
+
+- If you do not rely on the built-in field detection, register the entry yourself on a
+Crud controller or on the dashboard:
+
+```php
+public function configureAssets(Assets $assets): Assets
+{
+    $assets->addRepriseEntry('quill-admin');
+
+    return parent::configureAssets($assets);
+}
+```
+
+Then rebuild your assets (`vite build`).
 
 ## EasyAdmin Field usage
 

@@ -1,3 +1,10 @@
+# Unreleased
+
+## Symfony Reprise support
+
+- `QuillAdminField` now registers its `quill-admin` entry through **Symfony Reprise** (`addRepriseEntries()`) when the application bundles its assets with Vite or Rsbuild. Reprise is detected before AssetMapper and Webpack Encore, and requires **EasyAdmin >= 5.3** — with older EasyAdmin versions the previous behaviour is kept (`addAssetMapperEntries()` / `addWebpackEncoreEntries()`).
+- Documentation: installation and usage instructions for Symfony Reprise (Vite / Rsbuild), including the `assets/controllers.json` entry, the auto-imported stylesheets and the `npm install @ehyiah/ux-quill` requirement. `quill_content_styles()` renders nothing without AssetMapper, so the display stylesheets have to be imported from your own entry.
+
 # 3.5.1 (Symfony 8 better compatibility)
 
 ## PHP modifications

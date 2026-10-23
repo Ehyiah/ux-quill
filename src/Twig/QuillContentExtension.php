@@ -86,7 +86,8 @@ final class QuillContentExtension extends AbstractExtension
      * Emits the Stimulus controller element required to initialize interactive Quill content (e.g. maps).
      *
      * The controller is registered by the bundle (`symfony.controllers` in `assets/package.json`) and is
-     * loaded through the app's importmap (AssetMapper) or Webpack Encore (`@symfony/stimulus-bridge`).
+     * loaded through the app's importmap (AssetMapper), Webpack Encore (`@symfony/stimulus-bridge`) or
+     * Symfony Reprise (Vite / Rsbuild).
      */
     public function renderScripts(): string
     {
