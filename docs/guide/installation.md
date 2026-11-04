@@ -97,6 +97,15 @@ export default defineConfig({
 })
 ```
 
+::: tip
+If Composer installed the bundle through a symlinked `path` repository
+(`"symlink": true`, common when developing the bundle locally), Vite resolves the
+real path of `vendor/ehyiah/ux-quill`, outside your project. The bundle's
+dependencies (`@hotwired/stimulus`, `quill`, …) are then not found in your
+`node_modules`: either set `resolve: { preserveSymlinks: true }` in `vite.config.ts`,
+or install the repository with `"symlink": false`.
+:::
+
 Start the Stimulus application from your entry:
 
 ```js

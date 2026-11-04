@@ -33,7 +33,7 @@ jobs:
               run: |
                   composer create-project --no-interaction symfony/skeleton:"7.4.*" test-project-reprise
                   cd test-project-reprise
-                  composer config repositories.local '{"type": "path", "url": "../", "options": {"symlink": true}}'
+                  composer config repositories.local '{"type": "path", "url": "../", "options": {"symlink": false}}'
 
                   # Flex synchronizes package.json and assets/controllers.json with the
                   # bundles' assets/package.json, so it must exist before composer require
