@@ -163,7 +163,7 @@ Put the helper in the `<head>` of your layout, inside the `stylesheets` block so
 
 The helper is idempotent per request — calling it from both `base.html.twig` and a child template is safe, each `<link>` is emitted only once.
 
-#### Webpack Encore / your own bundler
+#### Webpack Encore / Symfony Reprise / your own bundler
 
 Import the stylesheets explicitly in your CSS entry point. The helper does nothing here — load only the layers you actually want:
 
@@ -174,6 +174,10 @@ Import the stylesheets explicitly in your CSS entry point. The helper does nothi
 
 @import '@ehyiah/ux-quill/dist/styles/quill-content-theme.css';
 ```
+
+This applies to Webpack Encore and to Symfony Reprise (Vite / Rsbuild): in both cases the
+bundle's stylesheets are resolved from `node_modules` by your bundler, not by AssetMapper,
+so `quill_content_styles()` stays silent.
 
 You can take a look at the css layers in the [CSS layers section](#explaining-the-css-layers) to know which ones you need.
 
@@ -204,7 +208,7 @@ It is **not** needed on:
 #### Requirements
 
 - **AssetMapper / importmap:** the page must render the importmap (`importmap('app')`, usually in `base.html.twig`) and `bin/console importmap:install` must have been run after updating the bundle.
-- **Webpack Encore:** the `quill-maps` controller must be listed in `assets/controllers.json` (run `bin/console ux:controllers:dump` after updating the bundle), then rebuild your assets (`yarn watch` / `yarn build`).
+- **Webpack Encore / Symfony Reprise (Vite / Rsbuild):** the bundle controllers (`quill`, `quill-maps`) must be listed in `assets/controllers.json`, then rebuild your assets (`yarn watch` / `yarn build`, or `vite build` with Reprise).
 
 #### Troubleshooting
 
