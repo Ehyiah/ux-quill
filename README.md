@@ -23,18 +23,19 @@ If you need an easy-to-use WYSIWYG (with no complex configuration) into a symfon
 ```
 If you are using the AssetMapper Component you're done !
 
-### Step 2: install the JavaScript package (Webpack Encore or Symfony Reprise)
+### Step 2: install the JavaScript dependencies (Webpack Encore or Symfony Reprise)
 
-Not needed with AssetMapper. Install the npm package, declare the bundle controllers
-in `assets/controllers.json`, and let your bundler rebuild:
+Not needed with AssetMapper. Symfony Flex already added the bundle assets to your
+`package.json` (as `file:vendor/ehyiah/ux-quill/assets`) and its controllers to
+`assets/controllers.json`. Just run:
 
 ```sh
-npm install @ehyiah/ux-quill
+npm install
 npm run dev   # or npm run build
 ```
 
-See the [installation guide](docs/guide/installation.md) for the `controllers.json`
-entry, the auto-imported stylesheets, and the Symfony Reprise (Vite / Rsbuild) setup.
+See the [installation guide](docs/guide/installation.md) for the auto-imported
+stylesheets and the Symfony Reprise (Vite / Rsbuild) setup.
 
 It's done, you can use the QuillType to build a QuillJs WYSIWYG
 

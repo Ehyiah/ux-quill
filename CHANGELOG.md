@@ -4,7 +4,7 @@
 
 - `QuillAdminField` now registers its `quill-admin` entry through **Symfony Reprise** (`addRepriseEntries()`) when the application bundles its assets with Vite or Rsbuild. Reprise is detected before AssetMapper and Webpack Encore, and requires **EasyAdmin >= 5.3** — with older EasyAdmin versions the previous behaviour is kept (`addAssetMapperEntries()` / `addWebpackEncoreEntries()`).
 - The detected toolchain can be overridden per field with `->withAssetsMode()` (`auto`, `reprise`, `asset_mapper`, `webpack_encore` or `none`). The entry is now registered when EasyAdmin converts the field to a DTO, so the custom option set on the field is taken into account.
-- Documentation: installation and usage instructions for Symfony Reprise (Vite / Rsbuild), including the `assets/controllers.json` entry, the auto-imported stylesheets and the `npm install @ehyiah/ux-quill` requirement. `quill_content_styles()` renders nothing without AssetMapper, so the display stylesheets have to be imported from your own entry.
+- Documentation: installation and usage instructions for Symfony Reprise (Vite / Rsbuild), including the `assets/controllers.json` entry, the auto-imported stylesheets and the Symfony Flex integration. `quill_content_styles()` renders nothing without AssetMapper, so the display stylesheets have to be imported from your own entry.
 
 # 3.5.1 (Symfony 8 better compatibility)
 

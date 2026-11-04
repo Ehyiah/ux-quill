@@ -88,7 +88,7 @@ The `quill_content_scripts()` function emits a Stimulus controller element (`dat
 >
 > **Webpack Encore:** the `quill-maps` controller is registered via `@symfony/stimulus-bridge` from `assets/controllers.json`. After updating the bundle, add the `quill-maps` entry manually, then rebuild your assets (`yarn watch` / `yarn build`).
 >
-> **Symfony Reprise (Vite / Rsbuild):** the controller is registered by `@symfony/reprise` from the same `assets/controllers.json` file, resolved from `node_modules` — make sure `@ehyiah/ux-quill` is installed (`npm install @ehyiah/ux-quill`), then rebuild.
+> **Symfony Reprise (Vite / Rsbuild):** the controller is registered by `@symfony/reprise` from the same `assets/controllers.json` file, resolved from `node_modules` — Flex links the bundle assets from `vendor/` there, so just run `npm install` after `composer require`, then rebuild.
 >
 > See [Usage → Loading the required JavaScript](/guide/usage#loading-the-required-javascript-maps) for when `quill_content_scripts()` is needed, and the [module documentation](/guide/modules/map#displaying-saved-maps) for details.
 

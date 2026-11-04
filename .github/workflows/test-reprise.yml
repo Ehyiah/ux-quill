@@ -35,6 +35,20 @@ jobs:
                   cd test-project-reprise
                   composer config repositories.local '{"type": "path", "url": "../", "options": {"symlink": true}}'
 
+                  # Flex synchronizes package.json and assets/controllers.json with the
+                  # bundles' assets/package.json, so it must exist before composer require
+                  cat > package.json << 'EOL'
+                  {
+                      "name": "test-project-reprise",
+                      "private": true,
+                      "type": "module",
+                      "scripts": {
+                          "dev": "vite",
+                          "build": "vite build"
+                      }
+                  }
+                  EOL
+
             - name: Install the bundle, Symfony Reprise and EasyAdmin
               working-directory: test-project-reprise
               run: |
@@ -52,6 +66,36 @@ jobs:
                     exit 1
                   fi
                   echo "✅ Reprise only"
+
+            - name: Symfony Flex wired the bundle assets and controllers
+              working-directory: test-project-reprise
+              run: |
+                  echo "--- package.json ---"
+                  cat package.json
+                  echo "--- assets/controllers.json ---"
+                  cat assets/controllers.json
+
+                  grep -q 'file:vendor/ehyiah/ux-quill/assets' package.json || {
+                    echo "❌ FAIL: Flex did not add the bundle assets as a file: dependency"
+                    exit 1
+                  }
+
+                  grep -q '@ehyiah/ux-quill' assets/controllers.json || {
+                    echo "❌ FAIL: Flex did not register the bundle controllers"
+                    exit 1
+                  }
+
+                  grep -q '"quill-maps"' assets/controllers.json || {
+                    echo "❌ FAIL: quill-maps is missing from assets/controllers.json"
+                    exit 1
+                  }
+
+                  grep -q '"quill":' package.json || {
+                    echo "❌ FAIL: Flex did not add the bundle peer dependencies"
+                    exit 1
+                  }
+
+                  echo "✅ Flex linked the bundle assets and registered the controllers"
 
             - name: QuillAdminField registers a Reprise entry (requires EasyAdmin >= 5.3)
               working-directory: test-project-reprise
@@ -179,18 +223,6 @@ jobs:
             - name: Build the assets with Vite
               working-directory: test-project-reprise
               run: |
-                  cat > package.json << 'EOL'
-                  {
-                      "name": "test-project-reprise",
-                      "private": true,
-                      "type": "module",
-                      "scripts": {
-                          "dev": "vite",
-                          "build": "vite build"
-                      }
-                  }
-                  EOL
-
                   cat > vite.config.ts << 'EOL'
                   import { defineConfig } from 'vite'
                   import Symfony from '@symfony/reprise/vite'
@@ -213,20 +245,10 @@ jobs:
                   startStimulusApp()
                   EOL
 
-                  cat > assets/controllers.json << 'EOL'
-                  {
-                      "controllers": {
-                          "@ehyiah/ux-quill": {
-                              "quill": { "enabled": true, "fetch": "eager" },
-                              "quill-maps": { "enabled": true, "fetch": "eager" }
-                          }
-                      },
-                      "entrypoints": []
-                  }
-                  EOL
-
+                  # package.json, @ehyiah/ux-quill (file:vendor/...) and assets/controllers.json
+                  # were filled by Symfony Flex during composer require
+                  npm install --no-fund --no-audit
                   npm install --no-fund --no-audit --save-dev vite @symfony/reprise
-                  npm install --no-fund --no-audit @ehyiah/ux-quill quill quill-table-better quill2-emoji highlight.js katex
 
                   npx vite build
 

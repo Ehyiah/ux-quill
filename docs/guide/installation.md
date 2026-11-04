@@ -16,23 +16,20 @@ stylesheets and its Stimulus controllers to AssetMapper.
 
 ## Webpack Encore
 
-Install the JavaScript package:
+Symfony Flex adds the bundle assets as a `file:` dependency in your `package.json`
+(`file:vendor/ehyiah/ux-quill/assets`), registers its Stimulus controllers in
+`assets/controllers.json` and adds the JavaScript packages required by the bundle
+(its `peerDependencies`) when you run `composer require`.
+
+Run the usual install, then rebuild:
 
 ```bash
-npm install @ehyiah/ux-quill
+npm install   # or yarn install
+npm run dev   # or npm run watch / npm run build
 ```
 
-The stylesheets auto-imported by the bundle's Stimulus controller
-(`quill/dist/quill.snow.css`, `quill-table-better/dist/quill-table-better.css`,
-`quill2-emoji/dist/style.css`, `highlight.js/styles/atom-one-dark.css`,
-`katex/dist/katex.min.css`…) are resolved from your project root, so install
-their packages too if they are not already (required with pnpm, recommended with npm):
-
-```bash
-npm install quill quill-table-better quill2-emoji highlight.js katex
-```
-
-Declare the bundle controllers in `assets/controllers.json`:
+If Flex did not update `assets/controllers.json` (for example when no `package.json`
+existed yet), declare the controllers manually:
 
 ```json
 {
@@ -45,22 +42,22 @@ Declare the bundle controllers in `assets/controllers.json`:
 }
 ```
 
-Then rebuild your assets (`npm run dev`, `npm run watch` or `npm run build`).
-
 ## Symfony Reprise (Vite / Rsbuild)
 
 [Symfony Reprise](https://symfony.com/bundles/reprise) is Webpack Encore's
 successor for Vite and Rsbuild. The bundle supports it the same way it supports
-Encore: controllers are declared in `assets/controllers.json` and resolved from
-`node_modules`.
+Encore: controllers are declared in `assets/controllers.json` (Flex fills it
+automatically) and resolved from `node_modules`.
 
 Install the PHP side and the JavaScript side:
 
 ```bash
 composer require symfony/reprise
 npm install --save-dev @symfony/reprise
-npm install @ehyiah/ux-quill quill quill-table-better quill2-emoji highlight.js katex
 ```
+
+Flex already linked the bundle assets and added the required JavaScript packages
+to your `package.json`.
 
 Enable the Stimulus integration by pointing the plugin at your `controllers.json`:
 
@@ -100,8 +97,7 @@ export default defineConfig({
 })
 ```
 
-Start the Stimulus application from your entry, and declare the bundle
-controllers in `assets/controllers.json` (same block as in the Encore section above):
+Start the Stimulus application from your entry:
 
 ```js
 // assets/app.js
