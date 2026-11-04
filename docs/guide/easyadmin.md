@@ -19,6 +19,19 @@ The built-in `QuillAdminField` detects your toolchain and registers the `quill-a
 entry accordingly (Symfony Reprise wins over AssetMapper and Webpack Encore).
 Reprise support requires EasyAdmin >= 5.3.
 
+If both AssetMapper and Symfony Reprise or webpack encore are installed (for example while migrating)
+and you want to keep AssetMapper, force the toolchain on the field:
+
+```php
+QuillAdminField::new('content')
+    ->withAssetsMode(QuillAdminField::ASSETS_MODE_ASSET_MAPPER)
+```
+
+Use `QuillAdminField::ASSETS_MODE_NONE` to disable the automatic registration
+entirely, for instance if you register the entry yourself in `configureAssets()`.
+The accepted values are `auto` (default behaviour), `reprise`, `asset_mapper`,
+`webpack_encore` and `none`.
+
 ## When using AssetMapper
 
 Create a new entry in importmap.php
@@ -95,8 +108,9 @@ export default defineConfig({
 })
 ```
 
-- If you do not rely on the built-in field detection, register the entry yourself on a
-Crud controller or on the dashboard:
+- If you do not rely on the built-in field detection, disable the automatic
+registration with `withAssetsMode(QuillAdminField::ASSETS_MODE_NONE)` and register
+the entry yourself on a Crud controller or on the dashboard:
 
 ```php
 public function configureAssets(Assets $assets): Assets

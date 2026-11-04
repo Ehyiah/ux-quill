@@ -3,34 +3,88 @@
 namespace Ehyiah\QuillJsBundle\Form;
 
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
+use InvalidArgumentException;
+use LogicException;
 use Symfony\Component\AssetMapper\AssetMapperInterface;
 
 class QuillAdminField implements FieldInterface
 {
     use FieldTrait;
 
+    public const ASSETS_MODE_AUTO = 'auto';
     public const ASSETS_MODE_REPRISE = 'reprise';
     public const ASSETS_MODE_ASSET_MAPPER = 'asset_mapper';
     public const ASSETS_MODE_WEBPACK_ENCORE = 'webpack_encore';
+    public const ASSETS_MODE_NONE = 'none';
+
+    public const OPTION_ASSETS_MODE = 'quill_assets_mode';
 
     private const ENTRY_NAME = 'quill-admin';
+
+    private const ASSETS_MODES = [
+        self::ASSETS_MODE_AUTO,
+        self::ASSETS_MODE_REPRISE,
+        self::ASSETS_MODE_ASSET_MAPPER,
+        self::ASSETS_MODE_WEBPACK_ENCORE,
+        self::ASSETS_MODE_NONE,
+    ];
+
+    private bool $assetsRegistered = false;
 
     /**
      * @param string|false|null $label
      */
     public static function new(string $propertyName, $label = null): self
     {
-        $field = (new self())
+        return (new self())
             ->addFormTheme('@QuillJs/form.html.twig', '@EasyAdmin/crud/form_theme.html.twig')
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setFormType(QuillType::class)
         ;
+    }
 
-        $registerEntry = self::resolveAssetsMethod();
+    /**
+     * Forces the asset toolchain used to register the "quill-admin" entry.
+     *
+     * Leave it untouched to auto-detect the toolchain (Symfony Reprise, then
+     * AssetMapper, then Webpack Encore). Use "none" when the entry is
+     * registered by the application in configureAssets().
+     */
+    public function withAssetsMode(string $mode): self
+    {
+        if ($this->assetsRegistered) {
+            throw new LogicException('The assets mode must be set before the field is converted to a DTO.');
+        }
 
-        return $field->{$registerEntry}(self::ENTRY_NAME);
+        $this->setCustomOption(self::OPTION_ASSETS_MODE, self::assertAssetsMode($mode));
+
+        return $this;
+    }
+
+    /**
+     * Registers the "quill-admin" entry when EasyAdmin converts the field to a DTO.
+     *
+     * The registration is deferred to this method so the assets mode set on the
+     * field (see withAssetsMode()) is known.
+     */
+    public function getAsDto(): FieldDto
+    {
+        if ($this->assetsRegistered) {
+            return $this->dto;
+        }
+
+        $mode = $this->resolveConfiguredAssetsMode();
+
+        if (self::ASSETS_MODE_NONE !== $mode) {
+            $this->{self::assetsMethodFor($mode)}(self::ENTRY_NAME);
+        }
+
+        $this->assetsRegistered = true;
+
+        return $this->dto;
     }
 
     /**
@@ -61,12 +115,37 @@ class QuillAdminField implements FieldInterface
         return self::ASSETS_MODE_WEBPACK_ENCORE;
     }
 
-    private static function resolveAssetsMethod(): string
+    private function resolveConfiguredAssetsMode(): string
     {
-        return match (self::resolveAssetsMode()) {
+        $mode = $this->dto->getCustomOption(self::OPTION_ASSETS_MODE);
+
+        if (null === $mode || self::ASSETS_MODE_AUTO === $mode) {
+            return self::resolveAssetsMode();
+        }
+
+        return self::assertAssetsMode($mode);
+    }
+
+    private static function assertAssetsMode(mixed $mode): string
+    {
+        if (!\is_string($mode) || !\in_array($mode, self::ASSETS_MODES, true)) {
+            throw new InvalidArgumentException(sprintf('Unknown assets mode "%s". Allowed values are: %s.', \is_string($mode) ? $mode : get_debug_type($mode), implode(', ', self::ASSETS_MODES)));
+        }
+
+        return $mode;
+    }
+
+    private static function assetsMethodFor(string $mode): string
+    {
+        if (self::ASSETS_MODE_REPRISE === $mode && !method_exists(self::class, 'addRepriseEntries')) {
+            throw new LogicException('The "reprise" assets mode requires EasyAdmin >= 5.3, which provides addRepriseEntries().');
+        }
+
+        return match ($mode) {
             self::ASSETS_MODE_REPRISE => 'addRepriseEntries',
             self::ASSETS_MODE_ASSET_MAPPER => 'addAssetMapperEntries',
-            default => 'addWebpackEncoreEntries',
+            self::ASSETS_MODE_WEBPACK_ENCORE => 'addWebpackEncoreEntries',
+            default => throw new InvalidArgumentException(sprintf('The "%s" assets mode does not register any entry.', $mode)),
         };
     }
 }
