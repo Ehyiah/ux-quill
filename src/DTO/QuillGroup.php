@@ -23,6 +23,7 @@ use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\EmojiField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\FormulaField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ImageField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ItalicField;
+use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\LayoutField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\LinkField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\PageBreakField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\StrikeField;
@@ -96,6 +97,7 @@ final class QuillGroup implements QuillGroupInterface
             new EmojiField(),
             new CleanField(),
             new TableField(),
+            new LayoutField(),
         ];
 
         return array_merge($stylingFields, $orgaFields, $otherFields);
@@ -175,6 +177,7 @@ final class QuillGroup implements QuillGroupInterface
             new CodeBlockField(),
             new TableField(),
             new CleanField(),
+            new LayoutField(),
         ];
     }
 }

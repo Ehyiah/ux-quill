@@ -69,6 +69,7 @@ These fields are provided by the bundle or integrated community modules. Most of
 | **[MapField](/guide/fields/map)** | Interactive map embed | `MapModule` | `map` |
 | **[PageBreakField](/guide/fields/pagebreak)** | Page break (for print) | `PageBreakModule` | `pageBreak` |
 | **[TableField](/guide/fields/table)** | Advanced table support | `TableModule` | `table-better` |
+| **[LayoutField](/guide/fields/layout)** | Multi-column layout (grid) | [`LayoutModule`](/guide/modules/layout) | `layout` |
 
 > [!TIP]
 > If you need to add a field that is not provided by this bundle, you can create your own. See [Custom Fields](/guide/advanced/custom-fields) for more details.
