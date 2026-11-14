@@ -1,6 +1,7 @@
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 import Delta from 'quill-delta';
 import { serializeContent, serializeHtml } from "../utils/serializeContent.js";
+import { LAYOUT_CHANGE_EVENT } from "./layoutEvents.js";
 export class Autosave {
   constructor(quill, options) {
     this.quill = void 0;
@@ -49,8 +50,10 @@ export class Autosave {
       }
     }
     this.quill.on('text-change', () => {
-      if (this.saveTimeout) clearTimeout(this.saveTimeout);
-      this.saveTimeout = setTimeout(() => this.save(), this.options.interval);
+      this.scheduleSave();
+    });
+    this.quill.on(LAYOUT_CHANGE_EVENT, () => {
+      this.scheduleSave();
     });
     const form = this.quill.container.closest('form');
     if (form) {
@@ -67,6 +70,10 @@ export class Autosave {
         (_document$getElementB = document.getElementById(id)) == null || _document$getElementB.remove();
       }
     });
+  }
+  scheduleSave() {
+    if (this.saveTimeout) clearTimeout(this.saveTimeout);
+    this.saveTimeout = setTimeout(() => this.save(), this.options.interval);
   }
   save() {
     const html = serializeContent(this.quill.root);

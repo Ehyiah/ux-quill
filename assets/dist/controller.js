@@ -5,6 +5,7 @@ import mergeModules from "./modules.js";
 import { ToolbarCustomizer } from "./ui/toolbarCustomizer.js";
 import { handleUploadResponse, uploadStrategies } from "./upload-utils.js";
 import { serializeContent, serializeHtml } from "./utils/serializeContent.js";
+import { LAYOUT_CHANGE_EVENT } from "./modules/layoutEvents.js";
 import "./register-modules.js";
 import QuillTableBetter from 'quill-table-better';
 import { Mention } from "./modules/mention.js";
@@ -146,6 +147,12 @@ export default class _Class extends Controller {
       this.bubbles(inputContent);
     };
     quill.on('text-change', syncContent);
+    quill.on(LAYOUT_CHANGE_EVENT, () => {
+      syncContent();
+      this.dispatchEvent('layout:change', {
+        html: this.inputTarget.value
+      });
+    });
     quill.root.addEventListener('quill:autosave:restored', syncContent);
   }
   bubbles(inputContent) {

@@ -20,3 +20,4 @@ Since they all bubble, you can catch them on the element carrying the controller
 |   **counter:words-update**    | Dispatched when the word count is updated                                                                                 |         `{ value: number }`          |
 | **counter:characters-update** | Dispatched when the character count is updated                                                                            |         `{ value: number }`          |
 |    **reading-time:update**    | Dispatched when the estimated reading time is updated                                                                     | `{ minutes: number, words: number }` |
+|       **layout:change**       | Dispatched when a layout is edited through its chrome (preset switch, add/remove column, duplicate, unwrap)               |          `{ html: string }`          |

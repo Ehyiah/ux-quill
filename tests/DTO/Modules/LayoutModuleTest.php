@@ -17,6 +17,8 @@ class LayoutModuleTest extends TestCase
         $this->assertEquals('layout', $module->name);
         $this->assertCount(4, $module->options['presets']);
         $this->assertTrue($module->options['allow_wrap']);
+        $this->assertTrue($module->options['ui']);
+        $this->assertTrue($module->options['show_badge']);
     }
 
     public function testDefaultPresetStructure(): void

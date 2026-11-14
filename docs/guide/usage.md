@@ -272,6 +272,12 @@ The bundle (and quill itself) ships differents stylesheets:
 - `quill.snow.css` — Quill's official theme (`.ql-editor h1`, `.ql-snow .ql-toolbar`, ...)
 - `quill-content.css` — structural rules for advanced and custom blots (`.ql-editor .ql-layout-col`, ...)
 
+Some editor affordances are **not** in these stylesheets: the layout module injects its editing
+styles at runtime (hover outline, empty-column placeholder, floating chrome). Restyle them by
+targeting the editor-only classes — `ql-layout-col--active`, `ql-layout-col--empty`,
+`.ql-layout-chrome` — knowing that `--active` and `--empty` are stripped before the content is
+saved, so they never reach the frontend rendering.
+
 ### Specificity principle
 
 Both use selectors like `.ql-editor .xxx` (specificity 0,2,0). To override, you need

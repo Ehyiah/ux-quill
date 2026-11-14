@@ -16,5 +16,9 @@ export function serializeHtml(html: string): string {
         }
     });
 
+    content.querySelectorAll('.ql-layout-col--active, .ql-layout-col--empty').forEach((column) => {
+        column.classList.remove('ql-layout-col--active', 'ql-layout-col--empty');
+    });
+
     return content.innerHTML;
 }

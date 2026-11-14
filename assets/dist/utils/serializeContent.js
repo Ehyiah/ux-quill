@@ -12,5 +12,8 @@ export function serializeHtml(html) {
       cell.removeAttribute('class');
     }
   });
+  content.querySelectorAll('.ql-layout-col--active, .ql-layout-col--empty').forEach(column => {
+    column.classList.remove('ql-layout-col--active', 'ql-layout-col--empty');
+  });
   return content.innerHTML;
 }

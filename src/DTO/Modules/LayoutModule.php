@@ -32,6 +32,8 @@ final class LayoutModule implements ModuleInterface
                 ['cols' => 3, 'ratios' => ['1fr', '1fr', '1fr'], 'label' => '3 columns'],
             ],
             'allow_wrap' => true,
+            'ui' => true,
+            'show_badge' => true,
         ];
     }
 }

@@ -1,6 +1,7 @@
 import Quill from 'quill';
 import Delta from 'quill-delta';
 import { serializeContent, serializeHtml } from '../utils/serializeContent.ts';
+import { LAYOUT_CHANGE_EVENT } from './layoutEvents.ts';
 
 type AutosaveOptions = {
     interval: number;
@@ -68,8 +69,11 @@ export class Autosave {
         }
 
         this.quill.on('text-change', () => {
-            if (this.saveTimeout) clearTimeout(this.saveTimeout);
-            this.saveTimeout = setTimeout(() => this.save(), this.options.interval);
+            this.scheduleSave();
+        });
+
+        this.quill.on(LAYOUT_CHANGE_EVENT, () => {
+            this.scheduleSave();
         });
 
         const form = this.quill.container.closest('form');
@@ -85,6 +89,11 @@ export class Autosave {
                 document.getElementById(id)?.remove();
             }
         });
+    }
+
+    private scheduleSave(): void {
+        if (this.saveTimeout) clearTimeout(this.saveTimeout);
+        this.saveTimeout = setTimeout(() => this.save(), this.options.interval);
     }
 
     private save(): void {

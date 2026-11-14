@@ -127,6 +127,8 @@ export type LayoutPreset = {
 export type LayoutOptions = {
     presets: LayoutPreset[];
     allow_wrap: boolean;
+    ui?: boolean;
+    show_badge?: boolean;
 };
 
 export interface ModuleInterface {

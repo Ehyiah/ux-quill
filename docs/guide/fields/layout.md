@@ -4,6 +4,9 @@
 
 The `LayoutField` adds a multi-column layout button to the toolbar. Clicking it opens a preset picker where users can choose between column default arrangements (50/50, 30/70, 70/30, 3 columns). Selecting a preset inserts a grid-based multi-column section at the cursor position.
 
+Once inserted, hovering the layout (or moving the caret inside a column) reveals a contextual chrome that can switch the preset, add or remove a column, duplicate the layout or unwrap it while keeping the content. See the [module documentation](/guide/modules/layout#editing-an-existing-layout) for details.
+
+
 **QuillJS name:** `layout`
 
 ## Usage
