@@ -1,0 +1,192 @@
+import type { AiManager } from '../aiManager.js';
+import type { AiFeature, AiFeatureInterface } from '../aiTypes.js';
+import { expandWordSelection } from '../utils/wordSelection.js';
+import { showReviewModal } from '../utils/reviewModal.js';
+import { showAiNotice } from '../utils/notice.js';
+import { AI_SUBMENU_DISMISS_EVENT } from '../utils/submenu.js';
+
+const LANGUAGE_MAP: Record<string, string> = {
+  fr: 'French', en: 'English', es: 'Spanish', de: 'German',
+  it: 'Italian', pt: 'Portuguese', nl: 'Dutch', pl: 'Polish',
+  ru: 'Russian', zh: 'Chinese', ja: 'Japanese', ko: 'Korean',
+  ar: 'Arabic', hi: 'Hindi',
+};
+
+export class TranslateFeature implements AiFeatureInterface {
+  readonly name: AiFeature = 'translate';
+  readonly label: string;
+  readonly requiresSelection = true;
+
+  private quill: unknown;
+  private aiManager: AiManager;
+  private config: Record<string, unknown>;
+
+  constructor(quill: unknown, aiManager: AiManager, config: Record<string, unknown> = {}) {
+    this.quill = quill;
+    this.aiManager = aiManager;
+    this.config = config;
+    this.label = aiManager.getLabels().featureTranslate;
+  }
+
+  async trigger(anchorRect?: DOMRect): Promise<void> {
+    const quill = this.quill as { getSelection(): { index: number; length: number } | null; getText(index?: number, length?: number): string; updateContents(delta: { ops: Array<Record<string, unknown>> }): void; getLength(): number; scroll: { domNode: HTMLElement } };
+    const selection = quill.getSelection();
+
+    if (!selection || selection.length === 0) {
+      const labels = this.aiManager.getLabels();
+      showAiNotice(labels.selectionRequired, labels.btnClose, quill.scroll.domNode);
+      return;
+    }
+
+    const getChar = (i: number) => {
+      if (i < 0 || i >= quill.getLength()) return '';
+      return quill.getText(i, 1) || '';
+    };
+    const wordRange = expandWordSelection(getChar, selection.index, selection.length);
+    const selectedText = quill.getText(wordRange.index, wordRange.length).trim();
+    if (!selectedText) {
+      const labels = this.aiManager.getLabels();
+      showAiNotice(labels.selectionRequired, labels.btnClose, quill.scroll.domNode);
+      return;
+    }
+
+    const targetLang = await this.promptLanguage(anchorRect);
+    if (!targetLang) return;
+
+    const provider = this.aiManager.getProvider();
+
+    try {
+      this.aiManager.setLoading(true);
+      const translated = await provider.translate(selectedText, targetLang);
+      this.aiManager.setLoading(false);
+
+      const labels = this.aiManager.getLabels();
+      const edited = await showReviewModal({
+        title: labels.featureTranslate,
+        description: `${LANGUAGE_MAP[targetLang] || targetLang}`,
+        originalText: selectedText,
+        generatedText: translated,
+        onRegenerate: () => provider.translate(selectedText, targetLang),
+      }, labels);
+
+      if (edited !== null) {
+        quill.updateContents([
+          { retain: wordRange.index },
+          { delete: wordRange.length },
+          { insert: edited },
+        ]);
+      }
+    } catch (error) {
+      this.aiManager.setLoading(false);
+      this.aiManager.reportError(error);
+    }
+  }
+
+  private async promptLanguage(anchorRect?: DOMRect): Promise<string | null> {
+    const labels = this.aiManager.getLabels();
+    const availableLanguages = [
+      { code: 'fr', label: 'Fran\u00E7ais', flag: '\uD83C\uDDEB\uD83C\uDDF7' },
+      { code: 'en', label: 'English', flag: '\uD83C\uDDEC\uD83C\uDDE7' },
+      { code: 'es', label: 'Espa\u00F1ol', flag: '\uD83C\uDDEA\uD83C\uDDF8' },
+      { code: 'de', label: 'Deutsch', flag: '\uD83C\uDDE9\uD83C\uDDEA' },
+      { code: 'it', label: 'Italiano', flag: '\uD83C\uDDEE\uD83C\uDDF9' },
+      { code: 'pt', label: 'Portugu\u00EAs', flag: '\uD83C\uDDF5\uD83C\uDDF9' },
+      { code: 'nl', label: 'Nederlands', flag: '\uD83C\uDDF3\uD83C\uDDF1' },
+      { code: 'pl', label: 'Polski', flag: '\uD83C\uDDF5\uD83C\uDDF1' },
+      { code: 'ru', label: '\u0420\u0443\u0441\u0441\u043A\u0438\u0439', flag: '\uD83C\uDDF7\uD83C\uDDFA' },
+      { code: 'zh', label: '\u4E2D\u6587', flag: '\uD83C\uDDE8\uD83C\uDDF3' },
+      { code: 'ja', label: '\u65E5\u672C\u8A9E', flag: '\uD83C\uDDEF\uD83C\uDDF5' },
+      { code: 'ko', label: '\uD55C\uAD6D\uC5B4', flag: '\uD83C\uDDF0\uD83C\uDDF7' },
+      { code: 'ar', label: '\u0627\u0644\u0639\u0631\u0628\u064A\u0629', flag: '\uD83C\uDDE6\uD83C\uDDEA' },
+      { code: 'hi', label: '\u0939\u093F\u0928\u094D\u0926\u0940', flag: '\uD83C\uDDEE\uD83C\uDDF3' },
+    ];
+    const targetLanguages = this.config.target_languages;
+    const configuredLanguages = Array.isArray(targetLanguages)
+      ? availableLanguages.filter((language) => targetLanguages.includes(language.code))
+      : availableLanguages;
+    const languages = configuredLanguages.length > 0 ? configuredLanguages : availableLanguages;
+    const defaultLanguage = typeof this.config.default_language === 'string'
+      && languages.some((language) => language.code === this.config.default_language)
+      ? this.config.default_language
+      : undefined;
+
+    return new Promise((resolve) => {
+      const container = document.createElement('div');
+      container.className = 'ai-assistant-submenu';
+      container.style.maxHeight = '320px';
+      container.style.overflowY = 'auto';
+
+      const title = document.createElement('div');
+      title.className = 'ai-assistant-submenu-title';
+      title.textContent = labels.translateTargetTitle;
+      container.appendChild(title);
+
+      languages.forEach((lang) => {
+        const item = document.createElement('button');
+        item.type = 'button';
+        item.className = 'ai-assistant-submenu-item';
+        item.setAttribute('aria-pressed', String(lang.code === defaultLanguage));
+
+        const icon = document.createElement('span');
+        icon.className = 'ai-assistant-submenu-icon';
+        icon.setAttribute('aria-hidden', 'true');
+        icon.textContent = lang.flag;
+
+        const copy = document.createElement('span');
+        copy.className = 'ai-assistant-submenu-copy';
+        const labelEl = document.createElement('span');
+        labelEl.className = 'ai-assistant-submenu-label';
+        labelEl.textContent = lang.label;
+        copy.appendChild(labelEl);
+
+        item.appendChild(icon);
+        item.appendChild(copy);
+
+        item.addEventListener('click', () => {
+          finish(lang.code);
+        });
+        container.appendChild(item);
+      });
+
+      const outsideClick = (e: MouseEvent) => {
+        if (!container.contains(e.target as Node)) {
+          finish(null);
+        }
+      };
+      const onKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          finish(null);
+        }
+      };
+      const finish = (value: string | null) => {
+        document.removeEventListener(AI_SUBMENU_DISMISS_EVENT, onDismiss);
+        document.removeEventListener('click', outsideClick);
+        document.removeEventListener('keydown', onKeyDown);
+        container.remove();
+        resolve(value);
+      };
+      const onDismiss = () => finish(null);
+
+      document.addEventListener(AI_SUBMENU_DISMISS_EVENT, onDismiss);
+      setTimeout(() => {
+        if (!container.isConnected) return;
+        document.addEventListener('click', outsideClick);
+        document.addEventListener('keydown', onKeyDown);
+      }, 0);
+
+      document.body.appendChild(container);
+
+      const refRect = anchorRect || window.getSelection()?.getRangeAt(0)?.getBoundingClientRect();
+      if (refRect) {
+        const maxX = window.innerWidth - container.offsetWidth - 8;
+        const x = Math.max(8, Math.min(refRect.left, maxX));
+        container.style.left = `${x}px`;
+        container.style.top = `${refRect.bottom + 4}px`;
+      } else {
+        container.style.top = '50%';
+        container.style.left = '50%';
+        container.style.transform = 'translate(-50%, -50%)';
+      }
+    });
+  }
+}

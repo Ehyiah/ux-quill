@@ -5,6 +5,8 @@ import type { ExtraOptions, ModuleOptions } from './types.d.ts';
 import mergeModules from './modules.ts';
 import { ToolbarCustomizer } from './ui/toolbarCustomizer.ts';
 import { handleUploadResponse, uploadStrategies } from './upload-utils.ts';
+import { AiManager } from './modules/aiAssistant/aiManager.ts';
+import { normalizeAiAssistantOptions } from './modules/aiAssistant/normalizeOptions.js';
 
 import './register-modules.ts';
 import QuillTableBetter from 'quill-table-better';
@@ -30,6 +32,7 @@ export default class extends Controller {
     declare readonly extraOptionsValue: ExtraOptions;
     declare readonly toolbarOptionsValue: HTMLDivElement;
     declare readonly modulesOptionsValue: ModuleOptions;
+
     static values = {
         toolbarOptions: {
             type: Array,
@@ -42,7 +45,7 @@ export default class extends Controller {
         modulesOptions: {
             type: Array,
             default: [],
-        }
+        },
     }
 
     private quillInstance: Quill | null = null;
@@ -59,6 +62,7 @@ export default class extends Controller {
         this.setupQuillStyles(options);
         this.setupUploadHandler(options);
         this.setupEditorHeight();
+        this.setupAiAssistant(options);
 
         this.dispatchEvent('options', options);
 
@@ -153,6 +157,45 @@ export default class extends Controller {
         const height = this.extraOptionsValue.height;
         if (height !== null) {
             this.editorContainerTarget.style.height = height;
+        }
+    }
+
+    private setupAiAssistant(options: Options): void {
+        const raw = options.modules.aiAssistant;
+        if (!raw) {
+            return;
+        }
+
+        const normalized = normalizeAiAssistantOptions(raw as Record<string, unknown>);
+        if (!normalized) {
+            delete options.modules.aiAssistant;
+            return;
+        }
+
+        const aiManager = new AiManager(normalized.aiOptions);
+        options.modules.aiAssistant = {
+            aiManager,
+            features: normalized.aiOptions.features,
+            keyboardShortcut: normalized.keyboardShortcut,
+        };
+
+        this.addAiAssistantToInlineToolbar(options);
+    }
+
+    private addAiAssistantToInlineToolbar(options: Options): void {
+        const inlineToolbar = options.modules.inlineToolbar;
+        if (!inlineToolbar || typeof inlineToolbar !== 'object') {
+            return;
+        }
+
+        const autoAdd = inlineToolbar.autoAddAiAssistantButton ?? true;
+        if (!autoAdd) {
+            return;
+        }
+
+        const buttons = Array.isArray(inlineToolbar.buttons) ? inlineToolbar.buttons : ['bold', 'italic', 'underline', 'strike'];
+        if (!buttons.includes('aiAssistant')) {
+            inlineToolbar.buttons = [...buttons, 'aiAssistant'];
         }
     }
 

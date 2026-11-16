@@ -1,0 +1,436 @@
+function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
+import { RewriteFeature } from "./features/rewriteFeature.js";
+import { TranslateFeature } from "./features/translateFeature.js";
+import { GrammarFeature } from "./features/grammarFeature.js";
+import { GenerateFeature } from "./features/generateFeature.js";
+import { SummarizeFeature } from "./features/summarizeFeature.js";
+import { TocFeature } from "./features/tocFeature.js";
+import { SynonymFeature } from "./features/synonymFeature.js";
+import { dismissAiSubmenu } from "./utils/submenu.js";
+const PANEL_ID = 'ai-assistant-panel';
+const featureIcon = paths => "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\">" + paths + "</svg>";
+const FEATURE_ICONS = {
+  rewrite: featureIcon('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/>'),
+  translate: featureIcon('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/>'),
+  grammar: featureIcon('<circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/>'),
+  summarize: featureIcon('<path d="M7 3h8l4 4v14H7z"/><path d="M15 3v5h4M10 12h6M10 16h6"/>'),
+  generate: featureIcon('<path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8Z"/><path d="m19 15 .8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8Z"/>'),
+  toc: featureIcon('<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4" cy="6" r=".7"/><circle cx="4" cy="12" r=".7"/><circle cx="4" cy="18" r=".7"/>'),
+  synonym: featureIcon('<path d="m16 3 4 4-4 4M20 7H4m4 14-4-4 4-4m-4 4h16"/>')
+};
+const FEATURE_GROUPS = {
+  rewrite: 'edit',
+  translate: 'edit',
+  grammar: 'edit',
+  summarize: 'analyze',
+  generate: 'create',
+  toc: 'analyze',
+  synonym: 'edit'
+};
+const GROUP_LABEL_KEYS = {
+  edit: 'groupEdit',
+  create: 'groupCreate',
+  analyze: 'groupAnalyze'
+};
+let stylesInjected = false;
+function injectStyles() {
+  if (stylesInjected) return;
+  stylesInjected = true;
+  const style = document.createElement('style');
+  style.textContent = "\n.ai-assistant-wrapper {\n  position: relative;\n  display: inline-block;\n  vertical-align: middle;\n}\n\n.ai-assistant-btn {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  width: 28px;\n  height: 24px;\n  padding: 3px 5px;\n  border: none;\n  background: none;\n  cursor: pointer;\n  color: #444;\n  border-radius: 2px;\n  transition: background .15s, color .15s;\n}\n.ai-assistant-btn:hover { background: #e6e6e6; color: #06c; }\ndiv.ai-assistant-wrapper .ai-assistant-btn svg { width: 18px; height: 18px; display: block; float: none; }\n\n.ai-assistant-panel {\n  position: fixed;\n  z-index: 99999;\n  width: 352px;\n  max-width: calc(100vw - 20px);\n  max-height: min(520px, calc(100vh - 20px));\n  overflow-y: auto;\n  overscroll-behavior: contain;\n  box-sizing: border-box;\n  padding: 10px;\n  background: #fff;\n  border: 1px solid #e5e9f2;\n  border-radius: 18px;\n  box-shadow: 0 20px 56px rgba(30, 41, 70, .18), 0 4px 14px rgba(30, 41, 70, .08);\n  animation: aiPanelIn .18s ease-out;\n  transform-origin: top left;\n}\n.ai-assistant-panel::-webkit-scrollbar { width: 6px; }\n.ai-assistant-panel::-webkit-scrollbar-thumb { background: #dce1ed; border-radius: 6px; }\n@keyframes aiPanelIn {\n  from { opacity: 0; transform: scale(.97) translateY(-5px); }\n  to   { opacity: 1; transform: scale(1) translateY(0); }\n}\n\n.ai-assistant-panel-header {\n  display: flex;\n  align-items: center;\n  gap: 11px;\n  padding: 8px 9px 14px;\n  border-bottom: 1px solid #edf0f6;\n  color: #19233d;\n}\n.ai-assistant-panel-mark {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  width: 36px;\n  height: 36px;\n  flex: 0 0 36px;\n  border: 1px solid rgba(89, 101, 216, .08);\n  border-radius: 12px;\n  background: linear-gradient(135deg, #e8edff, #f3ebff);\n  color: #5965d8;\n}\n.ai-assistant-panel-mark svg { width: 20px; height: 20px; }\n.ai-assistant-panel-title {\n  font-size: 14px;\n  font-weight: 700;\n  letter-spacing: -.01em;\n}\n\n.ai-assistant-divider {\n  height: 1px;\n  background: #edf0f6;\n  margin: 7px 9px 1px;\n}\n\n.ai-assistant-group-label {\n  padding: 12px 9px 5px;\n  color: #818ba1;\n  cursor: default;\n  font-size: 10px;\n  font-weight: 700;\n  text-transform: uppercase;\n  letter-spacing: .09em;\n}\n\n.ai-assistant-item {\n  display: flex;\n  align-items: center;\n  gap: 11px;\n  width: 100%;\n  min-height: 54px;\n  padding: 7px 9px;\n  border: 1px solid transparent;\n  border-radius: 12px;\n  background: transparent;\n  cursor: pointer;\n  text-align: left;\n  font-family: inherit;\n  transition: background .16s ease, border-color .16s ease, transform .16s ease;\n}\n.ai-assistant-item:hover { background: #f7f8ff; border-color: #e7e9fb; }\n.ai-assistant-item:active { background: #eef0ff; transform: scale(.99); }\n.ai-assistant-item:focus-visible {\n  outline: 2px solid #717be0;\n  outline-offset: 1px;\n}\n\n.ai-assistant-item-icon {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  flex: 0 0 36px;\n  width: 36px;\n  height: 36px;\n  border-radius: 11px;\n  transition: transform .16s ease;\n}\n.ai-assistant-item-icon svg { width: 19px; height: 19px; }\n.ai-assistant-item:hover .ai-assistant-item-icon { transform: translateY(-1px); }\n.ai-assistant-icon-rewrite { color: #7354c8; background: #f2edff; }\n.ai-assistant-icon-translate { color: #3276bd; background: #eaf3ff; }\n.ai-assistant-icon-grammar { color: #25835b; background: #eaf7ef; }\n.ai-assistant-icon-summarize { color: #a36c1c; background: #fff4e5; }\n.ai-assistant-icon-generate { color: #6757ce; background: #f0edff; }\n.ai-assistant-icon-toc { color: #27818a; background: #e8f7f7; }\n.ai-assistant-icon-synonym { color: #b04e75; background: #fff0f5; }\n\n.ai-assistant-item-text {\n  flex: 1;\n  min-width: 0;\n}\n.ai-assistant-item-label {\n  color: #202942;\n  font-size: 13px;\n  font-weight: 600;\n  line-height: 1.35;\n}\n.ai-assistant-item-desc {\n  margin-top: 2px;\n  color: #737e93;\n  font-size: 11px;\n  line-height: 1.35;\n}\n@media (prefers-reduced-motion: reduce) {\n  .ai-assistant-panel, .ai-assistant-item, .ai-assistant-item-icon {\n    animation: none !important;\n    transition: none !important;\n  }\n}\n\n.ai-assistant-backdrop {\n  position: fixed;\n  inset: 0;\n  z-index: 99998;\n}\n\n@keyframes aiSpinnerRotate {\n  to { transform: rotate(360deg); }\n}\n\n.ai-assistant-loading {\n  position: fixed;\n  inset: 0;\n  z-index: 100001;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  background: rgba(20, 27, 48, .38);\n  backdrop-filter: blur(4px);\n  animation: aiFadeIn .15s ease-out;\n}\n.ai-assistant-loading-card {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: 14px;\n  padding: 26px 34px;\n  background: #fff;\n  border: 1px solid #e5e9f2;\n  border-radius: 16px;\n  box-shadow: 0 24px 64px rgba(25,35,61,.22);\n  animation: aiPanelIn .18s ease-out;\n}\n.ai-assistant-loading-spinner {\n  width: 44px;\n  height: 44px;\n  border-radius: 50%;\n  background: conic-gradient(from 0deg, #5965d8, #9a6ee0 55%, #e8edff 80%, transparent);\n  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px));\n          mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px));\n  animation: aiSpinnerRotate .9s linear infinite;\n}\n.ai-assistant-loading-text {\n  display: flex;\n  align-items: baseline;\n  color: #40495f;\n  font-size: 14px;\n  font-weight: 500;\n}\n.ai-assistant-loading-dots {\n  display: inline-flex;\n  margin-left: 6px;\n}\n.ai-assistant-loading-dots i {\n  width: 4px;\n  height: 4px;\n  margin-left: 3px;\n  border-radius: 50%;\n  background: #5965d8;\n  animation: aiDotPulse 1s ease-in-out infinite;\n}\n.ai-assistant-loading-dots i:nth-child(2) { animation-delay: .15s; }\n.ai-assistant-loading-dots i:nth-child(3) { animation-delay: .3s; }\n@keyframes aiDotPulse {\n  0%, 100% { opacity: .25; transform: translateY(0); }\n  50%      { opacity: 1;   transform: translateY(-2px); }\n}\n\n.ai-assistant-error {\n  position: fixed;\n  top: 16px;\n  right: 16px;\n  z-index: 100002;\n  max-width: min(420px, calc(100vw - 32px));\n  padding: 12px 16px;\n  border: 1px solid #f0b8b8;\n  border-radius: 8px;\n  background: #fff5f5;\n  box-shadow: 0 8px 24px rgba(0,0,0,.15);\n  color: #9b1c1c;\n  font-size: 13px;\n  line-height: 1.4;\n}\n.ai-assistant-notice {\n  position: fixed;\n  top: 50%;\n  left: 50%;\n  right: auto;\n  bottom: auto;\n  transform: translate(-50%, -50%);\n  z-index: 100002;\n  display: flex;\n  align-items: center;\n  gap: 10px;\n  max-width: min(440px, calc(100vw - 32px));\n  padding: 12px 16px;\n  border: 1px solid #dce3f4;\n  border-radius: 12px;\n  background: #f7f8ff;\n  box-shadow: 0 12px 32px rgba(30, 41, 70, .14);\n  color: #394765;\n  font-size: 13px;\n  line-height: 1.45;\n  animation: aiFadeIn .15s ease-out;\n}\n.ai-assistant-notice-message {\n  flex: 1;\n}\n.ai-assistant-notice-close {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  flex: 0 0 28px;\n  width: 28px;\n  height: 28px;\n  margin: -4px -8px -4px 0;\n  padding: 0;\n  border: 0;\n  border-radius: 8px;\n  background: transparent;\n  color: #69758e;\n  cursor: pointer;\n  font: inherit;\n  font-size: 20px;\n  line-height: 1;\n  transition: background .15s ease, color .15s ease;\n}\n.ai-assistant-notice-close:hover { background: #e9edfb; color: #394765; }\n.ai-assistant-notice-close:focus-visible { outline: 2px solid #717be0; outline-offset: 1px; }\n.ai-assistant-notice::before {\n  content: 'i';\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  flex: 0 0 20px;\n  width: 20px;\n  height: 20px;\n  border-radius: 50%;\n  background: #e7ebff;\n  color: #5965d8;\n  font-size: 12px;\n  font-weight: 700;\n}\n.ai-assistant-submenu {\n  position: fixed;\n  z-index: 100000;\n  box-sizing: border-box;\n  width: 320px;\n  max-width: calc(100vw - 20px);\n  max-height: min(460px, calc(100vh - 20px));\n  overflow-y: auto;\n  overscroll-behavior: contain;\n  padding: 10px;\n  background: #fff;\n  border: 1px solid #e5e9f2;\n  border-radius: 16px;\n  box-shadow: 0 20px 56px rgba(30, 41, 70, .18), 0 4px 14px rgba(30, 41, 70, .08);\n  animation: aiPanelIn .18s ease-out;\n  transform-origin: top left;\n}\n.ai-assistant-submenu-title {\n  padding: 8px 9px 12px;\n  border-bottom: 1px solid #edf0f6;\n  color: #19233d;\n  font-size: 12px;\n  font-weight: 700;\n  letter-spacing: .01em;\n}\n.ai-assistant-submenu-item {\n  display: flex;\n  align-items: center;\n  gap: 11px;\n  width: 100%;\n  min-height: 54px;\n  padding: 7px 9px;\n  border: 1px solid transparent;\n  border-radius: 12px;\n  background: transparent;\n  color: #202942;\n  cursor: pointer;\n  text-align: left;\n  font-family: inherit;\n  transition: background .16s ease, border-color .16s ease, transform .16s ease;\n}\n.ai-assistant-submenu-item:hover, .ai-assistant-submenu-item[aria-pressed=\"true\"] { background: #f7f8ff; border-color: #e7e9fb; }\n.ai-assistant-submenu-item:active { background: #eef0ff; transform: scale(.99); }\n.ai-assistant-submenu-item:focus-visible {\n  outline: 2px solid #717be0;\n  outline-offset: 1px;\n}\n.ai-assistant-submenu-copy {\n  flex: 1;\n  min-width: 0;\n}\n.ai-assistant-submenu-label {\n  display: block;\n  color: #202942;\n  font-size: 13px;\n  font-weight: 600;\n  line-height: 1.35;\n}\n.ai-assistant-submenu-description {\n  display: block;\n  margin-top: 2px;\n  color: #737e93;\n  font-size: 11px;\n  line-height: 1.35;\n}\n.ai-assistant-submenu-icon {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  flex: 0 0 36px;\n  width: 36px;\n  height: 36px;\n  border-radius: 11px;\n  background: #f1f3f8;\n  color: #5965d8;\n  line-height: 1;\n  transition: transform .16s ease;\n}\n.ai-assistant-submenu-icon svg { width: 19px; height: 19px; }\n.ai-assistant-submenu-item:hover .ai-assistant-submenu-icon { transform: translateY(-1px); }\n.ai-assistant-style-formal { color: #4e6497; background: #edf2ff; }\n.ai-assistant-style-casual { color: #25835b; background: #eaf7ef; }\n.ai-assistant-style-concise { color: #a36c1c; background: #fff4e5; }\n.ai-assistant-style-expanded { color: #7354c8; background: #f2edff; }\n.ai-assistant-format-paragraph { color: #3276bd; background: #eaf3ff; }\n.ai-assistant-format-bullets { color: #27818a; background: #e8f7f7; }\n@media (prefers-reduced-motion: reduce) {\n  .ai-assistant-submenu, .ai-assistant-submenu-item, .ai-assistant-submenu-icon {\n    animation: none !important;\n    transition: none !important;\n  }\n}\n\n.ai-assistant-modal-overlay {\n  position: fixed;\n  inset: 0;\n  z-index: 99998;\n  background: rgba(20, 27, 48, .38);\n  backdrop-filter: blur(3px);\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  animation: aiFadeIn .15s ease-out;\n}\n@keyframes aiFadeIn {\n  from { opacity: 0; }\n  to { opacity: 1; }\n}\n\n.ai-assistant-modal {\n  background: #fff;\n  border: 1px solid #e5e9f2;\n  border-radius: 16px;\n  padding: 26px;\n  width: 620px;\n  max-width: 94vw;\n  max-height: 88vh;\n  overflow-y: auto;\n  box-shadow: 0 24px 64px rgba(25, 35, 61, .22);\n  animation: aiPanelIn .15s ease-out;\n  box-sizing: border-box;\n}\n@media (max-width: 680px) {\n  .ai-assistant-modal {\n    width: 96vw;\n    padding: 16px;\n    border-radius: 8px;\n  }\n}\n.ai-assistant-modal h3 {\n  margin: 0 0 4px;\n  font-size: 16px;\n  font-weight: 600;\n  color: #1a1a1a;\n}\n.ai-assistant-modal p {\n  margin: 0 0 16px;\n  font-size: 13px;\n  color: #888;\n}\n.ai-assistant-review-original {\n  background: #f7f8fa;\n  border-radius: 6px;\n  padding: 10px 12px;\n  font-size: 13px;\n  color: #888;\n  margin-bottom: 12px;\n  max-height: 160px;\n  overflow-y: auto;\n  white-space: pre-wrap;\n  word-break: break-word;\n}\n.ai-assistant-modal textarea {\n  width: 100%;\n  min-height: 200px;\n  padding: 10px 12px;\n  border: 1px solid #d9d9d9;\n  border-radius: 8px;\n  font-size: 14px;\n  font-family: inherit;\n  resize: vertical;\n  box-sizing: border-box;\n  transition: border-color .15s;\n  outline: none;\n}\n.ai-assistant-modal textarea:focus {\n  border-color: #06c;\n  box-shadow: 0 0 0 2px rgba(0,102,204,.12);\n}\n.ai-assistant-modal-actions {\n  display: flex;\n  gap: 8px;\n  justify-content: flex-end;\n  margin-top: 14px;\n}\n.ai-assistant-btn-secondary {\n  padding: 7px 18px;\n  border: 1px solid #d9d9d9;\n  border-radius: 8px;\n  background: #fff;\n  cursor: pointer;\n  font-size: 13px;\n  font-family: inherit;\n  color: #555;\n  transition: background .15s, border-color .15s;\n}\n.ai-assistant-btn-secondary:hover {\n  background: #f5f5f5;\n  border-color: #bbb;\n}\n.ai-assistant-modal-actions button:disabled {\n  opacity: .55;\n  cursor: default;\n}\n.ai-assistant-btn-regenerate {\n  margin-right: auto;\n}\n.ai-assistant-btn-regenerate.ai-assistant-btn-loading::before {\n  content: '';\n  display: inline-block;\n  width: 12px;\n  height: 12px;\n  margin-right: 6px;\n  border: 2px solid #cbd2e0;\n  border-top-color: #5965d8;\n  border-radius: 50%;\n  vertical-align: -2px;\n  animation: aiSpinnerRotate .7s linear infinite;\n}\n.ai-assistant-btn-primary {\n  padding: 7px 18px;\n  border: none;\n  border-radius: 8px;\n  background: #06c;\n  color: #fff;\n  cursor: pointer;\n  font-size: 13px;\n  font-family: inherit;\n  font-weight: 500;\n  transition: background .15s;\n}\n.ai-assistant-btn-primary:hover { background: #0052a3; }\n  ".trim();
+  document.head.appendChild(style);
+}
+export class AiAssistantModule {
+  constructor(quill, options) {
+    this.quill = void 0;
+    this.aiManager = void 0;
+    this.featureInstances = [];
+    this.button = null;
+    this.panel = null;
+    this.backdrop = null;
+    this.loadingEl = null;
+    this.errorEl = null;
+    this.panelSelection = null;
+    this.panelAnchorRect = void 0;
+    this.panelKeydownHandler = null;
+    this.panelPreviousFocus = null;
+    this.panelTrigger = null;
+    this.quill = quill;
+    this.aiManager = options.aiManager;
+    injectStyles();
+    this.initializeFeatures(options);
+    this.addToolbarButton();
+    const keyboardShortcut = options.keyboardShortcut !== undefined ? options.keyboardShortcut : {
+      key: 'Space',
+      ctrlKey: true,
+      shiftKey: false,
+      altKey: false,
+      metaKey: false
+    };
+    this.bindKeyboardShortcut(keyboardShortcut);
+    this.aiManager.onLoadingChange(loading => {
+      if (loading) {
+        this.showLoading();
+      } else {
+        this.hideLoading();
+      }
+    });
+    this.aiManager.onDownloadProgress(progress => {
+      const el = this.loadingEl;
+      if (!el) return;
+      const textEl = el.querySelector('.ai-assistant-loading-label');
+      if (textEl) {
+        textEl.textContent = progress < 100 ? this.aiManager.getLabels().loadingModel + " " + progress + "%" : this.aiManager.getLabels().preparing;
+      }
+    });
+    this.aiManager.onError(error => this.showError(error));
+  }
+  initializeFeatures(options) {
+    const features = options.features || {};
+    const featureMap = {
+      rewrite: RewriteFeature,
+      translate: TranslateFeature,
+      grammar: GrammarFeature,
+      generate: GenerateFeature,
+      summarize: SummarizeFeature,
+      toc: TocFeature,
+      synonym: SynonymFeature
+    };
+    Object.entries(features).forEach(_ref => {
+      let key = _ref[0],
+        config = _ref[1];
+      const FeatureClass = featureMap[key];
+      if (FeatureClass) {
+        const managerConfig = this.aiManager.getFeatureConfig(key);
+        const featureConfig = typeof config === 'object' && config !== null ? _extends({}, managerConfig, config) : managerConfig;
+        this.featureInstances.push(new FeatureClass(this.quill, this.aiManager, featureConfig));
+      }
+    });
+  }
+  addToolbarButton() {
+    if (this.featureInstances.length === 0) return;
+    const toolbar = this.quill.getModule('toolbar');
+    if (!toolbar || !toolbar.container) return;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'ai-assistant-wrapper';
+    this.button = document.createElement('button');
+    this.button.className = 'ql-ai-assistant ai-assistant-btn';
+    this.button.innerHTML = "\n      <svg viewBox=\"0 0 18 18\">\n        <path d=\"M9 2 L11 7 L16 7 L12 10.5 L13.5 16 L9 12.5 L4.5 16 L6 10.5 L2 7 L7 7 Z\"\n              class=\"ql-fill\" fill=\"currentColor\"/>\n      </svg>\n    ";
+    this.button.type = 'button';
+    this.button.setAttribute('aria-label', 'AI Assistant');
+    this.button.title = 'AI Assistant';
+    this.button.setAttribute('aria-controls', PANEL_ID);
+    this.button.setAttribute('aria-haspopup', 'menu');
+    this.button.setAttribute('aria-expanded', 'false');
+    this.button.addEventListener('click', e => {
+      e.stopPropagation();
+      e.preventDefault();
+      this.togglePanel();
+    });
+    wrapper.appendChild(this.button);
+    const lastButton = toolbar.container.querySelector('.ql-ai-assistant');
+    if (lastButton) {
+      toolbar.container.insertBefore(wrapper, lastButton);
+    } else {
+      toolbar.container.appendChild(wrapper);
+    }
+  }
+  bindKeyboardShortcut(shortcut) {
+    if (!shortcut) return;
+    const key = shortcut.key === 'Space' ? ' ' : shortcut.key;
+    const expectCtrl = !!shortcut.ctrlKey;
+    const expectShift = !!shortcut.shiftKey;
+    const expectAlt = !!shortcut.altKey;
+    const expectMeta = !!shortcut.metaKey;
+    this.quill.root.addEventListener('keydown', event => {
+      if (event.key !== key) return;
+      if (event.ctrlKey !== expectCtrl) return;
+      if (event.shiftKey !== expectShift) return;
+      if (event.altKey !== expectAlt) return;
+      if (event.metaKey !== expectMeta) return;
+      event.preventDefault();
+      event.stopPropagation();
+      this.openPanel(this.getSelectionAnchorRect());
+    });
+  }
+  getSelectionAnchorRect() {
+    const selection = this.quill.getSelection();
+    if (!selection) return undefined;
+    const bounds = this.quill.getBounds(selection.index, selection.length);
+    if (!bounds) return undefined;
+    const containerRect = this.quill.container.getBoundingClientRect();
+    return {
+      left: containerRect.left + bounds.left,
+      top: containerRect.top + bounds.top,
+      bottom: containerRect.top + bounds.top + bounds.height,
+      right: containerRect.left + bounds.left + bounds.width,
+      width: bounds.width,
+      height: bounds.height,
+      x: containerRect.left + bounds.left,
+      y: containerRect.top + bounds.top,
+      toJSON: () => ({})
+    };
+  }
+  togglePanel() {
+    if (this.panel) {
+      this.closePanel();
+      return;
+    }
+    this.openPanel();
+  }
+  openPanel(anchorRect, trigger) {
+    var _this$panelTrigger;
+    dismissAiSubmenu();
+    if (this.panel) {
+      this.closePanel();
+      return;
+    }
+    this.panelAnchorRect = anchorRect;
+    this.panelTrigger = trigger || this.button;
+    (_this$panelTrigger = this.panelTrigger) == null || _this$panelTrigger.setAttribute('aria-expanded', 'true');
+    this.showPanel();
+  }
+  showPanel() {
+    var _this$panel$querySele;
+    this.panelSelection = this.quill.getSelection() || null;
+    this.panelPreviousFocus = document.activeElement instanceof HTMLElement && document.activeElement !== document.body ? document.activeElement : null;
+    this.backdrop = document.createElement('div');
+    this.backdrop.className = 'ai-assistant-backdrop';
+    this.backdrop.addEventListener('click', () => this.closePanel());
+    this.backdrop.addEventListener('contextmenu', e => e.preventDefault());
+    document.body.appendChild(this.backdrop);
+    this.panel = document.createElement('div');
+    this.panel.className = 'ai-assistant-panel';
+    this.panel.id = PANEL_ID;
+    this.panel.setAttribute('role', 'menu');
+    this.panelKeydownHandler = event => {
+      var _this$panel;
+      if (event.key === 'Escape') {
+        event.stopPropagation();
+        this.closePanel();
+        return;
+      }
+      if (!((_this$panel = this.panel) != null && _this$panel.contains(event.target))) return;
+      if (event.key === 'Tab') {
+        this.closePanel();
+        return;
+      }
+      const items = Array.from(this.panel.querySelectorAll('[role="menuitem"]'));
+      const currentIndex = items.indexOf(document.activeElement);
+      let nextIndex = null;
+      if (event.key === 'ArrowDown') nextIndex = (currentIndex + 1) % items.length;
+      if (event.key === 'ArrowUp') nextIndex = (currentIndex - 1 + items.length) % items.length;
+      if (event.key === 'Home') nextIndex = 0;
+      if (event.key === 'End') nextIndex = items.length - 1;
+      if (nextIndex !== null && items[nextIndex]) {
+        event.preventDefault();
+        items[nextIndex].focus();
+      }
+    };
+    document.addEventListener('keydown', this.panelKeydownHandler);
+    const labels = this.aiManager.getLabels();
+    const header = document.createElement('div');
+    header.className = 'ai-assistant-panel-header';
+    this.panel.setAttribute('aria-label', labels.panelTitle || 'AI Assistant');
+    const mark = document.createElement('span');
+    mark.className = 'ai-assistant-panel-mark';
+    mark.setAttribute('aria-hidden', 'true');
+    mark.innerHTML = featureIcon('<path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8Z"/><path d="m19 15 .8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8Z"/>');
+    const title = document.createElement('span');
+    title.className = 'ai-assistant-panel-title';
+    title.textContent = labels.panelTitle || 'AI Assistant';
+    header.appendChild(mark);
+    header.appendChild(title);
+    this.panel.appendChild(header);
+    const grouped = this.groupFeatures();
+    grouped.forEach((group, gi) => {
+      if (gi > 0) {
+        const divider = document.createElement('div');
+        divider.className = 'ai-assistant-divider';
+        this.panel.appendChild(divider);
+      }
+      const groupLabel = document.createElement('div');
+      groupLabel.className = 'ai-assistant-group-label';
+      groupLabel.textContent = group.label;
+      this.panel.appendChild(groupLabel);
+      group.items.forEach(_ref2 => {
+        let feature = _ref2.feature,
+          instance = _ref2.instance;
+        const item = document.createElement('button');
+        item.type = 'button';
+        item.className = 'ai-assistant-item';
+        const icon = document.createElement('span');
+        icon.className = "ai-assistant-item-icon ai-assistant-icon-" + feature.name;
+        icon.innerHTML = FEATURE_ICONS[feature.name] || FEATURE_ICONS.generate;
+        const text = document.createElement('span');
+        text.className = 'ai-assistant-item-text';
+        const label = document.createElement('div');
+        label.className = 'ai-assistant-item-label';
+        label.textContent = instance.label;
+        const labels = this.aiManager.getLabels();
+        const descMap = {
+          rewrite: labels.descRewrite,
+          translate: labels.descTranslate,
+          grammar: labels.descGrammar,
+          generate: labels.descGenerate,
+          summarize: labels.descSummarize,
+          toc: labels.descToc,
+          synonym: labels.descSynonym
+        };
+        const desc = document.createElement('div');
+        desc.className = 'ai-assistant-item-desc';
+        desc.textContent = descMap[feature.name] || '';
+        item.setAttribute('role', 'menuitem');
+        item.tabIndex = -1;
+        text.appendChild(label);
+        text.appendChild(desc);
+        item.appendChild(icon);
+        item.appendChild(text);
+        item.addEventListener('mousedown', e => {
+          e.preventDefault();
+        });
+        item.addEventListener('click', () => {
+          var _this$panelTrigger2, _this$button;
+          const selection = this.panelSelection;
+          const btnRect = ((_this$panelTrigger2 = this.panelTrigger) == null ? void 0 : _this$panelTrigger2.getBoundingClientRect()) || ((_this$button = this.button) == null ? void 0 : _this$button.getBoundingClientRect());
+          this.closePanel();
+          if (selection) {
+            this.quill.setSelection(selection.index, selection.length, 'api');
+          }
+          instance.trigger(btnRect);
+        });
+        this.panel.appendChild(item);
+      });
+    });
+    document.body.appendChild(this.panel);
+    this.positionPanel();
+    (_this$panel$querySele = this.panel.querySelector('[role="menuitem"]')) == null || _this$panel$querySele.focus();
+  }
+  groupFeatures() {
+    const groups = {
+      edit: [],
+      create: [],
+      analyze: []
+    };
+    this.featureInstances.forEach(instance => {
+      const group = FEATURE_GROUPS[instance.name] || 'analyze';
+      if (groups[group]) {
+        groups[group].push({
+          feature: instance,
+          instance
+        });
+      }
+    });
+    const labels = this.aiManager.getLabels();
+    const result = [];
+    Object.entries(groups).forEach(_ref3 => {
+      let key = _ref3[0],
+        items = _ref3[1];
+      if (items.length > 0) {
+        const labelKey = GROUP_LABEL_KEYS[key];
+        result.push({
+          label: (labelKey ? labels[labelKey] : '') || key,
+          items
+        });
+      }
+    });
+    return result;
+  }
+  positionPanel() {
+    var _this$button2;
+    if (!this.panel) return;
+    const btnRect = this.panelAnchorRect || ((_this$button2 = this.button) == null ? void 0 : _this$button2.getBoundingClientRect());
+    if (!btnRect) return;
+    const panelWidth = this.panel.offsetWidth;
+    const panelHeight = this.panel.offsetHeight;
+    let left = btnRect.left;
+    let top = btnRect.bottom + 4;
+    if (left + panelWidth > window.innerWidth - 8) {
+      left = window.innerWidth - panelWidth - 8;
+    }
+    if (left < 8) {
+      left = 8;
+    }
+    if (top + panelHeight > window.innerHeight - 8) {
+      top = btnRect.top - panelHeight - 4;
+    }
+    if (top < 8) {
+      top = 8;
+    }
+    this.panel.style.left = left + "px";
+    this.panel.style.top = top + "px";
+  }
+  showLoading() {
+    if (this.loadingEl) return;
+    const el = document.createElement('div');
+    el.className = 'ai-assistant-loading';
+    el.setAttribute('role', 'status');
+    const card = document.createElement('div');
+    card.className = 'ai-assistant-loading-card';
+    const spinner = document.createElement('div');
+    spinner.className = 'ai-assistant-loading-spinner';
+    spinner.setAttribute('aria-hidden', 'true');
+    const text = document.createElement('div');
+    text.className = 'ai-assistant-loading-text';
+    const label = document.createElement('span');
+    label.className = 'ai-assistant-loading-label';
+    label.textContent = this.aiManager.getLabels().generating || '';
+    text.appendChild(label);
+    const dots = document.createElement('span');
+    dots.className = 'ai-assistant-loading-dots';
+    dots.setAttribute('aria-hidden', 'true');
+    for (let i = 0; i < 3; i++) {
+      dots.appendChild(document.createElement('i'));
+    }
+    text.appendChild(dots);
+    card.appendChild(spinner);
+    card.appendChild(text);
+    el.appendChild(card);
+    document.body.appendChild(el);
+    this.loadingEl = el;
+  }
+  hideLoading() {
+    if (this.loadingEl) {
+      this.loadingEl.remove();
+      this.loadingEl = null;
+    }
+  }
+  showError(error) {
+    var _this$errorEl;
+    (_this$errorEl = this.errorEl) == null || _this$errorEl.remove();
+    const errorEl = document.createElement('div');
+    errorEl.className = 'ai-assistant-error';
+    errorEl.setAttribute('role', 'alert');
+    errorEl.textContent = error.message;
+    document.body.appendChild(errorEl);
+    this.errorEl = errorEl;
+    window.setTimeout(() => {
+      if (this.errorEl === errorEl) {
+        errorEl.remove();
+        this.errorEl = null;
+      }
+    }, 6000);
+  }
+  closePanel() {
+    var _this$panelTrigger3;
+    const previousFocus = this.panelPreviousFocus;
+    this.panelSelection = null;
+    this.panelAnchorRect = undefined;
+    if (this.panelKeydownHandler) {
+      document.removeEventListener('keydown', this.panelKeydownHandler);
+      this.panelKeydownHandler = null;
+    }
+    if (this.panel) {
+      this.panel.remove();
+      this.panel = null;
+    }
+    if (this.backdrop) {
+      this.backdrop.remove();
+      this.backdrop = null;
+    }
+    (_this$panelTrigger3 = this.panelTrigger) == null || _this$panelTrigger3.setAttribute('aria-expanded', 'false');
+    this.panelTrigger = null;
+    this.panelPreviousFocus = null;
+    if (previousFocus != null && previousFocus.isConnected) previousFocus.focus();
+  }
+}

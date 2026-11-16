@@ -3,8 +3,12 @@
 namespace Ehyiah\QuillJsBundle\DependencyInjection;
 
 use Ehyiah\QuillJsBundle\Config\QuillConfigBuilder;
+use Ehyiah\QuillJsBundle\Controller\AiAssistantController;
+use Ehyiah\QuillJsBundle\DTO\Modules\Config\AiAssistantConfig;
 use Ehyiah\QuillJsBundle\Form\QuillAdminField;
 use Ehyiah\QuillJsBundle\Form\QuillType;
+use Ehyiah\QuillJsBundle\Service\AiAssistantPromptBuilder;
+use Ehyiah\QuillJsBundle\Service\SymfonyHttpClientAiAssistantClient;
 use Ehyiah\QuillJsBundle\Twig\Components\QuillContent;
 use Ehyiah\QuillJsBundle\Twig\QuillContentExtension;
 use Symfony\Component\AssetMapper\AssetMapperInterface;
@@ -82,6 +86,49 @@ class QuillJsExtension extends Extension implements PrependExtensionInterface
                 ->setPublic(false)
             ;
         }
+
+        // Register the AI Assistant config DTO from environment variables
+        $container->setDefinition(AiAssistantConfig::class, (new Definition(AiAssistantConfig::class))
+            ->setArgument('$apiKey', '%env(default::QUILL_AI_API_KEY)%')
+            ->setArgument('$apiUrl', '%env(default::QUILL_AI_API_URL)%')
+            ->setArgument('$model', '%env(default::QUILL_AI_MODEL)%')
+            ->setArgument('$maxTokens', '%env(int:default::QUILL_AI_MAX_TOKENS)%')
+            ->setArgument('$temperature', '%env(float:default::QUILL_AI_TEMPERATURE)%')
+            ->setArgument('$timeout', '%env(int:default::QUILL_AI_TIMEOUT)%')
+            ->setArgument('$maxTextChars', '%env(int:default::QUILL_AI_MAX_TEXT_CHARS)%')
+        );
+
+        // Register the prompt builder (pure PHP, always available).
+        $container->setDefinition(AiAssistantPromptBuilder::class, (new Definition(AiAssistantPromptBuilder::class))
+            ->setPublic(false)
+        );
+
+        // Register the optional Symfony HttpClient integration when available.
+        $clientReference = null;
+        if (class_exists('Symfony\Component\HttpClient\HttpClient')) {
+            $httpClient = (new Definition('Symfony\Contracts\HttpClient\HttpClientInterface'))
+                ->setFactory(['Symfony\Component\HttpClient\HttpClient', 'create'])
+            ;
+
+            $container->setDefinition(SymfonyHttpClientAiAssistantClient::class, (new Definition(SymfonyHttpClientAiAssistantClient::class))
+                ->setArgument('$httpClient', $httpClient)
+                ->setArgument('$logger', new Reference('logger', ContainerBuilder::IGNORE_ON_INVALID_REFERENCE))
+                ->setPublic(false)
+            );
+            $clientReference = new Reference(SymfonyHttpClientAiAssistantClient::class);
+        }
+
+        // Register the AI Assistant controller even without HttpClient so it can
+        // return a clear installation error when the endpoint is used.
+        $controllerDefinition = (new Definition(AiAssistantController::class))
+            ->setArgument('$config', new Reference(AiAssistantConfig::class))
+            ->setArgument('$promptBuilder', new Reference(AiAssistantPromptBuilder::class))
+            ->addTag('controller.service_arguments')
+        ;
+        if (null !== $clientReference) {
+            $controllerDefinition->setArgument('$client', $clientReference);
+        }
+        $container->setDefinition(AiAssistantController::class, $controllerDefinition);
     }
 
     private function isAssetMapperAvailable(ContainerBuilder $container): bool

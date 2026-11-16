@@ -48,7 +48,11 @@
         "symfony/asset-mapper": "^6.3|^7.0|^8.0",
         "easycorp/easyadmin-bundle": "^4.7|^5.0",
         "friendsoftwig/twigcs": "^6.4",
-        "dg/bypass-finals": "^1.6"
+        "dg/bypass-finals": "^1.6",
+        "symfony/http-client": "^6.4|^7.0|^8.0"
+    },
+    "suggest": {
+        "symfony/http-client": "Required to use the AI Assistant API provider"
     },
     "autoload": {
         "psr-4": {

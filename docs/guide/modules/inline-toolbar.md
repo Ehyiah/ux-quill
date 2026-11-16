@@ -2,6 +2,8 @@
 
 This module provides a floating selection toolbar that appears automatically when you select text, offering quick access to common formatting (Bold, Italic, Underline, and Strikethrough). It is designed to keep the interface clean by hiding formatting options until they are needed.
 
+When the [AiAssistantModule](/guide/modules/ai-assistant) is also enabled, the AI Assistant star button is automatically added to the inline toolbar so users can open the AI menu directly from a text selection.
+
 ## Installation
 
 The module is included in the bundle and registered automatically in the JavaScript controller. To use it, you only need to add it to your PHP form configuration.
@@ -29,13 +31,14 @@ new InlineToolbarModule(
 );
 ```
 
-Available button names: `bold`, `italic`, `underline`, `strike`.
+Available button names: `bold`, `italic`, `underline`, `strike`, `aiAssistant`.
 
 ## Options
 
 | Option | Type | Description | Default |
 | :--- | :--- | :--- | :--- |
 | **buttons** | `string[]` | Array of formatting buttons to display. | `['bold', 'italic', 'underline', 'strike']` |
+| **autoAddAiAssistantButton** | `bool` | Automatically add the AI Assistant button when the `aiAssistant` module is also enabled. | `true` |
 
 ## Behavior
 
@@ -43,6 +46,8 @@ Available button names: `bold`, `italic`, `underline`, `strike`.
 - It displays icons for each configured formatting option.
 - The icons reflect the current state of the selection (e.g., the Bold icon is highlighted if the text is already bold).
 - The toolbar disappears when the selection is cleared or when you click outside it.
+- If [AiAssistantModule](/guide/modules/ai-assistant) is enabled and `autoAddAiAssistantButton` is `true` (default), a star icon is appended to the toolbar. Clicking it opens the AI Assistant menu below the inline toolbar button.
+- Set `autoAddAiAssistantButton` to `false` to keep full control over the `buttons` list without automatic injection.
 
 ## Try it live
 

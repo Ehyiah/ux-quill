@@ -104,6 +104,8 @@
     },
     "peerDependencies": {
         "@hotwired/stimulus": "^3.0.0",
+        "@huggingface/transformers": "^4.2.0",
+        "@wllama/wllama": "^3.5.1",
         "axios": "^1.4.0",
         "eventemitter3": "^5.0.1",
         "highlight.js": "^11.9.0",
@@ -116,6 +118,14 @@
         "quill-table-better": "^1.2.1",
         "quill-toggle-fullscreen-button": "^0.1.4",
         "quill2-emoji": "^0.1.2"
+    },
+    "peerDependenciesMeta": {
+        "@huggingface/transformers": {
+            "optional": true
+        },
+        "@wllama/wllama": {
+            "optional": true
+        }
     },
     "dependencies": {
         "@hotwired/stimulus": "^3.0.0",
@@ -168,32 +178,35 @@
             "<rootDir>/tests/setup/jest.setup.ts"
         ],
         "moduleNameMapper": {
+            "^(\\.{1,2}/.*)\\.js$": "$1",
             "\\.(css|less)$": "<rootDir>/tests/setup/__mocks__/styleMock.js",
             "^../src/blots/image$": "<rootDir>/tests/setup/__mocks__/image.ts",
             "^quill$": "<rootDir>/tests/setup/__mocks__/quill.ts",
-            "^leaflet$": "<rootDir>/tests/setup/__mocks__/leaflet.ts"
-        },
-        "testMatch": [
-            "<rootDir>/tests/**/*.test.ts"
-        ],
-        "moduleDirectories": [
-            "node_modules",
-            "<rootDir>/src"
-        ],
-        "transform": {
-            "^.+\\.tsx?$": "ts-jest"
-        },
-        "transformIgnorePatterns": [
-            "/node_modules/(?!quill|quill2-emoji)"
-        ],
-        "rootDir": ".",
-        "moduleFileExtensions": [
-            "ts",
-            "js",
-            "json"
-        ],
-        "modulePaths": [
-            "<rootDir>"
-        ]
-    }
+            "^leaflet$": "<rootDir>/tests/setup/__mocks__/leaflet.ts",
+            "^@huggingface/transformers$": "<rootDir>/tests/setup/__mocks__/transformers.js",
+            "^@wllama/wllama$": "<rootDir>/tests/setup/__mocks__/wllama.js"
+        }
+    },
+    "testMatch": [
+        "<rootDir>/tests/**/*.test.ts"
+    ],
+    "moduleDirectories": [
+        "node_modules",
+        "<rootDir>/src"
+    ],
+    "transform": {
+        "^.+\\.tsx?$": "ts-jest"
+    },
+    "transformIgnorePatterns": [
+        "/node_modules/(?!quill|quill2-emoji|@wllama/wllama)"
+    ],
+    "rootDir": ".",
+    "moduleFileExtensions": [
+        "ts",
+        "js",
+        "json"
+    ],
+    "modulePaths": [
+        "<rootDir>"
+    ]
 }

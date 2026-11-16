@@ -16,6 +16,29 @@ export type ExtraOptions = {
     };
 }
 
+export type AiKeyboardShortcut = {
+    key: string;
+    ctrlKey?: boolean;
+    shiftKey?: boolean;
+    altKey?: boolean;
+    metaKey?: boolean;
+};
+
+export type AiOptions = {
+    provider?: string;
+    features?: Partial<Record<string, boolean | Record<string, unknown>>>;
+    model?: string;
+    debug?: boolean;
+    keyboardShortcut?: AiKeyboardShortcut | false;
+    translate?: {
+        target_languages?: string[];
+        default_language?: string;
+    };
+    toc?: {
+        depth?: number;
+    };
+}
+
 export type UploadOptions = {
     type: 'form' | 'json';
     upload_endpoint: null | string;

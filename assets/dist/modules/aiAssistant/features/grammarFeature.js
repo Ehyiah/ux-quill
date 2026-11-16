@@ -1,0 +1,84 @@
+import { showReviewModal } from "../utils/reviewModal.js";
+import { showAiNotice } from "../utils/notice.js";
+export class GrammarFeature {
+  constructor(quill, aiManager) {
+    this.name = 'grammar';
+    this.label = void 0;
+    this.requiresSelection = false;
+    this.quill = void 0;
+    this.aiManager = void 0;
+    this.quill = quill;
+    this.aiManager = aiManager;
+    this.label = aiManager.getLabels().featureGrammar;
+  }
+  async trigger() {
+    const quill = this.quill;
+    const selection = quill.getSelection();
+    const useSelection = selection && selection.length > 0;
+    let text;
+    let replaceIndex;
+    let replaceLength;
+    if (useSelection) {
+      const getChar = i => {
+        if (i < 0 || i >= quill.getLength()) return '';
+        return quill.getText(i, 1) || '';
+      };
+      const _await$import = await import("../utils/wordSelection.js"),
+        expandWordSelection = _await$import.expandWordSelection;
+      const wordRange = expandWordSelection(getChar, selection.index, selection.length);
+      text = quill.getText(wordRange.index, wordRange.length).trim();
+      replaceIndex = wordRange.index;
+      replaceLength = wordRange.length;
+    } else {
+      text = quill.getText().trim();
+      replaceIndex = 0;
+      replaceLength = quill.getLength() - 1;
+    }
+    if (!text) {
+      const labels = this.aiManager.getLabels();
+      showAiNotice(labels.grammarNoContent, labels.btnClose, quill.scroll.domNode);
+      return;
+    }
+    const provider = this.aiManager.getProvider();
+    const labels = this.aiManager.getLabels();
+    try {
+      const buildCorrection = async () => {
+        const suggestions = await provider.correct(text);
+        if (suggestions.length === 0) {
+          return text;
+        }
+        let correctedText = text;
+        for (const s of suggestions) {
+          correctedText = correctedText.substring(0, s.offset) + s.suggestion + correctedText.substring(s.offset + s.length);
+        }
+        return correctedText;
+      };
+      this.aiManager.setLoading(true);
+      const correctedText = await buildCorrection();
+      this.aiManager.setLoading(false);
+      if (correctedText === text) {
+        showAiNotice(labels.grammarNoIssues, labels.btnClose, quill.scroll.domNode);
+        return;
+      }
+      const edited = await showReviewModal({
+        title: labels.featureGrammar,
+        description: labels.grammarDescription,
+        originalText: text,
+        generatedText: correctedText,
+        onRegenerate: buildCorrection
+      }, labels);
+      if (edited !== null) {
+        quill.updateContents([{
+          retain: replaceIndex
+        }, {
+          delete: replaceLength
+        }, {
+          insert: edited
+        }]);
+      }
+    } catch (error) {
+      this.aiManager.setLoading(false);
+      this.aiManager.reportError(error);
+    }
+  }
+}

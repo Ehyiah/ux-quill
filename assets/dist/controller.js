@@ -3,6 +3,8 @@ import Quill from 'quill';
 import mergeModules from "./modules.js";
 import { ToolbarCustomizer } from "./ui/toolbarCustomizer.js";
 import { handleUploadResponse, uploadStrategies } from "./upload-utils.js";
+import { AiManager } from "./modules/aiAssistant/aiManager.js";
+import { normalizeAiAssistantOptions } from "./modules/aiAssistant/normalizeOptions.js";
 import "./register-modules.js";
 import QuillTableBetter from 'quill-table-better';
 import { Mention } from "./modules/mention.js";
@@ -30,6 +32,7 @@ export default class _Class extends Controller {
     this.setupQuillStyles(options);
     this.setupUploadHandler(options);
     this.setupEditorHeight();
+    this.setupAiAssistant(options);
     this.dispatchEvent('options', options);
     const unprocessedIcons = this.processIconReplacementFromQuillCore();
     this.initializeQuill(options, unprocessedIcons);
@@ -105,6 +108,39 @@ export default class _Class extends Controller {
     const height = this.extraOptionsValue.height;
     if (height !== null) {
       this.editorContainerTarget.style.height = height;
+    }
+  }
+  setupAiAssistant(options) {
+    const raw = options.modules.aiAssistant;
+    if (!raw) {
+      return;
+    }
+    const normalized = normalizeAiAssistantOptions(raw);
+    if (!normalized) {
+      delete options.modules.aiAssistant;
+      return;
+    }
+    const aiManager = new AiManager(normalized.aiOptions);
+    options.modules.aiAssistant = {
+      aiManager,
+      features: normalized.aiOptions.features,
+      keyboardShortcut: normalized.keyboardShortcut
+    };
+    this.addAiAssistantToInlineToolbar(options);
+  }
+  addAiAssistantToInlineToolbar(options) {
+    var _inlineToolbar$autoAd;
+    const inlineToolbar = options.modules.inlineToolbar;
+    if (!inlineToolbar || typeof inlineToolbar !== 'object') {
+      return;
+    }
+    const autoAdd = (_inlineToolbar$autoAd = inlineToolbar.autoAddAiAssistantButton) != null ? _inlineToolbar$autoAd : true;
+    if (!autoAdd) {
+      return;
+    }
+    const buttons = Array.isArray(inlineToolbar.buttons) ? inlineToolbar.buttons : ['bold', 'italic', 'underline', 'strike'];
+    if (!buttons.includes('aiAssistant')) {
+      inlineToolbar.buttons = [...buttons, 'aiAssistant'];
     }
   }
   initializeQuill(options, unprocessedIcons) {
