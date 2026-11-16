@@ -60,11 +60,14 @@ export default defineConfig({
               { text: 'Headers', link: '/guide/fields/headers' },
               { text: 'Image', link: '/guide/fields/image' },
               { text: 'Image Gallery', link: '/guide/fields/image-gallery' },
+              { text: 'Video', link: '/guide/fields/video' },
               { text: 'Link', link: '/guide/fields/link' },
+              { text: 'Map', link: '/guide/fields/map' },
               { text: 'Lists & Alignment', link: '/guide/fields/lists-alignment' },
               { text: 'Media', link: '/guide/fields/media' },
               { text: 'Page Break', link: '/guide/fields/pagebreak' },
               { text: 'Table', link: '/guide/fields/table' },
+              { text: 'Templates', link: '/guide/fields/templates' },
               { text: 'Text Formatting', link: '/guide/fields/text-formatting' },
             ]
           },
@@ -105,10 +108,13 @@ export default defineConfig({
                   { text: 'Image Selection', link: '/guide/modules/image-selection' },
                   { text: 'Image Gallery', link: '/guide/modules/image-gallery' },
                   { text: 'Link Attributes', link: '/guide/modules/link-attributes' },
+                  { text: 'Map', link: '/guide/modules/map' },
                   { text: 'PageBreak', link: '/guide/modules/pagebreak' },
                   { text: 'Resize', link: '/guide/modules/resize' },
                   { text: 'Syntax (Highlight)', link: '/guide/modules/syntax' },
                   { text: 'Table', link: '/guide/modules/table' },
+                  { text: 'Video Selection', link: '/guide/modules/video-selection' },
+                  { text: 'TemplatesModule', link: '/guide/modules/templates' },
                 ]
               },
             ]

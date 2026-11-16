@@ -49,7 +49,9 @@ export default class SlashModule {
     const range = this.quill.getSelection();
     if (!range) return;
     this.lastRange = range;
-    const [line, offset] = this.quill.getLine(range.index);
+    const _this$quill$getLine = this.quill.getLine(range.index),
+      line = _this$quill$getLine[0],
+      offset = _this$quill$getLine[1];
     const text = line.domNode.textContent || '';
     const beforeCursor = text.substring(0, offset);
     if (beforeCursor.endsWith('/')) {
@@ -135,7 +137,9 @@ export default class SlashModule {
         const range = this.lastRange || this.quill.getSelection();
         if (range) {
           const index = range.index;
-          const [line, offset] = this.quill.getLine(index);
+          const _this$quill$getLine2 = this.quill.getLine(index),
+            line = _this$quill$getLine2[0],
+            offset = _this$quill$getLine2[1];
           this.quill.deleteText(index - 1, 1, 'user');
           if (offset > 1) {
             this.quill.insertText(index - 1, '\n', 'user');

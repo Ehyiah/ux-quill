@@ -186,7 +186,8 @@ export default class NodeMover {
             index: range.index,
             length: range.length
           };
-          const [line] = this.quill.getLine(range.index);
+          const _this$quill$getLine = this.quill.getLine(range.index),
+            line = _this$quill$getLine[0];
           if (line) {
             blocks = [line.domNode];
             selectionFound = true;
@@ -196,7 +197,8 @@ export default class NodeMover {
 
       // Filter out empty lines if it's just a cursor in an empty paragraph
       if (blocks.length === 1 && range && range.length === 0) {
-        const [line] = this.quill.getLine(range.index);
+        const _this$quill$getLine2 = this.quill.getLine(range.index),
+          line = _this$quill$getLine2[0];
         if (line && line.length() <= 1 && line.domNode.textContent === '') {
           this.hideToolbar();
           return;
@@ -371,11 +373,10 @@ export default class NodeMover {
     if (!this.dragTarget || !this.dropIndicator) return;
     e.preventDefault();
     if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
-    const {
-      dropIndex,
-      targetRect,
-      isAfter
-    } = this.getDropPosition(e);
+    const _this$getDropPosition = this.getDropPosition(e),
+      dropIndex = _this$getDropPosition.dropIndex,
+      targetRect = _this$getDropPosition.targetRect,
+      isAfter = _this$getDropPosition.isAfter;
     if (dropIndex >= this.dragTarget.index && dropIndex <= this.dragTarget.index + this.dragTarget.length) {
       this.dropIndicator.style.display = 'none';
       return;
@@ -417,9 +418,8 @@ export default class NodeMover {
     if (!this.dragTarget) return;
     e.preventDefault();
     if (this.dropIndicator) this.dropIndicator.style.display = 'none';
-    const {
-      dropIndex
-    } = this.getDropPosition(e);
+    const _this$getDropPosition2 = this.getDropPosition(e),
+      dropIndex = _this$getDropPosition2.dropIndex;
     if (dropIndex >= this.dragTarget.index && dropIndex <= this.dragTarget.index + this.dragTarget.length) {
       this.handleDragEnd();
       return;

@@ -13,6 +13,7 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             fail-fast: true
+            max-parallel: 4
             matrix:
                 php-version: ['8.1', '8.2', '8.3', '8.4']
                 symfony-version: ['6.4', '7.4', '8.0']
@@ -68,23 +69,25 @@ jobs:
             - name: Installation du bundle QuillJs
               working-directory: test-project-${{ matrix.php-version }}-${{ matrix.symfony-version }}
               run: |
+                  # Installer notre bundle depuis le dépôt local
                   composer config repositories.local '{"type": "path", "url": "../", "options": {"symlink": true}}'
                   
-                  # Retry loop to handle transient failures (jsDelivr API rate-limiting, network glitches)
-                  for i in {1..3}; do
-                    # Clean up from any previous failed attempt
-                    if [ $i -gt 1 ]; then
-                      composer remove ehyiah/ux-quill:@dev 2>/dev/null || true
-                      rm -f composer.lock
+                  # Retry en cas d'échec transitoire de résolution des paquets JS via l'API jsDelivr
+                  # (voir https://github.com/jsdelivr/jsdelivr/issues/18717)
+                  MAX_ATTEMPTS=5
+                  for attempt in $(seq 1 $MAX_ATTEMPTS); do
+                    if composer require ehyiah/ux-quill:@dev; then
+                      echo "✅ Installation réussie (tentative $attempt)"
+                      break
                     fi
-                    composer require ehyiah/ux-quill:@dev && { echo "✅ Bundle installé avec succès"; break; }
-                    if [ $i -lt 3 ]; then
-                      echo "⚠️ Tentative $i/3 échouée. Nouvelle tentative dans 5 secondes..."
-                      sleep 5
-                    else
-                      echo "❌ Installation échouée après 3 tentatives"
+                  
+                    if [ "$attempt" -eq "$MAX_ATTEMPTS" ]; then
+                      echo "❌ Échec après $MAX_ATTEMPTS tentatives"
                       exit 1
                     fi
+                  
+                    echo "⚠️ Tentative $attempt échouée, probable souci temporaire de résolution jsDelivr. Nouvelle tentative dans 20s..."
+                    sleep 20
                   done
                   
                   # Vérifier que le bundle est correctement installé dans composer.json

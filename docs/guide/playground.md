@@ -32,6 +32,7 @@ Try all the features of Symfony UX Quill in this interactive editor.
 | **Page Break** | `pageBreak` (module) | `{}` |
 | **Image Gallery** | `imageGallery` (module) | `{ listEndpoint, searchEndpoint, uploadEndpoint, messages }` |
 | **Image Selection** | `imageSelection` (module) | `{}` |
+| **Video Selection** | `videoSelection` (module) | `{}` |
 | **Fullscreen** | `toggleFullscreen` (module) | `{}` |
 | **HTML Edit** | `htmlEditButton` (module) | `{}` |
 | **Mention** | `mention` (module) | `{ trigger: '@', data: 6 users }` available autocomplete choices : Alice Johnson, Bob Smith, Charlie Brown, Diana Prince, Eve Wilson, Frank Castle  |

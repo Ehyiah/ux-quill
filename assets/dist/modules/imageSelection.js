@@ -123,7 +123,8 @@ export default class ImageSelection {
   }
   handleClick(e) {
     const target = e.target;
-    if (target instanceof HTMLImageElement && this.quill.root.contains(target)) {
+    const isMapInternal = target.closest('.ql-map') !== null;
+    if (target instanceof HTMLImageElement && this.quill.root.contains(target) && !isMapInternal) {
       const link = target.closest('a');
       if (link && this.quill.root.contains(link)) {
         e.preventDefault();

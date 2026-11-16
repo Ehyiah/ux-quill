@@ -13,7 +13,9 @@ export class Markdown {
     const selection = quill.getSelection();
     if (!selection) return;
     const index = selection.index;
-    const [line, offset] = quill.getLine(index);
+    const _quill$getLine = quill.getLine(index),
+      line = _quill$getLine[0],
+      offset = _quill$getLine[1];
     if (!line) return;
     const lineIndex = quill.getIndex(line);
     const textBefore = line.domNode.innerText.substring(0, offset - 1);
