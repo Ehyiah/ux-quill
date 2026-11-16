@@ -187,27 +187,26 @@
             "^@wllama/wllama$": "<rootDir>/tests/setup/__mocks__/wllama.js"
         }
     },
-        "testMatch": [
-            "<rootDir>/tests/**/*.test.ts"
-        ],
-        "moduleDirectories": [
-            "node_modules",
-            "<rootDir>/src"
-        ],
-        "transform": {
-            "^.+\\.tsx?$": "ts-jest"
-        },
-        "transformIgnorePatterns": [
-            "/node_modules/(?!quill|quill2-emoji|@wllama/wllama)"
-        ],
-        "rootDir": ".",
-        "moduleFileExtensions": [
-            "ts",
-            "js",
-            "json"
-        ],
-        "modulePaths": [
-            "<rootDir>"
-        ]
-    }
+    "testMatch": [
+        "<rootDir>/tests/**/*.test.ts"
+    ],
+    "moduleDirectories": [
+        "node_modules",
+        "<rootDir>/src"
+    ],
+    "transform": {
+        "^.+\\.tsx?$": "ts-jest"
+    },
+    "transformIgnorePatterns": [
+        "/node_modules/(?!quill|quill2-emoji|@wllama/wllama)"
+    ],
+    "rootDir": ".",
+    "moduleFileExtensions": [
+        "ts",
+        "js",
+        "json"
+    ],
+    "modulePaths": [
+        "<rootDir>"
+    ]
 }

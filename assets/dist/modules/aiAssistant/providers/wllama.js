@@ -87,9 +87,8 @@ export class WllamaProvider extends BaseAiProvider {
       warnCdnFallback('@wllama/wllama');
       wllamaModule = await import(/* @vite-ignore */_tsRewriteRelativeImportExtensions(WLLAMA_CDN + "/esm/index.js"));
     }
-    const {
-      Wllama
-    } = wllamaModule;
+    const _wllamaModule = wllamaModule,
+      Wllama = _wllamaModule.Wllama;
     const recoveries = ['none', 'purge', 'wipe'];
     let lastError;
     for (let i = 0; i < recoveries.length; i++) {

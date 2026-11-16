@@ -23,9 +23,8 @@ export class GrammarFeature {
         if (i < 0 || i >= quill.getLength()) return '';
         return quill.getText(i, 1) || '';
       };
-      const {
-        expandWordSelection
-      } = await import("../utils/wordSelection.js");
+      const _await$import = await import("../utils/wordSelection.js"),
+        expandWordSelection = _await$import.expandWordSelection;
       const wordRange = expandWordSelection(getChar, selection.index, selection.length);
       text = quill.getText(wordRange.index, wordRange.length).trim();
       replaceIndex = wordRange.index;

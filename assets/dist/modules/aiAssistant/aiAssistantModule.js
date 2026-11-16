@@ -97,7 +97,8 @@ export class AiAssistantModule {
       synonym: SynonymFeature
     };
     Object.entries(features).forEach(_ref => {
-      let [key, config] = _ref;
+      let key = _ref[0],
+        config = _ref[1];
       const FeatureClass = featureMap[key];
       if (FeatureClass) {
         const managerConfig = this.aiManager.getFeatureConfig(key);
@@ -253,10 +254,8 @@ export class AiAssistantModule {
       groupLabel.textContent = group.label;
       this.panel.appendChild(groupLabel);
       group.items.forEach(_ref2 => {
-        let {
-          feature,
-          instance
-        } = _ref2;
+        let feature = _ref2.feature,
+          instance = _ref2.instance;
         const item = document.createElement('button');
         item.type = 'button';
         item.className = 'ai-assistant-item';
@@ -325,7 +324,8 @@ export class AiAssistantModule {
     const labels = this.aiManager.getLabels();
     const result = [];
     Object.entries(groups).forEach(_ref3 => {
-      let [key, items] = _ref3;
+      let key = _ref3[0],
+        items = _ref3[1];
       if (items.length > 0) {
         const labelKey = GROUP_LABEL_KEYS[key];
         result.push({
