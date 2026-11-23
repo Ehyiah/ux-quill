@@ -29,7 +29,7 @@ The bundle ships with a few ready-made toolbar compositions exposed by `QuillGro
 |------------------------------------------------------| --- | --- |
 | `QuillGroup::buildMinimal()`                         | Comments, short descriptions, note fields. | bold, italic, underline, link, clean |
 | `QuillGroup::buildForNewsletter()`                   | Newsletter / email content: light formatting, no technical fields. | text emphasis, headings, colors, alignment, lists, image |
-| `QuillGroup::buildAdvanced()`                        | Rich editorial content for blog articles. | full text formatting, headings, lists, media, code, table |
+| `QuillGroup::buildAdvanced()`                        | Rich editorial content for blog articles. | full text formatting, headings, lists, media, code, table, map, templates |
 | `QuillGroup::buildWithAllFields()` _see below warning_ | Every available field, including specialised ones (formula, RTL direction, script, font, emoji). | all |
 
 ::: warning

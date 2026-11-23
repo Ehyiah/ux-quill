@@ -24,9 +24,11 @@ use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\FormulaField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ImageField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ItalicField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\LinkField;
+use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\MapField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\PageBreakField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\StrikeField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\TableField;
+use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\TemplatesField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\UnderlineField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\VideoField;
 use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillBlockFieldInterface;
@@ -47,9 +49,9 @@ final class QuillGroup implements QuillGroupInterface
      * @return array<QuillBlockFieldInterface|QuillInlineFieldInterface>
      *
      * @deprecated since 3.9, will be removed in 4.0.
-     *     Some Field‑dependent modules (e.g. SpoilerField, MentionField, ImageGallery...) cannot
-     *     be auto‑included here because they need explicit configuration in their modules. Use other presets or QuillGroup::build() with explicit
-     *     fields instead.
+     *     Some fields (e.g. ImageGalleryField) cannot be auto-included here because
+     *     they need explicit configuration in their modules. Use other presets or
+     *     QuillGroup::build() with explicit fields instead.
      */
     public static function buildWithAllFields(): array
     {
@@ -144,8 +146,9 @@ final class QuillGroup implements QuillGroupInterface
     }
 
     /**
-     * Richer toolbar for editorial / blog content. Drops very specialised
-     * fields (formula, script, RTL direction, font, emoji) from the full set.
+     * Richer toolbar for editorial / blog content. Includes every field that
+     * works out of the box, with sensible defaults. Only ImageGalleryField is
+     * excluded: its module requires an explicit `listEndpoint` configuration.
      *
      * @return array<QuillBlockFieldInterface|QuillInlineFieldInterface>
      */
@@ -158,23 +161,31 @@ final class QuillGroup implements QuillGroupInterface
             new StrikeField(),
             new BlockQuoteField(),
             new LinkField(),
-            new HeaderGroupField(),
             new SizeField(),
+            new HeaderGroupField(),
             new ColorField(),
-            new BackgroundColorField(),
-            new AlignField(),
             new IndentField(),
+            new DividerField(),
+            new PageBreakField(),
+            new AlignField(),
+            new BackgroundColorField(),
             new ListField(),
             new ListField(ListField::LIST_FIELD_OPTION_BULLET),
             new ListField(ListField::LIST_FIELD_OPTION_CHECK),
-            new ImageField(),
-            new VideoField(),
-            new DividerField(),
-            new PageBreakField(),
+            new FontField(),
+            new DirectionField(),
             new CodeField(),
             new CodeBlockField(),
-            new TableField(),
+            new ScriptField(),
+            new ScriptField(ScriptField::SCRIPT_FIELD_OPTION_SUPER),
+            new FormulaField(),
+            new ImageField(),
+            new VideoField(),
+            new EmojiField(),
+            new MapField(),
+            new TemplatesField(),
             new CleanField(),
+            new TableField(),
         ];
     }
 }

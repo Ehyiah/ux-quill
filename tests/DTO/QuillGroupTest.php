@@ -9,9 +9,12 @@ use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\CleanField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\CodeBlockField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\FormulaField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ImageField;
+use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ImageGalleryField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\ItalicField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\LinkField;
+use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\MapField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\TableField;
+use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\TemplatesField;
 use Ehyiah\QuillJsBundle\DTO\Fields\InlineField\VideoField;
 use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillBlockFieldInterface;
 use Ehyiah\QuillJsBundle\DTO\Fields\Interfaces\QuillInlineFieldInterface;
@@ -78,7 +81,7 @@ class QuillGroupTest extends TestCase
     }
 
     /**
-     * @covers ::buildForBlog
+     * @covers ::buildAdvanced
      */
     public function testBuildForBlog(): void
     {
@@ -92,8 +95,13 @@ class QuillGroupTest extends TestCase
         $this->assertContainsFieldOfClass(CodeBlockField::class, $result);
         $this->assertContainsFieldOfClass(TableField::class, $result);
 
-        // Blog preset deliberately excludes very specialised fields.
-        $this->assertDoesNotContainFieldOfClass(FormulaField::class, $result);
+        // Fields that work without any configuration must all be present.
+        $this->assertContainsFieldOfClass(FormulaField::class, $result);
+        $this->assertContainsFieldOfClass(MapField::class, $result);
+        $this->assertContainsFieldOfClass(TemplatesField::class, $result);
+
+        // ImageGalleryField is the only field requiring explicit configuration.
+        $this->assertDoesNotContainFieldOfClass(ImageGalleryField::class, $result);
     }
 
     /**
